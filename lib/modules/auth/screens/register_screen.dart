@@ -12,6 +12,7 @@ import '../../../core/widgets/cards/glass_card.dart';
 import '../../../core/widgets/inputs/glass_input.dart';
 import '../models/user_role.dart';
 import '../providers/auth_provider.dart';
+import '../widgets/phone_input_field.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -25,6 +26,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _identifierController = TextEditingController();
   UserRole _selectedRole = UserRole.patient;
   String _selectedMethod = 'emailCode'; // phoneSms, phoneWhatsapp, emailCode
+  String? _phoneE164;
+
+  bool get _isPhoneMethod =>
+      _selectedMethod == 'phoneSms' || _selectedMethod == 'phoneWhatsapp';
 
   final List<Map<String, dynamic>> _roles = [
     {'label': 'Patient', 'value': UserRole.patient},
@@ -161,29 +166,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 16),
 
                   // Identifiant (téléphone ou email)
-                  GlassInput(
-                    label:
-                        _selectedMethod == 'phoneSms' ||
-                            _selectedMethod == 'phoneWhatsapp'
-                        ? 'Numéro de téléphone'
-                        : 'Adresse email',
-                    hint:
-                        _selectedMethod == 'phoneSms' ||
-                            _selectedMethod == 'phoneWhatsapp'
-                        ? '+224612345678'
-                        : 'jean.dupont@example.com',
-                    controller: _identifierController,
-                    prefixIcon: _selectedMethod == 'phoneSms'
-                        ? Icons.sms
-                        : (_selectedMethod == 'phoneWhatsapp'
-                              ? Icons.chat
-                              : Icons.email),
-                    keyboardType:
-                        _selectedMethod == 'phoneSms' ||
-                            _selectedMethod == 'phoneWhatsapp'
-                        ? TextInputType.phone
-                        : TextInputType.emailAddress,
-                  ),
+                  _isPhoneMethod
+                      ? PhoneInputField(
+                          onChanged: (e164) =>
+                              setState(() => _phoneE164 = e164),
+                        )
+                      : GlassInput(
+                          label: 'Adresse email',
+                          hint: 'jean.dupont@example.com',
+                          controller: _identifierController,
+                          prefixIcon: Icons.email,
+                          keyboardType: TextInputType.emailAddress,
+                        ),
                   const SizedBox(height: 12),
 
                   // Choix du mode de réception
@@ -239,14 +233,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     label: 'S\'inscrire',
                     isLoading: auth.isLoading,
                     onPressed: () async {
-                      if (_nameController.text.isEmpty ||
-                          _identifierController.text.isEmpty) {
+                      if (_nameController.text.isEmpty) return;
+                      if (_isPhoneMethod) {
+                        if (_phoneE164 == null) return;
+                      } else if (_identifierController.text.isEmpty) {
                         return;
                       }
 
                       // Envoyer l'OTP avec la méthode choisie
                       bool success;
-                      final identifier = _identifierController.text.trim();
+                      final identifier = _isPhoneMethod
+                          ? _phoneE164!
+                          : _identifierController.text.trim();
                       if (_selectedMethod == 'phoneSms') {
                         success = await auth.sendPhoneOtp(identifier, 'sms');
                       } else if (_selectedMethod == 'phoneWhatsapp') {

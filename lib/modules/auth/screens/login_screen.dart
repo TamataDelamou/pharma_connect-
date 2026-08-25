@@ -10,6 +10,7 @@ import '../../../core/widgets/buttons/tertiary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../../../core/widgets/inputs/glass_input.dart';
 import '../providers/auth_provider.dart';
+import '../widgets/phone_input_field.dart';
 
 enum LoginMethod { emailCode, emailMagic, phoneWhatsapp, phoneSms }
 
@@ -23,6 +24,11 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _identifierController = TextEditingController();
   LoginMethod _selectedMethod = LoginMethod.emailCode;
+  String? _phoneE164;
+
+  bool get _isPhoneMethod =>
+      _selectedMethod == LoginMethod.phoneSms ||
+      _selectedMethod == LoginMethod.phoneWhatsapp;
 
   @override
   void dispose() {
@@ -88,13 +94,18 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 24),
 
                   // ===== CHAMP IDENTIFIANT =====
-                  GlassInput(
-                    label: _getIdentifierLabel(),
-                    hint: _getIdentifierHint(),
-                    controller: _identifierController,
-                    prefixIcon: _getIdentifierIcon(),
-                    keyboardType: _getKeyboardType(),
-                  ),
+                  _isPhoneMethod
+                      ? PhoneInputField(
+                          onChanged: (e164) =>
+                              setState(() => _phoneE164 = e164),
+                        )
+                      : GlassInput(
+                          label: _getIdentifierLabel(),
+                          hint: _getIdentifierHint(),
+                          controller: _identifierController,
+                          prefixIcon: _getIdentifierIcon(),
+                          keyboardType: _getKeyboardType(),
+                        ),
                   const SizedBox(height: 8),
 
                   // ===== INFORMATION COMPLÉMENTAIRE =====
@@ -106,7 +117,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     label: _getButtonLabel(),
                     isLoading: auth.isLoading,
                     onPressed: () async {
-                      if (_identifierController.text.isEmpty) return;
+                      if (_isPhoneMethod) {
+                        if (_phoneE164 == null) return;
+                      } else if (_identifierController.text.isEmpty) {
+                        return;
+                      }
                       await _handleSendOtp(auth);
                     },
                   ),
@@ -292,7 +307,9 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _handleSendOtp(AuthProvider auth) async {
-    final identifier = _identifierController.text.trim();
+    final identifier = _isPhoneMethod
+        ? _phoneE164!
+        : _identifierController.text.trim();
     bool success;
 
     switch (_selectedMethod) {
