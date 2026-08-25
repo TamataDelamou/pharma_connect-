@@ -48,6 +48,9 @@ app.*.map.json
 # Node (used only to host the Supabase CLI as a dev dependency)
 node_modules/
 
+# Config locale d'un outil de code assisté par IA (par développeur, pas partagée)
+.claude/
+
 # Supabase local dev
 supabase/.branches
 supabase/.temp
