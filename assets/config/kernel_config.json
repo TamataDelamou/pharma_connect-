@@ -1,0 +1,20 @@
+{
+  "fallback_mode": true,
+  "note": "Valeurs de repli local utilisées quand le GSG Referential (Kernel) est injoignable ou pas encore branché. Ne pas traiter comme source de vérité une fois l'intégration réelle en place (KER-REF) — le Kernel reste alors la seule source, ce fichier ne sert plus qu'en dégradé (KER-ARC-03).",
+  "country": {
+    "iso_3166_1_alpha2": "GN",
+    "iso_3166_1_alpha3": "GIN",
+    "iso_3166_1_numeric": "324",
+    "name_fr": "Guinée"
+  },
+  "currency": {
+    "iso_4217_alpha3": "GNF",
+    "iso_4217_numeric": 324,
+    "name_fr": "Franc guinéen",
+    "decimal_digits": 0
+  },
+  "language": {
+    "iso_639_1": "fr",
+    "name_fr": "Français"
+  }
+}

@@ -1,0 +1,31 @@
+name: Kernel compliance
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  guardrails:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: KER-VIS-03 — pas de FK SQL vers un schéma externe
+        run: bash scripts/ci/check_no_cross_schema_fk.sh
+
+      - name: KER-REF — pas de devise codée en dur dans l'UI
+        run: bash scripts/ci/check_no_hardcoded_currency.sh
+
+      - name: KER-DES-03 — pas de couleur codée en dur hors du thème
+        run: bash scripts/ci/check_no_hardcoded_color.sh
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: flutter pub get
+        run: flutter pub get
+
+      - name: flutter analyze
+        run: flutter analyze
