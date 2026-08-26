@@ -27,6 +27,8 @@ Le Kernel n'est pas un produit vendu au client final : c'est une couche d'infras
 | **Billing Core** | Facturation unifiée — **différée par défaut**, activée uniquement sur décision commerciale explicite (KER-BIL-02). |
 | **Design System** | Bibliothèque de composants Flutter partagée — **non urgente**, adoption progressive et non bloquante (KER-DES-02). Composants bâtis sur des tokens sémantiques (couleur primaire, accent succès, surface...), jamais de couleurs codées en dur : chaque produit branche sa propre palette sur ce contrat (KER-DES-03). |
 
+**Convention UI recommandée — saisie téléphone (ajout 26/08/2026) :** pour tout produit du portefeuille qui fait saisir un numéro de téléphone (brique GSG ID, exigence E.164 ci-dessus), séparer indicatif pays et numéro local en deux champs distincts plutôt qu'un seul champ texte libre, et normaliser en E.164 côté client avant tout appel d'authentification. Implémentation de référence portefeuille : `PhoneInputField` dans PharmaConnect (`lib/modules/auth/widgets/phone_input_field.dart`), qui délègue la normalisation finale à une fonction unique (`normalizeE164`) plutôt que de la dupliquer par écran. Ceci reste une convention recommandée, pas une règle `KER-XXX-NN` obligatoire — si l'équipe Kernel décide d'en faire un standard portefeuille, lui attribuer un numéro selon la convention `KER-XXX-NN` ci-dessous plutôt que de l'assumer sans l'enregistrer.
+
 ### Règles d'intégration à connaître avant de coder
 
 - **KER-INT-01** — Tout nouveau produit est conçu nativement avec le noyau dès son cahier de conception : GSG ID, `gsg_org_id`, GSG Referential et, si pertinent, le Referential Engine sont intégrés dès la première version du schéma de données, jamais ajoutés après coup.
