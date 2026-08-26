@@ -138,6 +138,8 @@ Second effet, plus large : sans historique, il est impossible de savoir *quand* 
 
 **Plan d'action, avant tout nouveau module :** `git init`, premier commit sur l'état actuel (216 erreurs corrigées, régressions §3.5 encore ouvertes — un commit honnête, pas un commit qui prétend que tout est propre), puis un dépôt distant pour que `.github/workflows/kernel-compliance.yml` puisse enfin s'exécuter. Sans cela, tout le §5.6 de ce document (« les trois garde-fous ne sont pas optionnels ») reste une déclaration d'intention non vérifiable.
 
+**Résolu (26/08/2026) :** dépôt git initialisé, remote GitHub configuré (dépôt privé), premier push effectué. Le premier run réel du workflow a échoué — pas sur les trois garde-fous KER-*, mais sur `flutter analyze` (assets déclarés non suivis par git, seuil de sortie de la commande plus strict que ce que le projet vise) — corrigé, second run vert. Le §5.6 n'est donc plus une déclaration d'intention non vérifiable : les garde-fous se sont réellement exécutés et ont réellement bloqué un problème (même si ce problème n'était, cette fois, ni une couleur ni une devise codée en dur). Voir `PharmaConnect_CLAUDE.md`, mise à jour du 26/08/2026, pour le détail complet.
+
 ---
 
 ## 4. Directives de conception — modules à venir

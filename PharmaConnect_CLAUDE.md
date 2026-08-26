@@ -10,6 +10,8 @@ Deux fichiers ajoutés dans le module `auth` : `lib/modules/auth/models/phone_co
 
 Par ailleurs, le dépôt a été initialisé en git ce même jour (`git init` + premier commit honnête reflétant l'état vérifié du code, pas une affirmation non vérifiée) — voir `git log` pour l'historique à jour. C'est ce qui permet désormais de suivre ce type de changement comme un diff isolé plutôt que comme une modification silencieuse d'un état déjà flou.
 
+Un remote GitHub a ensuite été configuré (`https://github.com/TamataDelamou/pharma_connect-`, privé) et la branche locale renommée `master` → `main` pour correspondre au déclencheur du workflow. Premier push effectué — première exécution réelle de `.github/workflows/kernel-compliance.yml` depuis sa création. Ce premier run a immédiatement révélé deux problèmes invisibles en local : `assets/icons/`/`assets/images/` déclarés dans `pubspec.yaml` mais jamais suivis par git (dossiers vides — corrigé avec des `.gitkeep`), et `flutter analyze` qui échoue par défaut sur les avertissements *et* les infos, pas seulement les erreurs (jamais vérifié jusqu'ici : seul le nombre d'erreurs était contrôlé, jamais le code de sortie réel de la commande). 25 imports/champs/variables réellement inutilisés nettoyés dans 22 fichiers, et `--no-fatal-infos` ajouté à l'étape `flutter analyze` du workflow pour aligner le seuil CI sur celui visé depuis le début du projet (0 erreur, avertissements/infos non bloquants). Second push : **CI verte** — les trois garde-fous KER-* s'exécutent réellement pour la première fois.
+
 ## Mise à jour (25/08/2026) — régression non documentée détectée et corrigée
 
 **Constat, avant toute nouvelle lecture de ce fichier :** entre le 24/08 (état décrit ci-dessous) et le 25/08, six nouveaux modules ont été codés (`stock`, `traceability`, `coldchain`, `recall`, `admin`, `alerts` — 86 fichiers Dart) **sans que ce fichier, ni `REFERENTIEL_ARCHITECTE.md`, ni `code_export_architecte.md` ne soient mis à jour**. Dans l'intervalle, `pubspec.yaml` a été cassé (trois dépendances dupliquées — YAML invalide, `flutter pub get` levait une exception avant même d'atteindre l'analyseur) et une dépendance non maintenue (`tesseract_ocr`, incompatible null-safety) a été ajoutée pour l'OCR des ordonnances. Résultat : le dépôt était dans un état où **aucune commande Flutter ne pouvait s'exécuter**, alors que ce fichier affirmait toujours « `flutter analyze` : aucun signalement ». Cette affirmation ne pouvait matériellement pas avoir été vérifiée sur le code réellement présent dans le dépôt au moment de la lecture — voir `code_export_architecte.md`, section « Rapport d'audit — 25 août 2026 » pour le détail complet et l'hypothèse la plus probable (absence de dépôt git, donc aucune trace de ce qui s'est passé entre les deux dates).
@@ -38,7 +40,7 @@ Le projet est **en chantier**, pas au stade zéro décrit par le cahier de conce
 | Modules avec code réel | 14 / 33 dossiers existants : `search` (22 fichiers), `stock` (17), `reservations` (17), `payments` (17), `prescriptions` (16), `delivery` (15), `traceability` (14), `recall` (14), `coldchain` (14), `admin` (14), `alerts` (11), `catalog` (10), `auth` (8), `dashboard` (7) |
 | Modules vides | 19 dossiers présents mais sans code (`analytics`, `business`, `chains`, `family`, `financing`, `forecasting`, `healthrecord`, `homecare`, `hospitals`, `insurance`, `iot`, `loyalty`, `marketplace`, `professionals`, `regulator`, `solidarity`, `support`, `teleconsult`, `triage`) + `eprescription`, cité dans le cahier de conception racine mais dont **le dossier n'existe même pas encore** dans `lib/modules/` |
 | `flutter analyze` | 0 erreur, 83 avertissements/infos (voir §CI plus bas) |
-| CI | Workflow `.github/workflows/kernel-compliance.yml` présent mais **jamais exécuté** — pas de dépôt git dans ce répertoire |
+| CI | **Verte** depuis le 26/08/2026 (remote GitHub configuré, premier push) — voir §CI plus bas pour le détail |
 - `catalog` et `search` sont deux modules **distincts et complémentaires**, pas redondants : `catalog` liste les produits et leur classification (catégories, fabricants) via le modèle partagé `Product` (`lib/shared/models/product.dart`) — aucune notion de prix ni de stock. `search` réutilise les mêmes produits mais y ajoute la disponibilité en officine et le prix (`AvailabilityResult`). Les prix et les stocks réels resteront portés par `search` et par le futur module `stock` (FEFO) — ne pas faire porter cette responsabilité à `catalog`.
 - Intégration de `catalog` finalisée (24/08/2026) : `CatalogProvider` était utilisé (`context.watch`/`context.read`) par `catalog_list_screen.dart` et `catalog_detail_screen.dart` sans jamais être enregistré dans le `MultiProvider` de `lib/app.dart` — corrigé (`ProviderNotFoundException` évitée). Le module a aussi été raccordé à la navigation : le `SidebarNavigation` du tableau de bord n'appelait jamais `context.go(route)` (seul le surlignage local changeait, aucun module — y compris `catalog` — n'était réellement atteignable au clic) ; corrigé dans `dashboard_screen.dart`, et une entrée « Catalogue » → `/catalog` a été ajoutée à la barre latérale.
 - 13 écrans du routeur sont des **coquilles provisoires** (`core/widgets/screens/placeholder_screen.dart`), pas de vraie UI/logique métier : `ReservationCheckoutScreen`, `ReservationConfirmationScreen`, `ReservationQRScreen`, `ReservationHistoryScreen`, `PharmacyQueueScreen`, `DeliveryHistoryScreen`, `DeliveryScheduleScreen`, `DriverDashboardScreen`, `InstallmentPlanScreen`, `WalletScreen`, `TransactionHistoryScreen`, `DisputeScreen`, `ReconciliationScreen`.
@@ -131,21 +133,21 @@ Cette discipline a été contournée dans 5 modèles de statut (`delivery.dart`,
 
 ## CI
 
-`.github/workflows/kernel-compliance.yml`, censé se déclencher sur push vers `main` et sur toute pull request :
+`.github/workflows/kernel-compliance.yml`, se déclenche sur push vers `main` et sur toute pull request :
 
 1. `scripts/ci/check_no_cross_schema_fk.sh` (KER-VIS-03)
 2. `scripts/ci/check_no_hardcoded_currency.sh` (KER-REF)
 3. `scripts/ci/check_no_hardcoded_color.sh` (KER-DES-03)
 4. `flutter pub get`
-5. `flutter analyze`
+5. `flutter analyze --no-fatal-infos`
 
-Toute contribution doit passer ces cinq étapes avant merge — **en théorie**. En pratique, ce répertoire n'est pas un dépôt git (`git status` échoue), donc rien ne pousse jamais vers `main` et ce workflow ne s'est probablement jamais exécuté une seule fois. C'est très concrètement ce qui a permis aux deux régressions du 25/08 (§ tout en haut du fichier) de rester invisibles : les garde-fous étaient écrits, corrects, et inertes. **Avant toute chose, initialiser un dépôt git** — voir `REFERENTIEL_ARCHITECTE.md` §3.6.
+Toute contribution doit passer ces cinq étapes avant merge — **et depuis le 26/08/2026, ce n'est plus théorique**. Un remote GitHub a été configuré (dépôt privé) et le workflow s'est réellement exécuté pour la première fois. Le premier run a échoué (assets déclarés mais non suivis par git, `flutter analyze` par défaut plus strict que le seuil visé par le projet — voir la mise à jour du 26/08/2026 en tête de fichier pour le détail) ; corrigé, second run **vert**. C'est très concrètement ce qui aurait empêché les deux régressions du 25/08 (§ plus haut) : les garde-fous étaient écrits, corrects, mais inertes faute de dépôt git pour les déclencher — ce n'est plus le cas.
 
 ## Commandes utiles
 
 ```bash
 flutter pub get                 # dépendances
-flutter analyze                 # lint/typecheck — doit rester à 0 signalement
+flutter analyze --no-fatal-infos # lint/typecheck — doit rester à 0 erreur/avertissement (commande utilisée par la CI)
 flutter test                    # suite de tests — actuellement 1 seul test
 flutter run                     # lancer l'app (nécessite un vrai projet Supabase configuré)
 
@@ -158,7 +160,7 @@ bash scripts/ci/check_no_hardcoded_color.sh      # garde-fou KER-DES-03 en local
 
 ## Chantiers ouverts (par ordre de dépendance)
 
-0. **Initialiser un dépôt git** — condition de tout le reste : sans lui, ni la CI, ni la revue de code, ni la détection de régression (§ tout en haut du fichier) ne peuvent fonctionner. À faire avant le prochain changement de code, pas après.
+0. ~~Initialiser un dépôt git~~ — **fait le 26/08/2026** : dépôt git initialisé, remote GitHub configuré, CI vérifiée verte. Ne reste plus dans cette liste que par cohérence avec la numérotation historique.
 1. **Corriger les deux régressions de gouvernance du 25/08** — 18 couleurs et 11 chaînes de devise codées en dur (détail § tout en haut et `REFERENTIEL_ARCHITECTE.md` §3.5). Rapide une fois le mapping littéral → token validé par un humain.
 2. **Configurer un vrai projet Supabase** — remplacer les placeholders de `supabase_service.dart` (`supabaseUrl`, `supabaseAnonKey`) ; écrire les premières migrations dans `supabase/migrations/` (toujours vide) pour les tables déjà modélisées côté client (`deliveries`, `transactions`, `reservations`, `prescriptions`, et désormais `stock`, `traceability`, `recall`, `coldchain`...), en respectant KER-VIS-01/KER-ORG-02 (PK locale + colonnes `gsg_id`/`gsg_org_id` nullables). À date, seule l'authentification parle réellement à Supabase — tous les autres services sont des mocks en mémoire.
 3. **Implémenter les écrans placeholder** — 13 identifiés le 24/08 (réservation, livraison, paiement/wallet) + 4 ajoutés le 25/08 pour que le routeur compile (`EquipmentAddScreen`, `PharmaciesManagementScreen`, `AuditLogScreen`, `SystemConfigScreen`) : 17 au total, coquilles qui compilent, pas des écrans finis.
