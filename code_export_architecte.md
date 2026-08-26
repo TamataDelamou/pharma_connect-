@@ -6,23 +6,20 @@ du dépôt, afin de documenter les corrections apportées aux modules d'authenti
 prescriptions, de livraison, de paiements et de réservations, ainsi que la mise en conformité avec le Kernel
 GSG v3.0. Trois documents complémentaires vivent à côté de celui-ci : `CLAUDE.md` (contexte portefeuille),
 `PharmaConnect_CLAUDE.md` (état vivant du code) et `REFERENTIEL_ARCHITECTE.md` (directives de conception pour
-les modules restants). Trois rapports complets figurent en fin de document, dont un troisième daté du
-25/08/2026.
+les modules restants). Quatre rapports complets figurent en fin de document, le dernier daté du 26/08/2026.
 
-> **Avertissement (25/08/2026) : le dump de code ci-dessous est dépassé et n'a volontairement pas été
-> régénéré dans cette passe.** Six modules ont été codés entre le 24 et le 25/08 (`stock`, `traceability`,
-> `coldchain`, `recall`, `admin`, `alerts` — 86 fichiers Dart, ~40 % du volume actuel du projet) sans que ce
-> document ne soit mis à jour ; l'arborescence et les fichiers reproduits plus bas correspondent à l'état du
-> 24/08, pas à l'état réel du dépôt. Régénérer un export mécanique de 12 800+ lignes à la main, fichier par
-> fichier, dans la continuité de cette session aurait consommé l'essentiel du budget de la revue pour une
-> valeur ajoutée nulle par rapport à un script d'export — ce que ce fichier semble être à l'origine
-> (numérotation et format identiques à chaque section). **Recommandation à l'architecte : régénérer ce
-> document via le script/outil qui l'a produit initialement plutôt que de le maintenir à la main désormais
-> que le projet dépasse 170 fichiers** ; au-delà de ce volume, un export statique complet devient plus vite
-> périmé qu'utile. Le « Rapport d'audit — 25 août 2026 » en fin de document, lui, est à jour et couvre les
-> six modules manquants ci-dessous.
+> **Décision (26/08/2026) : le dump de code fichier par fichier ci-dessous ne sera plus maintenu.** Le
+> dépôt a été initialisé en git ce jour (voir « Rapport d'audit — 26 août 2026 » en fin de document) — git
+> est désormais la source de vérité pour le code lui-même, fiable et toujours à jour, ce que ce dump
+> mécanique n'a jamais réussi à rester (dépassé dès le 25/08, un jour après sa dernière mise à jour). Le
+> dump plus bas reste consultable comme **archive figée de l'état du 24/08/2026** (76 fichiers, 7 modules :
+> `auth`, `dashboard`, `delivery`, `payments`, `prescriptions`, `reservations`, `search`) — ne pas s'y fier
+> pour l'état actuel du code, et ne plus y ajouter de nouveaux fichiers. L'arborescence juste en dessous,
+> elle, a été régénérée à partir de `git ls-files` et reflète l'état réel au 26/08/2026 (253 fichiers
+> suivis, 14/33 modules avec du code). Pour toute question sur l'état actuel du code : `git log`, `git show`,
+> ou cloner le dépôt — plus fiable qu'un export statique au-delà de ce volume.
 
-## Arborescence
+## Arborescence (état figé au 24/08/2026 — historique, voir la section suivante pour l'état actuel)
 
 ```
 pharma_connect/
@@ -210,6 +207,388 @@ pharma_connect/
 ├── code_export_architecte.md     → ce document
 └── pubspec.yaml
 ```
+
+## Arborescence actuelle (26/08/2026)
+
+Régénérée à partir de `git ls-files` (donc : uniquement les fichiers réellement suivis par git, à
+l'exclusion des artefacts de build, `node_modules/`, et des dossiers de plateforme natifs `android/`,
+`ios/`, `linux/`, `macos/`, `windows/` — omis ici par lisibilité, inchangés depuis la génération Flutter
+initiale). 253 fichiers suivis, 14/33 dossiers de `lib/modules/` contiennent du code (les 19 autres restent
+des dossiers vides, non listés ci-dessous puisque git ne suit pas les dossiers vides).
+
+```
+pharma_connect/
+├── .github/
+│   └── workflows/
+│       └── kernel-compliance.yml
+├── assets/
+│   └── config/
+│       └── kernel_config.json
+├── lib/
+│   ├── core/
+│   │   ├── kernel/
+│   │   │   ├── gsg_kernel_auth_bridge.dart
+│   │   │   ├── kernel_badge.dart
+│   │   │   ├── kernel_connection_indicator.dart
+│   │   │   └── kernel_status.dart
+│   │   ├── services/
+│   │   │   ├── notification_service.dart
+│   │   │   └── supabase_service.dart
+│   │   ├── theme/
+│   │   │   ├── animations.dart
+│   │   │   ├── app_theme.dart
+│   │   │   ├── colors.dart
+│   │   │   ├── glass.dart
+│   │   │   ├── spacing.dart
+│   │   │   └── typography.dart
+│   │   ├── utils/
+│   │   │   ├── currency_formatter.dart
+│   │   │   ├── export_service.dart
+│   │   │   ├── extensions.dart
+│   │   │   └── validators.dart
+│   │   └── widgets/
+│   │       ├── badges/
+│   │       │   └── status_badge.dart
+│   │       ├── buttons/
+│   │       │   ├── danger_button.dart
+│   │       │   ├── kernel_button.dart
+│   │       │   ├── primary_button.dart
+│   │       │   ├── secondary_button.dart
+│   │       │   └── tertiary_button.dart
+│   │       ├── cards/
+│   │       │   ├── glass_card.dart
+│   │       │   └── status_card.dart
+│   │       ├── inputs/
+│   │       │   └── glass_input.dart
+│   │       ├── modals/
+│   │       │   └── glass_modal.dart
+│   │       ├── navigation/
+│   │       │   └── sidebar_navigation.dart
+│   │       ├── screens/
+│   │       │   └── placeholder_screen.dart
+│   │       └── confirm_dialog.dart
+│   ├── modules/
+│   │   ├── admin/
+│   │   │   ├── models/
+│   │   │   │   ├── admin_permission.dart
+│   │   │   │   ├── admin_pharmacy.dart
+│   │   │   │   ├── admin_role.dart
+│   │   │   │   ├── admin_user.dart
+│   │   │   │   ├── audit_log.dart
+│   │   │   │   ├── pharmacy_status.dart
+│   │   │   │   └── system_config.dart
+│   │   │   ├── providers/
+│   │   │   │   └── admin_provider.dart
+│   │   │   ├── screens/
+│   │   │   │   ├── admin_dashboard_screen.dart
+│   │   │   │   ├── audit_log_screen.dart
+│   │   │   │   ├── pharmacies_management_screen.dart
+│   │   │   │   ├── system_config_screen.dart
+│   │   │   │   └── users_management_screen.dart
+│   │   │   ├── services/
+│   │   │   │   └── admin_service.dart
+│   │   │   └── widgets/
+│   │   │       └── admin_pagination.dart
+│   │   ├── alerts/
+│   │   │   ├── models/
+│   │   │   │   ├── alert.dart
+│   │   │   │   ├── alert_preferences.dart
+│   │   │   │   ├── alert_severity.dart
+│   │   │   │   ├── alert_status.dart
+│   │   │   │   └── alert_type.dart
+│   │   │   ├── providers/
+│   │   │   │   └── alert_provider.dart
+│   │   │   ├── screens/
+│   │   │   │   ├── alert_center_screen.dart
+│   │   │   │   └── alert_preferences_screen.dart
+│   │   │   ├── services/
+│   │   │   │   └── alert_service.dart
+│   │   │   └── widgets/
+│   │   │       ├── alert_card.dart
+│   │   │       └── alert_filter_chips.dart
+│   │   ├── auth/
+│   │   │   ├── models/
+│   │   │   │   ├── phone_country.dart
+│   │   │   │   └── user_role.dart
+│   │   │   ├── providers/
+│   │   │   │   └── auth_provider.dart
+│   │   │   ├── screens/
+│   │   │   │   ├── license_verification_screen.dart
+│   │   │   │   ├── login_screen.dart
+│   │   │   │   ├── otp_verification_screen.dart
+│   │   │   │   ├── register_screen.dart
+│   │   │   │   └── two_factor_screen.dart
+│   │   │   ├── services/
+│   │   │   │   └── auth_service.dart
+│   │   │   └── widgets/
+│   │   │       └── phone_input_field.dart
+│   │   ├── catalog/
+│   │   │   ├── models/
+│   │   │   │   ├── category.dart
+│   │   │   │   └── manufacturer.dart
+│   │   │   ├── providers/
+│   │   │   │   └── catalog_provider.dart
+│   │   │   ├── screens/
+│   │   │   │   ├── catalog_detail_screen.dart
+│   │   │   │   └── catalog_list_screen.dart
+│   │   │   ├── services/
+│   │   │   │   └── catalog_service.dart
+│   │   │   └── widgets/
+│   │   │       ├── category_filter.dart
+│   │   │       ├── pagination_controls.dart
+│   │   │       ├── product_grid_item.dart
+│   │   │       └── product_image.dart
+│   │   ├── coldchain/
+│   │   │   ├── models/
+│   │   │   │   ├── cold_equipment.dart
+│   │   │   │   ├── cold_incident.dart
+│   │   │   │   ├── equipment_status.dart
+│   │   │   │   ├── equipment_type.dart
+│   │   │   │   ├── record_type.dart
+│   │   │   │   └── temperature_record.dart
+│   │   │   ├── providers/
+│   │   │   │   └── coldchain_provider.dart
+│   │   │   ├── screens/
+│   │   │   │   ├── coldchain_dashboard_screen.dart
+│   │   │   │   ├── equipment_add_screen.dart
+│   │   │   │   └── equipment_detail_screen.dart
+│   │   │   ├── services/
+│   │   │   │   └── coldchain_service.dart
+│   │   │   └── widgets/
+│   │   │       ├── equipment_card.dart
+│   │   │       ├── incident_tile.dart
+│   │   │       └── temperature_record_tile.dart
+│   │   ├── dashboard/
+│   │   │   ├── models/
+│   │   │   │   └── dashboard_data.dart
+│   │   │   ├── providers/
+│   │   │   │   └── dashboard_provider.dart
+│   │   │   ├── widgets/
+│   │   │   │   ├── activity_timeline.dart
+│   │   │   │   ├── alert_center.dart
+│   │   │   │   ├── quick_action_grid.dart
+│   │   │   │   └── role_based_dashboard.dart
+│   │   │   └── dashboard_screen.dart
+│   │   ├── delivery/
+│   │   │   ├── models/
+│   │   │   │   ├── delivery.dart
+│   │   │   │   ├── delivery_driver.dart
+│   │   │   │   ├── delivery_proof.dart
+│   │   │   │   ├── delivery_route.dart
+│   │   │   │   └── delivery_status.dart
+│   │   │   ├── providers/
+│   │   │   │   └── delivery_provider.dart
+│   │   │   ├── screens/
+│   │   │   │   ├── delivery_history_screen.dart
+│   │   │   │   ├── delivery_schedule_screen.dart
+│   │   │   │   ├── delivery_tracking_screen.dart
+│   │   │   │   └── driver_dashboard_screen.dart
+│   │   │   ├── services/
+│   │   │   │   └── delivery_service.dart
+│   │   │   └── widgets/
+│   │   │       ├── delivery_card.dart
+│   │   │       ├── delivery_status_badge.dart
+│   │   │       ├── delivery_timeline.dart
+│   │   │       └── driver_info_card.dart
+│   │   ├── payments/
+│   │   │   ├── models/
+│   │   │   │   ├── installment.dart
+│   │   │   │   ├── invoice.dart
+│   │   │   │   ├── payment_method.dart
+│   │   │   │   ├── transaction.dart
+│   │   │   │   ├── transaction_status.dart
+│   │   │   │   └── wallet.dart
+│   │   │   ├── providers/
+│   │   │   │   └── payment_provider.dart
+│   │   │   ├── screens/
+│   │   │   │   ├── dispute_screen.dart
+│   │   │   │   ├── installment_plan_screen.dart
+│   │   │   │   ├── payment_screen.dart
+│   │   │   │   ├── reconciliation_screen.dart
+│   │   │   │   ├── transaction_history_screen.dart
+│   │   │   │   └── wallet_screen.dart
+│   │   │   ├── services/
+│   │   │   │   └── payment_service.dart
+│   │   │   └── widgets/
+│   │   │       ├── payment_method_selector.dart
+│   │   │       ├── transaction_list_tile.dart
+│   │   │       └── wallet_balance_card.dart
+│   │   ├── prescriptions/
+│   │   │   ├── models/
+│   │   │   │   ├── e_prescription.dart
+│   │   │   │   ├── prescription.dart
+│   │   │   │   ├── prescription_item.dart
+│   │   │   │   └── prescription_status.dart
+│   │   │   ├── providers/
+│   │   │   │   └── prescription_provider.dart
+│   │   │   ├── screens/
+│   │   │   │   ├── patient_history_screen.dart
+│   │   │   │   ├── prescription_detail_screen.dart
+│   │   │   │   ├── prescription_list_screen.dart
+│   │   │   │   ├── prescription_preview_screen.dart
+│   │   │   │   └── prescription_upload_screen.dart
+│   │   │   ├── services/
+│   │   │   │   ├── ocr_service.dart
+│   │   │   │   └── prescription_service.dart
+│   │   │   └── widgets/
+│   │   │       ├── ocr_confidence_indicator.dart
+│   │   │       ├── prescription_card.dart
+│   │   │       ├── prescription_item_tile.dart
+│   │   │       └── upload_guidance_overlay.dart
+│   │   ├── recall/
+│   │   │   ├── models/
+│   │   │   │   ├── batch_recall_status.dart
+│   │   │   │   ├── recall.dart
+│   │   │   │   ├── recall_affected_batch.dart
+│   │   │   │   ├── recall_severity.dart
+│   │   │   │   └── recall_status.dart
+│   │   │   ├── providers/
+│   │   │   │   └── recall_provider.dart
+│   │   │   ├── screens/
+│   │   │   │   ├── recall_create_screen.dart
+│   │   │   │   ├── recall_dashboard_screen.dart
+│   │   │   │   └── recall_detail_screen.dart
+│   │   │   ├── services/
+│   │   │   │   └── recall_service.dart
+│   │   │   └── widgets/
+│   │   │       ├── affected_batch_tile.dart
+│   │   │       ├── recall_card.dart
+│   │   │       ├── recall_filter_chips.dart
+│   │   │       └── recall_status_chip.dart
+│   │   ├── reservations/
+│   │   │   ├── models/
+│   │   │   │   ├── reservation.dart
+│   │   │   │   ├── reservation_item.dart
+│   │   │   │   ├── reservation_status.dart
+│   │   │   │   └── timeslot.dart
+│   │   │   ├── providers/
+│   │   │   │   └── reservation_provider.dart
+│   │   │   ├── screens/
+│   │   │   │   ├── cart_screen.dart
+│   │   │   │   ├── pharmacy_queue_screen.dart
+│   │   │   │   ├── reservation_checkout_screen.dart
+│   │   │   │   ├── reservation_confirmation_screen.dart
+│   │   │   │   ├── reservation_history_screen.dart
+│   │   │   │   └── reservation_qr_screen.dart
+│   │   │   ├── services/
+│   │   │   │   └── reservation_service.dart
+│   │   │   └── widgets/
+│   │   │       ├── cart_item_tile.dart
+│   │   │       ├── checkout_step_indicator.dart
+│   │   │       ├── queue_position_widget.dart
+│   │   │       ├── reservation_status_card.dart
+│   │   │       └── timeslot_picker.dart
+│   │   ├── search/
+│   │   │   ├── models/
+│   │   │   │   ├── availability_result.dart
+│   │   │   │   ├── pharmacy.dart
+│   │   │   │   ├── search_filters.dart
+│   │   │   │   ├── search_result.dart
+│   │   │   │   └── search_suggestion.dart
+│   │   │   ├── providers/
+│   │   │   │   └── search_provider.dart
+│   │   │   ├── screens/
+│   │   │   │   ├── barcode_scanner_screen.dart
+│   │   │   │   ├── product_detail_screen.dart
+│   │   │   │   └── search_screen.dart
+│   │   │   ├── services/
+│   │   │   │   ├── location_service.dart
+│   │   │   │   └── search_service.dart
+│   │   │   └── widgets/
+│   │   │       ├── availability_badge.dart
+│   │   │       ├── filter_chips.dart
+│   │   │       ├── pharmacy_list_tile.dart
+│   │   │       ├── product_card.dart
+│   │   │       ├── search_bar.dart
+│   │   │       ├── search_bar_with_suggestions.dart
+│   │   │       ├── search_empty_state.dart
+│   │   │       ├── search_error_state.dart
+│   │   │       ├── search_filter_bottom_sheet.dart
+│   │   │       ├── search_result_card.dart
+│   │   │       └── search_skeleton.dart
+│   │   ├── stock/
+│   │   │   ├── models/
+│   │   │   │   ├── pharmacy_group.dart
+│   │   │   │   ├── stock_adjustment.dart
+│   │   │   │   ├── stock_batch.dart
+│   │   │   │   ├── stock_item.dart
+│   │   │   │   ├── stock_movement.dart
+│   │   │   │   └── stock_status.dart
+│   │   │   ├── providers/
+│   │   │   │   └── stock_provider.dart
+│   │   │   ├── screens/
+│   │   │   │   ├── stock_adjustment_screen.dart
+│   │   │   │   ├── stock_alerts_screen.dart
+│   │   │   │   ├── stock_detail_screen.dart
+│   │   │   │   ├── stock_list_screen.dart
+│   │   │   │   └── stock_movements_screen.dart
+│   │   │   ├── services/
+│   │   │   │   ├── forecast_service.dart
+│   │   │   │   ├── stock_service.dart
+│   │   │   │   └── stock_summary_card.dart
+│   │   │   └── widgets/
+│   │   │       ├── stock_batch_tile.dart
+│   │   │       └── stock_status_chip.dart
+│   │   └── traceability/
+│   │       ├── models/
+│   │       │   ├── batch_movement.dart
+│   │       │   ├── batch_status.dart
+│   │       │   ├── certificate.dart
+│   │       │   ├── cold_chain_record.dart
+│   │       │   ├── traceable_batch.dart
+│   │       │   └── verification_result.dart
+│   │       ├── providers/
+│   │       │   └── traceability_provider.dart
+│   │       ├── screens/
+│   │       │   ├── batch_detail_screen.dart
+│   │       │   ├── traceability_dashboard_screen.dart
+│   │       │   └── verification_screen.dart
+│   │       ├── services/
+│   │       │   └── traceability_service.dart
+│   │       └── widgets/
+│   │           ├── batch_status_chip.dart
+│   │           ├── movement_timeline.dart
+│   │           ├── scan_fab.dart
+│   │           └── verification_result_card.dart
+│   ├── routes/
+│   │   └── app_router.dart
+│   ├── shared/
+│   │   └── models/
+│   │       └── product.dart
+│   ├── app.dart
+│   └── main.dart
+├── scripts/
+│   └── ci/
+│       ├── check_no_cross_schema_fk.sh
+│       ├── check_no_hardcoded_color.sh
+│       └── check_no_hardcoded_currency.sh
+├── supabase/
+│   └── config.toml
+├── test/
+│   └── widget_test.dart
+├── .gitignore
+├── .metadata
+├── CLAUDE.md
+├── PharmaConnect_CLAUDE.md
+├── README.md
+├── REFERENTIEL_ARCHITECTE.md
+├── analysis_options.yaml
+├── code_export_architecte.md
+├── devtools_options.yaml
+├── package-lock.json
+├── package.json
+├── pubspec.lock
+└── pubspec.yaml
+```
+
+Note structurelle mineure repérée en générant cet arbre : `lib/modules/stock/services/stock_summary_card.dart`
+a un nom qui suggère un widget (carte récapitulative), pas un service — probablement mal rangé au moment de
+sa création. Non corrigé ici (déplacer un fichier suppose de vérifier tous ses imports entrants d'abord,
+hors périmètre de ce rapport) ; à vérifier avant le prochain travail sur le module `stock`.
+
+`supabase/migrations/` n'apparaît plus dans cet arbre car le dossier ne contient toujours aucun fichier —
+git ne suit pas les dossiers vides. Ce n'est pas une régression par rapport à l'arbre du 24/08 : le dossier
+est vide depuis l'origine et l'est toujours.
 
 ## Résumé des corrections appliquées
 
@@ -12882,3 +13261,52 @@ Deux régressions de conformité Kernel, distinctes des erreurs de compilation, 
 La cause commune à ces deux régressions n'est pas un relâchement de discipline de la part de qui a écrit les six nouveaux modules — c'est que les garde-fous censés les empêcher n'ont jamais pu s'exécuter. `.github/workflows/kernel-compliance.yml` se déclenche sur `push` vers `main` et sur toute pull request ; ce répertoire n'est pas un dépôt git, il n'y a donc jamais eu de `push`, jamais de pull request, et par construction jamais une seule exécution de ce workflow depuis sa création. Les trois scripts qu'il orchestre sont corrects — exécutés manuellement aujourd'hui, ils détectent bien les 29 occurrences ci-dessus — mais un garde-fou qui ne s'exécute jamais protège aussi peu qu'un garde-fou qui n'existe pas. C'est, plus qu'aucune des erreurs de compilation, le constat que ce rapport recommande de traiter en premier : sans dépôt git, ni cet audit ni le précédent ne peuvent garantir qu'un troisième développeur, humain ou agent, ne reproduira pas la même régression une troisième fois dans les modules restants.
 
 À l'issue de cette intervention, `flutter pub get` résout proprement, `flutter analyze` ne remonte plus aucune erreur (83 avertissements et informations non bloquants subsistent — imports inutilisés, `const` manquants, cinq usages de `BuildContext` après un `await` sans vérification `mounted`, qui sont les seuls parmi les 83 à représenter un risque réel plutôt qu'une question de style), et `flutter test` passe (1 test, 0 échec — toujours le seul test du projet, désormais rapporté à 178 fichiers Dart plutôt qu'à ~90). Le garde-fou `check_no_cross_schema_fk.sh` passe. Les recommandations issues de cette intervention — corriger les deux régressions de gouvernance, initialiser un dépôt git avant tout nouveau module, écrire les premières migrations Supabase (le répertoire `supabase/migrations/` est resté vide sur les trois audits), et mettre à jour un lot de paquets obsolètes désormais passé de 27 à 52 — sont détaillées et priorisées dans `REFERENTIEL_ARCHITECTE.md`.
+
+## Rapport d'audit — 26 août 2026
+
+Cette quatrième intervention a commencé par une demande simple — corriger le projet et fournir un rapport de priorités pour discussion — mais la toute première vérification a suffi à révéler que la question elle-même reposait sur une prémisse fausse. `PharmaConnect_CLAUDE.md` affirmait encore, à la date de lecture, « `flutter analyze` : 0 erreur, 83 avertissements/infos ». Une exécution directe de la commande — pas une lecture de plus de ce fichier — en a remonté **205, réelles et bloquantes**. Ce rapport documente ce qui a été trouvé, ce qui a été corrigé, et ce qui reste ouvert, en s'appuyant systématiquement sur l'exécution du code plutôt que sur la documentation existante — la leçon des deux audits précédents, appliquée cette fois à la documentation elle-même plutôt qu'au seul code.
+
+### La cause racine : un fichier vidé de son contenu, pas une accumulation d'erreurs mineures
+
+L'essentiel des 205 signalements (environ 85) provenait d'un seul fichier : `lib/modules/traceability/models/traceable_batch.dart` ne contenait plus, au lieu de la classe `TraceableBatch` complète, que des commentaires placeholder — `// ... (tous les champs inchangés)`, `TraceableBatch({ ... }); // constructeur inchangé`, `bool get isActive => ... ; // inchangé` — du Dart syntaxiquement invalide (`...` n'est pas une expression légale hors contexte de spread). La classe n'exposait donc plus aucun champ ni getter, ce qui a fait cascader des erreurs `undefined_getter`/`undefined_named_parameter` dans tout ce que le module `traceability` construit sur elle : `traceability_service.dart`, `traceability_provider.dart`, `batch_detail_screen.dart`, `traceability_dashboard_screen.dart`. Le fichier portait un commentaire signalant un ajout sur son import du thème et un getter `statusColor` déjà migré vers les tokens `PharmaConnectColors` — signe qu'une tentative antérieure de corriger la régression KER-DES-03 documentée dans le rapport du 25/08 (18 couleurs codées en dur dans ce même fichier) a réécrit le fichier en gardant seulement le nécessaire pour ce correctif précis, sans jamais restaurer le reste de la classe. Reconstruit intégralement à partir des usages réels : les paramètres nommés attendus par `TraceabilityService._createMockBatch()`, les getters lus par les deux écrans, et le patron `copyWith` déjà en usage dans `recallBatch()`/`updateBatchStatus()`.
+
+Quatre autres bugs, plus petits mais tout aussi bloquants, ont été trouvés et corrigés dans la même passe :
+
+- **`lib/modules/coldchain/screens/equipment_add_screen.dart`** — un `StatelessWidget` sans méthode `build()` (donc un membre abstrait non implémenté), un type `ColdEquipment` utilisé sans import, un appel `context.read` sans import du package `provider`, et les tokens de couleur du thème référencés sans import. Le fichier ressemblait à un fragment de code collé (une boîte de dialogue de modification de seuils) plutôt qu'à un écran routé — un commentaire final indiquant où ajouter un bouton dans un futur `build()` confirme qu'il n'a jamais été terminé. Réécrit comme un vrai formulaire d'ajout d'équipement, sur le patron déjà utilisé par `stock_adjustment_screen.dart`, branché sur `ColdChainProvider.createEquipment()` qui existait déjà côté provider mais n'était appelé nulle part.
+- **`lib/modules/alerts/widgets/alert_card.dart`** — utilisait `AlertSeverity` et le getter d'extension `AlertType.label` sans importer directement les fichiers qui les définissent (import transitif via `alert.dart`, qui ne suffit pas en Dart pour les extensions) ; passait aussi deux paramètres de bordure à `GlassCard` qu'il n'expose pas. Imports ajoutés, bordure conditionnelle réimplémentée via un conteneur autour de la carte pour les alertes critiques.
+- **Trois imports manquants supplémentaires** — `traceability_dashboard_screen.dart`, `recall_dashboard_screen.dart` et `recall_detail_screen.dart` référençaient des classes/enums sans importer les fichiers qui les définissent. Le même anti-motif que les audits du 24/08 et du 25/08 documentent déjà deux fois (« les imports Dart ne sont jamais transitifs ») — une troisième fois, dans des fichiers différents.
+- **`recall_detail_screen.dart`** — un `Text` déclaré `const` appelait `.copyWith()` sur son `style`, un appel de méthode dans une expression constante, invalide en Dart. `const` retiré.
+
+Après correctifs : `flutter analyze` → **0 erreur**, 87 avertissements/informations non bloquants (imports inutilisés, `const` manquants, deux membres dépréciés). `flutter test` → 1/1, inchangé. `flutter pub get` résout proprement (aucune dépendance dupliquée, contrairement au 25/08).
+
+### La dérive documentaire ne va pas que dans un sens
+
+`REFERENTIEL_ARCHITECTE.md` §3.1, §3.2 et §3.3 listaient comme « écarts encore ouverts » : les montants stockés en `double` plutôt qu'en entier unité mineure (KER-REF-05), l'absence de normalisation E.164 des téléphones (`validators.dart` décrit comme « vide, 0 octet »), et une gestion d'erreur incohérente entre providers. Vérification directe du code : les trois étaient déjà résolus avant cette intervention — les champs monétaires des modèles sont des `int`, `validators.dart` contient `normalizeE164()` et elle est déjà appelée par `AuthProvider.sendPhoneOtp()`, et aucun `catch` vide n'a été trouvé dans les providers. Rien n'indique quand ni par qui ces corrections ont été apportées — sans dépôt git à cette date, il n'y avait aucune trace possible. C'est le même problème que celui déjà décrit dans le rapport du 25/08 (code qui change sans que la documentation suive), mais dans le sens inverse : ici, le code avait progressé, pas régressé, et la documentation ne le reflétait simplement pas.
+
+### Dépôt git initialisé — la recommandation des deux audits précédents, enfin appliquée
+
+`git init` a été exécuté, suivi d'un premier commit reflétant l'état vérifié du code (205→0 erreurs corrigées) plutôt qu'une affirmation non vérifiée. Un trou dans `.gitignore` a été corrigé au passage (un dossier de build de la plateforme Android s'était glissé dans le premier `git add` faute d'un motif générique — seul le dossier de build racine était couvert). Quatre commits suivants, chacun un diff isolé et relisible : mise en conformité de `.gitignore`, séparation du champ téléphone en sélecteur pays + numéro local (composant dédié, normalisation déléguée à `Validators.normalizeE164()` déjà existante), exclusion de la configuration locale d'un outil de développement, et mise à jour de `CLAUDE.md`/`PharmaConnect_CLAUDE.md`/`REFERENTIEL_ARCHITECTE.md` pour documenter cette fonctionnalité et corriger la trace historique du §3.2.
+
+`.github/workflows/kernel-compliance.yml` peut désormais s'exécuter dès qu'un remote est ajouté et qu'un push a lieu — condition absente lors des deux audits précédents, identifiée dans les deux comme le risque le plus élevé du projet.
+
+### Décision prise sur ce document
+
+La section « export du code » de ce fichier (le dump par fichier plus haut) n'est plus maintenue à partir de cette intervention — décision prise avec l'architecte responsable du projet. Elle s'était arrêtée au 24/08 (76 fichiers, 7 modules) alors même que le rapport du 25/08, juste au-dessus dans ce même document, décrivait déjà des corrections sur des modules absents du dump — la dérive documentaire que ce rapport dénonce plus haut, présente aussi dans ce fichier. Avec un dépôt git désormais initialisé, le code lui-même n'a plus besoin d'être dupliqué ici pour rester accessible et à jour : l'historique git le fait de façon plus fiable qu'un export statique, surtout au-delà de 250 fichiers. L'arborescence a été régénérée mécaniquement pour refléter l'état réel du 26/08 ; le dump de code plus haut reste comme archive figée du 24/08, non complétée.
+
+### État vérifié du projet au 26/08/2026
+
+| | |
+|---|---|
+| Dépôt git | Initialisé (4 commits), pas de remote configuré |
+| `flutter analyze` | 0 erreur, 87 avertissements/infos non bloquants |
+| `flutter test` | 1/1 — toujours le seul test du projet |
+| Fichiers suivis par git | 253 (231 fichiers `.dart` dans `lib/`) |
+| Modules avec code réel | 14 / 33 dossiers (`admin`, `alerts`, `auth`, `catalog`, `coldchain`, `dashboard`, `delivery`, `payments`, `prescriptions`, `recall`, `reservations`, `search`, `stock`, `traceability`) |
+| Migrations Supabase | Toujours aucune — dossier vide depuis l'origine, sur les quatre audits |
+| Backend | Toujours des URL/clés placeholder — seule l'authentification parle réellement à Supabase |
+| Paquets obsolètes | 53 (`flutter pub outdated`) |
+| Couverture de tests | 1 test protège 231 fichiers Dart ; `test/unit/` et `test/widget/` toujours vides |
+
+Écart de conformité Kernel non couvert par la CI actuelle, trouvé en préparant ce rapport : 10 fichiers modèles utilisent des couleurs Material nommées littérales plutôt que les tokens `PharmaConnectColors` — même anti-motif KER-DES-03 que les deux régressions déjà corrigées, mais sous une forme que le garde-fou CI actuel ne détecte pas (il ne cherche que les couleurs hexadécimales littérales). Non corrigé dans cette intervention — la correspondance couleur littérale → token demande un arbitrage visuel, pas une substitution mécanique, comme pour les régressions précédentes du même type.
+
+Les recommandations de fond restent celles déjà priorisées dans `REFERENTIEL_ARCHITECTE.md` : traiter le mapping des couleurs ci-dessus, provisionner un vrai projet Supabase et écrire les premières migrations, étoffer la couverture de tests, et statuer sur le périmètre des 19 modules non entamés. Ce rapport ne les duplique pas — la nouveauté de cette intervention est d'avoir vérifié par exécution, pas par lecture, que l'état affiché par la documentation correspondait à l'état réel du code, dans les deux sens.
