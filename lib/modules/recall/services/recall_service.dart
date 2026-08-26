@@ -330,7 +330,7 @@ class RecallService {
     await Future.delayed(const Duration(milliseconds: 200));
 
     // Pour chaque lot affecté, créer une alerte
-    for (final batch in recall.affectedBatches) {
+    for (final _ in recall.affectedBatches) {
       // alertService.createAlert(...)
     }
   }

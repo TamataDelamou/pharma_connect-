@@ -1,4 +1,3 @@
-import 'dart:math';
 import '../../../shared/models/product.dart';
 import '../models/stock_item.dart';
 import '../models/stock_batch.dart';
@@ -7,7 +6,6 @@ import '../models/stock_status.dart';
 import '../models/stock_adjustment.dart';
 
 class StockService {
-  static final Random _random = Random();
 
   // ==================== DONNÉES MOCKÉES ====================
 

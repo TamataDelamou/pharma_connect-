@@ -4,7 +4,6 @@ import '../../../core/theme/colors.dart';
 import '../../../core/theme/typography.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../models/transaction.dart';
-import '../models/transaction_status.dart';
 import '../models/payment_method.dart';
 
 class TransactionListTile extends StatelessWidget {

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../shared/models/product.dart';
 
 class SearchFilters {
   final String? category;

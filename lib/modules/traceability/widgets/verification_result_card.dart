@@ -54,7 +54,6 @@ class _VerificationResultCardState extends State<VerificationResultCard>
   Widget build(BuildContext context) {
     final isAuthentic = widget.result.isAuthentic && !widget.result.isRecalled;
     final isRecalled = widget.result.isRecalled;
-    final isCounterfeit = widget.result.isCounterfeit;
 
     return Stack(
       children: [

@@ -1,4 +1,3 @@
-import 'dart:math';
 import '../models/admin_user.dart';
 import '../models/admin_role.dart';
 import '../models/admin_permission.dart';
@@ -13,7 +12,6 @@ class AdminService {
   static final List<AdminPharmacy> _pharmacies = [];
   static final List<AuditLog> _auditLogs = [];
   static final List<SystemConfig> _configs = [];
-  static final Random _random = Random();
   static int _counter = 0;
 
   // ==================== DONNÉES MOCKÉES ====================

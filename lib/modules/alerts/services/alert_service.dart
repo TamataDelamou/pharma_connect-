@@ -1,4 +1,3 @@
-import 'dart:math';
 import '../models/alert.dart';
 import '../models/alert_type.dart';
 import '../models/alert_severity.dart';
@@ -8,7 +7,6 @@ import '../../../core/utils/currency_formatter.dart';
 
 class AlertService {
   static final List<Alert> _alerts = [];
-  static final Random _random = Random();
   static AlertPreferences _preferences = const AlertPreferences();
 
   // ==================== DONNÉES MOCKÉES ====================

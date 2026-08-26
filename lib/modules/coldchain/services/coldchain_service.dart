@@ -1,4 +1,3 @@
-import 'dart:math';
 import '../models/cold_equipment.dart';
 import '../models/equipment_type.dart';
 import '../models/equipment_status.dart';
@@ -10,7 +9,6 @@ class ColdChainService {
   static final List<ColdEquipment> _equipments = [];
   static final List<TemperatureRecord> _temperatureRecords = [];
   static final List<ColdIncident> _incidents = [];
-  static final Random _random = Random();
 
   // ==================== DONNÉES MOCKÉES ====================
 

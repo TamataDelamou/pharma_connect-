@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../shared/models/product.dart';
 import '../models/stock_item.dart';
 import '../models/stock_movement.dart';
 import '../models/stock_batch.dart';

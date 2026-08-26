@@ -3,7 +3,6 @@ import '../../../shared/models/product.dart';
 import '../models/search_filters.dart';
 import '../models/search_suggestion.dart';
 import '../models/search_result.dart';
-import '../models/pharmacy.dart';
 import '../models/availability_result.dart';
 import '../services/search_service.dart';
 

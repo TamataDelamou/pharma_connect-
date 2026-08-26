@@ -21,7 +21,6 @@ class VerificationScreen extends StatefulWidget {
 class _VerificationScreenState extends State<VerificationScreen> {
   final _serialController = TextEditingController();
   final _gtinController = TextEditingController();
-  bool _isScanning = false;
 
   @override
   void dispose() {

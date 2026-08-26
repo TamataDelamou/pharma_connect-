@@ -16,7 +16,6 @@ class CheckoutStepIndicator extends StatelessWidget {
     return Row(
       children: steps.asMap().entries.map((entry) {
         final index = entry.key;
-        final label = entry.value;
         final isActive = index <= currentStep;
         final isCurrent = index == currentStep;
 

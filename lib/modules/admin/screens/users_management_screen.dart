@@ -5,10 +5,8 @@ import '../../../core/kernel/kernel_badge.dart';
 import '../../../core/theme/colors.dart';
 import '../../../core/theme/typography.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
-import '../../../core/widgets/cards/glass_card.dart';
 import '../providers/admin_provider.dart';
 import '../models/admin_role.dart';
-import '../models/admin_permission.dart';
 
 class UsersManagementScreen extends StatefulWidget {
   const UsersManagementScreen({super.key});

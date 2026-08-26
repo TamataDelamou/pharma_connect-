@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import '../../../shared/models/product.dart';
 import 'stock_batch.dart';
 import 'stock_status.dart';

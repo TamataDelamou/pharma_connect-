@@ -19,7 +19,6 @@ class ReconciliationScreen extends StatefulWidget {
 
 class _ReconciliationScreenState extends State<ReconciliationScreen> {
   bool _isReconciling = false;
-  DateTime? _selectedDate;
 
   @override
   void initState() {

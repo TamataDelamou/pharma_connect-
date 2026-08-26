@@ -4,7 +4,6 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
 import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../providers/search_provider.dart';
 
 class BarcodeScannerScreen extends StatefulWidget {
