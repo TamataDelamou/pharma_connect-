@@ -65,6 +65,19 @@ Deux trouvailles significatives cette session, corrigées avant que les tests ne
 
 Détail vivant et à jour → **`PharmaConnect_CLAUDE.md`**, sections « Mise à jour (27/08/2026) ».
 
+### 1 quater. Où en est le produit — 27/08/2026, P0 (persistance réelle)
+
+| | |
+|---|---|
+| Services câblés sur Supabase réel | **13 / 14** : `auth` (déjà réel avant cette session) + `catalog`, `alerts`, `admin`, `coldchain`, `recall`, `traceability`, `stock`, `delivery`, `payments`, `prescriptions`, `reservations`, `search` (câblés cette session). `dashboard` n'a pas de table (agrégation pure) — hors périmètre par nature. |
+| Projet Supabase réel | **Toujours aucun** — décision explicite : Docker absent de cet environnement (`supabase start` local impossible), création de compte/projet distant hors de portée d'une session de code. `supabase_service.dart` garde ses placeholders, volontairement. |
+| Modèles avec sérialisation JSON | ~35 (`fromJson`/`toJson` ajoutés cette session) — 0 avant |
+| `flutter analyze` | 0 erreur sur tout `lib/`, 64 infos de style pré-existantes |
+| `flutter test` | **24/42 passent, 18 échouent** — tous par construction (`PostgrestException`, pas de backend réel derrière `supabase_service.dart`), vérifié en lisant le message d'erreur de chacun. Repasseront verts automatiquement une fois un projet réel provisionné et migré, sans toucher au code de test. |
+| CI | Les 3 garde-fous KER-* restent verts ; `flutter test` est rouge par construction (voir ligne précédente) |
+
+Détail vivant et à jour → **`PharmaConnect_CLAUDE.md`**, section « Mise à jour (27/08/2026, suite) — P0 ».
+
 ---
 
 ## 2. Corrections déjà appliquées — ne pas les réintroduire
@@ -94,6 +107,13 @@ Le détail complet des 216 erreurs corrigées le 25/08 (216 → 0, sur 54 fichie
 
 14. **Provider créé mais jamais enregistré dans `app.dart`** — un nouveau `ChangeNotifierProvider` doit être ajouté au `MultiProvider` racine de `app.dart` **au moment où le provider est créé**, pas seulement quand un écran commence à l'utiliser. `AdminProvider`, `AlertProvider`, `ColdChainProvider`, `RecallProvider`, `StockProvider` et `TraceabilityProvider` ont existé pendant toute la session du 25/08 sans jamais être enregistrés, alors que 20 écrans dans ces 6 modules appellent déjà `context.read<X>()`/`context.watch<X>()` dessus — un crash `ProviderNotFoundException` garanti à la navigation, resté invisible faute d'un seul test qui construise ces écrans. Les 6 providers manquants ont été ajoutés à `app.dart`. Voir §6, nouvel item de checklist.
 15. **Valeur de repli entière passée à une API qui exige un `double`** — `(provider.statistics['averageCompletionRate'] ?? 0) * 100` dans `recall_dashboard_screen.dart` : le littéral `0` du repli est un `int`, donc `int * int = int`, rejeté par `BarChartRodData.toY` qui exige un `double`. Se déclenchait dès que la statistique n'était pas encore chargée — un cas normal en tout début de vie de l'écran, pas un cas limite rare. Règle générale : tout repli `?? 0`/`?? 0.0` doit avoir le même type que le reste de l'expression ; si l'expression finale doit être un `double`, écrire `?? 0.0` ou caster explicitement (`.toDouble()`), jamais `?? 0` suivi d'une opération arithmétique.
+
+**Corrections du 27/08/2026, suite** — trouvées en câblant la persistance Supabase réelle (P0), pas en développant un nouveau module :
+
+16. **`orElse` qui retourne un élément arbitraire au lieu de `null`, malgré un type de retour nullable déclaré** — `DeliveryService.getDriver()` faisait `_drivers.firstWhere((d) => d.id == id, orElse: () => _drivers[0])` et `getRoute()` faisait l'équivalent avec `_routes.first` : sur un id introuvable, la méthode ne renvoyait pas `null` (son propre type de retour déclaré, `Future<DeliveryDriver?>`/`Future<DeliveryRoute?>`) mais un élément quelconque de la liste — silencieusement le mauvais livreur ou la mauvaise tournée. Même défaut sur `PaymentService.getInvoice()`. Les trois corrigés pour retourner vraiment `null` (`.maybeSingle()` côté Supabase). Règle générale : si une méthode déclare un retour nullable, un id introuvable doit produire `null`, jamais une valeur de repli arbitraire qui masque l'échec.
+17. **Méthodes stub qui ignoraient leurs paramètres** — `PaymentService.getInstallment(installmentId)` retournait des données entièrement simulées sans jamais lire `installmentId` ; `payInstallment(installmentId, paymentNumber)` ne modifiait rien et se contentait de rappeler `getInstallment()`. `TraceabilityService.getVerificationHistory(serialNumber)` retournait un historique fictif à une seule entrée, sans jamais lire `serialNumber`. Les trois implémentées pour de vrai en câblant la persistance (P0) — l'écart n'était visible qu'en lisant le corps de la méthode, aucun test ni aucun appelant ne l'aurait révélé puisque le type de retour restait cohérent.
+
+Détail complet de la session P0 (13 services convertis, ~35 modèles avec sérialisation JSON ajoutée) → `PharmaConnect_CLAUDE.md`, section « Mise à jour (27/08/2026, suite) — P0 ».
 
 ---
 
@@ -247,7 +267,9 @@ Un commentaire `// handle error` sans code derrière n'est pas une gestion d'err
 
 ### 5.2 — Mock aujourd'hui, Supabase demain : ne jamais changer l'interface publique
 
-Tous les services actuels (`payment_service.dart`, `delivery_service.dart`, `reservation_service.dart`, `search_service.dart`, `prescription_service.dart`) sont des mocks en mémoire. C'est un choix délibéré et sain pour développer l'UI sans attendre le backend — mais cela n'a de valeur que si la bascule vers une vraie table Supabase ne casse pas les providers/écrans qui consomment le service. Règle : la signature publique d'un service (`Future<List<X>> getX()`, `Future<X> createX(...)`) ne change pas entre la version mock et la version réelle ; seul le corps de la méthode change.
+Règle : la signature publique d'un service (`Future<List<X>> getX()`, `Future<X> createX(...)`) ne change pas entre la version mock et la version réelle ; seul le corps de la méthode change.
+
+**Vérifié en pratique le 27/08/2026 (P0) :** les 12 derniers services encore mockés (`payment_service.dart`, `delivery_service.dart`, `reservation_service.dart`, `search_service.dart`, `prescription_service.dart` et 7 autres) ont été convertis à `Supabase.instance.client` réel — cette règle a effectivement tenu, aucun provider n'a eu besoin d'être modifié. Un projet Supabase réel reste à provisionner derrière (§2b de `PharmaConnect_CLAUDE.md`) pour que ce code s'exécute pour de vrai ; voir la mise à jour du 27/08/2026 (« P0 ») en tête de fichier pour le détail et les limites connues.
 
 ### 5.3 — Authentification : ne jamais dupliquer ce que Supabase Auth fait déjà
 
@@ -266,6 +288,8 @@ Pour tout nouveau module, a minima :
 Ne pas attendre un chantier « tests » séparé en fin de projet — l'écart ne fera que grandir avec 20 modules de plus.
 
 **Résolu partiellement (27/08/2026) :** `test/unit/` et `test/widget/` n'étaient effectivement vides que jusqu'à cette date — 27 tests unitaires (un fichier par provider, 14/14) et 14 tests widget (un par écran principal des 14 modules avec code réel) ajoutés. Deux cas particuliers documentés plutôt que forcés à rentrer dans le patron nominal/erreur : `DashboardProvider` n'a aucun chemin d'erreur possible (données générées en pur mémoire, ne peut jamais lever d'exception) ; `AuthProvider` parle à un vrai `GoTrueClient` Supabase, donc seules ses branches synchrones/hors-réseau sont testables en unitaire sans un vrai projet Supabase. Reste ouvert : les écrans secondaires de chaque module (détail, formulaires) ne sont pas couverts, seul l'écran principal ; les 20 modules non entamés (§4.3) n'ont par construction encore rien à tester.
+
+**Conséquence attendue de la persistance réelle (27/08/2026, P0) :** depuis que les 12 services mockés parlent à `Supabase.instance.client` (§5.2), **18 de ces 42 tests échouent** — tous par `PostgrestException`, faute d'un projet Supabase réel derrière `supabase_service.dart` (§2b de `PharmaConnect_CLAUDE.md`). Vérifié un par un que la cause est bien l'absence de backend et non un bug introduit. Ne pas chercher à les faire repasser au vert en les modifiant : ils repasseront d'eux-mêmes une fois qu'un projet réel existera et sera migré. Corrigé en marge : les 24 fichiers de test concernés ne faisaient jamais `Supabase.initialize()` dans leur `setUpAll` — sans ce correctif, ils échouaient sur une erreur d'initialisation Dart plutôt que sur la vraie cause, ce qui aurait été trompeur pour la prochaine personne qui les lit.
 
 ### 5.6 — CI : les trois garde-fous ne sont pas optionnels
 
