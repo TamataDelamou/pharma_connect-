@@ -48,4 +48,16 @@ class StockAdjustment {
     this.notes,
     required this.timestamp,
   });
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'stock_item_id': stockItemId,
+    'batch_id': batchId,
+    'reason': reason.name,
+    'quantity': quantity,
+    'user_id': userId,
+    'user_name': userName,
+    'notes': notes,
+    'timestamp': timestamp.toIso8601String(),
+  };
 }

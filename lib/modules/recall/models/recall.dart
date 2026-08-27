@@ -53,6 +53,64 @@ class Recall {
     this.notes,
   });
 
+  factory Recall.fromJson(Map<String, dynamic> json) => Recall(
+    id: json['id'] as String,
+    referenceNumber: json['reference_number'] as String,
+    title: json['title'] as String,
+    description: json['description'] as String,
+    severity: RecallSeverity.values.byName(json['severity'] as String),
+    status: RecallStatus.values.byName(json['status'] as String),
+    affectedBatches: (json['recall_affected_batches'] as List<dynamic>? ?? [])
+        .map((b) => RecallAffectedBatch.fromJson(b as Map<String, dynamic>))
+        .toList(),
+    issuedAt: DateTime.parse(json['issued_at'] as String),
+    updatedAt: json['updated_at'] != null
+        ? DateTime.parse(json['updated_at'] as String)
+        : null,
+    completedAt: json['completed_at'] != null
+        ? DateTime.parse(json['completed_at'] as String)
+        : null,
+    issuedBy: json['issued_by'] as String,
+    issuedByUserId: json['issued_by_user_id'] as String?,
+    reason: json['reason'] as String?,
+    correctiveAction: json['corrective_action'] as String?,
+    distributionInstructions: json['distribution_instructions'] as String?,
+    isPublic: json['is_public'] as bool? ?? true,
+    totalAffectedUnits: json['total_affected_units'] as int?,
+    unitsReturned: json['units_returned'] as int?,
+    unitsDestroyed: json['units_destroyed'] as int?,
+    unitsUnrecovered: json['units_unrecovered'] as int?,
+    notifiedParties: (json['notified_parties'] as List<dynamic>?)
+        ?.map((p) => p as String)
+        .toList(),
+    notes: json['notes'] as String?,
+  );
+
+  // affectedBatches n'est jamais écrit ici : recall_affected_batches est une
+  // table séparée, insérée/mise à jour indépendamment par RecallService.
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'reference_number': referenceNumber,
+    'title': title,
+    'description': description,
+    'severity': severity.name,
+    'status': status.name,
+    'issued_at': issuedAt.toIso8601String(),
+    'completed_at': completedAt?.toIso8601String(),
+    'issued_by': issuedBy,
+    'issued_by_user_id': issuedByUserId,
+    'reason': reason,
+    'corrective_action': correctiveAction,
+    'distribution_instructions': distributionInstructions,
+    'is_public': isPublic,
+    'total_affected_units': totalAffectedUnits,
+    'units_returned': unitsReturned,
+    'units_destroyed': unitsDestroyed,
+    'units_unrecovered': unitsUnrecovered,
+    'notified_parties': notifiedParties,
+    'notes': notes,
+  };
+
   Recall copyWith({
     String? id,
     String? referenceNumber,

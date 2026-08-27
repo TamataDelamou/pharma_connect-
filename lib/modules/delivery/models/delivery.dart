@@ -59,6 +59,80 @@ class Delivery {
     this.estimatedTimeRemaining,
   });
 
+  factory Delivery.fromJson(Map<String, dynamic> json) => Delivery(
+    id: json['id'] as String,
+    reservationId: json['reservation_id'] as String? ?? '',
+    patientId: json['patient_id'] as String? ?? '',
+    patientName: json['patient_name'] as String,
+    patientPhone: json['patient_phone'] as String,
+    deliveryAddress: json['delivery_address'] as String,
+    latitude: (json['latitude'] as num?)?.toDouble(),
+    longitude: (json['longitude'] as num?)?.toDouble(),
+    driver: json['driver'] != null
+        ? DeliveryDriver.fromJson(json['driver'] as Map<String, dynamic>)
+        : null,
+    trackingHistory: (json['tracking_history'] as List<dynamic>? ?? [])
+        .map((t) => t as String)
+        .toList(),
+    scheduledAt: DateTime.parse(json['scheduled_at'] as String),
+    startedAt: json['started_at'] != null
+        ? DateTime.parse(json['started_at'] as String)
+        : null,
+    pickedUpAt: json['picked_up_at'] != null
+        ? DateTime.parse(json['picked_up_at'] as String)
+        : null,
+    arrivedAt: json['arrived_at'] != null
+        ? DateTime.parse(json['arrived_at'] as String)
+        : null,
+    deliveredAt: json['delivered_at'] != null
+        ? DateTime.parse(json['delivered_at'] as String)
+        : null,
+    cancelledAt: json['cancelled_at'] != null
+        ? DateTime.parse(json['cancelled_at'] as String)
+        : null,
+    status: DeliveryStatus.values.byName(json['status'] as String),
+    proof: json['proof'] != null
+        ? DeliveryProof.fromJson(json['proof'] as Map<String, dynamic>)
+        : null,
+    isColdChainRequired: json['is_cold_chain_required'] as bool? ?? false,
+    notes: json['notes'] as String?,
+    isExpress: json['is_express'] as bool? ?? false,
+    pickupPointId: json['pickup_point_id'] as String?,
+    pickupPointName: json['pickup_point_name'] as String?,
+    distanceToDestination: (json['distance_to_destination'] as num?)
+        ?.toDouble(),
+    estimatedTimeRemaining: json['estimated_time_remaining'] as int?,
+  );
+
+  // proof n'est jamais écrit ici : delivery_proofs est une table séparée
+  // (1:1, PK = delivery_id), gérée indépendamment par DeliveryService.
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'reservation_id': reservationId.isEmpty ? null : reservationId,
+    'patient_id': patientId.isEmpty ? null : patientId,
+    'patient_name': patientName,
+    'patient_phone': patientPhone,
+    'delivery_address': deliveryAddress,
+    'latitude': latitude,
+    'longitude': longitude,
+    'driver_id': driver?.id,
+    'tracking_history': trackingHistory,
+    'scheduled_at': scheduledAt.toIso8601String(),
+    'started_at': startedAt?.toIso8601String(),
+    'picked_up_at': pickedUpAt?.toIso8601String(),
+    'arrived_at': arrivedAt?.toIso8601String(),
+    'delivered_at': deliveredAt?.toIso8601String(),
+    'cancelled_at': cancelledAt?.toIso8601String(),
+    'status': status.name,
+    'is_cold_chain_required': isColdChainRequired,
+    'notes': notes,
+    'is_express': isExpress,
+    'pickup_point_id': pickupPointId,
+    'pickup_point_name': pickupPointName,
+    'distance_to_destination': distanceToDestination,
+    'estimated_time_remaining': estimatedTimeRemaining,
+  };
+
   Delivery copyWith({
     String? id,
     String? reservationId,

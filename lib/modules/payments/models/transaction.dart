@@ -52,6 +52,60 @@ class Transaction {
     this.notes,
   });
 
+  factory Transaction.fromJson(Map<String, dynamic> json) => Transaction(
+    id: json['id'] as String,
+    reservationId: json['reservation_id'] as String?,
+    deliveryId: json['delivery_id'] as String?,
+    prescriptionId: json['prescription_id'] as String?,
+    userId: json['user_id'] as String? ?? '',
+    userPhone: json['user_phone'] as String,
+    pharmacyId: json['pharmacy_id'] as String?,
+    pharmacyName: json['pharmacy_name'] as String?,
+    amount: json['amount'] as int,
+    fee: json['fee'] as int?,
+    cashback: json['cashback'] as int?,
+    finalAmount: json['final_amount'] as int,
+    method: PaymentMethod.values.byName(json['method'] as String),
+    status: TransactionStatus.values.byName(json['status'] as String),
+    createdAt: DateTime.parse(json['created_at'] as String),
+    completedAt: json['completed_at'] != null
+        ? DateTime.parse(json['completed_at'] as String)
+        : null,
+    refundedAt: json['refunded_at'] != null
+        ? DateTime.parse(json['refunded_at'] as String)
+        : null,
+    transactionReference: json['transaction_reference'] as String?,
+    externalReference: json['external_reference'] as String?,
+    qrCodeToken: json['qr_code_token'] as String?,
+    metadata: json['metadata'] as Map<String, dynamic>?,
+    notes: json['notes'] as String?,
+  );
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'reservation_id': reservationId,
+    'delivery_id': deliveryId,
+    'prescription_id': prescriptionId,
+    'user_id': userId.isEmpty ? null : userId,
+    'user_phone': userPhone,
+    'pharmacy_id': pharmacyId,
+    'pharmacy_name': pharmacyName,
+    'amount': amount,
+    'fee': fee,
+    'cashback': cashback,
+    'final_amount': finalAmount,
+    'method': method.name,
+    'status': status.name,
+    'created_at': createdAt.toIso8601String(),
+    'completed_at': completedAt?.toIso8601String(),
+    'refunded_at': refundedAt?.toIso8601String(),
+    'transaction_reference': transactionReference,
+    'external_reference': externalReference,
+    'qr_code_token': qrCodeToken,
+    'metadata': metadata,
+    'notes': notes,
+  };
+
   Transaction copyWith({
     String? id,
     String? reservationId,

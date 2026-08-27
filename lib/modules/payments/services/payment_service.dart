@@ -1,126 +1,19 @@
-import 'dart:math';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:uuid/uuid.dart';
 import '../models/transaction.dart';
 import '../models/transaction_status.dart';
 import '../models/payment_method.dart';
 import '../models/installment.dart';
 import '../models/wallet.dart';
 import '../models/invoice.dart';
+import '../../../core/services/supabase_service.dart';
 
 class PaymentService {
-  static final List<Transaction> _transactions = [];
-  static final List<Wallet> _wallets = [];
-  static final List<Invoice> _invoices = [];
-  static final Random _random = Random();
+  SupabaseClient get _client => SupabaseService().client;
 
   // Taux
   static const int _feePercent = 1;
   static const int _cashbackPercent = 2;
-
-  // ==================== DONNÉES MOCKÉES ====================
-
-  static final List<Wallet> _mockWallets = [
-    Wallet(
-      id: 'wal_001',
-      userId: 'patient_123',
-      balance: 45000,
-      pendingBalance: 12000,
-      totalEarned: 87000,
-      totalSpent: 42000,
-      cashbackAvailable: 3400,
-      lastUpdated: DateTime(2026, 8, 24),
-    ),
-  ];
-
-  static final List<Transaction> _mockTransactions = [
-    _createMockTransaction(
-      id: 'tx_001',
-      amount: 15000,
-      method: PaymentMethod.orangeMoney,
-      status: TransactionStatus.completed,
-      pharmacyName: 'Pharmacie Centrale',
-    ),
-    _createMockTransaction(
-      id: 'tx_002',
-      amount: 8500,
-      method: PaymentMethod.gsgWallet,
-      status: TransactionStatus.completed,
-      pharmacyName: 'Pharmacie du Soleil',
-    ),
-    _createMockTransaction(
-      id: 'tx_003',
-      amount: 35000,
-      method: PaymentMethod.mtnMomo,
-      status: TransactionStatus.pending,
-      pharmacyName: 'Pharmacie Moderne',
-    ),
-    _createMockTransaction(
-      id: 'tx_004',
-      amount: 12000,
-      method: PaymentMethod.gsgWallet,
-      status: TransactionStatus.processing,
-      pharmacyName: 'Pharmacie Centrale',
-    ),
-    _createMockTransaction(
-      id: 'tx_005',
-      amount: 2800,
-      method: PaymentMethod.cashOnDelivery,
-      status: TransactionStatus.completed,
-      pharmacyName: 'Pharmacie du Soleil',
-    ),
-    _createMockTransaction(
-      id: 'tx_006',
-      amount: 7500,
-      method: PaymentMethod.orangeMoney,
-      status: TransactionStatus.disputed,
-      pharmacyName: 'Pharmacie Moderne',
-    ),
-  ];
-
-  static Transaction _createMockTransaction({
-    required String id,
-    required int amount,
-    required PaymentMethod method,
-    required TransactionStatus status,
-    required String pharmacyName,
-  }) {
-    final now = DateTime.now();
-    final int fee = (amount * _feePercent) ~/ 100;
-    final int cashback = status == TransactionStatus.completed
-        ? (amount * _cashbackPercent) ~/ 100
-        : 0;
-    final int finalAmount = amount + fee - cashback;
-
-    return Transaction(
-      id: id,
-      userId: 'patient_123',
-      userPhone: '+224612345678',
-      pharmacyName: pharmacyName,
-      amount: amount,
-      fee: fee,
-      cashback: cashback,
-      finalAmount: finalAmount,
-      method: method,
-      status: status,
-      createdAt: now.subtract(Duration(days: _random.nextInt(30))),
-      completedAt: status == TransactionStatus.completed
-          ? now.subtract(Duration(hours: _random.nextInt(48)))
-          : null,
-      transactionReference: 'GSG${_random.nextInt(1000000)}',
-      externalReference: 'REF${_random.nextInt(10000)}',
-      notes: status == TransactionStatus.disputed
-          ? 'Paiement non reconnu par le client'
-          : null,
-    );
-  }
-
-  static void _initMockData() {
-    if (_transactions.isEmpty) {
-      _transactions.addAll(_mockTransactions);
-    }
-    if (_wallets.isEmpty) {
-      _wallets.addAll(_mockWallets);
-    }
-  }
 
   // ==================== TRANSACTIONS ====================
 
@@ -133,73 +26,73 @@ class PaymentService {
     PaymentMethod? method,
     int limit = 50,
   }) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    _initMockData();
-
-    var list = _transactions;
+    var query = _client.from('transactions').select();
 
     if (status != null) {
-      list = list.where((t) => t.status == status).toList();
+      query = query.eq('status', status.name);
     }
-
     if (pharmacyId != null) {
-      list = list.where((t) => t.pharmacyId == pharmacyId).toList();
+      query = query.eq('pharmacy_id', pharmacyId);
     }
-
     if (userId != null) {
-      list = list.where((t) => t.userId == userId).toList();
+      query = query.eq('user_id', userId);
     }
-
     if (fromDate != null) {
-      list = list.where((t) => t.createdAt.isAfter(fromDate)).toList();
+      query = query.gt('created_at', fromDate.toIso8601String());
     }
-
     if (toDate != null) {
-      list = list.where((t) => t.createdAt.isBefore(toDate)).toList();
+      query = query.lt('created_at', toDate.toIso8601String());
     }
-
     if (method != null) {
-      list = list.where((t) => t.method == method).toList();
+      query = query.eq('method', method.name);
     }
 
-    list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    return list.take(limit).toList();
+    final rows = await query.order('created_at', ascending: false).limit(limit);
+    return rows.map((row) => Transaction.fromJson(row)).toList();
   }
 
   Future<Transaction> getTransaction(String id) async {
-    await Future.delayed(const Duration(milliseconds: 200));
-    _initMockData();
-    return _transactions.firstWhere((t) => t.id == id);
+    final row = await _client
+        .from('transactions')
+        .select()
+        .eq('id', id)
+        .single();
+    return Transaction.fromJson(row);
   }
 
   Future<int> getTransactionCount({
     TransactionStatus? status,
     String? userId,
   }) async {
-    await Future.delayed(const Duration(milliseconds: 100));
-    _initMockData();
-    var list = _transactions;
+    var query = _client.from('transactions').select('id');
     if (status != null) {
-      list = list.where((t) => t.status == status).toList();
+      query = query.eq('status', status.name);
     }
     if (userId != null) {
-      list = list.where((t) => t.userId == userId).toList();
+      query = query.eq('user_id', userId);
     }
-    return list.length;
+    final rows = await query;
+    return rows.length;
   }
 
   // ==================== PORTEFEUILLE ====================
 
   Future<Wallet> getWallet(String userId) async {
-    await Future.delayed(const Duration(milliseconds: 200));
-    _initMockData();
-    return _wallets.firstWhere((w) => w.userId == userId);
+    final row = await _client
+        .from('wallets')
+        .select()
+        .eq('user_id', userId)
+        .single();
+    return Wallet.fromJson(row);
   }
 
   Future<int> getWalletBalance(String userId) async {
-    await Future.delayed(const Duration(milliseconds: 200));
-    _initMockData();
-    return _wallets.firstWhere((w) => w.userId == userId).balance;
+    final row = await _client
+        .from('wallets')
+        .select('balance')
+        .eq('user_id', userId)
+        .single();
+    return row['balance'] as int;
   }
 
   Future<Wallet> topUpWallet({
@@ -207,23 +100,23 @@ class PaymentService {
     required int amount,
     required PaymentMethod method,
   }) async {
-    await Future.delayed(const Duration(seconds: 1));
-    _initMockData();
+    final current = await getWallet(userId);
 
-    final index = _wallets.indexWhere((w) => w.userId == userId);
-    if (index == -1) throw Exception('Wallet not found');
+    final row = await _client
+        .from('wallets')
+        .update({
+          'balance': current.balance + amount,
+          'last_updated': DateTime.now().toIso8601String(),
+        })
+        .eq('user_id', userId)
+        .select()
+        .single();
+    final updated = Wallet.fromJson(row);
 
-    final current = _wallets[index];
-    final updated = current.copyWith(
-      balance: current.balance + amount,
-      lastUpdated: DateTime.now(),
-    );
-
-    // Ajouter une transaction
     final transaction = Transaction(
-      id: 'tx_${DateTime.now().millisecondsSinceEpoch}',
+      id: const Uuid().v4(),
       userId: userId,
-      userPhone: '+224612345678',
+      userPhone: '',
       amount: amount,
       fee: 0,
       cashback: 0,
@@ -232,11 +125,10 @@ class PaymentService {
       status: TransactionStatus.completed,
       createdAt: DateTime.now(),
       completedAt: DateTime.now(),
-      transactionReference: 'TOPUP${_random.nextInt(1000000)}',
+      transactionReference: 'TOPUP${const Uuid().v4().substring(0, 8)}',
     );
-    _transactions.add(transaction);
+    await _client.from('transactions').insert(transaction.toJson());
 
-    _wallets[index] = updated;
     return updated;
   }
 
@@ -254,12 +146,6 @@ class PaymentService {
     String? pharmacyName,
     bool useCashback = false,
   }) async {
-    await Future.delayed(const Duration(seconds: 1));
-    _initMockData();
-
-    final id = 'tx_${DateTime.now().millisecondsSinceEpoch}';
-    final now = DateTime.now();
-
     final int fee = method == PaymentMethod.gsgWallet
         ? 0
         : (amount * _feePercent) ~/ 100;
@@ -270,7 +156,7 @@ class PaymentService {
     final int finalAmount = amount + fee - (useCashback ? cashback : 0);
 
     final transaction = Transaction(
-      id: id,
+      id: const Uuid().v4(),
       userId: userId,
       userPhone: userPhone,
       amount: amount,
@@ -279,44 +165,48 @@ class PaymentService {
       finalAmount: finalAmount,
       method: method,
       status: TransactionStatus.processing,
-      createdAt: now,
+      createdAt: DateTime.now(),
       pharmacyId: pharmacyId,
       pharmacyName: pharmacyName,
       reservationId: reservationId,
       deliveryId: deliveryId,
       prescriptionId: prescriptionId,
-      transactionReference: 'GSG${_random.nextInt(1000000)}',
+      transactionReference: 'GSG${const Uuid().v4().substring(0, 8)}',
     );
 
-    _transactions.add(transaction);
+    await _client.from('transactions').insert(transaction.toJson());
 
-    // Simuler la confirmation
+    // Simuler la confirmation (comportement hérité du mock — un vrai
+    // fournisseur Mobile Money confirmerait via webhook, pas un délai fixe).
     await Future.delayed(const Duration(seconds: 2));
-    final completed = transaction.copyWith(
-      status: TransactionStatus.completed,
-      completedAt: DateTime.now(),
-    );
-    final index = _transactions.indexWhere((t) => t.id == id);
-    if (index != -1) _transactions[index] = completed;
+    final row = await _client
+        .from('transactions')
+        .update({
+          'status': TransactionStatus.completed.name,
+          'completed_at': DateTime.now().toIso8601String(),
+        })
+        .eq('id', transaction.id)
+        .select()
+        .single();
+    final completed = Transaction.fromJson(row);
 
-    // Créer une facture
-    _createInvoice(completed);
+    await _createInvoice(completed);
 
     return completed;
   }
 
   Future<Transaction> confirmTransaction(String transactionId) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    _initMockData();
-    final index = _transactions.indexWhere((t) => t.id == transactionId);
-    if (index == -1) throw Exception('Transaction not found');
-
-    final updated = _transactions[index].copyWith(
-      status: TransactionStatus.completed,
-      completedAt: DateTime.now(),
-    );
-    _transactions[index] = updated;
-    _createInvoice(updated);
+    final row = await _client
+        .from('transactions')
+        .update({
+          'status': TransactionStatus.completed.name,
+          'completed_at': DateTime.now().toIso8601String(),
+        })
+        .eq('id', transactionId)
+        .select()
+        .single();
+    final updated = Transaction.fromJson(row);
+    await _createInvoice(updated);
     return updated;
   }
 
@@ -324,35 +214,30 @@ class PaymentService {
     String transactionId, {
     String? reason,
   }) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    _initMockData();
-    final index = _transactions.indexWhere((t) => t.id == transactionId);
-    if (index == -1) throw Exception('Transaction not found');
-
-    final updated = _transactions[index].copyWith(
-      status: TransactionStatus.refunded,
-      refundedAt: DateTime.now(),
-      notes: reason,
-    );
-    _transactions[index] = updated;
-    return updated;
+    final row = await _client
+        .from('transactions')
+        .update({
+          'status': TransactionStatus.refunded.name,
+          'refunded_at': DateTime.now().toIso8601String(),
+          'notes': reason,
+        })
+        .eq('id', transactionId)
+        .select()
+        .single();
+    return Transaction.fromJson(row);
   }
 
   Future<Transaction> markAsDisputed(
     String transactionId, {
     String? reason,
   }) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    _initMockData();
-    final index = _transactions.indexWhere((t) => t.id == transactionId);
-    if (index == -1) throw Exception('Transaction not found');
-
-    final updated = _transactions[index].copyWith(
-      status: TransactionStatus.disputed,
-      notes: reason,
-    );
-    _transactions[index] = updated;
-    return updated;
+    final row = await _client
+        .from('transactions')
+        .update({'status': TransactionStatus.disputed.name, 'notes': reason})
+        .eq('id', transactionId)
+        .select()
+        .single();
+    return Transaction.fromJson(row);
   }
 
   // ==================== ÉCHÉANCIER ====================
@@ -363,28 +248,19 @@ class PaymentService {
     required int numberOfPayments,
     required DateTime startDate,
   }) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    _initMockData();
-
     final int amountPerPayment = totalAmount ~/ numberOfPayments;
-    final payments = <InstallmentPayment>[];
-
-    for (int i = 0; i < numberOfPayments; i++) {
-      final dueDate = startDate.add(Duration(days: (i + 1) * 30));
-      payments.add(
+    final payments = <InstallmentPayment>[
+      for (int i = 0; i < numberOfPayments; i++)
         InstallmentPayment(
           number: i + 1,
           amount: amountPerPayment,
-          dueDate: dueDate,
-          status: i == 0
-              ? InstallmentPaymentStatus.pending
-              : InstallmentPaymentStatus.pending,
+          dueDate: startDate.add(Duration(days: (i + 1) * 30)),
+          status: InstallmentPaymentStatus.pending,
         ),
-      );
-    }
+    ];
 
-    return Installment(
-      id: 'inst_${DateTime.now().millisecondsSinceEpoch}',
+    final installment = Installment(
+      id: const Uuid().v4(),
       transactionId: transactionId,
       totalAmount: totalAmount,
       numberOfPayments: numberOfPayments,
@@ -393,58 +269,61 @@ class PaymentService {
       payments: payments,
       status: InstallmentStatus.active,
     );
+
+    await _client.from('installments').insert(installment.toJson());
+    await _client
+        .from('installment_payments')
+        .insert(
+          payments.map((p) => p.toJson(installmentId: installment.id)).toList(),
+        );
+
+    return installment;
   }
 
   Future<Installment> getInstallment(String installmentId) async {
-    await Future.delayed(const Duration(milliseconds: 200));
-    _initMockData();
-
-    // Simuler un échéancier
-    final now = DateTime.now();
-    final payments = List.generate(
-      3,
-      (i) => InstallmentPayment(
-        number: i + 1,
-        amount: 15000,
-        dueDate: now.add(Duration(days: (i + 1) * 30)),
-        status: i == 0
-            ? InstallmentPaymentStatus.paid
-            : i == 1
-            ? InstallmentPaymentStatus.pending
-            : InstallmentPaymentStatus.pending,
-        paidAt: i == 0 ? now.subtract(const Duration(days: 30)) : null,
-      ),
-    );
-    return Installment(
-      id: installmentId,
-      transactionId: 'tx_${_random.nextInt(1000)}',
-      totalAmount: 45000,
-      numberOfPayments: 3,
-      amountPerPayment: 15000,
-      startDate: now.subtract(const Duration(days: 30)),
-      payments: payments,
-      status: InstallmentStatus.active,
-    );
+    final row = await _client
+        .from('installments')
+        .select('*, installment_payments(*)')
+        .eq('id', installmentId)
+        .single();
+    return Installment.fromJson(row);
   }
 
   Future<Installment> payInstallment(
     String installmentId,
     int paymentNumber,
   ) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    _initMockData();
-    // Simuler le paiement d'une échéance
-    // Dans la réalité, on appellerait une API de paiement
-    return getInstallment(installmentId);
+    await _client
+        .from('installment_payments')
+        .update({
+          'status': InstallmentPaymentStatus.paid.name,
+          'paid_at': DateTime.now().toIso8601String(),
+        })
+        .eq('installment_id', installmentId)
+        .eq('payment_number', paymentNumber);
+
+    final installment = await getInstallment(installmentId);
+    if (installment.paidCount == installment.numberOfPayments) {
+      await _client
+          .from('installments')
+          .update({
+            'status': InstallmentStatus.completed.name,
+            'completed_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', installmentId);
+      return getInstallment(installmentId);
+    }
+
+    return installment;
   }
 
   // ==================== FACTURES ====================
 
-  void _createInvoice(Transaction transaction) {
+  Future<void> _createInvoice(Transaction transaction) async {
     final invoice = Invoice(
-      id: 'inv_${DateTime.now().millisecondsSinceEpoch}',
+      id: const Uuid().v4(),
       transactionId: transaction.id,
-      invoiceNumber: 'FAC${_random.nextInt(1000000)}',
+      invoiceNumber: 'FAC${const Uuid().v4().substring(0, 8)}',
       pharmacyName: transaction.pharmacyName ?? 'Pharmacie',
       pharmacyAddress: '123 Rue du Commerce, Conakry',
       pharmacyPhone: '+224622334455',
@@ -455,7 +334,7 @@ class PaymentService {
       issuedAt: DateTime.now(),
       items: [
         InvoiceItem(
-          id: 'item_${_random.nextInt(1000)}',
+          id: const Uuid().v4(),
           productName: 'Médicaments',
           quantity: 1,
           unitPrice: transaction.amount,
@@ -469,24 +348,28 @@ class PaymentService {
       total: transaction.finalAmount,
       status: 'paid',
     );
-    _invoices.add(invoice);
+
+    await _client.from('invoices').insert(invoice.toJson());
+    await _client
+        .from('invoice_items')
+        .insert(
+          invoice.items.map((i) => i.toJson(invoiceId: invoice.id)).toList(),
+        );
   }
 
   Future<Invoice?> getInvoice(String transactionId) async {
-    await Future.delayed(const Duration(milliseconds: 200));
-    return _invoices.firstWhere(
-      (i) => i.transactionId == transactionId,
-      orElse: () => _invoices.first,
-    );
+    final row = await _client
+        .from('invoices')
+        .select('*, invoice_items(*)')
+        .eq('transaction_id', transactionId)
+        .maybeSingle();
+    return row != null ? Invoice.fromJson(row) : null;
   }
 
   // ==================== STATISTIQUES ====================
 
   Future<Map<String, dynamic>> getPaymentStats(String userId) async {
-    await Future.delayed(const Duration(milliseconds: 200));
-    _initMockData();
-
-    final userTransactions = _transactions.where((t) => t.userId == userId);
+    final userTransactions = await getTransactions(userId: userId, limit: 10000);
     final completed = userTransactions
         .where((t) => t.status == TransactionStatus.completed)
         .toList();
@@ -498,7 +381,7 @@ class PaymentService {
           ? 0
           : completed.fold(0, (sum, t) => sum + t.finalAmount) ~/
                 completed.length,
-      'mostUsedMethod': _getMostUsedMethod(userTransactions.toList()),
+      'mostUsedMethod': _getMostUsedMethod(userTransactions),
       'totalCashback': completed.fold(0, (sum, t) => sum + (t.cashback ?? 0)),
     };
   }

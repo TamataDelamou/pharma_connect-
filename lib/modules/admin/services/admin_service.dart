@@ -1,3 +1,5 @@
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:uuid/uuid.dart';
 import '../models/admin_user.dart';
 import '../models/admin_role.dart';
 import '../models/admin_permission.dart';
@@ -5,172 +7,10 @@ import '../models/admin_pharmacy.dart';
 import '../models/pharmacy_status.dart';
 import '../models/audit_log.dart';
 import '../models/system_config.dart';
-import '../../../core/utils/currency_formatter.dart';
+import '../../../core/services/supabase_service.dart';
 
 class AdminService {
-  static final List<AdminUser> _users = [];
-  static final List<AdminPharmacy> _pharmacies = [];
-  static final List<AuditLog> _auditLogs = [];
-  static final List<SystemConfig> _configs = [];
-  static int _counter = 0;
-
-  // ==================== DONNÉES MOCKÉES ====================
-
-  static final List<AdminUser> _mockUsers = [
-    AdminUser(
-      id: 'au_001',
-      userId: 'user_001',
-      email: 'admin@pharmaconnect.com',
-      fullName: 'Super Admin',
-      role: AdminRole.superAdmin,
-      permissions: AdminPermission.values,
-      isActive: true,
-      isVerified: true,
-      createdAt: DateTime.now().subtract(const Duration(days: 365)),
-      lastLoginAt: DateTime.now().subtract(const Duration(minutes: 5)),
-    ),
-    AdminUser(
-      id: 'au_002',
-      userId: 'user_002',
-      email: 'pharmacien@pharmacie.fr',
-      fullName: 'Dr. Martin',
-      phone: '+224612345678',
-      role: AdminRole.pharmacyManager,
-      permissions: [
-        AdminPermission.pharmacyRead,
-        AdminPermission.pharmacyUpdate,
-        AdminPermission.userRead,
-        AdminPermission.reportView,
-      ],
-      isActive: true,
-      isVerified: true,
-      createdAt: DateTime.now().subtract(const Duration(days: 180)),
-      lastLoginAt: DateTime.now().subtract(const Duration(hours: 2)),
-    ),
-    AdminUser(
-      id: 'au_003',
-      userId: 'user_003',
-      email: 'regulateur@dnpm.gouv.fr',
-      fullName: 'M. Diallo',
-      role: AdminRole.regulator,
-      permissions: [
-        AdminPermission.pharmacyRead,
-        AdminPermission.licenseView,
-        AdminPermission.licenseVerify,
-        AdminPermission.reportView,
-        AdminPermission.auditRead,
-      ],
-      isActive: true,
-      isVerified: true,
-      createdAt: DateTime.now().subtract(const Duration(days: 90)),
-    ),
-  ];
-
-  static final List<AdminPharmacy> _mockPharmacies = [
-    AdminPharmacy(
-      id: 'ph_001',
-      name: 'Pharmacie Centrale',
-      address: '123 Avenue de la République, Conakry',
-      phone: '+224612345678',
-      email: 'contact@pharmaciecentrale.com',
-      licenseNumber: 'DNPM-2024-001',
-      status: PharmacyStatus.active,
-      licenseExpiryDate: DateTime.now().add(const Duration(days: 365)),
-      managerId: 'user_002',
-      managerName: 'Dr. Martin',
-      latitude: 9.5095,
-      longitude: -13.7122,
-      isActive: true,
-      createdAt: DateTime.now().subtract(const Duration(days: 180)),
-      licenseVerifiedAt: DateTime.now().subtract(const Duration(days: 150)),
-    ),
-    AdminPharmacy(
-      id: 'ph_002',
-      name: 'Pharmacie du Soleil',
-      address: '45 Rue du Commerce, Conakry',
-      phone: '+224622334455',
-      email: 'contact@pharmaciedusoleil.com',
-      licenseNumber: 'DNPM-2024-002',
-      status: PharmacyStatus.pending,
-      managerId: 'user_004',
-      managerName: 'Dr. Camara',
-      latitude: 9.5195,
-      longitude: -13.7222,
-      isActive: true,
-      createdAt: DateTime.now().subtract(const Duration(days: 30)),
-    ),
-    AdminPharmacy(
-      id: 'ph_003',
-      name: 'Pharmacie de l\'Hôpital',
-      address: 'Avenue de l\'Hôpital, Conakry',
-      phone: '+224633445566',
-      email: 'contact@pharmaciehopital.com',
-      licenseNumber: 'DNPM-2024-003',
-      status: PharmacyStatus.underReview,
-      managerId: 'user_005',
-      managerName: 'Dr. Sow',
-      latitude: 9.4995,
-      longitude: -13.7022,
-      isActive: true,
-      createdAt: DateTime.now().subtract(const Duration(days: 45)),
-    ),
-  ];
-
-  static final List<SystemConfig> _mockConfigs = [
-    SystemConfig(
-      id: 'cfg_001',
-      key: 'default_currency',
-      value: CurrencyFormatter.defaultCurrencyCode,
-      category: 'general',
-      description: 'Devise par défaut du système',
-      isEditable: true,
-      updatedAt: DateTime.now().subtract(const Duration(days: 30)),
-      updatedBy: 'admin',
-    ),
-    SystemConfig(
-      id: 'cfg_002',
-      key: 'default_country',
-      value: 'Guinée',
-      category: 'general',
-      description: 'Pays par défaut du système',
-      isEditable: true,
-      updatedAt: DateTime.now().subtract(const Duration(days: 30)),
-      updatedBy: 'admin',
-    ),
-    SystemConfig(
-      id: 'cfg_003',
-      key: 'enable_2fa',
-      value: 'true',
-      category: 'security',
-      description: 'Activer l\'authentification à deux facteurs',
-      isEditable: true,
-      updatedAt: DateTime.now().subtract(const Duration(days: 30)),
-      updatedBy: 'admin',
-    ),
-    SystemConfig(
-      id: 'cfg_004',
-      key: 'max_login_attempts',
-      value: '5',
-      category: 'security',
-      description: 'Nombre maximum de tentatives de connexion',
-      isEditable: true,
-      updatedAt: DateTime.now().subtract(const Duration(days: 30)),
-      updatedBy: 'admin',
-    ),
-  ];
-
-  static void _initMockData() {
-    if (_users.isEmpty) {
-      _users.addAll(_mockUsers);
-      _counter = _users.length;
-    }
-    if (_pharmacies.isEmpty) {
-      _pharmacies.addAll(_mockPharmacies);
-    }
-    if (_configs.isEmpty) {
-      _configs.addAll(_mockConfigs);
-    }
-  }
+  SupabaseClient get _client => SupabaseService().client;
 
   // ==================== UTILISATEURS ====================
 
@@ -179,30 +19,27 @@ class AdminService {
     bool? isActive,
     bool? isVerified,
   }) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    _initMockData();
-
-    var list = _users;
-
+    var query = _client.from('admin_users').select();
     if (role != null) {
-      list = list.where((u) => u.role == role).toList();
+      query = query.eq('role', role.name);
     }
-
     if (isActive != null) {
-      list = list.where((u) => u.isActive == isActive).toList();
+      query = query.eq('is_active', isActive);
     }
-
     if (isVerified != null) {
-      list = list.where((u) => u.isVerified == isVerified).toList();
+      query = query.eq('is_verified', isVerified);
     }
-
-    return list;
+    final rows = await query;
+    return rows.map((row) => AdminUser.fromJson(row)).toList();
   }
 
   Future<AdminUser> getUser(String id) async {
-    await Future.delayed(const Duration(milliseconds: 200));
-    _initMockData();
-    return _users.firstWhere((u) => u.id == id);
+    final row = await _client
+        .from('admin_users')
+        .select()
+        .eq('id', id)
+        .single();
+    return AdminUser.fromJson(row);
   }
 
   Future<AdminUser> createUser({
@@ -215,11 +52,8 @@ class AdminService {
     String? createdBy,
     String? notes,
   }) async {
-    await Future.delayed(const Duration(seconds: 1));
-    _initMockData();
-
     final user = AdminUser(
-      id: 'au_${(++_counter).toString().padLeft(3, '0')}',
+      id: const Uuid().v4(),
       userId: userId,
       email: email,
       fullName: fullName,
@@ -233,18 +67,22 @@ class AdminService {
       notes: notes,
     );
 
-    _users.add(user);
+    final row = await _client
+        .from('admin_users')
+        .insert(user.toJson())
+        .select()
+        .single();
+    final created = AdminUser.fromJson(row);
 
-    // Log l'action
     await logAction(
       userId: createdBy ?? 'system',
       userName: 'System',
       action: 'create_user',
       resource: 'user',
-      resourceId: user.id,
+      resourceId: created.id,
     );
 
-    return user;
+    return created;
   }
 
   List<AdminPermission> _getDefaultPermissions(AdminRole role) {
@@ -301,13 +139,14 @@ class AdminService {
   }
 
   Future<AdminUser> updateUser(String id, AdminUser updated) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    _initMockData();
-
-    final index = _users.indexWhere((u) => u.id == id);
-    if (index == -1) throw Exception('User not found');
-
-    _users[index] = updated;
+    final payload = updated.toJson()..remove('id');
+    final row = await _client
+        .from('admin_users')
+        .update(payload)
+        .eq('id', id)
+        .select()
+        .single();
+    final result = AdminUser.fromJson(row);
 
     await logAction(
       userId: updated.createdBy ?? 'system',
@@ -317,7 +156,7 @@ class AdminService {
       resourceId: id,
     );
 
-    return _users[index];
+    return result;
   }
 
   Future<AdminUser> toggleUserActive(String id, bool isActive) async {
@@ -333,36 +172,36 @@ class AdminService {
   }
 
   // ==================== PHARMACIES ====================
+  // AdminPharmacy est une vue partielle de la table canonique
+  // public.pharmacies (voir supabase/migrations/20260827000400_pharmacies.sql)
+  // partagée avec les modules search/stock.
 
   Future<List<AdminPharmacy>> getPharmacies({
     PharmacyStatus? status,
     String? groupId,
     bool? isActive,
   }) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    _initMockData();
-
-    var list = _pharmacies;
-
+    var query = _client.from('pharmacies').select();
     if (status != null) {
-      list = list.where((p) => p.status == status).toList();
+      query = query.eq('status', status.name);
     }
-
     if (groupId != null) {
-      list = list.where((p) => p.groupId == groupId).toList();
+      query = query.eq('group_id', groupId);
     }
-
     if (isActive != null) {
-      list = list.where((p) => p.isActive == isActive).toList();
+      query = query.eq('is_active', isActive);
     }
-
-    return list;
+    final rows = await query;
+    return rows.map((row) => AdminPharmacy.fromJson(row)).toList();
   }
 
   Future<AdminPharmacy> getPharmacy(String id) async {
-    await Future.delayed(const Duration(milliseconds: 200));
-    _initMockData();
-    return _pharmacies.firstWhere((p) => p.id == id);
+    final row = await _client
+        .from('pharmacies')
+        .select()
+        .eq('id', id)
+        .single();
+    return AdminPharmacy.fromJson(row);
   }
 
   Future<AdminPharmacy> createPharmacy({
@@ -379,11 +218,8 @@ class AdminService {
     String? groupName,
     String? notes,
   }) async {
-    await Future.delayed(const Duration(seconds: 1));
-    _initMockData();
-
     final pharmacy = AdminPharmacy(
-      id: 'ph_${DateTime.now().millisecondsSinceEpoch}',
+      id: const Uuid().v4(),
       name: name,
       address: address,
       phone: phone,
@@ -401,27 +237,34 @@ class AdminService {
       notes: notes,
     );
 
-    _pharmacies.add(pharmacy);
+    final row = await _client
+        .from('pharmacies')
+        .insert(pharmacy.toJson())
+        .select()
+        .single();
+    final created = AdminPharmacy.fromJson(row);
 
     await logAction(
       userId: 'system',
       userName: 'System',
       action: 'create_pharmacy',
       resource: 'pharmacy',
-      resourceId: pharmacy.id,
+      resourceId: created.id,
     );
 
-    return pharmacy;
+    return created;
   }
 
   Future<AdminPharmacy> updatePharmacy(String id, AdminPharmacy updated) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    _initMockData();
-
-    final index = _pharmacies.indexWhere((p) => p.id == id);
-    if (index == -1) throw Exception('Pharmacy not found');
-
-    _pharmacies[index] = updated.copyWith(statusUpdatedAt: DateTime.now());
+    final payload = updated.copyWith(statusUpdatedAt: DateTime.now()).toJson()
+      ..remove('id');
+    final row = await _client
+        .from('pharmacies')
+        .update(payload)
+        .eq('id', id)
+        .select()
+        .single();
+    final result = AdminPharmacy.fromJson(row);
 
     await logAction(
       userId: 'system',
@@ -431,7 +274,7 @@ class AdminService {
       resourceId: id,
     );
 
-    return _pharmacies[index];
+    return result;
   }
 
   Future<AdminPharmacy> updatePharmacyStatus(
@@ -474,7 +317,7 @@ class AdminService {
     String? errorMessage,
   }) async {
     final log = AuditLog(
-      id: 'aud_${DateTime.now().millisecondsSinceEpoch}',
+      id: const Uuid().v4(),
       userId: userId,
       userName: userName,
       action: action,
@@ -488,7 +331,7 @@ class AdminService {
       errorMessage: errorMessage,
     );
 
-    _auditLogs.add(log);
+    await _client.from('audit_logs').insert(log.toJson());
   }
 
   Future<List<AuditLog>> getAuditLogs({
@@ -499,52 +342,44 @@ class AdminService {
     DateTime? toDate,
     int limit = 100,
   }) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    _initMockData();
-
-    var list = _auditLogs;
-
+    var query = _client.from('audit_logs').select();
     if (userId != null) {
-      list = list.where((l) => l.userId == userId).toList();
+      query = query.eq('user_id', userId);
     }
-
     if (resource != null) {
-      list = list.where((l) => l.resource == resource).toList();
+      query = query.eq('resource', resource);
     }
-
     if (resourceId != null) {
-      list = list.where((l) => l.resourceId == resourceId).toList();
+      query = query.eq('resource_id', resourceId);
     }
-
     if (fromDate != null) {
-      list = list.where((l) => l.timestamp.isAfter(fromDate)).toList();
+      query = query.gt('timestamp', fromDate.toIso8601String());
     }
-
     if (toDate != null) {
-      list = list.where((l) => l.timestamp.isBefore(toDate)).toList();
+      query = query.lt('timestamp', toDate.toIso8601String());
     }
-
-    list.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-    return list.take(limit).toList();
+    final rows = await query.order('timestamp', ascending: false).limit(limit);
+    return rows.map((row) => AuditLog.fromJson(row)).toList();
   }
 
   // ==================== CONFIGURATION ====================
 
   Future<List<SystemConfig>> getConfigs({String? category}) async {
-    await Future.delayed(const Duration(milliseconds: 200));
-    _initMockData();
-
-    var list = _configs;
+    var query = _client.from('system_configs').select();
     if (category != null) {
-      list = list.where((c) => c.category == category).toList();
+      query = query.eq('category', category);
     }
-    return list;
+    final rows = await query;
+    return rows.map((row) => SystemConfig.fromJson(row)).toList();
   }
 
   Future<SystemConfig> getConfig(String key) async {
-    await Future.delayed(const Duration(milliseconds: 200));
-    _initMockData();
-    return _configs.firstWhere((c) => c.key == key);
+    final row = await _client
+        .from('system_configs')
+        .select()
+        .eq('key', key)
+        .single();
+    return SystemConfig.fromJson(row);
   }
 
   Future<SystemConfig> updateConfig(
@@ -552,19 +387,17 @@ class AdminService {
     String value,
     String updatedBy,
   ) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    _initMockData();
-
-    final index = _configs.indexWhere((c) => c.key == key);
-    if (index == -1) throw Exception('Config not found');
-
-    final updated = _configs[index].copyWith(
-      value: value,
-      updatedAt: DateTime.now(),
-      updatedBy: updatedBy,
-    );
-
-    _configs[index] = updated;
+    final row = await _client
+        .from('system_configs')
+        .update({
+          'value': value,
+          'updated_at': DateTime.now().toIso8601String(),
+          'updated_by': updatedBy,
+        })
+        .eq('key', key)
+        .select()
+        .single();
+    final updated = SystemConfig.fromJson(row);
 
     await logAction(
       userId: updatedBy,
@@ -580,22 +413,23 @@ class AdminService {
   // ==================== STATISTIQUES ====================
 
   Future<Map<String, dynamic>> getStatistics() async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    _initMockData();
+    final users = await getUsers();
+    final pharmacies = await getPharmacies();
+    final auditLogs = await getAuditLogs(limit: 10000);
 
     return {
-      'totalUsers': _users.length,
-      'activeUsers': _users.where((u) => u.isActive).length,
-      'verifiedUsers': _users.where((u) => u.isVerified).length,
-      'totalPharmacies': _pharmacies.length,
-      'pendingPharmacies': _pharmacies
+      'totalUsers': users.length,
+      'activeUsers': users.where((u) => u.isActive).length,
+      'verifiedUsers': users.where((u) => u.isVerified).length,
+      'totalPharmacies': pharmacies.length,
+      'pendingPharmacies': pharmacies
           .where((p) => p.status == PharmacyStatus.pending)
           .length,
-      'activePharmacies': _pharmacies
+      'activePharmacies': pharmacies
           .where((p) => p.status == PharmacyStatus.active)
           .length,
-      'totalAuditLogs': _auditLogs.length,
-      'recentLogs': _auditLogs
+      'totalAuditLogs': auditLogs.length,
+      'recentLogs': auditLogs
           .where(
             (l) => l.timestamp.isAfter(
               DateTime.now().subtract(const Duration(days: 7)),

@@ -46,6 +46,54 @@ class AdminPharmacy {
     this.notes,
   });
 
+  factory AdminPharmacy.fromJson(Map<String, dynamic> json) => AdminPharmacy(
+    id: json['id'] as String,
+    name: json['name'] as String,
+    address: json['address'] as String,
+    phone: json['phone'] as String,
+    email: json['email'] as String? ?? '',
+    licenseNumber: json['license_number'] as String?,
+    status: PharmacyStatus.values.byName(json['status'] as String),
+    licenseExpiryDate: json['license_expiry_date'] != null
+        ? DateTime.parse(json['license_expiry_date'] as String)
+        : null,
+    managerId: json['manager_id'] as String?,
+    managerName: json['manager_name'] as String?,
+    groupId: json['group_id'] as String?,
+    latitude: (json['latitude'] as num).toDouble(),
+    longitude: (json['longitude'] as num).toDouble(),
+    isActive: json['is_active'] as bool? ?? true,
+    createdAt: DateTime.parse(json['created_at'] as String),
+    licenseVerifiedAt: json['license_verified_at'] != null
+        ? DateTime.parse(json['license_verified_at'] as String)
+        : null,
+    statusUpdatedAt: json['status_updated_at'] != null
+        ? DateTime.parse(json['status_updated_at'] as String)
+        : null,
+    notes: json['notes'] as String?,
+  );
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'name': name,
+    'address': address,
+    'phone': phone,
+    'email': email,
+    'license_number': licenseNumber,
+    'status': status.name,
+    'license_expiry_date': licenseExpiryDate?.toIso8601String(),
+    'manager_id': managerId,
+    'manager_name': managerName,
+    'group_id': groupId,
+    'latitude': latitude,
+    'longitude': longitude,
+    'is_active': isActive,
+    'created_at': createdAt.toIso8601String(),
+    'license_verified_at': licenseVerifiedAt?.toIso8601String(),
+    'status_updated_at': statusUpdatedAt?.toIso8601String(),
+    'notes': notes,
+  };
+
   AdminPharmacy copyWith({
     String? id,
     String? name,

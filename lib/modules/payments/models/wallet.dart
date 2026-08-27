@@ -23,6 +23,31 @@ class Wallet {
     required this.lastUpdated,
   });
 
+  factory Wallet.fromJson(Map<String, dynamic> json) => Wallet(
+    id: json['id'] as String,
+    userId: json['user_id'] as String,
+    balance: json['balance'] as int? ?? 0,
+    pendingBalance: json['pending_balance'] as int? ?? 0,
+    totalEarned: json['total_earned'] as int? ?? 0,
+    totalSpent: json['total_spent'] as int? ?? 0,
+    cashbackAvailable: json['cashback_available'] as int? ?? 0,
+    currency:
+        json['currency'] as String? ?? CurrencyFormatter.defaultCurrencyCode,
+    lastUpdated: DateTime.parse(json['last_updated'] as String),
+  );
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'user_id': userId,
+    'balance': balance,
+    'pending_balance': pendingBalance,
+    'total_earned': totalEarned,
+    'total_spent': totalSpent,
+    'cashback_available': cashbackAvailable,
+    'currency': currency,
+    'last_updated': lastUpdated.toIso8601String(),
+  };
+
   Wallet copyWith({
     String? id,
     String? userId,

@@ -1,119 +1,14 @@
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:uuid/uuid.dart';
 import '../models/alert.dart';
 import '../models/alert_type.dart';
 import '../models/alert_severity.dart';
 import '../models/alert_status.dart';
 import '../models/alert_preferences.dart';
-import '../../../core/utils/currency_formatter.dart';
+import '../../../core/services/supabase_service.dart';
 
 class AlertService {
-  static final List<Alert> _alerts = [];
-  static AlertPreferences _preferences = const AlertPreferences();
-
-  // ==================== DONNÉES MOCKÉES ====================
-
-  static final List<Alert> _mockAlerts = [
-    Alert(
-      id: 'alt_001',
-      type: AlertType.stockCritical,
-      severity: AlertSeverity.critical,
-      status: AlertStatus.new_,
-      title: 'Stock critique : Paracétamol 500mg',
-      message:
-          'Il ne reste que 3 unités en stock. Réapprovisionnement urgent nécessaire.',
-      actionLabel: 'Voir le stock',
-      actionRoute: '/stock',
-      referenceId: 'stock_001',
-      referenceType: 'stock_item',
-      createdAt: DateTime.now().subtract(const Duration(minutes: 5)),
-      isRead: false,
-      isActioned: false,
-    ),
-    Alert(
-      id: 'alt_002',
-      type: AlertType.expirySoon,
-      severity: AlertSeverity.warning,
-      status: AlertStatus.new_,
-      title: 'Péremption dans 7 jours',
-      message: 'Le lot #B2024-003 (Amoxicilline) expire dans 7 jours.',
-      actionLabel: 'Voir le lot',
-      actionRoute: '/stock',
-      referenceId: 'batch_003',
-      referenceType: 'batch',
-      createdAt: DateTime.now().subtract(const Duration(minutes: 15)),
-      isRead: false,
-      isActioned: false,
-    ),
-    Alert(
-      id: 'alt_003',
-      type: AlertType.reservationReady,
-      severity: AlertSeverity.success,
-      status: AlertStatus.new_,
-      title: 'Commande prête à être retirée !',
-      message: 'Votre commande #RES-001 est prête à la Pharmacie Centrale.',
-      actionLabel: 'Voir la réservation',
-      actionRoute: '/reservations/confirmation',
-      referenceId: 'res_001',
-      referenceType: 'reservation',
-      createdAt: DateTime.now().subtract(const Duration(minutes: 30)),
-      isRead: false,
-      isActioned: false,
-    ),
-    Alert(
-      id: 'alt_004',
-      type: AlertType.paymentSuccess,
-      severity: AlertSeverity.success,
-      status: AlertStatus.read,
-      title: 'Paiement effectué avec succès',
-      message:
-          'Votre paiement de ${CurrencyFormatter.format(15000)} a été confirmé.',
-      actionLabel: 'Voir la transaction',
-      actionRoute: '/transactions',
-      referenceId: 'tx_001',
-      referenceType: 'transaction',
-      createdAt: DateTime.now().subtract(const Duration(hours: 1)),
-      isRead: true,
-      isActioned: false,
-    ),
-    Alert(
-      id: 'alt_005',
-      type: AlertType.deliveryStarted,
-      severity: AlertSeverity.info,
-      status: AlertStatus.new_,
-      title: 'Votre livraison est en route !',
-      message: 'Amadou Diallo a pris en charge votre livraison.',
-      actionLabel: 'Suivre la livraison',
-      actionRoute: '/deliveries/tracking',
-      referenceId: 'del_001',
-      referenceType: 'delivery',
-      createdAt: DateTime.now().subtract(const Duration(hours: 2)),
-      isRead: false,
-      isActioned: false,
-    ),
-    Alert(
-      id: 'alt_006',
-      type: AlertType.recall,
-      severity: AlertSeverity.critical,
-      status: AlertStatus.new_,
-      title: 'Rappel de lot : Doliprane 1000mg',
-      message:
-          'Le lot #DOL-2024-001 fait l\'objet d\'un rappel pour défaut de fabrication.',
-      actionLabel: 'Voir les détails',
-      actionRoute: '/recall',
-      referenceId: 'recall_001',
-      referenceType: 'recall',
-      createdAt: DateTime.now().subtract(const Duration(hours: 3)),
-      isRead: false,
-      isActioned: false,
-    ),
-  ];
-
-  static void _initMockData() {
-    if (_alerts.isEmpty) {
-      _alerts.addAll(_mockAlerts);
-    }
-  }
-
-  // ==================== MÉTHODES ====================
+  SupabaseClient get _client => SupabaseService().client;
 
   Future<List<Alert>> getAlerts({
     AlertStatus? status,
@@ -124,123 +19,111 @@ class AlertService {
     bool unreadOnly = false,
     int limit = 50,
   }) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    _initMockData();
-
-    var list = _alerts;
+    var query = _client.from('alerts').select();
 
     if (status != null) {
-      list = list.where((a) => a.status == status).toList();
+      query = query.eq(
+        'status',
+        status == AlertStatus.new_ ? 'new' : status.name,
+      );
     }
-
     if (type != null) {
-      list = list.where((a) => a.type == type).toList();
+      query = query.eq('type', type.name);
     }
-
     if (severity != null) {
-      list = list.where((a) => a.severity == severity).toList();
+      query = query.eq('severity', severity.name);
     }
-
     if (userId != null) {
-      list = list.where((a) => a.userId == userId).toList();
+      query = query.eq('user_id', userId);
     }
-
     if (pharmacyId != null) {
-      list = list.where((a) => a.pharmacyId == pharmacyId).toList();
+      query = query.eq('pharmacy_id', pharmacyId);
     }
-
     if (unreadOnly) {
-      list = list.where((a) => !a.isRead).toList();
+      query = query.eq('is_read', false);
     }
 
-    list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    return list.take(limit).toList();
+    final rows = await query
+        .order('created_at', ascending: false)
+        .limit(limit);
+    return rows.map((row) => Alert.fromJson(row)).toList();
   }
 
   Future<Alert> getAlert(String id) async {
-    await Future.delayed(const Duration(milliseconds: 200));
-    _initMockData();
-    return _alerts.firstWhere((a) => a.id == id);
+    final row = await _client.from('alerts').select().eq('id', id).single();
+    return Alert.fromJson(row);
   }
 
   Future<int> getUnreadCount({String? userId, String? pharmacyId}) async {
-    await Future.delayed(const Duration(milliseconds: 100));
-    _initMockData();
-    var list = _alerts.where((a) => !a.isRead);
+    var query = _client.from('alerts').select().eq('is_read', false);
     if (userId != null) {
-      list = list.where((a) => a.userId == userId);
+      query = query.eq('user_id', userId);
     }
     if (pharmacyId != null) {
-      list = list.where((a) => a.pharmacyId == pharmacyId);
+      query = query.eq('pharmacy_id', pharmacyId);
     }
-    return list.length;
+    final rows = await query;
+    return rows.length;
   }
 
   Future<Alert> markAsRead(String id) async {
-    await Future.delayed(const Duration(milliseconds: 200));
-    _initMockData();
-    final index = _alerts.indexWhere((a) => a.id == id);
-    if (index == -1) throw Exception('Alert not found');
-
-    final updated = _alerts[index].copyWith(
-      status: AlertStatus.read,
-      isRead: true,
-      readAt: DateTime.now(),
-    );
-    _alerts[index] = updated;
-    return updated;
+    final row = await _client
+        .from('alerts')
+        .update({
+          'status': 'read',
+          'is_read': true,
+          'read_at': DateTime.now().toIso8601String(),
+        })
+        .eq('id', id)
+        .select()
+        .single();
+    return Alert.fromJson(row);
   }
 
   Future<List<Alert>> markAllAsRead({
     String? userId,
     String? pharmacyId,
   }) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    _initMockData();
-    final updatedAlerts = <Alert>[];
-
-    for (int i = 0; i < _alerts.length; i++) {
-      final alert = _alerts[i];
-      if (!alert.isRead) {
-        if ((userId == null || alert.userId == userId) &&
-            (pharmacyId == null || alert.pharmacyId == pharmacyId)) {
-          _alerts[i] = alert.copyWith(
-            status: AlertStatus.read,
-            isRead: true,
-            readAt: DateTime.now(),
-          );
-          updatedAlerts.add(_alerts[i]);
-        }
-      }
+    var query = _client
+        .from('alerts')
+        .update({
+          'status': 'read',
+          'is_read': true,
+          'read_at': DateTime.now().toIso8601String(),
+        })
+        .eq('is_read', false);
+    if (userId != null) {
+      query = query.eq('user_id', userId);
     }
-
-    return updatedAlerts;
+    if (pharmacyId != null) {
+      query = query.eq('pharmacy_id', pharmacyId);
+    }
+    final rows = await query.select();
+    return rows.map((row) => Alert.fromJson(row)).toList();
   }
 
   Future<Alert> dismissAlert(String id) async {
-    await Future.delayed(const Duration(milliseconds: 200));
-    _initMockData();
-    final index = _alerts.indexWhere((a) => a.id == id);
-    if (index == -1) throw Exception('Alert not found');
-
-    final updated = _alerts[index].copyWith(status: AlertStatus.dismissed);
-    _alerts[index] = updated;
-    return updated;
+    final row = await _client
+        .from('alerts')
+        .update({'status': 'dismissed'})
+        .eq('id', id)
+        .select()
+        .single();
+    return Alert.fromJson(row);
   }
 
   Future<Alert> markAsActioned(String id) async {
-    await Future.delayed(const Duration(milliseconds: 200));
-    _initMockData();
-    final index = _alerts.indexWhere((a) => a.id == id);
-    if (index == -1) throw Exception('Alert not found');
-
-    final updated = _alerts[index].copyWith(
-      status: AlertStatus.actioned,
-      isActioned: true,
-      actionedAt: DateTime.now(),
-    );
-    _alerts[index] = updated;
-    return updated;
+    final row = await _client
+        .from('alerts')
+        .update({
+          'status': 'actioned',
+          'is_actioned': true,
+          'actioned_at': DateTime.now().toIso8601String(),
+        })
+        .eq('id', id)
+        .select()
+        .single();
+    return Alert.fromJson(row);
   }
 
   // ==================== CRÉATION D'ALERTE ====================
@@ -259,11 +142,8 @@ class AlertService {
     String? pharmacyId,
     String? imageUrl,
   }) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    _initMockData();
-
     final alert = Alert(
-      id: 'alt_${DateTime.now().millisecondsSinceEpoch}',
+      id: const Uuid().v4(),
       type: type,
       severity: severity,
       status: AlertStatus.new_,
@@ -282,27 +162,29 @@ class AlertService {
       imageUrl: imageUrl,
     );
 
-    _alerts.add(alert);
+    final row = await _client
+        .from('alerts')
+        .insert(alert.toJson())
+        .select()
+        .single();
+    final created = Alert.fromJson(row);
 
     // Envoyer des notifications selon les préférences
-    await _sendNotifications(alert);
+    await _sendNotifications(created);
 
-    return alert;
+    return created;
   }
 
   Future<void> _sendNotifications(Alert alert) async {
-    // Simuler l'envoi de notifications
     // Dans la réalité, on vérifierait les préférences et on enverrait
-    // via push, email, ou in-app
-    if (_preferences.pushEnabled &&
-        _preferences.isSeverityEnabled(alert.severity)) {
-      // Envoyer une notification push
+    // via push, email, ou in-app.
+    final preferences = await getPreferences();
+    if (preferences.pushEnabled &&
+        preferences.isSeverityEnabled(alert.severity)) {
       // await NotificationService.showNotification(...);
     }
-
-    if (_preferences.emailEnabled &&
-        _preferences.isSeverityEnabled(alert.severity)) {
-      // Envoyer un email
+    if (preferences.emailEnabled &&
+        preferences.isSeverityEnabled(alert.severity)) {
       // await EmailService.sendAlertEmail(...);
     }
   }
@@ -310,13 +192,26 @@ class AlertService {
   // ==================== PRÉFÉRENCES ====================
 
   Future<AlertPreferences> getPreferences() async {
-    await Future.delayed(const Duration(milliseconds: 100));
-    return _preferences;
+    final userId = SupabaseService().currentUser?.id;
+    if (userId == null) return const AlertPreferences();
+
+    final row = await _client
+        .from('alert_preferences')
+        .select()
+        .eq('user_id', userId)
+        .maybeSingle();
+    if (row == null) return const AlertPreferences();
+    return AlertPreferences.fromJson(row);
   }
 
   Future<void> updatePreferences(AlertPreferences newPreferences) async {
-    await Future.delayed(const Duration(milliseconds: 200));
-    _preferences = newPreferences;
+    final userId = SupabaseService().currentUser?.id;
+    if (userId == null) return;
+
+    await _client.from('alert_preferences').upsert({
+      'user_id': userId,
+      ...newPreferences.toJson(),
+    });
   }
 
   // ==================== ALERTES SYSTÈME ====================

@@ -27,6 +27,22 @@ class Pharmacy {
     this.imageUrl,
   });
 
+  // isOpenNow/isOpen24h/isOnDuty/openingHours n'existent pas dans
+  // public.pharmacies (aucune notion d'horaires en base aujourd'hui) —
+  // valeurs par défaut documentées, pas une vraie source de vérité.
+  // distance est calculé côté client (LocationService), jamais lu ici.
+  factory Pharmacy.fromJson(Map<String, dynamic> json) => Pharmacy(
+    id: json['id'] as String,
+    name: json['name'] as String,
+    address: json['address'] as String,
+    phone: json['phone'] as String,
+    latitude: (json['latitude'] as num).toDouble(),
+    longitude: (json['longitude'] as num).toDouble(),
+    isOpenNow: true,
+    isOpen24h: false,
+    isOnDuty: false,
+  );
+
   Pharmacy copyWith({
     String? id,
     String? name,

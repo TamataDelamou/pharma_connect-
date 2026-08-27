@@ -10,6 +10,12 @@ import 'modules/reservations/providers/reservation_provider.dart';
 import 'modules/delivery/providers/delivery_provider.dart';
 import 'modules/payments/providers/payment_provider.dart';
 import 'modules/catalog/providers/catalog_provider.dart';
+import 'modules/admin/providers/admin_provider.dart';
+import 'modules/alerts/providers/alert_provider.dart';
+import 'modules/coldchain/providers/coldchain_provider.dart';
+import 'modules/recall/providers/recall_provider.dart';
+import 'modules/stock/providers/stock_provider.dart';
+import 'modules/traceability/providers/traceability_provider.dart';
 
 class PharmaConnectApp extends StatelessWidget {
   const PharmaConnectApp({super.key});
@@ -26,6 +32,12 @@ class PharmaConnectApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => DeliveryProvider()),
         ChangeNotifierProvider(create: (_) => PaymentProvider()),
         ChangeNotifierProvider(create: (_) => CatalogProvider()),
+        ChangeNotifierProvider(create: (_) => AdminProvider()),
+        ChangeNotifierProvider(create: (_) => AlertProvider()),
+        ChangeNotifierProvider(create: (_) => ColdChainProvider()),
+        ChangeNotifierProvider(create: (_) => RecallProvider()),
+        ChangeNotifierProvider(create: (_) => StockProvider()),
+        ChangeNotifierProvider(create: (_) => TraceabilityProvider()),
       ],
       child: MaterialApp.router(
         title: 'PharmaConnect',

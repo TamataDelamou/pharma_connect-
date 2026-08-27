@@ -32,6 +32,42 @@ class AdminUser {
     this.notes,
   });
 
+  factory AdminUser.fromJson(Map<String, dynamic> json) => AdminUser(
+    id: json['id'] as String,
+    userId: json['user_id'] as String? ?? '',
+    email: json['email'] as String,
+    fullName: json['full_name'] as String,
+    phone: json['phone'] as String?,
+    role: AdminRole.values.byName(json['role'] as String),
+    permissions: (json['permissions'] as List<dynamic>? ?? [])
+        .map((p) => AdminPermission.values.byName(p as String))
+        .toList(),
+    isActive: json['is_active'] as bool? ?? true,
+    isVerified: json['is_verified'] as bool? ?? false,
+    createdAt: DateTime.parse(json['created_at'] as String),
+    lastLoginAt: json['last_login_at'] != null
+        ? DateTime.parse(json['last_login_at'] as String)
+        : null,
+    createdBy: json['created_by'] as String?,
+    notes: json['notes'] as String?,
+  );
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'user_id': userId.isEmpty ? null : userId,
+    'email': email,
+    'full_name': fullName,
+    'phone': phone,
+    'role': role.name,
+    'permissions': permissions.map((p) => p.name).toList(),
+    'is_active': isActive,
+    'is_verified': isVerified,
+    'created_at': createdAt.toIso8601String(),
+    'last_login_at': lastLoginAt?.toIso8601String(),
+    'created_by': createdBy,
+    'notes': notes,
+  };
+
   AdminUser copyWith({
     String? id,
     String? userId,

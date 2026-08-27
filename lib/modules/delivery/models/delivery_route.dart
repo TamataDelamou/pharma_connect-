@@ -18,6 +18,28 @@ class DeliveryRoute {
     this.stops = const [],
   });
 
+  factory DeliveryRoute.fromJson(Map<String, dynamic> json) => DeliveryRoute(
+    id: json['id'] as String,
+    deliveries: (json['deliveries'] as List<dynamic>? ?? [])
+        .map((d) => Delivery.fromJson(d as Map<String, dynamic>))
+        .toList(),
+    driverId: json['driver_id'] as String,
+    date: DateTime.parse(json['date'] as String),
+    status: RouteStatus.values.byName(json['status'] as String),
+    stops: (json['stops'] as List<dynamic>? ?? [])
+        .map((s) => RouteStop.fromJson(s as Map<String, dynamic>))
+        .toList(),
+  );
+
+  // deliveries est reconstruit depuis route_stops.delivery_id, pas une
+  // colonne : jamais écrit ici.
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'driver_id': driverId,
+    'date': date.toIso8601String(),
+    'status': status.name,
+  };
+
   int get totalDeliveries => deliveries.length;
   int get completedDeliveries =>
       deliveries.where((d) => d.status == DeliveryStatus.delivered).length;
@@ -51,6 +73,27 @@ class RouteStop {
     required this.stopOrder,
     this.isCompleted = false,
   });
+
+  factory RouteStop.fromJson(Map<String, dynamic> json) => RouteStop(
+    id: json['id'] as String,
+    deliveryId: json['delivery_id'] as String,
+    latitude: (json['latitude'] as num).toDouble(),
+    longitude: (json['longitude'] as num).toDouble(),
+    address: json['address'] as String,
+    stopOrder: json['stop_order'] as int,
+    isCompleted: json['is_completed'] as bool? ?? false,
+  );
+
+  Map<String, dynamic> toJson({required String routeId}) => {
+    'id': id,
+    'route_id': routeId,
+    'delivery_id': deliveryId,
+    'latitude': latitude,
+    'longitude': longitude,
+    'address': address,
+    'stop_order': stopOrder,
+    'is_completed': isCompleted,
+  };
 }
 
 enum RouteStatus { planned, inProgress, completed, cancelled }

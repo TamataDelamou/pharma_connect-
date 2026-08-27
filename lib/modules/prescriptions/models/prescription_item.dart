@@ -27,6 +27,38 @@ class PrescriptionItem {
     this.ocrConfidence = 0.0,
   });
 
+  factory PrescriptionItem.fromJson(Map<String, dynamic> json) =>
+      PrescriptionItem(
+        id: json['id'] as String,
+        prescriptionId: json['prescription_id'] as String? ?? '',
+        medicationName: json['medication_name'] as String,
+        dosage: json['dosage'] as String,
+        frequency: json['frequency'] as String,
+        duration: json['duration'] as String,
+        quantity: json['quantity'] as int,
+        instructions: json['instructions'] as String?,
+        isSubstitutionAllowed:
+            json['is_substitution_allowed'] as bool? ?? false,
+        suggestedGenericId: json['suggested_generic_id'] as String?,
+        isExtractedByOcr: json['is_extracted_by_ocr'] as bool? ?? false,
+        ocrConfidence: (json['ocr_confidence'] as num?)?.toDouble() ?? 0.0,
+      );
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'prescription_id': prescriptionId.isEmpty ? null : prescriptionId,
+    'medication_name': medicationName,
+    'dosage': dosage,
+    'frequency': frequency,
+    'duration': duration,
+    'quantity': quantity,
+    'instructions': instructions,
+    'is_substitution_allowed': isSubstitutionAllowed,
+    'suggested_generic_id': suggestedGenericId,
+    'is_extracted_by_ocr': isExtractedByOcr,
+    'ocr_confidence': ocrConfidence,
+  };
+
   PrescriptionItem copyWith({
     String? id,
     String? prescriptionId,

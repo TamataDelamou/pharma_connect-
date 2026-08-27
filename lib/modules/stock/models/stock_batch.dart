@@ -27,6 +27,37 @@ class StockBatch {
     this.location,
   }) : purchasePrice = purchasePriceInt.toDouble();
 
+  factory StockBatch.fromJson(Map<String, dynamic> json) => StockBatch(
+    id: json['id'] as String,
+    batchNumber: json['batch_number'] as String,
+    manufacturingDate: DateTime.parse(json['manufacturing_date'] as String),
+    expiryDate: DateTime.parse(json['expiry_date'] as String),
+    quantity: json['quantity'] as int? ?? 0,
+    quantityReserved: json['quantity_reserved'] as int? ?? 0,
+    purchasePriceInt: json['purchase_price'] as int? ?? 0,
+    receivedAt: json['received_at'] != null
+        ? DateTime.parse(json['received_at'] as String)
+        : null,
+    supplierId: json['supplier_id'] as String?,
+    supplierName: json['supplier_name'] as String?,
+    location: json['location'] as String?,
+  );
+
+  Map<String, dynamic> toJson({String? stockItemId}) => {
+    'id': id,
+    if (stockItemId != null) 'stock_item_id': stockItemId,
+    'batch_number': batchNumber,
+    'manufacturing_date': manufacturingDate.toIso8601String(),
+    'expiry_date': expiryDate.toIso8601String(),
+    'quantity': quantity,
+    'quantity_reserved': quantityReserved,
+    'purchase_price': purchasePriceInt,
+    'received_at': receivedAt?.toIso8601String(),
+    'supplier_id': supplierId,
+    'supplier_name': supplierName,
+    'location': location,
+  };
+
   int get availableQuantity => quantity - quantityReserved;
   bool get isExpired => expiryDate.isBefore(DateTime.now());
   bool get isExpiringSoon =>

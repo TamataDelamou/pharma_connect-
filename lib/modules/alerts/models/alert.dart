@@ -47,6 +47,59 @@ class Alert {
     this.imageUrl,
   });
 
+  factory Alert.fromJson(Map<String, dynamic> json) {
+    final statusRaw = json['status'] as String;
+    return Alert(
+      id: json['id'] as String,
+      type: AlertType.values.byName(json['type'] as String),
+      severity: AlertSeverity.values.byName(json['severity'] as String),
+      status: statusRaw == 'new'
+          ? AlertStatus.new_
+          : AlertStatus.values.byName(statusRaw),
+      title: json['title'] as String,
+      message: json['message'] as String,
+      actionLabel: json['action_label'] as String?,
+      actionRoute: json['action_route'] as String?,
+      actionParams: json['action_params'] as Map<String, dynamic>?,
+      referenceId: json['reference_id'] as String?,
+      referenceType: json['reference_type'] as String?,
+      createdAt: DateTime.parse(json['created_at'] as String),
+      readAt: json['read_at'] != null
+          ? DateTime.parse(json['read_at'] as String)
+          : null,
+      actionedAt: json['actioned_at'] != null
+          ? DateTime.parse(json['actioned_at'] as String)
+          : null,
+      userId: json['user_id'] as String?,
+      pharmacyId: json['pharmacy_id'] as String?,
+      isRead: json['is_read'] as bool? ?? false,
+      isActioned: json['is_actioned'] as bool? ?? false,
+      imageUrl: json['image_url'] as String?,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'type': type.name,
+    'severity': severity.name,
+    'status': status == AlertStatus.new_ ? 'new' : status.name,
+    'title': title,
+    'message': message,
+    'action_label': actionLabel,
+    'action_route': actionRoute,
+    'action_params': actionParams,
+    'reference_id': referenceId,
+    'reference_type': referenceType,
+    'created_at': createdAt.toIso8601String(),
+    'read_at': readAt?.toIso8601String(),
+    'actioned_at': actionedAt?.toIso8601String(),
+    'user_id': userId,
+    'pharmacy_id': pharmacyId,
+    'is_read': isRead,
+    'is_actioned': isActioned,
+    'image_url': imageUrl,
+  };
+
   Alert copyWith({
     String? id,
     AlertType? type,

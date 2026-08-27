@@ -40,6 +40,34 @@ class StockMovement {
     this.notes,
   });
 
+  factory StockMovement.fromJson(Map<String, dynamic> json) => StockMovement(
+    id: json['id'] as String,
+    stockItemId: json['stock_item_id'] as String,
+    batchId: json['batch_id'] as String?,
+    type: StockMovementType.values.byName(json['type'] as String),
+    quantity: json['quantity'] as int,
+    timestamp: DateTime.parse(json['timestamp'] as String),
+    userId: json['user_id'] as String?,
+    userName: json['user_name'] as String?,
+    referenceId: json['reference_id'] as String?,
+    reason: json['reason'] as String?,
+    notes: json['notes'] as String?,
+  );
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'stock_item_id': stockItemId,
+    'batch_id': batchId,
+    'type': type.name,
+    'quantity': quantity,
+    'timestamp': timestamp.toIso8601String(),
+    'user_id': userId,
+    'user_name': userName,
+    'reference_id': referenceId,
+    'reason': reason,
+    'notes': notes,
+  };
+
   String get typeLabel {
     switch (type) {
       case StockMovementType.purchase:

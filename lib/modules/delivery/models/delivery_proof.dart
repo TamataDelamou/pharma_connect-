@@ -17,6 +17,27 @@ class DeliveryProof {
     this.notes,
   });
 
+  factory DeliveryProof.fromJson(Map<String, dynamic> json) => DeliveryProof(
+    signatureData: json['signature_data'] as String?,
+    imageUrl: json['image_url'] as String?,
+    confirmationCode: json['confirmation_code'] as String?,
+    timestamp: DateTime.parse(json['timestamp'] as String),
+    recipientName: json['recipient_name'] as String?,
+    recipientPhone: json['recipient_phone'] as String?,
+    notes: json['notes'] as String?,
+  );
+
+  Map<String, dynamic> toJson({required String deliveryId}) => {
+    'delivery_id': deliveryId,
+    'signature_data': signatureData,
+    'image_url': imageUrl,
+    'confirmation_code': confirmationCode,
+    'timestamp': timestamp.toIso8601String(),
+    'recipient_name': recipientName,
+    'recipient_phone': recipientPhone,
+    'notes': notes,
+  };
+
   DeliveryProof copyWith({
     String? signatureData,
     String? imageUrl,

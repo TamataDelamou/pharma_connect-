@@ -31,6 +31,40 @@ class BatchMovement {
     this.isColdChainRequired = false,
   });
 
+  factory BatchMovement.fromJson(Map<String, dynamic> json) => BatchMovement(
+    id: json['id'] as String,
+    batchId: json['batch_id'] as String,
+    type: BatchMovementType.values.byName(json['type'] as String),
+    fromLocation: json['from_location'] as String,
+    toLocation: json['to_location'] as String,
+    fromLocationType: json['from_location_type'] as String,
+    toLocationType: json['to_location_type'] as String,
+    timestamp: DateTime.parse(json['timestamp'] as String),
+    userId: json['user_id'] as String?,
+    userName: json['user_name'] as String?,
+    trackingNumber: json['tracking_number'] as String?,
+    notes: json['notes'] as String?,
+    temperature: json['temperature'] as int?,
+    isColdChainRequired: json['is_cold_chain_required'] as bool? ?? false,
+  );
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'batch_id': batchId,
+    'type': type.name,
+    'from_location': fromLocation,
+    'to_location': toLocation,
+    'from_location_type': fromLocationType,
+    'to_location_type': toLocationType,
+    'timestamp': timestamp.toIso8601String(),
+    'user_id': userId,
+    'user_name': userName,
+    'tracking_number': trackingNumber,
+    'notes': notes,
+    'temperature': temperature,
+    'is_cold_chain_required': isColdChainRequired,
+  };
+
   String get typeLabel {
     switch (type) {
       case BatchMovementType.shipment:
