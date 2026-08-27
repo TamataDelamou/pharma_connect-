@@ -78,6 +78,19 @@ Détail vivant et à jour → **`PharmaConnect_CLAUDE.md`**, sections « Mise à
 
 Détail vivant et à jour → **`PharmaConnect_CLAUDE.md`**, section « Mise à jour (27/08/2026, suite) — P0 ».
 
+### 1 quinquies. Où en est le produit — 27/08/2026, 2b (projet Supabase réel provisionné)
+
+| | |
+|---|---|
+| Projet Supabase réel | **Oui** — `qemizapoldevapmygryp.supabase.co`, créé par l'utilisateur. `supabase_service.dart` pointe désormais dessus (URL + clé anon réelles, plus de placeholders). |
+| Migrations appliquées | **15/15**, poussées via `npx supabase db push --linked --include-all` (CLI sans installation globale, `npx` suffit — pas besoin de Docker pour un projet distant). Confirmé par `npx supabase migration list --linked` : les 15 identifiants `local` et `remote` correspondent. |
+| Données | Tables vides — aucun seed chargé, hors périmètre de ce chantier. |
+| `flutter analyze` | 0 erreur, inchangé |
+| `flutter test` | **24/42, inchangé** — les 18 tests en échec pointent volontairement sur `example.supabase.co` dans leur propre `setUpAll` (isolation délibérée), donc le vrai projet ne les affecte pas ; ne pas s'attendre à ce qu'ils passent au vert pour cette raison. |
+| Chantier 2b (« configurer un vrai projet Supabase ») | **Clôturé** — dernier point Kernel/Supabase resté ouvert depuis la mise à jour précédente. |
+
+Détail vivant et à jour → **`PharmaConnect_CLAUDE.md`**, section « Mise à jour (27/08/2026, suite) — 2b ».
+
 ---
 
 ## 2. Corrections déjà appliquées — ne pas les réintroduire
