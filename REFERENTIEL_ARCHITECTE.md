@@ -100,6 +100,18 @@ Détail vivant et à jour → **`PharmaConnect_CLAUDE.md`**, section « Mise à 
 
 Détail vivant et à jour → **`PharmaConnect_CLAUDE.md`**, section « Mise à jour (27/08/2026, suite) — dernier écran placeholder implémenté ».
 
+### 1 septies. Où en est le produit — 27/08/2026, fusion des 4 branches en attente
+
+| | |
+|---|---|
+| Branches | **1** — `main` contient désormais tout le travail de `test/expand-coverage`, `feature/supabase-backend` et `chore/update-outdated-packages` (fusionnées dans cet ordre). Les branches n'ont pas été supprimées mais n'ont plus rien d'exclusif. |
+| Conflit de fusion | 1, sur `PharmaConnect_CLAUDE.md` (les deux dernières branches avaient chacune documenté le chantier paquets) — résolu en conservant le contenu le plus détaillé des deux côtés, pas en tranchant arbitrairement. |
+| `flutter analyze` | **0 erreur, 24 infos de style** — en baisse par rapport aux 64-66 documentés séparément par branche avant fusion : `flutter_lints` 3.0→6.0 (apporté par la fusion des paquets) a changé l'ensemble de règles actives, ce n'est pas une régression masquée. |
+| `flutter test` | **24/42**, inchangé après fusion — mêmes 18 échecs attendus (absence de backend réel dans les tests, isolés par construction). |
+| CI | Les trois garde-fous KER-* verts sur `main` reconstitué. |
+
+Détail vivant et à jour → **`PharmaConnect_CLAUDE.md`**, section « Mise à jour (27/08/2026, suite) — fusion des 4 branches en attente dans `main` ».
+
 ---
 
 ## 2. Corrections déjà appliquées — ne pas les réintroduire
