@@ -123,6 +123,18 @@ Détail vivant et à jour → **`PharmaConnect_CLAUDE.md`**, section « Mise à 
 
 Détail vivant et à jour → **`PharmaConnect_CLAUDE.md`**, section « Mise à jour (27/08/2026, suite) — données de départ chargées dans le projet Supabase réel ».
 
+### 1 nonies. Où en est le produit — 27/08/2026, P1 (politiques RLS d'écriture par rôle)
+
+| | |
+|---|---|
+| Rattachement utilisateur↔officine | `public.profiles.role` (déjà existant) + nouvelle colonne `profiles.pharmacy_id` — décision confirmée avec l'utilisateur (rôle sur le compte existant plutôt qu'une table de rattachement séparée). Livreurs : rattachement déjà existant via `delivery_drivers.user_id`, inchangé. |
+| Politiques RLS d'écriture | **10 nouvelles**, poussées et vérifiées sur le projet réel (`pg_policies`) : `stock_items`/`stock_batches` (staff, gestion complète), `stock_movements`/`stock_adjustments` (staff, insertion seule — journaux), `deliveries`/`delivery_routes`/`route_stops` (livreur assigné, mise à jour seule), `delivery_proofs` (livreur, insertion), `delivery_drivers` (livreur, mise à jour de son propre profil). |
+| Bug trouvé et corrigé | `public.profiles` n'était **jamais écrite par le produit** — rôle/nom saisis à l'inscription restaient en mémoire (`AuthProvider._userRole`) ou étaient carrément perdus (nom jamais transmis). Sans ce correctif, les nouvelles politiques RLS auraient été inertes. Voir §2 point 18. |
+| `flutter analyze` / `flutter test` | 0 erreur, 27 infos (+3 attendues) ; 24/42 inchangé. |
+| Non fait | Aucune UI pour assigner `profiles.pharmacy_id` (flux post-vérification de licence, hors périmètre). |
+
+Détail vivant et à jour → **`PharmaConnect_CLAUDE.md`**, section « Mise à jour (27/08/2026, suite) — P1 ».
+
 ---
 
 ## 2. Corrections déjà appliquées — ne pas les réintroduire
@@ -159,6 +171,12 @@ Le détail complet des 216 erreurs corrigées le 25/08 (216 → 0, sur 54 fichie
 17. **Méthodes stub qui ignoraient leurs paramètres** — `PaymentService.getInstallment(installmentId)` retournait des données entièrement simulées sans jamais lire `installmentId` ; `payInstallment(installmentId, paymentNumber)` ne modifiait rien et se contentait de rappeler `getInstallment()`. `TraceabilityService.getVerificationHistory(serialNumber)` retournait un historique fictif à une seule entrée, sans jamais lire `serialNumber`. Les trois implémentées pour de vrai en câblant la persistance (P0) — l'écart n'était visible qu'en lisant le corps de la méthode, aucun test ni aucun appelant ne l'aurait révélé puisque le type de retour restait cohérent.
 
 Détail complet de la session P0 (13 services convertis, ~35 modèles avec sérialisation JSON ajoutée) → `PharmaConnect_CLAUDE.md`, section « Mise à jour (27/08/2026, suite) — P0 ».
+
+**Correction du 27/08/2026, suite** — trouvée en écrivant les politiques RLS d'écriture par rôle (P1), pas en développant un nouveau module :
+
+18. **`public.profiles` jamais écrite par le produit** — `register_screen.dart` collecte nom et rôle à l'inscription, mais `auth.setRole(_selectedRole)` ne faisait que positionner un état en mémoire côté `AuthProvider` (`_userRole`), jamais persisté ; le nom saisi (`_nameController.text`) n'était même pas transmis au provider, silencieusement perdu. Aucun service n'écrivait jamais dans `profiles` malgré ses policies RLS déjà en place (`select`/`update`/`insert` own) depuis la migration `profiles` — un écart resté invisible faute d'un chantier qui dépende réellement de cette table. Trouvé en écrivant les nouvelles politiques RLS d'écriture par rôle (staff officine/livreur, P1) : sans profil persisté, ces politiques (qui lisent `profiles.role`/`profiles.pharmacy_id`) auraient été inertes pour tout le monde. Corrigé : nouveau `ProfileService.upsertProfile()`, appelé par `AuthProvider` après vérification OTP réussie (inscription **et** connexion), en best-effort pour ne pas transformer une authentification réussie en échec sur une simple panne réseau. Règle générale : une table avec des policies RLS déjà écrites n'est pas la preuve qu'elle est réellement utilisée par le produit — vérifier qu'au moins un service y écrit avant de construire dessus.
+
+Détail complet (migration, `ProfileService`, écrans modifiés) → `PharmaConnect_CLAUDE.md`, section « Mise à jour (27/08/2026, suite) — P1 ».
 
 ---
 

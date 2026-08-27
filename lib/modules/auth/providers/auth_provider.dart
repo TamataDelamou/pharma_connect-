@@ -3,10 +3,12 @@ import '../../../core/kernel/gsg_kernel_auth_bridge.dart';
 import '../../../core/services/supabase_service.dart';
 import '../../../core/utils/validators.dart';
 import '../services/auth_service.dart';
+import '../services/profile_service.dart';
 import '../models/user_role.dart';
 
 class AuthProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
+  final ProfileService _profileService = ProfileService();
   final GsgKernelAuthBridge _kernelBridge = GsgKernelAuthBridge();
 
   bool _isLoading = false;
@@ -53,7 +55,12 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> verifyPhoneOtp(String phone, String token) async {
+  Future<bool> verifyPhoneOtp(
+    String phone,
+    String token, {
+    String? fullName,
+    UserRole? role,
+  }) async {
     _setLoading(true);
     try {
       final response = await _authService.verifyPhoneOtp(phone, token);
@@ -63,6 +70,8 @@ class AuthProvider extends ChangeNotifier {
         _userPhone = user.phone;
         _isAuthenticated = true;
         _pendingIdentifier = null;
+        if (role != null) _userRole = role;
+        await _persistProfile(user.id, phone: user.phone, fullName: fullName, role: role);
         _setLoading(false);
         _bridgeToGsgKernel(user.id, response.session?.accessToken);
         return true;
@@ -96,7 +105,12 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> verifyEmailOtp(String email, String token) async {
+  Future<bool> verifyEmailOtp(
+    String email,
+    String token, {
+    String? fullName,
+    UserRole? role,
+  }) async {
     _setLoading(true);
     try {
       final response = await _authService.verifyEmailOtp(email, token);
@@ -106,6 +120,8 @@ class AuthProvider extends ChangeNotifier {
         _userEmail = user.email;
         _isAuthenticated = true;
         _pendingIdentifier = null;
+        if (role != null) _userRole = role;
+        await _persistProfile(user.id, fullName: fullName, role: role);
         _setLoading(false);
         _bridgeToGsgKernel(user.id, response.session?.accessToken);
         return true;
@@ -116,6 +132,27 @@ class AuthProvider extends ChangeNotifier {
       _error = e.toString();
       _setLoading(false);
       return false;
+    }
+  }
+
+  /// Ecriture best-effort de public.profiles : l'authentification a déjà
+  /// réussi à ce stade (id/token Supabase valides), une panne réseau ici ne
+  /// doit pas transformer une connexion réussie en échec de vérification.
+  Future<void> _persistProfile(
+    String userId, {
+    String? phone,
+    String? fullName,
+    UserRole? role,
+  }) async {
+    try {
+      await _profileService.upsertProfile(
+        id: userId,
+        phone: phone,
+        fullName: fullName,
+        role: role?.name,
+      );
+    } catch (_) {
+      // Best-effort — voir docstring ci-dessus.
     }
   }
 

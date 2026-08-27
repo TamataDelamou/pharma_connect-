@@ -259,12 +259,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       if (success && context.mounted) {
                         // On stocke les infos supplémentaires dans le provider
                         auth.setRole(_selectedRole);
-                        // On passe à l'écran OTP avec l'identifiant
+                        // On passe à l'écran OTP avec l'identifiant ; nom/rôle
+                        // ne seront écrits dans profiles qu'après vérification
+                        // réussie du code (voir AuthProvider._persistProfile).
                         context.go(
                           '/otp',
                           extra: {
                             'identifier': identifier,
                             'method': _selectedMethod,
+                            'fullName': _nameController.text.trim(),
+                            'role': _selectedRole,
                           },
                         );
                       } else if (context.mounted) {
