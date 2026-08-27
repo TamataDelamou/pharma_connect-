@@ -19,7 +19,7 @@ if [ ! -d "$MIGRATIONS_DIR" ]; then
   exit 0
 fi
 
-MATCHES=$(grep -rnPi "references\s+[a-z_][a-z0-9_]*\.(?!(${ALLOWED})\b)" \
+MATCHES=$(grep -rnPi "references\s+(?!(${ALLOWED})\.)[a-z_][a-z0-9_]*\." \
   --include="*.sql" "$MIGRATIONS_DIR" 2>/dev/null || true)
 
 if [ -n "$MATCHES" ]; then
