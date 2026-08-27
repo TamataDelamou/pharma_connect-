@@ -9,6 +9,7 @@ import '../../../core/widgets/buttons/tertiary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../../../core/widgets/inputs/glass_input.dart';
 import '../providers/auth_provider.dart';
+import '../models/user_role.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
   const OtpVerificationScreen({super.key});
@@ -24,6 +25,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
   late String _identifier;
   late String _method;
+  String? _fullName;
+  UserRole? _role;
 
   @override
   void didChangeDependencies() {
@@ -31,6 +34,10 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     final args = GoRouterState.of(context).extra as Map<String, dynamic>?;
     _identifier = args?['identifier'] ?? '';
     _method = args?['method'] ?? 'phoneSms';
+    // Présents seulement quand on vient de l'inscription (register_screen.dart) ;
+    // absents pour une simple connexion.
+    _fullName = args?['fullName'] as String?;
+    _role = args?['role'] as UserRole?;
   }
 
   @override
@@ -150,11 +157,15 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                         success = await auth.verifyPhoneOtp(
                           _identifier,
                           _otpController.text,
+                          fullName: _fullName,
+                          role: _role,
                         );
                       } else {
                         success = await auth.verifyEmailOtp(
                           _identifier,
                           _otpController.text,
+                          fullName: _fullName,
+                          role: _role,
                         );
                       }
                       if (success && context.mounted) {
