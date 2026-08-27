@@ -135,6 +135,16 @@ Détail vivant et à jour → **`PharmaConnect_CLAUDE.md`**, section « Mise à 
 
 Détail vivant et à jour → **`PharmaConnect_CLAUDE.md`**, section « Mise à jour (27/08/2026, suite) — P1 ».
 
+### 1 decies. Où en est le produit — 27/08/2026, P1 (fin) : test end-to-end reporté
+
+| | |
+|---|---|
+| Test avec un compte réel | **Bloqué**, pas par le code : SMS/WhatsApp indisponible sur le projet (`external_phone_enabled: false`), inscription par email limitée à un lien (le template ne peut pas inclure `{{ .Token }}` sur le plan gratuit Supabase avec expéditeur par défaut — `400` explicite de l'API de gestion à la tentative de correction). |
+| Corrigé quand même | `mailer_otp_length` remis à 6 sur le projet réel (était à 8, incohérent avec les 6 caractères attendus par `otp_verification_screen.dart`) — accepté par l'API, contrairement au template. |
+| Décision | Reporté (confirmé avec l'utilisateur) — pas de SMTP tiers ni d'upgrade Supabase pour l'instant. Le travail P1 (§1 nonies) reste considéré comme fait : vérification structurelle déjà faite en base, seule la vérification comportementale via compte authentifié reste ouverte. |
+
+Détail vivant et à jour → **`PharmaConnect_CLAUDE.md`**, section « Mise à jour (27/08/2026, suite) — P1 (fin) ».
+
 ---
 
 ## 2. Corrections déjà appliquées — ne pas les réintroduire
