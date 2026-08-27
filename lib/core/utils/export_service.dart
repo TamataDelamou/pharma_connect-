@@ -15,16 +15,19 @@ class ExportService {
 
     // Ajouter les en-têtes et les données
     final csvData = [headers, ...data];
-    final csv = const ListToCsvConverter().convert(csvData);
-    await file.writeAsString(csv);
+    final csvContent = csv.encode(csvData);
+    await file.writeAsString(csvContent);
 
     return filePath;
   }
 
   static Future<void> shareFile(String filePath) async {
-    await Share.shareXFiles([
-      XFile(filePath),
-    ], text: 'Export de données PharmaConnect');
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [XFile(filePath)],
+        text: 'Export de données PharmaConnect',
+      ),
+    );
   }
 
   static Future<void> exportStockReport(
