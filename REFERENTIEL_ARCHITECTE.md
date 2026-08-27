@@ -112,6 +112,17 @@ Détail vivant et à jour → **`PharmaConnect_CLAUDE.md`**, section « Mise à 
 
 Détail vivant et à jour → **`PharmaConnect_CLAUDE.md`**, section « Mise à jour (27/08/2026, suite) — fusion des 4 branches en attente dans `main` ».
 
+### 1 octies. Où en est le produit — 27/08/2026, données de départ chargées
+
+| | |
+|---|---|
+| Données | Catalogue (6 catégories, 5 fabricants, 20 médicaments), 6 officines de Conakry (1 groupe + 5 indépendantes, 1 en statut `pending`), stock croisé 6×20 (120 `stock_items` + 120 `stock_batches`). Nouveau fichier `supabase/seed.sql`, idempotent. |
+| Portée | Volontairement limitée aux tables ouvertes à `authenticated` sans dépendance utilisateur (catalogue/officines/stock). Les tables à portée personnelle (profiles, wallets, prescriptions, réservations, transactions, alertes, livraisons) restent vides, faute de compte `auth.users` réel. |
+| Bug trouvé et corrigé | Une sous-requête `LATERAL` non corrélée (`cross join lateral (select floor(random()*161)::int as qty) q`) a été hissée par le planificateur Postgres et évaluée une seule fois pour les 120 lignes au lieu d'une fois par ligne — toutes les lignes portaient la même quantité, donc le même statut (`inStock`). Corrigé en corrélant explicitement chaque `LATERAL` aux colonnes de la ligne externe (clause `where`), après confirmation de l'utilisateur pour vider et recharger les 120 lignes concernées (action destructive sur la base distante). |
+| Chargement | `npx supabase db push --include-seed` a fonctionné au premier passage mais pas au second (juste mis à jour un hash de suivi sans réexécuter le SQL après correction) — contourné en exécutant `seed.sql` directement via l'API de gestion Supabase (`POST /v1/projects/{ref}/database/query`). |
+
+Détail vivant et à jour → **`PharmaConnect_CLAUDE.md`**, section « Mise à jour (27/08/2026, suite) — données de départ chargées dans le projet Supabase réel ».
+
 ---
 
 ## 2. Corrections déjà appliquées — ne pas les réintroduire
