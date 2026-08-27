@@ -25,7 +25,7 @@ class NotificationService {
     );
 
     await _notifications.initialize(
-      settings,
+      settings: settings,
       onDidReceiveNotificationResponse: _onNotificationTap,
     );
   }
@@ -64,7 +64,13 @@ class NotificationService {
       iOS: iosDetails,
     );
 
-    await _notifications.show(id, title, body, details, payload: payload);
+    await _notifications.show(
+      id: id,
+      title: title,
+      body: body,
+      notificationDetails: details,
+      payload: payload,
+    );
   }
 
   static Future<void> showScheduledNotification({
@@ -91,20 +97,18 @@ class NotificationService {
     );
 
     await _notifications.zonedSchedule(
-      id,
-      title,
-      body,
-      tz.TZDateTime.from(scheduledTime, tz.local),
-      details,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
+      id: id,
+      title: title,
+      body: body,
+      scheduledDate: tz.TZDateTime.from(scheduledTime, tz.local),
+      notificationDetails: details,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       payload: payload,
     );
   }
 
   static Future<void> cancelNotification(int id) async {
-    await _notifications.cancel(id);
+    await _notifications.cancel(id: id);
   }
 
   static Future<void> cancelAllNotifications() async {

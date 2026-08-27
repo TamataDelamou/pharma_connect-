@@ -62,7 +62,9 @@ class LocationService {
     // Obtenir la position actuelle
     try {
       return await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.medium,
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.medium,
+        ),
       );
     } catch (_) {
       return Position(
