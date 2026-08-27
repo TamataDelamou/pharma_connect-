@@ -92,6 +92,8 @@ Un `double` sur de l'argent accumule des erreurs d'arrondi dès qu'on additionne
 
 **Plan d'action :** migrer ces champs vers `int` (GNF entier) avant la première vraie persistance Postgres — c'est un changement de type qui casse toute donnée déjà écrite, donc à faire **avant** d'écrire les premières migrations (§4.3, chantier 1), pas après. `CurrencyFormatter.format()` continue de recevoir un `num`, aucun impact côté affichage.
 
+**Résolu (27/08/2026) — constat obsolète, même écart de gouvernance qu'en §3.2 :** vérification directe du code (pas de cette liste) montre que les cinq champs ci-dessus sont déjà tous en `int` — `Transaction.amount/fee/cashback/finalAmount`, `Installment.totalAmount/amountPerPayment`, `InstallmentPayment.amount`, `Reservation.totalPrice`, `ReservationItem.pricePerUnit`, `PaymentProvider._walletBalance` — et qu'aucun champ `double` lié à un montant/prix/solde/frais ne subsiste nulle part dans `lib/`. `CurrencyFormatter.format()` accepte déjà `num`, donc `int` sans modification. Aucune trace de quand ni par qui cette migration a eu lieu (déjà relevé en §3.2 pour `validators.dart` — le même point continue de valoir : le code peut progresser sans que la documentation suive). Section conservée pour l'historique ; ne plus considérer ce point comme un chantier ouvert.
+
 ### 3.2 — Téléphones non normalisés E.164
 
 **Règle du portefeuille :** *« Téléphones stockés au format E.164. »* (`CLAUDE.md`)
@@ -117,6 +119,10 @@ Un `double` sur de l'argent accumule des erreurs d'arrondi dès qu'on additionne
 Aucun état d'erreur n'est renseigné, aucun log — l'utilisateur voit un écran qui ne se met simplement pas à jour, sans indication de ce qui s'est passé. C'est un vrai risque en usage réel (coupure réseau, erreur serveur) : rien ne distingue « en cours de chargement » de « a échoué en silence ».
 
 **Plan d'action :** aligner ces trois providers sur le patron déjà correct de `delivery_provider.dart`/`payment_provider.dart` — voir §5.1 pour la règle transverse à appliquer à tout nouveau module.
+
+**Résolu partiellement, constat partiellement obsolète (27/08/2026) :** vérification directe du code montre que `prescription_provider.dart` et `reservation_provider.dart` n'avalent déjà plus aucune erreur silencieusement — chaque `catch (e)` y positionne déjà `_error = e.toString()` suivi de `notifyListeners()`, sans trace de quand cette migration a eu lieu (même écart de gouvernance qu'en §3.2). Seul `search_provider.dart` avait un vrai reliquat, plus étendu que documenté ici : 4 `catch` silencieux (`loadSuggestions`, `loadHistory`, `clearHistory` — avec un littéral `// ignore` — et `loadProductAvailability`), pas 2. Les quatre ont été alignés sur le patron `_error = e.toString()`.
+
+Le second symptôme, plus grave que le premier — l'état `_error` était souvent renseigné dans le provider mais jamais lu par l'écran, donc invisible pour l'utilisateur malgré tout — a aussi été trouvé et corrigé : `prescription_detail_screen.dart` affichait un spinner de chargement **infini** en cas d'échec de `loadPrescription()` (jamais de sortie de l'état de chargement, `provider.error` jamais consulté) ; `prescription_list_screen.dart` et `patient_history_screen.dart` traitaient un échec réseau comme une liste vide (« Aucune ordonnance ») plutôt que comme une erreur ; `reservation_checkout_screen.dart` affichait un message d'erreur générique codé en dur au lieu du `provider.error` réel remonté par `createReservation()`. Les quatre corrigés en suivant le patron déjà en usage dans `catalog_list_screen.dart`/`stock_list_screen.dart` (état erreur dédié avec bouton Réessayer, avant l'état vide).
 
 ### 3.4 — Chantiers déjà identifiés dans `PharmaConnect_CLAUDE.md`
 
@@ -235,6 +241,8 @@ Ne pas attendre un chantier « tests » séparé en fin de projet (chantier 3 de
 ### 5.6 — CI : les trois garde-fous ne sont pas optionnels
 
 `scripts/ci/check_no_cross_schema_fk.sh` (KER-VIS-03), `scripts/ci/check_no_hardcoded_currency.sh` (KER-REF) et `scripts/ci/check_no_hardcoded_color.sh` (KER-DES-03) tournent sur chaque push/PR via `.github/workflows/kernel-compliance.yml`, avec `flutter analyze`. Tout nouveau module qui introduit une chaîne de devise ou une couleur en dur, ou une contrainte SQL inter-schémas, fait échouer la CI par construction — c'est voulu, ne pas contourner avec un `# skip`.
+
+**Correctif (27/08/2026) — `check_no_cross_schema_fk.sh` était cassé depuis sa création :** la première écriture de SQL réel dans `supabase/migrations/` (voir PharmaConnect_CLAUDE.md, mise à jour du 27/08/2026) a révélé que le script rejetait `references auth.users(id)` et `references public.categories(id)` — des références 100% légitimes. La regex vérifiait le mauvais côté du point (`references schema.TABLE` au lieu de `references SCHEMA.table`), un bug invisible tant que `supabase/migrations/` était vide (rien à analyser) et que le seul test négatif jamais fait portait sur une violation injectée, jamais sur une référence légitime au même schéma. Corrigé, revérifié positivement (silencieux sur les 15 migrations réelles) et négativement (échoue bien sur une FK injectée vers un schéma `gsg_id.*` fictif, retirée ensuite). Même leçon que celle déjà tirée en §3.6 : un garde-fou jamais exercé contre du contenu réel ne prouve rien.
 
 ---
 
