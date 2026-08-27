@@ -47,6 +47,24 @@ Ce document répond à une question différente des trois autres : **comment con
 
 Détail vivant et à jour → **`PharmaConnect_CLAUDE.md`**.
 
+### 1 ter. Où en est le produit — 27/08/2026
+
+| | |
+|---|---|
+| Modules avec code réel | 14 / 33 — inchangé depuis le 25/08, aucun nouveau module démarré cette session |
+| Écrans placeholder | **1 restant** (`PlaceholderScreen(title: 'Détail de la transaction #$id')` sur `/transactions/:id`) — sur les 17 recensés le 25/08, 8 se sont révélés déjà réels à l'audit, 9 ont été réécrits ; ce dernier n'était pas dans la liste des 17 (écran de détail, pas l'écran principal du chantier « historique »), découvert au passage |
+| Migrations Supabase | 15 fichiers dans `supabase/migrations/`, 33 tables couvrant les 14 modules avec code réel — le schéma existe désormais aussi côté SQL, pas seulement côté Dart. Aucun projet Supabase réel provisionné derrière (`supabase_service.dart` a toujours ses placeholders) — voir `PharmaConnect_CLAUDE.md`, chantier 2b |
+| Kernel GSG | Non branché — inchangé |
+| Tests | **42 tests** (1 test de démarrage + 27 unitaires dans `test/unit/providers/`, un par provider + 14 widget dans `test/widget/screens/`, un par écran principal de module) — contre 1 seul le 25/08. Voir §5.5 |
+| `flutter analyze` | 0 erreur, ~66 infos de style pré-existantes non bloquantes |
+| CI | `flutter test` fait désormais partie de `.github/workflows/kernel-compliance.yml` — les 42 tests s'exécutent réellement à chaque push/PR, pas seulement les 3 garde-fous KER-* + `flutter analyze` |
+
+Deux trouvailles significatives cette session, corrigées avant que les tests ne les masquent en échouant silencieusement ailleurs — détail complet → §2 points 14-15 et `PharmaConnect_CLAUDE.md` :
+- 6 providers sur 14 n'étaient jamais enregistrés dans le `MultiProvider` racine (`app.dart`) — un crash garanti (`ProviderNotFoundException`) sur 20 écrans de production, invisible faute de test qui construise ces écrans.
+- `recall_dashboard_screen.dart` avait un dépassement de mise en page (`RenderFlex overflowed`) et une erreur de type sur un graphique (`int` passé où `BarChartRodData.toY` exige un `double`) — les deux trouvés par le premier test widget jamais écrit pour cet écran.
+
+Détail vivant et à jour → **`PharmaConnect_CLAUDE.md`**, sections « Mise à jour (27/08/2026) ».
+
 ---
 
 ## 2. Corrections déjà appliquées — ne pas les réintroduire
@@ -71,6 +89,11 @@ Résumé condensé de l'audit du 24/08/2026 (détail complet et diffs → `code_
 13. **8 fichiers référencés, jamais créés** — 4 écrans routés depuis `app_router.dart` (`EquipmentAddScreen`, `PharmaciesManagementScreen`, `AuditLogScreen`, `SystemConfigScreen`) et 3 widgets importés par `search_screen.dart` (`SearchSkeleton`, `SearchEmptyState`, `SearchErrorState`) n'existaient sur le disque sous aucune forme. Mêmes causes, même remède qu'au point 3 : les 4 écrans utilisent `PlaceholderScreen`, les 3 widgets de recherche ont été écrits en respectant les appels déjà présents dans `search_screen.dart` (ce ne sont pas des coquilles vides, contrairement aux écrans).
 
 Le détail complet des 216 erreurs corrigées le 25/08 (216 → 0, sur 54 fichiers) → `code_export_architecte.md`, section « Rapport d'audit — 25 août 2026 ».
+
+**Corrections du 27/08/2026** — trouvées en écrivant la couverture de tests (§5.5), pas en développant un nouveau module, ce qui montre exactement pourquoi §5.5 existe :
+
+14. **Provider créé mais jamais enregistré dans `app.dart`** — un nouveau `ChangeNotifierProvider` doit être ajouté au `MultiProvider` racine de `app.dart` **au moment où le provider est créé**, pas seulement quand un écran commence à l'utiliser. `AdminProvider`, `AlertProvider`, `ColdChainProvider`, `RecallProvider`, `StockProvider` et `TraceabilityProvider` ont existé pendant toute la session du 25/08 sans jamais être enregistrés, alors que 20 écrans dans ces 6 modules appellent déjà `context.read<X>()`/`context.watch<X>()` dessus — un crash `ProviderNotFoundException` garanti à la navigation, resté invisible faute d'un seul test qui construise ces écrans. Les 6 providers manquants ont été ajoutés à `app.dart`. Voir §6, nouvel item de checklist.
+15. **Valeur de repli entière passée à une API qui exige un `double`** — `(provider.statistics['averageCompletionRate'] ?? 0) * 100` dans `recall_dashboard_screen.dart` : le littéral `0` du repli est un `int`, donc `int * int = int`, rejeté par `BarChartRodData.toY` qui exige un `double`. Se déclenchait dès que la statistique n'était pas encore chargée — un cas normal en tout début de vie de l'écran, pas un cas limite rare. Règle générale : tout repli `?? 0`/`?? 0.0` doit avoir le même type que le reste de l'expression ; si l'expression finale doit être un `double`, écrire `?? 0.0` ou caster explicitement (`.toDouble()`), jamais `?? 0` suivi d'une opération arithmétique.
 
 ---
 
@@ -126,7 +149,7 @@ Le second symptôme, plus grave que le premier — l'état `_error` était souve
 
 ### 3.4 — Chantiers déjà identifiés dans `PharmaConnect_CLAUDE.md`
 
-Rappel de ce qui y est déjà suivi (ne pas dupliquer le détail ici, s'y référer) : configurer un vrai projet Supabase, écrire les premières migrations, implémenter les écrans placeholder (17 depuis le 25/08), étoffer `test/unit/`+`test/widget/` (vides), brancher le Kernel réel, mettre à jour les paquets obsolètes (52 au 25/08).
+Rappel de ce qui y est déjà suivi (ne pas dupliquer le détail ici, s'y référer) — état au 27/08/2026, la plupart des points ci-dessous étaient encore ouverts le 25/08 : écrans placeholder (16/17 traités, voir §1 ter), premières migrations Supabase écrites (15 fichiers, §1 ter — configurer un vrai projet Supabase reste ouvert), couverture de tests étoffée (42 tests, §5.5), paquets obsolètes mis à jour (16 dépendances directes, sur une branche dédiée non encore fusionnée). Reste ouvert sans progrès cette session : brancher le Kernel réel.
 
 ### 3.5 — Régression KER-DES-03 / KER-REF dans les modules ajoutés le 25/08
 
@@ -135,6 +158,8 @@ Le point §2.9 documentait une correction de 27 couleurs littérales et le point
 **Non corrigé** dans la session du 25/08, volontairement : la substitution littéral → token demande de vérifier, couleur par couleur, quelle constante `PharmaConnectColors` correspond visuellement à chaque hex existant (ou d'en créer une nouvelle si aucune ne correspond) — un arbitrage produit, pas une opération mécanique sûre à automatiser sans revue.
 
 **Plan d'action :** avant le prochain module, traiter ces 29 occurrences avec la même méthode qu'au point §2.9 (recenser les hex uniques, les faire correspondre à un token existant ou en créer un nouveau, remplacer, laisser `check_no_hardcoded_color.sh`/`check_no_hardcoded_currency.sh` confirmer). Utiliser ce chantier comme test de la recommandation §3.6 : le faire *après* avoir initialisé git, pour que la CI existante prouve enfin qu'elle attrape quelque chose.
+
+**Résolu (26-27/08/2026) :** les 18 couleurs littérales de `traceability` (`batch_status.dart`, `traceable_batch.dart`) et celles trouvées dans 8 autres fichiers modèles (`admin_pharmacy.dart`, `alert.dart`, `cold_equipment.dart`, `cold_incident.dart`, `temperature_record.dart`, `recall.dart`, `recall_affected_batch.dart`, `recall_status.dart`, `stock_movement.dart` — 10 fichiers au total, pas seulement les 2 de `traceability`) remplacées par les tokens `PharmaConnectColors` correspondants. `check_no_hardcoded_color.sh` renforcé pour détecter aussi la forme `Colors.<nom>` (il ne couvrait auparavant que `Color(0xFF...)`), scopé sur `lib/modules/*/models/`, avec exclusion de `Colors.white/black/transparent` (204 usages structurels légitimes). Les 11 chaînes `'... GNF'` littérales n'ont pas été retrouvées lors de la vérification directe du code du 27/08 — `CurrencyFormatter` semble déjà systématiquement utilisé ; aucune trace de quand cette partie a été corrigée (même écart de gouvernance qu'en §3.2/§3.3). Les deux garde-fous CI sont verts.
 
 ### 3.6 — Absence de dépôt git : le risque le plus élevé de ce rapport
 
@@ -161,6 +186,8 @@ lib/modules/<nom_module>/
                  jamais un Color(0xFF...) littéral (§2 point 9, KER-DES-03) — c'est le point où le
                  gabarit précédent a dérivé 27 fois de suite, ne pas reproduire l'erreur une 28e fois
   providers/   → ChangeNotifier, état exposé à l'UI, _error TOUJOURS renseigné sur catch (§5.1)
+               → enregistré dans le MultiProvider de lib/app.dart AU MOMENT où il est créé, pas
+                 quand un écran commence à l'utiliser (§2 point 14) — sinon ProviderNotFoundException
   screens/     → un écran = un fichier ; enregistré dans app_router.dart SEULEMENT s'il existe déjà
   services/    → couche d'accès aux données ; mock aujourd'hui, Supabase demain — même interface publique dans les deux cas (§5.2)
   widgets/     → composants réutilisables internes au module
@@ -232,17 +259,21 @@ Tout futur appel réseau vers une brique du Kernel (Referential, Org Registry, B
 
 ### 5.5 — Tests : ce qui doit accompagner chaque nouveau module
 
-`test/unit/` et `test/widget/` sont vides aujourd'hui — un seul test protège toute l'application. Pour tout nouveau module, a minima :
-- un test unitaire par provider (au moins le chemin nominal + un chemin d'erreur, ce qui aurait immédiatement révélé le problème du §3.3) ;
-- un test widget pour l'écran principal du module.
+Pour tout nouveau module, a minima :
+- un test unitaire par provider (au moins le chemin nominal + un chemin d'erreur, ce qui aurait immédiatement révélé le problème du §3.3) — voir `test/unit/providers/*.dart` pour le patron à reproduire ;
+- un test widget pour l'écran principal du module qui construit l'écran dans son provider réel — voir `test/widget/screens/*.dart`. C'est précisément ce type de test qui aurait immédiatement révélé le crash du §2 point 14 (provider jamais enregistré dans `app.dart`).
 
-Ne pas attendre un chantier « tests » séparé en fin de projet (chantier 3 de `PharmaConnect_CLAUDE.md`) — l'écart ne fera que grandir avec 27 modules de plus.
+Ne pas attendre un chantier « tests » séparé en fin de projet — l'écart ne fera que grandir avec 20 modules de plus.
+
+**Résolu partiellement (27/08/2026) :** `test/unit/` et `test/widget/` n'étaient effectivement vides que jusqu'à cette date — 27 tests unitaires (un fichier par provider, 14/14) et 14 tests widget (un par écran principal des 14 modules avec code réel) ajoutés. Deux cas particuliers documentés plutôt que forcés à rentrer dans le patron nominal/erreur : `DashboardProvider` n'a aucun chemin d'erreur possible (données générées en pur mémoire, ne peut jamais lever d'exception) ; `AuthProvider` parle à un vrai `GoTrueClient` Supabase, donc seules ses branches synchrones/hors-réseau sont testables en unitaire sans un vrai projet Supabase. Reste ouvert : les écrans secondaires de chaque module (détail, formulaires) ne sont pas couverts, seul l'écran principal ; les 20 modules non entamés (§4.3) n'ont par construction encore rien à tester.
 
 ### 5.6 — CI : les trois garde-fous ne sont pas optionnels
 
 `scripts/ci/check_no_cross_schema_fk.sh` (KER-VIS-03), `scripts/ci/check_no_hardcoded_currency.sh` (KER-REF) et `scripts/ci/check_no_hardcoded_color.sh` (KER-DES-03) tournent sur chaque push/PR via `.github/workflows/kernel-compliance.yml`, avec `flutter analyze`. Tout nouveau module qui introduit une chaîne de devise ou une couleur en dur, ou une contrainte SQL inter-schémas, fait échouer la CI par construction — c'est voulu, ne pas contourner avec un `# skip`.
 
 **Correctif (27/08/2026) — `check_no_cross_schema_fk.sh` était cassé depuis sa création :** la première écriture de SQL réel dans `supabase/migrations/` (voir PharmaConnect_CLAUDE.md, mise à jour du 27/08/2026) a révélé que le script rejetait `references auth.users(id)` et `references public.categories(id)` — des références 100% légitimes. La regex vérifiait le mauvais côté du point (`references schema.TABLE` au lieu de `references SCHEMA.table`), un bug invisible tant que `supabase/migrations/` était vide (rien à analyser) et que le seul test négatif jamais fait portait sur une violation injectée, jamais sur une référence légitime au même schéma. Corrigé, revérifié positivement (silencieux sur les 15 migrations réelles) et négativement (échoue bien sur une FK injectée vers un schéma `gsg_id.*` fictif, retirée ensuite). Même leçon que celle déjà tirée en §3.6 : un garde-fou jamais exercé contre du contenu réel ne prouve rien.
+
+**Ajout (27/08/2026) — `flutter test` manquait du workflow CI :** `.github/workflows/kernel-compliance.yml` exécutait `flutter analyze` mais jamais `flutter test`, y compris après l'ajout des 42 tests (§5.5). Un test qui ne tourne qu'en local, jamais en CI, ne protège personne d'autre que la personne qui pense à le lancer — la même leçon que §3.6 et l'ajout ci-dessus à `check_no_cross_schema_fk.sh`, appliquée cette fois à l'absence totale d'une étape plutôt qu'à un bug dans une étape existante. Étape `flutter test` ajoutée après `flutter analyze`.
 
 ---
 
@@ -254,7 +285,7 @@ Ne pas attendre un chantier « tests » séparé en fin de projet (chantier 3 de
 3. Créer la structure `models/providers/screens/services/widgets` (§4.1).
 4. Montants en entier unité mineure dès le modèle (§3.1) — pas de `double`.
 5. Tout champ téléphone passe par la normalisation E.164 (§3.2) dès qu'elle existera dans `validators.dart`.
-6. Provider : patron d'erreur §5.1 dès la première ligne, pas en correction a posteriori.
+6. Provider : patron d'erreur §5.1 dès la première ligne, pas en correction a posteriori — et enregistré dans le `MultiProvider` de `lib/app.dart` dès sa création (§2 point 14), pas seulement quand un écran commence à l'utiliser.
 7. Service : interface publique stable mock → réel (§5.2).
 8. Tout `statusColor` (ou équivalent) retourne une constante `PharmaConnectColors`, jamais un `Color(0xFF...)` littéral (§2 point 9, KER-DES-03).
 9. Écran ajouté à `app_router.dart` **seulement** s'il existe déjà — sinon `PlaceholderScreen` explicite.
