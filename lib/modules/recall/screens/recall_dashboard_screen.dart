@@ -36,92 +36,94 @@ class _RecallDashboardScreenState extends State<RecallDashboardScreen> {
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // En-tête
-            Row(
-              children: [
-                const Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Rappels de lots',
-                        style: PharmaConnectTypography.heading1,
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Gérez les rappels de produits et suivez leur exécution',
-                        style: PharmaConnectTypography.body2,
-                      ),
-                    ],
-                  ),
-                ),
-                const KernelBadge(),
-                const SizedBox(width: 16),
-                ElevatedButton.icon(
-                  onPressed: () => context.push('/recall/create'),
-                  icon: const Icon(Icons.add),
-                  label: const Text('Nouveau rappel'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: PharmaConnectColors.accentCyan,
-                    foregroundColor: PharmaConnectColors.textOnAccent,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-
-            // Statistiques
-            if (!provider.isLoading) ...[
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // En-tête
               Row(
                 children: [
-                  _buildStatCard(
-                    label: 'Total',
-                    value:
-                        provider.statistics['totalRecalls']?.toString() ?? '0',
-                    color: PharmaConnectColors.accentCyan,
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Rappels de lots',
+                          style: PharmaConnectTypography.heading1,
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          'Gérez les rappels de produits et suivez leur exécution',
+                          style: PharmaConnectTypography.body2,
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(width: 12),
-                  _buildStatCard(
-                    label: 'Actifs',
-                    value:
-                        provider.statistics['activeRecalls']?.toString() ?? '0',
-                    color: PharmaConnectColors.accentOrange,
-                  ),
-                  const SizedBox(width: 12),
-                  _buildStatCard(
-                    label: 'Classe I',
-                    value:
-                        provider.statistics['bySeverity']?['classI']
-                            ?.toString() ??
-                        '0',
-                    color: PharmaConnectColors.accentRed,
-                  ),
-                  const SizedBox(width: 12),
-                  _buildStatCard(
-                    label: 'Taux de rappel',
-                    value:
-                        '${((provider.statistics['averageCompletionRate'] ?? 0) * 100).toStringAsFixed(0)}%',
-                    color: PharmaConnectColors.accentGreen,
+                  const KernelBadge(),
+                  const SizedBox(width: 16),
+                  ElevatedButton.icon(
+                    onPressed: () => context.push('/recall/create'),
+                    icon: const Icon(Icons.add),
+                    label: const Text('Nouveau rappel'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: PharmaConnectColors.accentCyan,
+                      foregroundColor: PharmaConnectColors.textOnAccent,
+                    ),
                   ),
                 ],
               ),
+              const SizedBox(height: 24),
+
+              // Statistiques
+              if (!provider.isLoading) ...[
+                Row(
+                  children: [
+                    _buildStatCard(
+                      label: 'Total',
+                      value:
+                          provider.statistics['totalRecalls']?.toString() ??
+                          '0',
+                      color: PharmaConnectColors.accentCyan,
+                    ),
+                    const SizedBox(width: 12),
+                    _buildStatCard(
+                      label: 'Actifs',
+                      value:
+                          provider.statistics['activeRecalls']?.toString() ??
+                          '0',
+                      color: PharmaConnectColors.accentOrange,
+                    ),
+                    const SizedBox(width: 12),
+                    _buildStatCard(
+                      label: 'Classe I',
+                      value:
+                          provider.statistics['bySeverity']?['classI']
+                              ?.toString() ??
+                          '0',
+                      color: PharmaConnectColors.accentRed,
+                    ),
+                    const SizedBox(width: 12),
+                    _buildStatCard(
+                      label: 'Taux de rappel',
+                      value:
+                          '${((provider.statistics['averageCompletionRate'] ?? 0) * 100).toStringAsFixed(0)}%',
+                      color: PharmaConnectColors.accentGreen,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // Graphiques
+                _buildCharts(provider),
+                const SizedBox(height: 16),
+              ],
+
+              // Filtres
+              const RecallFilterChips(),
               const SizedBox(height: 16),
 
-              // Graphiques
-              _buildCharts(provider),
-              const SizedBox(height: 16),
-            ],
-
-            // Filtres
-            const RecallFilterChips(),
-            const SizedBox(height: 16),
-
-            // Liste
-            Expanded(
-              child: provider.isLoading
+              // Liste
+              provider.isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : provider.recalls.isEmpty
                   ? const Center(
@@ -147,6 +149,8 @@ class _RecallDashboardScreenState extends State<RecallDashboardScreen> {
                       ),
                     )
                   : ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
                       itemCount: provider.recalls.length,
                       itemBuilder: (context, index) {
                         final recall = provider.recalls[index];
@@ -161,8 +165,8 @@ class _RecallDashboardScreenState extends State<RecallDashboardScreen> {
                         );
                       },
                     ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -300,10 +304,11 @@ class _RecallDashboardScreenState extends State<RecallDashboardScreen> {
                           barRods: [
                             BarChartRodData(
                               toY:
-                                  (provider
-                                          .statistics['averageCompletionRate'] ??
-                                      0) *
-                                  100,
+                                  (((provider.statistics['averageCompletionRate']
+                                                  as num?) ??
+                                              0) *
+                                          100)
+                                      .toDouble(),
                               color: PharmaConnectColors.accentCyan,
                               width: 20,
                               borderRadius: BorderRadius.circular(4),
