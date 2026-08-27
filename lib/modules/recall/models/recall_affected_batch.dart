@@ -31,6 +31,39 @@ class RecallAffectedBatch {
     this.notes,
   });
 
+  factory RecallAffectedBatch.fromJson(Map<String, dynamic> json) =>
+      RecallAffectedBatch(
+        id: json['id'] as String,
+        recallId: json['recall_id'] as String? ?? '',
+        batchId: json['batch_id'] as String? ?? '',
+        batchNumber: json['batch_number'] as String,
+        productName: json['product_name'] as String,
+        productId: json['product_id'] as String? ?? '',
+        totalUnits: json['total_units'] as int? ?? 0,
+        unitsRecalled: json['units_recalled'] as int? ?? 0,
+        unitsReturned: json['units_returned'] as int? ?? 0,
+        unitsDestroyed: json['units_destroyed'] as int? ?? 0,
+        status: BatchRecallStatus.values.byName(json['status'] as String),
+        notes: json['notes'] as String?,
+      );
+
+  // batch_id/product_id sont des FK uuid nullable (traceable_batches,
+  // products) : omises si la valeur fournie n'est pas un id réel connu.
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'recall_id': recallId.isEmpty ? null : recallId,
+    'batch_id': batchId.isEmpty ? null : batchId,
+    'batch_number': batchNumber,
+    'product_name': productName,
+    'product_id': productId.isEmpty ? null : productId,
+    'total_units': totalUnits,
+    'units_recalled': unitsRecalled,
+    'units_returned': unitsReturned,
+    'units_destroyed': unitsDestroyed,
+    'status': status.name,
+    'notes': notes,
+  };
+
   RecallAffectedBatch copyWith({
     String? id,
     String? recallId,

@@ -37,6 +37,46 @@ class Prescription {
     this.ocrConfidenceScore,
   });
 
+  factory Prescription.fromJson(Map<String, dynamic> json) => Prescription(
+    id: json['id'] as String,
+    patientId: json['patient_id'] as String? ?? '',
+    patientName: json['patient_name'] as String,
+    doctorName: json['doctor_name'] as String?,
+    doctorLicense: json['doctor_license'] as String?,
+    uploadedAt: DateTime.parse(json['uploaded_at'] as String),
+    validatedAt: json['validated_at'] != null
+        ? DateTime.parse(json['validated_at'] as String)
+        : null,
+    dispensedAt: json['dispensed_at'] != null
+        ? DateTime.parse(json['dispensed_at'] as String)
+        : null,
+    status: PrescriptionStatus.values.byName(json['status'] as String),
+    imageUrl: json['image_url'] as String,
+    ocrData: json['ocr_data'] as Map<String, dynamic>?,
+    notes: json['notes'] as String?,
+    items: (json['prescription_items'] as List<dynamic>? ?? [])
+        .map((i) => PrescriptionItem.fromJson(i as Map<String, dynamic>))
+        .toList(),
+    ocrConfidenceScore: (json['ocr_confidence_score'] as num?)?.toDouble(),
+  );
+
+  // items n'est jamais écrit ici : prescription_items est une table séparée.
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'patient_id': patientId.isEmpty ? null : patientId,
+    'patient_name': patientName,
+    'doctor_name': doctorName,
+    'doctor_license': doctorLicense,
+    'uploaded_at': uploadedAt.toIso8601String(),
+    'validated_at': validatedAt?.toIso8601String(),
+    'dispensed_at': dispensedAt?.toIso8601String(),
+    'status': status.name,
+    'image_url': imageUrl,
+    'ocr_data': ocrData,
+    'notes': notes,
+    'ocr_confidence_score': ocrConfidenceScore,
+  };
+
   Prescription copyWith({
     String? id,
     String? patientId,

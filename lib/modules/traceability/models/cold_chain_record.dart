@@ -23,6 +23,33 @@ class ColdChainRecord {
     this.breachReason,
   });
 
+  factory ColdChainRecord.fromJson(Map<String, dynamic> json) =>
+      ColdChainRecord(
+        id: json['id'] as String,
+        batchId: json['batch_id'] as String,
+        timestamp: DateTime.parse(json['timestamp'] as String),
+        temperature: (json['temperature'] as num).toDouble(),
+        minTemperature: (json['min_temperature'] as num).toDouble(),
+        maxTemperature: (json['max_temperature'] as num).toDouble(),
+        location: json['location'] as String?,
+        deviceId: json['device_id'] as String?,
+        isBreach: json['is_breach'] as bool? ?? false,
+        breachReason: json['breach_reason'] as String?,
+      );
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'batch_id': batchId,
+    'timestamp': timestamp.toIso8601String(),
+    'temperature': temperature,
+    'min_temperature': minTemperature,
+    'max_temperature': maxTemperature,
+    'location': location,
+    'device_id': deviceId,
+    'is_breach': isBreach,
+    'breach_reason': breachReason,
+  };
+
   bool get isWithinRange =>
       temperature >= minTemperature && temperature <= maxTemperature;
 

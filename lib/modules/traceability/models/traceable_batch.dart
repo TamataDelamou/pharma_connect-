@@ -56,6 +56,67 @@ class TraceableBatch {
     this.notes,
   });
 
+  factory TraceableBatch.fromJson(Map<String, dynamic> json) => TraceableBatch(
+    id: json['id'] as String,
+    productId: json['product_id'] as String? ?? '',
+    productName: json['product_name'] as String,
+    batchNumber: json['batch_number'] as String,
+    serialNumber: json['serial_number'] as String,
+    gtin: json['gtin'] as String,
+    manufacturingDate: DateTime.parse(json['manufacturing_date'] as String),
+    expiryDate: DateTime.parse(json['expiry_date'] as String),
+    status: BatchStatus.values.byName(json['status'] as String),
+    manufacturer: json['manufacturer'] as String,
+    manufacturerId: json['manufacturer_id'] as String? ?? '',
+    distributor: json['distributor'] as String? ?? '',
+    distributorId: json['distributor_id'] as String? ?? '',
+    movements: (json['batch_movements'] as List<dynamic>? ?? [])
+        .map((m) => BatchMovement.fromJson(m as Map<String, dynamic>))
+        .toList(),
+    coldChainRecords: (json['cold_chain_records'] as List<dynamic>? ?? [])
+        .map((c) => ColdChainRecord.fromJson(c as Map<String, dynamic>))
+        .toList(),
+    certificates: (json['certificates'] as List<dynamic>? ?? [])
+        .map((c) => Certificate.fromJson(c as Map<String, dynamic>))
+        .toList(),
+    isAuthenticated: json['is_authenticated'] as bool? ?? false,
+    isCounterfeit: json['is_counterfeit'] as bool? ?? false,
+    lastVerifiedAt: json['last_verified_at'] != null
+        ? DateTime.parse(json['last_verified_at'] as String)
+        : null,
+    isRecalled: json['is_recalled'] as bool? ?? false,
+    recalledAt: json['recalled_at'] != null
+        ? DateTime.parse(json['recalled_at'] as String)
+        : null,
+    recallReason: json['recall_reason'] as String?,
+    notes: json['notes'] as String?,
+  );
+
+  // movements/coldChainRecords/certificates ne sont jamais écrits ici : ce
+  // sont des tables séparées, gérées indépendamment par TraceabilityService.
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'product_id': productId.isEmpty ? null : productId,
+    'product_name': productName,
+    'batch_number': batchNumber,
+    'serial_number': serialNumber,
+    'gtin': gtin,
+    'manufacturing_date': manufacturingDate.toIso8601String(),
+    'expiry_date': expiryDate.toIso8601String(),
+    'status': status.name,
+    'manufacturer': manufacturer,
+    'manufacturer_id': manufacturerId.isEmpty ? null : manufacturerId,
+    'distributor': distributor.isEmpty ? null : distributor,
+    'distributor_id': distributorId.isEmpty ? null : distributorId,
+    'is_authenticated': isAuthenticated,
+    'is_counterfeit': isCounterfeit,
+    'last_verified_at': lastVerifiedAt?.toIso8601String(),
+    'is_recalled': isRecalled,
+    'recalled_at': recalledAt?.toIso8601String(),
+    'recall_reason': recallReason,
+    'notes': notes,
+  };
+
   TraceableBatch copyWith({
     String? id,
     String? productId,

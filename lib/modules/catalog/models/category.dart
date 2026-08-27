@@ -4,4 +4,10 @@ class Category {
   final String icon; // Code emoji ou nom d'icône
 
   const Category({required this.id, required this.name, required this.icon});
+
+  factory Category.fromJson(Map<String, dynamic> json) => Category(
+    id: json['id'] as String,
+    name: json['name'] as String,
+    icon: json['icon'] as String,
+  );
 }

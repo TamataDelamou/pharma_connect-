@@ -40,6 +40,48 @@ class ColdIncident {
     this.affectedProducts,
   });
 
+  factory ColdIncident.fromJson(Map<String, dynamic> json) => ColdIncident(
+    id: json['id'] as String,
+    equipmentId: json['equipment_id'] as String,
+    equipmentName: json['equipment_name'] as String,
+    batchId: json['batch_id'] as String? ?? 'unknown',
+    batchNumber: json['batch_number'] as String? ?? 'unknown',
+    productName: json['product_name'] as String? ?? 'Produit inconnu',
+    occurredAt: DateTime.parse(json['occurred_at'] as String),
+    resolvedAt: json['resolved_at'] != null
+        ? DateTime.parse(json['resolved_at'] as String)
+        : null,
+    temperatureRecorded: (json['temperature_recorded'] as num).toDouble(),
+    minTemperature: (json['min_temperature'] as num).toDouble(),
+    maxTemperature: (json['max_temperature'] as num).toDouble(),
+    severity: IncidentSeverity.values.byName(json['severity'] as String),
+    resolutionNotes: json['resolution_notes'] as String?,
+    reportedBy: json['reported_by'] as String?,
+    isResolved: json['is_resolved'] as bool? ?? false,
+    affectedProducts: json['affected_products'] as String?,
+  );
+
+  // batch_id est une FK uuid vers traceable_batches : le littéral 'unknown'
+  // utilisé quand aucun lot n'est identifié n'est pas un uuid valide.
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'equipment_id': equipmentId,
+    'equipment_name': equipmentName,
+    'batch_id': batchId == 'unknown' ? null : batchId,
+    'batch_number': batchNumber == 'unknown' ? null : batchNumber,
+    'product_name': productName,
+    'occurred_at': occurredAt.toIso8601String(),
+    'resolved_at': resolvedAt?.toIso8601String(),
+    'temperature_recorded': temperatureRecorded,
+    'min_temperature': minTemperature,
+    'max_temperature': maxTemperature,
+    'severity': severity.name,
+    'resolution_notes': resolutionNotes,
+    'reported_by': reportedBy,
+    'is_resolved': isResolved,
+    'affected_products': affectedProducts,
+  };
+
   ColdIncident copyWith({
     String? id,
     String? equipmentId,

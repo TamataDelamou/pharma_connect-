@@ -29,6 +29,35 @@ class TemperatureRecord {
     this.alertId,
   });
 
+  factory TemperatureRecord.fromJson(Map<String, dynamic> json) =>
+      TemperatureRecord(
+        id: json['id'] as String,
+        equipmentId: json['equipment_id'] as String,
+        temperature: (json['temperature'] as num).toDouble(),
+        minTemperature: (json['min_temperature'] as num?)?.toDouble(),
+        maxTemperature: (json['max_temperature'] as num?)?.toDouble(),
+        timestamp: DateTime.parse(json['timestamp'] as String),
+        type: RecordType.values.byName(json['type'] as String),
+        recordedBy: json['recorded_by'] as String?,
+        notes: json['notes'] as String?,
+        isAlert: json['is_alert'] as bool? ?? false,
+        alertId: json['alert_id'] as String?,
+      );
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'equipment_id': equipmentId,
+    'temperature': temperature,
+    'min_temperature': minTemperature,
+    'max_temperature': maxTemperature,
+    'timestamp': timestamp.toIso8601String(),
+    'type': type.name,
+    'recorded_by': recordedBy,
+    'notes': notes,
+    'is_alert': isAlert,
+    'alert_id': alertId,
+  };
+
   TemperatureRecord copyWith({
     String? id,
     String? equipmentId,

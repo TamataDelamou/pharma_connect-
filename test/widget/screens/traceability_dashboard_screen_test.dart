@@ -1,11 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:provider/provider.dart';
 
 import 'package:pharma_connect/modules/traceability/providers/traceability_provider.dart';
 import 'package:pharma_connect/modules/traceability/screens/traceability_dashboard_screen.dart';
 
 void main() {
+  setUpAll(() async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    SharedPreferences.setMockInitialValues({});
+    await Supabase.initialize(
+      url: 'https://example.supabase.co',
+      publishableKey: 'test-anon-key',
+    );
+  });
+
   testWidgets(
     'TraceabilityDashboardScreen se construit avec TraceabilityProvider sans exception',
     (tester) async {

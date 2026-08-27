@@ -40,6 +40,54 @@ class Invoice {
     required this.status,
     this.pdfUrl,
   });
+
+  factory Invoice.fromJson(Map<String, dynamic> json) => Invoice(
+    id: json['id'] as String,
+    transactionId: json['transaction_id'] as String,
+    invoiceNumber: json['invoice_number'] as String,
+    pharmacyName: json['pharmacy_name'] as String,
+    pharmacyAddress: json['pharmacy_address'] as String,
+    pharmacyPhone: json['pharmacy_phone'] as String,
+    patientName: json['patient_name'] as String,
+    patientAddress: json['patient_address'] as String? ?? '',
+    patientPhone: json['patient_phone'] as String,
+    patientEmail: json['patient_email'] as String? ?? '',
+    issuedAt: DateTime.parse(json['issued_at'] as String),
+    dueDate: json['due_date'] != null
+        ? DateTime.parse(json['due_date'] as String)
+        : null,
+    items: (json['invoice_items'] as List<dynamic>? ?? [])
+        .map((i) => InvoiceItem.fromJson(i as Map<String, dynamic>))
+        .toList(),
+    subtotal: json['subtotal'] as int,
+    tax: json['tax'] as int? ?? 0,
+    discount: json['discount'] as int? ?? 0,
+    total: json['total'] as int,
+    status: json['status'] as String,
+    pdfUrl: json['pdf_url'] as String?,
+  );
+
+  // items n'est jamais écrit ici : invoice_items est une table séparée.
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'transaction_id': transactionId,
+    'invoice_number': invoiceNumber,
+    'pharmacy_name': pharmacyName,
+    'pharmacy_address': pharmacyAddress,
+    'pharmacy_phone': pharmacyPhone,
+    'patient_name': patientName,
+    'patient_address': patientAddress,
+    'patient_phone': patientPhone,
+    'patient_email': patientEmail,
+    'issued_at': issuedAt.toIso8601String(),
+    'due_date': dueDate?.toIso8601String(),
+    'subtotal': subtotal,
+    'tax': tax,
+    'discount': discount,
+    'total': total,
+    'status': status,
+    'pdf_url': pdfUrl,
+  };
 }
 
 class InvoiceItem {
@@ -58,4 +106,23 @@ class InvoiceItem {
     required this.total,
     this.dosage,
   });
+
+  factory InvoiceItem.fromJson(Map<String, dynamic> json) => InvoiceItem(
+    id: json['id'] as String,
+    productName: json['product_name'] as String,
+    quantity: json['quantity'] as int,
+    unitPrice: json['unit_price'] as int,
+    total: json['total'] as int,
+    dosage: json['dosage'] as String?,
+  );
+
+  Map<String, dynamic> toJson({required String invoiceId}) => {
+    'id': id,
+    'invoice_id': invoiceId,
+    'product_name': productName,
+    'quantity': quantity,
+    'unit_price': unitPrice,
+    'total': total,
+    'dosage': dosage,
+  };
 }

@@ -46,6 +46,7 @@ dependencies:
 
   # SUPABASE
   supabase_flutter: ^2.0.0
+  uuid: ^4.4.0
 
   # SCAN & CAMÉRA (QR Code réservations + OCR)
   mobile_scanner: ^3.5.0

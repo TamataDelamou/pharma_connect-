@@ -25,6 +25,24 @@ class Product {
     this.description,
   });
 
+  factory Product.fromJson(Map<String, dynamic> json) {
+    final category = json['category'] as Map<String, dynamic>?;
+    final manufacturer = json['manufacturer'] as Map<String, dynamic>?;
+    return Product(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      genericName: json['generic_name'] as String,
+      dosage: json['dosage'] as String,
+      form: json['form'] as String,
+      category: category?['name'] as String? ?? '',
+      imageUrl: json['image_url'] as String? ?? '',
+      isGeneric: json['is_generic'] as bool? ?? false,
+      manufacturer: manufacturer?['name'] as String? ?? '',
+      isPrescriptionRequired: json['is_prescription_required'] as bool? ?? false,
+      description: json['description'] as String?,
+    );
+  }
+
   Product copyWith({
     String? id,
     String? name,

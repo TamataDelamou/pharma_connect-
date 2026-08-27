@@ -58,6 +58,76 @@ class Reservation {
     this.estimatedWaitMinutes,
   });
 
+  factory Reservation.fromJson(Map<String, dynamic> json) => Reservation(
+    id: json['id'] as String,
+    patientId: json['patient_id'] as String? ?? '',
+    patientName: json['patient_name'] as String,
+    patientPhone: json['patient_phone'] as String,
+    patientEmail: json['patient_email'] as String?,
+    pharmacyId: json['pharmacy_id'] as String,
+    pharmacyName: json['pharmacy_name'] as String,
+    pharmacyAddress: json['pharmacy_address'] as String,
+    pharmacyPhone: json['pharmacy_phone'] as String?,
+    items: (json['reservation_items'] as List<dynamic>? ?? [])
+        .map((i) => ReservationItem.fromJson(i as Map<String, dynamic>))
+        .toList(),
+    reservedAt: DateTime.parse(json['reserved_at'] as String),
+    pickupTime: json['pickup_time'] != null
+        ? DateTime.parse(json['pickup_time'] as String)
+        : null,
+    pickupDeadline: json['pickup_deadline'] != null
+        ? DateTime.parse(json['pickup_deadline'] as String)
+        : null,
+    confirmedAt: json['confirmed_at'] != null
+        ? DateTime.parse(json['confirmed_at'] as String)
+        : null,
+    readyAt: json['ready_at'] != null
+        ? DateTime.parse(json['ready_at'] as String)
+        : null,
+    pickedUpAt: json['picked_up_at'] != null
+        ? DateTime.parse(json['picked_up_at'] as String)
+        : null,
+    cancelledAt: json['cancelled_at'] != null
+        ? DateTime.parse(json['cancelled_at'] as String)
+        : null,
+    status: ReservationStatus.values.byName(json['status'] as String),
+    totalPrice: json['total_price'] as int? ?? 0,
+    qrCodeToken: json['qr_code_token'] as String?,
+    notes: json['notes'] as String?,
+    deliveryAddress: json['delivery_address'] as String?,
+    paymentMethod: json['payment_method'] as String?,
+    queuePosition: json['queue_position'] as int?,
+    estimatedWaitMinutes: json['estimated_wait_minutes'] as int?,
+  );
+
+  // items n'est jamais écrit ici : reservation_items est une table séparée.
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'patient_id': patientId.isEmpty ? null : patientId,
+    'patient_name': patientName,
+    'patient_phone': patientPhone,
+    'patient_email': patientEmail,
+    'pharmacy_id': pharmacyId,
+    'pharmacy_name': pharmacyName,
+    'pharmacy_address': pharmacyAddress,
+    'pharmacy_phone': pharmacyPhone,
+    'reserved_at': reservedAt.toIso8601String(),
+    'pickup_time': pickupTime?.toIso8601String(),
+    'pickup_deadline': pickupDeadline?.toIso8601String(),
+    'confirmed_at': confirmedAt?.toIso8601String(),
+    'ready_at': readyAt?.toIso8601String(),
+    'picked_up_at': pickedUpAt?.toIso8601String(),
+    'cancelled_at': cancelledAt?.toIso8601String(),
+    'status': status.name,
+    'total_price': totalPrice,
+    'qr_code_token': qrCodeToken,
+    'notes': notes,
+    'delivery_address': deliveryAddress,
+    'payment_method': paymentMethod,
+    'queue_position': queuePosition,
+    'estimated_wait_minutes': estimatedWaitMinutes,
+  };
+
   Reservation copyWith({
     String? id,
     String? patientId,
