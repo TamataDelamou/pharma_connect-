@@ -50,6 +50,16 @@ class PatientHistoryScreen extends StatelessWidget {
             Expanded(
               child: provider.isLoading
                   ? const Center(child: CircularProgressIndicator())
+                  : provider.error != null
+                  ? Center(
+                      child: Text(
+                        'Erreur : ${provider.error}',
+                        style: PharmaConnectTypography.body2.copyWith(
+                          color: PharmaConnectColors.accentRed,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    )
                   : provider.prescriptions.isEmpty
                   ? const Center(
                       child: Column(

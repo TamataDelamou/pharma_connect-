@@ -102,6 +102,7 @@ class SearchProvider extends ChangeNotifier {
     } catch (e) {
       _suggestions = [];
       _showSuggestions = false;
+      _error = e.toString();
     }
     notifyListeners();
   }
@@ -149,6 +150,7 @@ class SearchProvider extends ChangeNotifier {
       _searchHistory = await _service.getSearchHistory();
     } catch (e) {
       _searchHistory = [];
+      _error = e.toString();
     }
     notifyListeners();
   }
@@ -157,10 +159,10 @@ class SearchProvider extends ChangeNotifier {
     try {
       await _service.clearHistory();
       _searchHistory = [];
-      notifyListeners();
     } catch (e) {
-      // ignore
+      _error = e.toString();
     }
+    notifyListeners();
   }
 
   // ==================== CODE-BARRES ====================
@@ -210,6 +212,7 @@ class SearchProvider extends ChangeNotifier {
       );
     } catch (e) {
       _selectedProductAvailability = null;
+      _error = e.toString();
     }
     notifyListeners();
   }

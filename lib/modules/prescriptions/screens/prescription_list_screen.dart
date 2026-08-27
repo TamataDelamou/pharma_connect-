@@ -125,7 +125,31 @@ class _PrescriptionListScreenState extends State<PrescriptionListScreen>
 
             // Liste des ordonnances
             Expanded(
-              child: provider.prescriptions.isEmpty
+              child: provider.isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : provider.error != null
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Erreur : ${provider.error}',
+                            style: PharmaConnectTypography.body2.copyWith(
+                              color: PharmaConnectColors.accentRed,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () => provider.loadPrescriptions(
+                              status: _selectedStatus,
+                            ),
+                            child: const Text('Réessayer'),
+                          ),
+                        ],
+                      ),
+                    )
+                  : provider.prescriptions.isEmpty
                   ? const Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,

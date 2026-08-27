@@ -36,6 +36,34 @@ class _PrescriptionDetailScreenState extends State<PrescriptionDetailScreen> {
     final provider = context.watch<PrescriptionProvider>();
     final prescription = provider.selectedPrescription;
 
+    if (prescription == null && provider.error != null) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Text(
+                  'Erreur : ${provider.error}',
+                  style: PharmaConnectTypography.body2.copyWith(
+                    color: PharmaConnectColors.accentRed,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => context.read<PrescriptionProvider>()
+                    .loadPrescription(widget.prescriptionId),
+                child: const Text('Réessayer'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     if (prescription == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }

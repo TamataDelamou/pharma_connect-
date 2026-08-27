@@ -391,9 +391,10 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
                             });
                           } else if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
+                              SnackBar(
                                 content: Text(
-                                  'Erreur lors de la création de la commande',
+                                  provider.error ??
+                                      'Erreur lors de la création de la commande',
                                 ),
                                 backgroundColor: PharmaConnectColors.accentRed,
                               ),
