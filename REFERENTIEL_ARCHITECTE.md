@@ -91,6 +91,15 @@ Détail vivant et à jour → **`PharmaConnect_CLAUDE.md`**, section « Mise à 
 
 Détail vivant et à jour → **`PharmaConnect_CLAUDE.md`**, section « Mise à jour (27/08/2026, suite) — 2b ».
 
+### 1 sexies. Où en est le produit — 27/08/2026, dernier écran placeholder résolu
+
+| | |
+|---|---|
+| Écrans placeholder | **0** — `TransactionDetailScreen` remplace `PlaceholderScreen` sur `/transactions/:id`, branché sur `PaymentProvider.loadTransaction()` déjà existant. Plus aucune référence à `PlaceholderScreen` dans `app_router.dart`, son import y a été retiré. |
+| `flutter analyze` / `flutter test` | Inchangés (0 erreur ; 24/42, mêmes 18 échecs attendus documentés en 1 quinquies) |
+
+Détail vivant et à jour → **`PharmaConnect_CLAUDE.md`**, section « Mise à jour (27/08/2026, suite) — dernier écran placeholder implémenté ».
+
 ---
 
 ## 2. Corrections déjà appliquées — ne pas les réintroduire

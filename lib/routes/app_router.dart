@@ -1,7 +1,6 @@
 import 'package:go_router/go_router.dart';
 
 import '../core/services/supabase_service.dart';
-import '../core/widgets/screens/placeholder_screen.dart';
 // Alerts
 import '../modules/alerts/screens/alert_center_screen.dart';
 import '../modules/alerts/screens/alert_preferences_screen.dart';
@@ -26,6 +25,7 @@ import '../modules/payments/screens/installment_plan_screen.dart';
 // Payments
 import '../modules/payments/screens/payment_screen.dart';
 import '../modules/payments/screens/reconciliation_screen.dart';
+import '../modules/payments/screens/transaction_detail_screen.dart';
 import '../modules/payments/screens/transaction_history_screen.dart';
 import '../modules/payments/screens/wallet_screen.dart';
 import '../modules/prescriptions/screens/patient_history_screen.dart';
@@ -294,7 +294,7 @@ class AppRouter {
         name: 'transaction-detail',
         builder: (context, state) {
           final id = state.pathParameters['id']!;
-          return PlaceholderScreen(title: 'Détail de la transaction #$id');
+          return TransactionDetailScreen(transactionId: id);
         },
       ),
       GoRoute(
