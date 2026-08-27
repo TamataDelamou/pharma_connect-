@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/colors.dart';
 import 'alert_type.dart';
 import 'alert_severity.dart';
 import 'alert_status.dart';
@@ -101,13 +102,13 @@ class Alert {
   Color get severityColor {
     switch (severity) {
       case AlertSeverity.critical:
-        return Colors.red;
+        return PharmaConnectColors.accentRed;
       case AlertSeverity.warning:
-        return Colors.orange;
+        return PharmaConnectColors.accentOrange;
       case AlertSeverity.info:
-        return Colors.blue;
+        return PharmaConnectColors.accentCyan;
       case AlertSeverity.success:
-        return Colors.green;
+        return PharmaConnectColors.accentGreen;
     }
   }
 

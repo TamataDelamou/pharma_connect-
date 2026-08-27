@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/colors.dart';
 
 enum RecallStatus { draft, inProgress, completed, cancelled }
 
@@ -19,13 +20,13 @@ extension RecallStatusExtension on RecallStatus {
   Color get color {
     switch (this) {
       case RecallStatus.draft:
-        return Colors.grey;
+        return PharmaConnectColors.neutralMuted;
       case RecallStatus.inProgress:
-        return Colors.orange;
+        return PharmaConnectColors.accentOrange;
       case RecallStatus.completed:
-        return Colors.green;
+        return PharmaConnectColors.accentGreen;
       case RecallStatus.cancelled:
-        return Colors.red;
+        return PharmaConnectColors.accentRed;
     }
   }
 }

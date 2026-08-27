@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/colors.dart';
 
 class VerificationResult {
   final String batchId;
@@ -55,15 +56,15 @@ class VerificationResult {
   Color get statusColor {
     switch (status) {
       case VerificationStatus.authentic:
-        return Colors.green;
+        return PharmaConnectColors.accentGreen;
       case VerificationStatus.counterfeit:
-        return Colors.red;
+        return PharmaConnectColors.accentRed;
       case VerificationStatus.recalled:
-        return Colors.orange;
+        return PharmaConnectColors.accentOrange;
       case VerificationStatus.unknown:
-        return Colors.grey;
+        return PharmaConnectColors.neutralMuted;
       case VerificationStatus.invalid:
-        return Colors.red;
+        return PharmaConnectColors.accentRed;
     }
   }
 }

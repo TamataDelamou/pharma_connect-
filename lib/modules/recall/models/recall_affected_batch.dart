@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/colors.dart';
 import 'batch_recall_status.dart';
 
 class RecallAffectedBatch {
@@ -83,15 +84,15 @@ class RecallAffectedBatch {
   Color get statusColor {
     switch (status) {
       case BatchRecallStatus.pending:
-        return Colors.grey;
+        return PharmaConnectColors.neutralMuted;
       case BatchRecallStatus.inProgress:
-        return Colors.orange;
+        return PharmaConnectColors.accentOrange;
       case BatchRecallStatus.completed:
-        return Colors.green;
+        return PharmaConnectColors.accentGreen;
       case BatchRecallStatus.partial:
-        return Colors.blue;
+        return PharmaConnectColors.accentCyan;
       case BatchRecallStatus.cancelled:
-        return Colors.red;
+        return PharmaConnectColors.accentRed;
     }
   }
 }

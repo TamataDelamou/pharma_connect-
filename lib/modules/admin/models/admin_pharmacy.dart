@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/colors.dart';
 import 'pharmacy_status.dart';
 
 class AdminPharmacy {
@@ -109,17 +110,17 @@ class AdminPharmacy {
   Color get statusColor {
     switch (status) {
       case PharmacyStatus.pending:
-        return Colors.orange;
+        return PharmaConnectColors.accentOrange;
       case PharmacyStatus.verified:
-        return Colors.blue;
+        return PharmaConnectColors.accentCyan;
       case PharmacyStatus.active:
-        return Colors.green;
+        return PharmaConnectColors.accentGreen;
       case PharmacyStatus.suspended:
-        return Colors.red;
+        return PharmaConnectColors.accentRed;
       case PharmacyStatus.underReview:
-        return Colors.yellow;
+        return PharmaConnectColors.accentAmber;
       case PharmacyStatus.rejected:
-        return Colors.red;
+        return PharmaConnectColors.accentRed;
     }
   }
 

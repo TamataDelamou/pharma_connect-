@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/colors.dart';
 
 enum StockMovementType {
   purchase,      // Achat fournisseur
@@ -66,19 +67,19 @@ class StockMovement {
     switch (type) {
       case StockMovementType.purchase:
       case StockMovementType.transfer:
-        return Colors.green;
+        return PharmaConnectColors.accentGreen;
       case StockMovementType.sale:
       case StockMovementType.reservation:
-        return Colors.blue;
+        return PharmaConnectColors.accentCyan;
       case StockMovementType.adjustment:
-        return Colors.orange;
+        return PharmaConnectColors.accentOrange;
       case StockMovementType.expiry:
       case StockMovementType.breakage:
-        return Colors.red;
+        return PharmaConnectColors.accentRed;
       case StockMovementType.supplierReturn:
-        return Colors.purple;
+        return PharmaConnectColors.accentPurple;
       case StockMovementType.unreservation:
-        return Colors.cyan;
+        return PharmaConnectColors.accentCyan;
     }
   }
 }
