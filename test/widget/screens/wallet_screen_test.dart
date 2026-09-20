@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import 'package:pharma_connect/modules/payments/providers/payment_provider.dart';
 import 'package:pharma_connect/modules/payments/screens/wallet_screen.dart';
+import 'package:pharma_connect/modules/auth/providers/auth_provider.dart';
 
 void main() {
   setUpAll(() async {
@@ -20,10 +21,15 @@ void main() {
   testWidgets('WalletScreen se construit avec PaymentProvider sans exception', (
     tester,
   ) async {
+    // WalletScreen lit aussi AuthProvider (userId courant) - absent du
+    // wrapper d'origine, ProviderNotFoundException a la construction.
     await tester.pumpWidget(
       MaterialApp(
-        home: ChangeNotifierProvider(
-          create: (_) => PaymentProvider(),
+        home: MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (_) => AuthProvider()),
+            ChangeNotifierProvider(create: (_) => PaymentProvider()),
+          ],
           child: const WalletScreen(),
         ),
       ),
