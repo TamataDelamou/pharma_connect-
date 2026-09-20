@@ -120,6 +120,7 @@ class ScannerService {
 
     final prescription = EPrescription(
       id: '',
+      prescriptionNumber: '',
       patientId: scanned.patientId,
       doctorId: SupabaseService().currentUser!.id,
       prescribedAt: DateTime.now().toUtc(),
