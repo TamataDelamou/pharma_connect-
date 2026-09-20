@@ -409,8 +409,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                               child: SecondaryButton(
                                 label: 'Mettre en maintenance',
                                 icon: Icons.build,
-                                onPressed: () =>
-                                    _updateStatus(device.id, 'maintenance'),
+                                onPressed: () => _updateStatus('maintenance'),
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -418,8 +417,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                               child: SecondaryButton(
                                 label: 'Désactiver',
                                 icon: Icons.power_settings_new,
-                                onPressed: () =>
-                                    _updateStatus(device.id, 'inactive'),
+                                onPressed: () => _updateStatus('inactive'),
                               ),
                             ),
                           ] else if (device.status == 'inactive' ||
@@ -428,8 +426,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                               child: PrimaryButton(
                                 label: 'Réactiver',
                                 icon: Icons.power_settings_new,
-                                onPressed: () =>
-                                    _updateStatus(device.id, 'active'),
+                                onPressed: () => _updateStatus('active'),
                               ),
                             ),
                           ],
@@ -513,7 +510,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
     }
   }
 
-  Future<void> _updateStatus(String id, String newStatus) async {
+  Future<void> _updateStatus(String newStatus) async {
     final device = await context.read<IotProvider>().selectedDevice;
     if (device == null) return;
 
