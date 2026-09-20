@@ -1,4 +1,5 @@
 import 'package:pharma_connect/core/services/supabase_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 import '../models/async_message.dart';
 
@@ -92,15 +93,25 @@ class MessagingService {
     required String professionalId,
   }) async {
     try {
+      // Phase 4 (module teleconsult) : `select(..., count: CountOption.exact)`
+      // n'est pas l'API réelle du postgrest-dart 2.9.1 pinné dans ce projet -
+      // `count` s'obtient désormais via `.count(CountOption.exact)` chaîné
+      // après `.select()`, qui retourne un PostgrestResponse (`.count`), pas
+      // directement la liste - défaut de compilation, jamais détecté faute
+      // de compilateur exécuté à la clôture du Module 15/CNS. `.neq()`
+      // exige un Object non nul ; `currentUser!.id` (comme ailleurs dans ce
+      // projet, ex. eprescription_service.dart) puisque cette méthode
+      // suppose déjà un compte authentifié (patientId/professionalId requis).
       final response = await _client
           .from('async_messages')
-          .select('id', count: CountOption.exact)
+          .select('id')
           .eq('patient_id', patientId)
           .eq('professional_id', professionalId)
           .eq('is_read', false)
-          .neq('sender_id', SupabaseService().currentUser?.id);
+          .neq('sender_id', SupabaseService().currentUser!.id)
+          .count(CountOption.exact);
 
-      return response.length;
+      return response.count;
     } catch (e) {
       return 0;
     }
