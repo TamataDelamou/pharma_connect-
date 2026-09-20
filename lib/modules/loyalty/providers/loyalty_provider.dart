@@ -23,6 +23,9 @@ class LoyaltyProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
+  @visibleForTesting
+  set errorForTest(String? value) => _error = value;
+
   Future<void> loadAccount(String patientId, String pharmacyId) async {
     _isLoading = true;
     _error = null;

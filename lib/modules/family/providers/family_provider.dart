@@ -23,6 +23,12 @@ class FamilyProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
+  @visibleForTesting
+  set errorForTest(String? value) => _error = value;
+
+  @visibleForTesting
+  set selectedLinkForTest(FamilyLink? value) => _selectedLink = value;
+
   // ---- Links ----
 
   Future<void> loadLinks(String userId) async {
