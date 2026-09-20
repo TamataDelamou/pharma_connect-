@@ -24,7 +24,9 @@ class SupportService {
       // mandat de cette phase transversale.
       var query = _client
           .from('support_tickets')
-          .select('*, patients:patient_id(full_name, phone), assignees:assigned_to(full_name), categories:category_id(name), responses:responses(id), feedbacks:feedback(id)');
+          .select(
+            '*, patients:patient_id(full_name, phone), assignees:assigned_to(full_name), categories:category_id(name), responses:responses(id), feedbacks:feedback(id)',
+          );
 
       if (patientId != null) {
         query = query.eq('patient_id', patientId);
@@ -39,7 +41,11 @@ class SupportService {
         query = query.eq('priority', priority);
       }
       if (isOpen != null && isOpen) {
-        query = query.in('status', ['new', 'in_progress', 'waiting_for_patient']);
+        query = query.inFilter('status', [
+          'new',
+          'in_progress',
+          'waiting_for_patient',
+        ]);
       }
 
       final response = await query.order('created_at', ascending: false);
@@ -55,7 +61,9 @@ class SupportService {
     try {
       final response = await _client
           .from('support_tickets')
-          .select('*, patients:patient_id(full_name, phone), assignees:assigned_to(full_name), categories:category_id(name), responses:responses(id), feedbacks:feedback(id)')
+          .select(
+            '*, patients:patient_id(full_name, phone), assignees:assigned_to(full_name), categories:category_id(name), responses:responses(id), feedbacks:feedback(id)',
+          )
           .eq('id', id)
           .maybeSingle();
       if (response == null) return null;
@@ -69,26 +77,30 @@ class SupportService {
     try {
       final newId = _uuid.v4();
       final now = DateTime.now().toUtc();
-      final data = ticket.copyWith(
-        id: newId,
-        status: 'new',
-        createdAt: now,
-        updatedAt: now,
-        createdBy: SupabaseService().currentUser?.id,
-        updatedBy: SupabaseService().currentUser?.id,
-      ).toJson();
-      data.removeWhere((key, value) =>
-          key == 'patient_name' ||
-          key == 'patient_phone' ||
-          key == 'assignee_name' ||
-          key == 'category_name' ||
-          key == 'response_count' ||
-          key == 'has_feedback' ||
-          key == 'patients' ||
-          key == 'assignees' ||
-          key == 'categories' ||
-          key == 'responses' ||
-          key == 'feedbacks');
+      final data = ticket
+          .copyWith(
+            id: newId,
+            status: 'new',
+            createdAt: now,
+            updatedAt: now,
+            createdBy: SupabaseService().currentUser?.id,
+            updatedBy: SupabaseService().currentUser?.id,
+          )
+          .toJson();
+      data.removeWhere(
+        (key, value) =>
+            key == 'patient_name' ||
+            key == 'patient_phone' ||
+            key == 'assignee_name' ||
+            key == 'category_name' ||
+            key == 'response_count' ||
+            key == 'has_feedback' ||
+            key == 'patients' ||
+            key == 'assignees' ||
+            key == 'categories' ||
+            key == 'responses' ||
+            key == 'feedbacks',
+      );
 
       final response = await _client
           .from('support_tickets')
@@ -103,22 +115,26 @@ class SupportService {
 
   Future<SupportTicket> updateTicket(SupportTicket ticket) async {
     try {
-      final data = ticket.copyWith(
-        updatedAt: DateTime.now().toUtc(),
-        updatedBy: SupabaseService().currentUser?.id,
-      ).toJson();
-      data.removeWhere((key, value) =>
-          key == 'patient_name' ||
-          key == 'patient_phone' ||
-          key == 'assignee_name' ||
-          key == 'category_name' ||
-          key == 'response_count' ||
-          key == 'has_feedback' ||
-          key == 'patients' ||
-          key == 'assignees' ||
-          key == 'categories' ||
-          key == 'responses' ||
-          key == 'feedbacks');
+      final data = ticket
+          .copyWith(
+            updatedAt: DateTime.now().toUtc(),
+            updatedBy: SupabaseService().currentUser?.id,
+          )
+          .toJson();
+      data.removeWhere(
+        (key, value) =>
+            key == 'patient_name' ||
+            key == 'patient_phone' ||
+            key == 'assignee_name' ||
+            key == 'category_name' ||
+            key == 'response_count' ||
+            key == 'has_feedback' ||
+            key == 'patients' ||
+            key == 'assignees' ||
+            key == 'categories' ||
+            key == 'responses' ||
+            key == 'feedbacks',
+      );
 
       final response = await _client
           .from('support_tickets')
@@ -132,12 +148,18 @@ class SupportService {
     }
   }
 
-  Future<SupportTicket> updateTicketStatus(String id, String newStatus, {String? resolutionNote}) async {
+  Future<SupportTicket> updateTicketStatus(
+    String id,
+    String newStatus, {
+    String? resolutionNote,
+  }) async {
     try {
       final data = {
         'status': newStatus,
-        if (newStatus == 'resolved') 'resolved_at': DateTime.now().toUtc().toIso8601String(),
-        if (newStatus == 'closed') 'closed_at': DateTime.now().toUtc().toIso8601String(),
+        if (newStatus == 'resolved')
+          'resolved_at': DateTime.now().toUtc().toIso8601String(),
+        if (newStatus == 'closed')
+          'closed_at': DateTime.now().toUtc().toIso8601String(),
         if (resolutionNote != null) 'resolution_note': resolutionNote,
         'updated_at': DateTime.now().toUtc().toIso8601String(),
         'updated_by': SupabaseService().currentUser?.id,
@@ -183,12 +205,12 @@ class SupportService {
     try {
       final newId = _uuid.v4();
       final now = DateTime.now().toUtc();
-      final data = response.copyWith(
-        id: newId,
-        createdAt: now,
-        updatedAt: now,
-      ).toJson();
-      data.removeWhere((key, value) => key == 'author_name' || key == 'authors');
+      final data = response
+          .copyWith(id: newId, createdAt: now, updatedAt: now)
+          .toJson();
+      data.removeWhere(
+        (key, value) => key == 'author_name' || key == 'authors',
+      );
 
       final result = await _client
           .from('support_responses')
