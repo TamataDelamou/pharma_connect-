@@ -170,6 +170,7 @@ class AnalyticsService {
         activePharmacies: 0, // From pharmacies_performance
         lowStockProducts: lowStock.length,
         pendingAlerts: alerts.length,
+        todayStats: today,
       );
     } catch (e) {
       throw Exception('Failed to load summary: $e');
