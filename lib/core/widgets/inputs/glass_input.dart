@@ -18,6 +18,14 @@ class GlassInput extends StatelessWidget {
   final TextInputType keyboardType;
   final ValueChanged<String>? onChanged;
   final String? initialValue;
+  // Phase 4 (module marketplace) : offer_create_screen.dart appelait
+  // GlassInput(validator: ...) en supposant l'API d'un TextFormField brut -
+  // paramètre jamais exposé par ce widget partagé, défaut de compilation,
+  // jamais détecté faute de compilateur exécuté à la clôture du Module 13/
+  // B2B. Ajouté en pass-through vers le TextFormField interne (additif,
+  // nullable, aucun changement pour les 38 appelants existants qui ne le
+  // passent pas).
+  final FormFieldValidator<String>? validator;
 
   const GlassInput({
     super.key,
@@ -34,6 +42,7 @@ class GlassInput extends StatelessWidget {
     this.keyboardType = TextInputType.text,
     this.onChanged,
     this.initialValue,
+    this.validator,
   });
 
   @override
@@ -50,6 +59,7 @@ class GlassInput extends StatelessWidget {
           enabled: !isDisabled,
           keyboardType: keyboardType,
           onChanged: onChanged,
+          validator: validator,
           style: PharmaConnectTypography.body1.copyWith(
             color: isDisabled ? PharmaConnectColors.textSecondary : null,
           ),
