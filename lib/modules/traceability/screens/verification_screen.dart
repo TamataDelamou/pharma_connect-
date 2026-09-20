@@ -8,6 +8,8 @@ import '../../../core/theme/typography.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../../../core/widgets/inputs/glass_input.dart';
+import '../../auth/providers/auth_provider.dart';
+import '../../auth/models/user_role.dart';
 import '../providers/traceability_provider.dart';
 import '../widgets/verification_result_card.dart';
 
@@ -144,10 +146,20 @@ class _VerificationScreenState extends State<VerificationScreen> {
                           );
                           return;
                         }
+                        // Correctif audit Module 12 (29/08/2026) : 'Pharmacien'
+                        // était codé en dur, alors que ce même écran est
+                        // accessible à tout utilisateur authentifié (patient
+                        // compris, via ScanFloatingButton) — le libellé
+                        // affiché sur le résultat mentait sur qui avait
+                        // vérifié. verified_by (le uuid réel, colonne FK)
+                        // n'est de toute façon jamais construit à partir de
+                        // ce libellé (voir traceability_service.dart) ; il
+                        // ne sert qu'à l'affichage.
+                        final role = context.read<AuthProvider>().userRole;
                         await provider.verifyProduct(
                           serialNumber: _serialController.text.trim(),
                           gtin: _gtinController.text.trim(),
-                          verifiedBy: 'Pharmacien',
+                          verifiedBy: role?.label ?? 'Utilisateur',
                         );
                       },
                     ),
@@ -219,6 +231,36 @@ class _BarcodeScannerPage extends StatefulWidget {
 class _BarcodeScannerPageState extends State<_BarcodeScannerPage> {
   final MobileScannerController _controller = MobileScannerController();
 
+  // Correctif audit Module 12 (29/08/2026) : `rawValue.substring(0, 13)`
+  // levait un RangeError (crash de l'écran, pas seulement un résultat
+  // incorrect) pour tout code-barres dont la valeur brute faisait moins de
+  // 13 caractères — trivialement atteignable (QR code de test, numéro de
+  // série court, etc.). Tente en plus une lecture GS1 basique (AI(01) =
+  // GTIN-14, AI(21) = numéro de série), le format que le cahier attend
+  // réellement pour un Datamatrix pharmaceutique, avant de retomber sur
+  // l'ancienne heuristique (désormais sans risque de crash) si le code
+  // scanné n'est pas au format GS1.
+  static Map<String, String> _parseBarcode(String raw) {
+    final gtinMatch = RegExp(r'01(\d{14})').firstMatch(raw);
+    final serialMatch = RegExp(r'21(.+)$', dotAll: true).firstMatch(raw);
+    if (gtinMatch != null) {
+      var gtin = gtinMatch.group(1)!;
+      // GTIN-14 avec un zéro de bourrage en tête -> EAN-13 usuel de ce
+      // catalogue (voir traceable_batches.gtin, ex. '0032456789012').
+      if (gtin.startsWith('0')) gtin = gtin.substring(1);
+      final serial = serialMatch != null
+          ? serialMatch.group(1)!.split(RegExp(r'[\x00-\x1f]')).first.trim()
+          : raw;
+      return {'serial': serial, 'gtin': gtin};
+    }
+    // Pas un GS1 reconnu : traiter la valeur brute comme numéro de série,
+    // et n'en dériver un GTIN que si elle est assez longue pour ça.
+    return {
+      'serial': raw,
+      'gtin': raw.length >= 13 ? raw.substring(0, 13) : '',
+    };
+  }
+
   @override
   void dispose() {
     _controller.dispose();
@@ -238,13 +280,9 @@ class _BarcodeScannerPageState extends State<_BarcodeScannerPage> {
             controller: _controller,
             onDetect: (capture) {
               final barcode = capture.barcodes.first;
-              if (barcode.rawValue != null) {
-                // Traitement du code-barres
-                // Dans la réalité, on extrairait le GTIN et le numéro de série
-                Navigator.pop(context, {
-                  'serial': barcode.rawValue,
-                  'gtin': barcode.rawValue?.substring(0, 13) ?? '',
-                });
+              final raw = barcode.rawValue;
+              if (raw != null && raw.isNotEmpty) {
+                Navigator.pop(context, _parseBarcode(raw));
               }
             },
           ),
