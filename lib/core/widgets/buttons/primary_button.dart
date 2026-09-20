@@ -10,6 +10,15 @@ class PrimaryButton extends StatelessWidget {
   final bool isDisabled;
   final double width;
   final IconData? icon;
+  // Phase 4 (module financing) : request_detail_screen.dart appelait
+  // PrimaryButton(height: ..., fontSize: ...) pour un petit bouton d'action
+  // en ligne (repayment), paramètres jamais exposés par ce widget partagé -
+  // défaut de compilation, jamais détecté faute de compilateur exécuté à la
+  // clôture du Module 14/FIN. Ajoutés en pass-through (additifs, valeurs
+  // par défaut identiques au comportement actuel), aucun changement pour
+  // les autres appelants.
+  final double height;
+  final double fontSize;
 
   const PrimaryButton({
     super.key,
@@ -19,6 +28,8 @@ class PrimaryButton extends StatelessWidget {
     this.isDisabled = false,
     this.width = double.infinity,
     this.icon,
+    this.height = 50,
+    this.fontSize = 16,
   });
 
   @override
@@ -27,7 +38,7 @@ class PrimaryButton extends StatelessWidget {
 
     return SizedBox(
       width: width,
-      height: 50,
+      height: height,
       child: ElevatedButton(
         onPressed: isInteractive ? onPressed : null,
         style: ElevatedButton.styleFrom(
@@ -67,8 +78,8 @@ class PrimaryButton extends StatelessWidget {
                       child: Text(
                         label,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 16,
+                        style: TextStyle(
+                          fontSize: fontSize,
                           fontWeight: FontWeight.w600,
                           height: 1.0,
                         ),
