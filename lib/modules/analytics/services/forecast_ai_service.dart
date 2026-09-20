@@ -48,11 +48,11 @@ class ForecastAIService {
       predicted += (predicted * 0.05 * (_random.nextDouble() - 0.5));
 
       // Ensure non-negative
-      predicted = max(0, predicted);
+      predicted = max(0.0, predicted);
 
       // Calculate confidence bounds
       final stdDev = _calculateStdDev(values);
-      final lowerBound = max(0, predicted - (stdDev * 1.96));
+      final lowerBound = max(0.0, predicted - (stdDev * 1.96));
       final upperBound = predicted + (stdDev * 1.96);
 
       final prediction = ForecastPrediction(
@@ -98,9 +98,7 @@ class ForecastAIService {
         query = query.eq('product_id', productId);
       }
 
-      final response = await query
-          .order('date', ascending: false)
-          .limit(limit);
+      final response = await query.order('date', ascending: false).limit(limit);
       return (response as List)
           .map((e) => HistoricalData.fromJson(e as Map<String, dynamic>))
           .toList();
