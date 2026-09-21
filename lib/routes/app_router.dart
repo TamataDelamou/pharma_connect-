@@ -150,6 +150,8 @@ import '../modules/loyalty/screens/loyalty_pharmacy_select_screen.dart';
 
 //solidarty
 import '../modules/solidarity/screens/solidarity_dashboard_screen.dart';
+import '../modules/solidarity/screens/solidarity_program_form_screen.dart';
+import '../modules/solidarity/screens/solidarity_program_detail_screen.dart';
 
 //eprescription
 import '../modules/eprescription/screens/eprescription_list_screen.dart';
@@ -197,6 +199,7 @@ import '../modules/iot/screens/device_create_screen.dart';
 // business
 import '../modules/business/screens/business_dashboard_screen.dart';
 import '../modules/business/screens/company_detail_screen.dart';
+import '../modules/business/screens/company_create_screen.dart';
 
 //forecast
 import '../modules/stock/screens/demand_forecast_screen.dart';
@@ -1106,6 +1109,20 @@ class AppRouter {
         builder: (context, state) =>
             const SolidarityDashboardScreen(isStaff: true),
       ),
+      GoRoute(
+        path: '/solidarity/program/new',
+        name: 'solidarity-program-new',
+        builder: (context, state) => const SolidarityProgramFormScreen(),
+      ),
+      GoRoute(
+        path: '/solidarity/program/:id',
+        name: 'solidarity-program-detail',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          final isStaff = state.extra as bool? ?? false;
+          return SolidarityProgramDetailScreen(programId: id, isStaff: isStaff);
+        },
+      ),
       // eprescription
       GoRoute(
         path: '/eprescription',
@@ -1378,12 +1395,11 @@ class AppRouter {
       // Audit Module 18 (HOM, 30/08/2026), balayage C69 :
       // `/business/company/:id` capturait `/business/company/new` (déclarée
       // après, même profondeur à 3 segments) — réordonnancement.
-      // TODO PharmaConnect: écran non cadré, cluster hors-cahier, cf. Etape1 §1.5 — audit dédié requis avant réintégration.
-      // GoRoute(
-      //   path: '/business/company/new',
-      //   name: 'business-company-new',
-      //   builder: (context, state) => const CompanyCreateScreen(),
-      // ),
+      GoRoute(
+        path: '/business/company/new',
+        name: 'business-company-new',
+        builder: (context, state) => const CompanyCreateScreen(),
+      ),
       GoRoute(
         path: '/business/company/:id',
         name: 'business-company-detail',
@@ -1392,15 +1408,14 @@ class AppRouter {
           return CompanyDetailScreen(companyId: id);
         },
       ),
-      // TODO PharmaConnect: écran non cadré, cluster hors-cahier, cf. Etape1 §1.5 — audit dédié requis avant réintégration.
-      // GoRoute(
-      //   path: '/business/company/edit/:id',
-      //   name: 'business-company-edit',
-      //   builder: (context, state) {
-      //     final id = state.pathParameters['id']!;
-      //     return CompanyCreateScreen(companyId: id);
-      //   },
-      // ),
+      GoRoute(
+        path: '/business/company/edit/:id',
+        name: 'business-company-edit',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return CompanyCreateScreen(companyId: id);
+        },
+      ),
       // Audit Module 11 (29/08/2026), arbitrage D17 : nouvel écran « Commande
       // recommandée » — placé avant '/stock/forecast/:productId' pour éviter
       // toute ambiguïté de correspondance de route ('orders' ne doit jamais
