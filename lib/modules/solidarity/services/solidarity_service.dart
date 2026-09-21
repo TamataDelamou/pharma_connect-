@@ -18,7 +18,7 @@ class SolidarityService {
       // Phase 2bis (motif transversal "filtre après .order()") : voir
       // eprescription_service.dart pour la genèse du motif.
       var query = _client.from('solidarity_programs').select(
-            '*, pharmacies:pharmacy_id(name), beneficiaries:beneficiaries(id)',
+            '*, pharmacies:pharmacy_id(name), beneficiaries:solidarity_beneficiaries(id)',
           );
 
       if (type != null) {
@@ -45,7 +45,7 @@ class SolidarityService {
       final response = await _client
           .from('solidarity_programs')
           .select(
-            '*, pharmacies:pharmacy_id(name), beneficiaries:beneficiaries(id)',
+            '*, pharmacies:pharmacy_id(name), beneficiaries:solidarity_beneficiaries(id)',
           )
           .eq('id', id)
           .maybeSingle();

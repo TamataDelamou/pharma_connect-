@@ -5,6 +5,7 @@ import '../../../core/kernel/kernel_badge.dart';
 import '../../../core/theme/colors.dart';
 import '../../../core/theme/typography.dart';
 import '../../../core/widgets/inputs/glass_input.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../providers/payment_provider.dart';
 import '../widgets/transaction_list_tile.dart';
 import '../models/transaction_status.dart';
@@ -21,11 +22,15 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
   TransactionStatus? _selectedStatus;
   String _searchQuery = '';
 
+  // Bug corrigé (audit Module 8, 29/08/2026) : 'patient_123' en dur —
+  // même défaut que wallet_screen.dart/payment_screen.dart dans ce module.
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<PaymentProvider>().loadTransactions(userId: 'patient_123');
+      final userId = context.read<AuthProvider>().userId;
+      if (userId == null) return;
+      context.read<PaymentProvider>().loadTransactions(userId: userId);
     });
   }
 

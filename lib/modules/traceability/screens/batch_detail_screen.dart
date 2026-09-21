@@ -5,6 +5,9 @@ import '../../../core/kernel/kernel_badge.dart';
 import '../../../core/theme/colors.dart';
 import '../../../core/theme/typography.dart';
 import '../../../core/widgets/cards/glass_card.dart';
+import '../../auth/models/user_role.dart';
+import '../../auth/providers/auth_provider.dart';
+import '../../recall/models/recall_severity.dart';
 import '../providers/traceability_provider.dart';
 import '../widgets/batch_status_chip.dart';
 import '../widgets/movement_timeline.dart';
@@ -102,6 +105,17 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
                   ),
                 ),
                 const KernelBadge(),
+                if (_canDeclareRecall(context) && !batch.isRecalled) ...[
+                  const SizedBox(width: 8),
+                  IconButton(
+                    tooltip: 'Déclarer un rappel',
+                    icon: const Icon(
+                      Icons.warning_amber,
+                      color: PharmaConnectColors.accentRed,
+                    ),
+                    onPressed: () => _showRecallDialog(context),
+                  ),
+                ],
               ],
             ),
             const SizedBox(height: 24),
@@ -339,6 +353,154 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // Correctif audit Module 12 (29/08/2026) : TraceabilityService.recallBatch
+  // et .updateBatchStatus existaient déjà dans le code (provider inclus)
+  // mais n'étaient appelés depuis AUCUN écran — code mort, même motif que
+  // celui déjà documenté pour la navigation (registre, item D6). Réservé
+  // aux mêmes rôles que la policy RLS d'écriture sur traceable_batches.
+  bool _canDeclareRecall(BuildContext context) {
+    final role = context.watch<AuthProvider>().userRole;
+    return role == UserRole.pharmacien ||
+        role == UserRole.grossiste ||
+        role == UserRole.regulateur;
+  }
+
+  // Correctif porteur du projet (29/08/2026, clôture Module 12) : ce
+  // formulaire ne demandait qu'un motif texte, suffisant pour le seul flag
+  // is_recalled construit initialement. Depuis l'unification avec le module
+  // recall (pharmacovigilance, registre C41/D21), un vrai dossier de rappel
+  // est créé — la sévérité et la quantité concernée en sont des champs de
+  // premier ordre (classement Classe I/II/III, taux de récupération), d'où
+  // leur ajout ici plutôt que de les laisser à des valeurs par défaut
+  // silencieuses.
+  Future<void> _showRecallDialog(BuildContext context) async {
+    final reasonController = TextEditingController();
+    final quantityController = TextEditingController();
+    final provider = context.read<TraceabilityProvider>();
+    var severity = RecallSeverity.classII;
+    var isPublic = false;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setDialogState) => AlertDialog(
+          title: const Text('Déclarer un rappel'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextField(
+                  controller: reasonController,
+                  decoration: const InputDecoration(
+                    labelText: 'Motif du rappel',
+                    hintText: 'Ex: défaut de fabrication détecté sur ce lot',
+                  ),
+                  maxLines: 3,
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<RecallSeverity>(
+                  initialValue: severity,
+                  decoration: const InputDecoration(labelText: 'Sévérité'),
+                  items: RecallSeverity.values
+                      .map(
+                        (s) => DropdownMenuItem(
+                          value: s,
+                          child: Text(s.label),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      setDialogState(() => severity = value);
+                    }
+                  },
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: quantityController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Quantité concernée (optionnel)',
+                    hintText: 'Unités du lot couvertes par ce rappel',
+                  ),
+                ),
+                const SizedBox(height: 12),
+                CheckboxListTile(
+                  value: isPublic,
+                  contentPadding: EdgeInsets.zero,
+                  controlAffinity: ListTileControlAffinity.leading,
+                  title: const Text(
+                    'Avis de rappel public (visible par tous les patients)',
+                    style: PharmaConnectTypography.body2,
+                  ),
+                  onChanged: (value) {
+                    setDialogState(() => isPublic = value ?? false);
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('Annuler'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: const Text(
+                'Confirmer le rappel',
+                style: TextStyle(color: PharmaConnectColors.accentRed),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (confirmed != true) return;
+    if (reasonController.text.trim().isEmpty) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Veuillez préciser le motif du rappel'),
+            backgroundColor: PharmaConnectColors.accentRed,
+          ),
+        );
+      }
+      return;
+    }
+
+    // issuedBy : aucun libellé (nom complet) n'est exposé côté client par
+    // AuthProvider aujourd'hui (voir auth_provider.dart) — même limite déjà
+    // documentée pour verifiedBy dans verification_screen.dart. Le rôle
+    // reste identifiant et cohérent avec la chaîne d'approvisionnement.
+    final role = context.mounted
+        ? context.read<AuthProvider>().userRole
+        : null;
+    final totalUnits = int.tryParse(quantityController.text.trim()) ?? 0;
+
+    final success = await provider.recallBatch(
+      widget.batchId,
+      reason: reasonController.text.trim(),
+      issuedBy: role?.label ?? 'Utilisateur',
+      severity: severity,
+      totalUnits: totalUnits,
+      isPublic: isPublic,
+    );
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          success ? 'Rappel déclaré' : (provider.error ?? 'Échec du rappel'),
+        ),
+        backgroundColor: success
+            ? PharmaConnectColors.accentGreen
+            : PharmaConnectColors.accentRed,
       ),
     );
   }

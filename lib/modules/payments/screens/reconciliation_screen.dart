@@ -6,6 +6,8 @@ import '../../../core/theme/colors.dart';
 import '../../../core/theme/typography.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
+import '../../auth/models/user_role.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../providers/payment_provider.dart';
 import '../models/transaction_status.dart';
 import '../../../core/utils/currency_formatter.dart';
@@ -20,17 +22,80 @@ class ReconciliationScreen extends StatefulWidget {
 class _ReconciliationScreenState extends State<ReconciliationScreen> {
   bool _isReconciling = false;
 
+  // Bug corrigé (audit Module 8, 29/08/2026) : appel non filtré — pour un
+  // pharmacien, RLS (transactions_select_own avant correctif) ne renvoyait
+  // que ses propres transactions patient éventuelles, jamais celles de son
+  // officine. Corrigé pour appeler avec pharmacyId dès que disponible ;
+  // combiné à la nouvelle policy transactions_staff_select (migration
+  // 20260829019000).
+  Future<void> _refresh() async {
+    final pharmacyId = context.read<AuthProvider>().pharmacyId;
+    if (pharmacyId == null) return;
+    await context.read<PaymentProvider>().loadTransactions(
+      pharmacyId: pharmacyId,
+    );
+  }
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<PaymentProvider>().loadTransactions();
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _refresh());
   }
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
     final provider = context.watch<PaymentProvider>();
+
+    // Bug corrigé (audit Module 8, 29/08/2026) : aucun contrôle d'accès
+    // n'existait sur ce back-office de réconciliation — n'importe quel
+    // utilisateur authentifié pouvait l'ouvrir (cahier de conception :
+    // "Back-office de réconciliation pharmacie"). Même patron de correction
+    // que pharmacy_queue_screen.dart (Module 6) / delivery_schedule_screen.dart
+    // (Module 7).
+    final isPharmacist = auth.userRole == UserRole.pharmacien;
+    final pharmacyId = auth.pharmacyId;
+
+    if (!isPharmacist) {
+      return Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.lock_outline, size: 48, color: Colors.white24),
+                const SizedBox(height: 16),
+                Text(
+                  'Réservé aux pharmaciens de l\'officine.',
+                  style: PharmaConnectTypography.body2,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                OutlinedButton(
+                  onPressed: () => context.pop(),
+                  child: const Text('Retour'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+    if (pharmacyId == null) {
+      return Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(
+              'Aucune officine rattachée à ce compte pharmacien.',
+              style: PharmaConnectTypography.body2,
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      );
+    }
 
     final pendingTransactions = provider.transactions
         .where((t) => t.status == TransactionStatus.pending)

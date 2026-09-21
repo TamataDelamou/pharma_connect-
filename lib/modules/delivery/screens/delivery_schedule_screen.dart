@@ -5,6 +5,8 @@ import '../../../core/kernel/kernel_badge.dart';
 import '../../../core/theme/colors.dart';
 import '../../../core/theme/typography.dart';
 import '../../../core/widgets/cards/glass_card.dart';
+import '../../auth/models/user_role.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../models/delivery.dart';
 import '../models/delivery_driver.dart';
 import '../models/delivery_status.dart';
@@ -63,7 +65,43 @@ class _DeliveryScheduleScreenState extends State<DeliveryScheduleScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
     final provider = context.watch<DeliveryProvider>();
+    // Aucun contrôle d'accès n'existait sur cet écran (audit Module 7,
+    // 29/08/2026) : n'importe quel utilisateur authentifié pouvait ouvrir
+    // /deliveries/schedule et assigner un livreur ou démarrer une course —
+    // les policies RLS scopent déjà correctement les écritures côté
+    // serveur (voir la migration de ce module), mais rien ne l'interdisait
+    // côté UI. Même patron de correction que pharmacy_queue_screen.dart
+    // (Module 6) et driver_dashboard_screen.dart (Module 7).
+    final isPharmacist = auth.userRole == UserRole.pharmacien;
+    if (!isPharmacist) {
+      return Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.lock_outline, size: 48, color: Colors.white24),
+                const SizedBox(height: 16),
+                Text(
+                  'Réservé aux pharmaciens de l\'officine.',
+                  style: PharmaConnectTypography.body2,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                OutlinedButton(
+                  onPressed: () => context.pop(),
+                  child: const Text('Retour'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     final scheduled = provider.deliveries
         .where((d) => d.status == DeliveryStatus.scheduled)
         .toList();
@@ -103,7 +141,13 @@ class _DeliveryScheduleScreenState extends State<DeliveryScheduleScreen> {
             Expanded(
               child: provider.isLoading
                   ? const Center(child: CircularProgressIndicator())
-                  : provider.error != null
+                  // Bug corrigé (audit Module 7, 29/08/2026) : sans le
+                  // "&& scheduled.isEmpty", une erreur survenant après un
+                  // premier chargement réussi (ex. reconnexion perdue au
+                  // moment d'un rafraîchissement automatique) masquait la
+                  // liste déjà chargée derrière un écran d'erreur bloquant
+                  // — même classe de bug que delivery_history_screen.dart.
+                  : provider.error != null && scheduled.isEmpty
                   ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,

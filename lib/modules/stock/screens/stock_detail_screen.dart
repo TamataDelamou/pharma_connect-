@@ -276,10 +276,15 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                               ),
                               child: Row(
                                 children: [
+                                  // Audit Module 4 (29/08/2026) : icônes
+                                  // inversées par rapport au signe/couleur
+                                  // affichés juste à côté (texte "+X" vert
+                                  // avec une flèche vers le bas, "-X" rouge
+                                  // avec une flèche vers le haut).
                                   Icon(
                                     movement.quantity > 0
-                                        ? Icons.arrow_downward
-                                        : Icons.arrow_upward,
+                                        ? Icons.arrow_upward
+                                        : Icons.arrow_downward,
                                     color: movement.typeColor,
                                     size: 16,
                                   ),

@@ -106,6 +106,47 @@ class _PrescriptionListScreenState extends State<PrescriptionListScreen>
             ),
             const SizedBox(height: 24),
 
+            // Bandeau hors-ligne (directive standing « mode offline ») —
+            // même patron visuel que stock_list_screen.dart (Module 4) pour
+            // rester cohérent entre modules.
+            if (provider.isOffline) ...[
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+                decoration: BoxDecoration(
+                  color: PharmaConnectColors.accentAmber.withValues(
+                    alpha: 0.12,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: PharmaConnectColors.accentAmber.withValues(
+                      alpha: 0.3,
+                    ),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.cloud_off,
+                      size: 18,
+                      color: PharmaConnectColors.accentAmber,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        provider.error ??
+                            'Hors-ligne — dernière liste synchronisée affichée.',
+                        style: PharmaConnectTypography.micro,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+
             // Filtres par onglet
             TabBar(
               controller: _tabController,
@@ -127,7 +168,14 @@ class _PrescriptionListScreenState extends State<PrescriptionListScreen>
             Expanded(
               child: provider.isLoading
                   ? const Center(child: CircularProgressIndicator())
-                  : provider.error != null
+                  // Bug corrigé (audit Module 5, 29/08/2026) : un repli
+                  // hors-ligne réussi renseigne aussi `error` (message
+                  // informatif, voir le bandeau ci-dessus) — sans le garde
+                  // `&& provider.prescriptions.isEmpty` (même patron que
+                  // stock_list_screen.dart, Module 4), cet écran plein
+                  // affichait "Erreur : Hors connexion..." à la place de la
+                  // liste mise en cache au lieu de la montrer.
+                  : provider.error != null && provider.prescriptions.isEmpty
                   ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,

@@ -30,6 +30,13 @@ class Delivery {
   final String? pickupPointName;
   final double? distanceToDestination;
   final int? estimatedTimeRemaining; // en minutes
+  // RG-LIV-02 (audit Module 7, 29/08/2026) : généré à la planification
+  // (DeliveryService.scheduleDelivery), affiché au patient dans
+  // delivery_tracking_screen.dart, et vérifié à la clôture de la livraison
+  // — voir le commentaire sur DeliveryService.completeDelivery pour le bug
+  // corrigé (un code fabriqué par le client, jamais vérifié, faisait
+  // jusqu'ici office de "preuve").
+  final String? confirmationCode;
 
   Delivery({
     required this.id,
@@ -57,6 +64,7 @@ class Delivery {
     this.pickupPointName,
     this.distanceToDestination,
     this.estimatedTimeRemaining,
+    this.confirmationCode,
   });
 
   factory Delivery.fromJson(Map<String, dynamic> json) => Delivery(
@@ -102,6 +110,7 @@ class Delivery {
     distanceToDestination: (json['distance_to_destination'] as num?)
         ?.toDouble(),
     estimatedTimeRemaining: json['estimated_time_remaining'] as int?,
+    confirmationCode: json['confirmation_code'] as String?,
   );
 
   // proof n'est jamais écrit ici : delivery_proofs est une table séparée
@@ -131,6 +140,7 @@ class Delivery {
     'pickup_point_name': pickupPointName,
     'distance_to_destination': distanceToDestination,
     'estimated_time_remaining': estimatedTimeRemaining,
+    'confirmation_code': confirmationCode,
   };
 
   Delivery copyWith({
@@ -159,6 +169,7 @@ class Delivery {
     String? pickupPointName,
     double? distanceToDestination,
     int? estimatedTimeRemaining,
+    String? confirmationCode,
   }) {
     return Delivery(
       id: id ?? this.id,
@@ -188,6 +199,7 @@ class Delivery {
           distanceToDestination ?? this.distanceToDestination,
       estimatedTimeRemaining:
           estimatedTimeRemaining ?? this.estimatedTimeRemaining,
+      confirmationCode: confirmationCode ?? this.confirmationCode,
     );
   }
 

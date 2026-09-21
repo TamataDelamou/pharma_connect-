@@ -10,6 +10,15 @@ class PrescriptionItemTile extends StatelessWidget {
   final bool showActions;
   final VoidCallback? onEdit;
   final VoidCallback? onSubstitute;
+  // RG-ORD-02 (audit Module 5, 29/08/2026) : « Une ordonnance pour un
+  // produit classé stupéfiant doit être conservée sous forme d'original
+  // vérifiable et ne peut être honorée que par retrait physique en
+  // officine. » Rien dans ce module ne rattachait une ligne d'ordonnance au
+  // regulatory_class du produit (Module 3) — ce badge amorce la visibilité
+  // pharmacien ; l'application effective (bloquer une livraison à domicile
+  // pour cette ligne) reste à faire dans le module de livraison, une fois
+  // ce module audité.
+  final bool isControlledSubstance;
 
   const PrescriptionItemTile({
     super.key,
@@ -18,6 +27,7 @@ class PrescriptionItemTile extends StatelessWidget {
     this.showActions = false,
     this.onEdit,
     this.onSubstitute,
+    this.isControlledSubstance = false,
   });
 
   @override
@@ -107,6 +117,40 @@ class PrescriptionItemTile extends StatelessWidget {
                     style: PharmaConnectTypography.micro,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+                if (isControlledSubstance) ...[
+                  const SizedBox(height: 4),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: PharmaConnectColors.accentRed.withValues(
+                        alpha: 0.15,
+                      ),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.warning_amber_rounded,
+                          size: 12,
+                          color: PharmaConnectColors.accentRed,
+                        ),
+                        SizedBox(width: 4),
+                        Text(
+                          'Stupéfiant — retrait en officine uniquement',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: PharmaConnectColors.accentRed,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
                 if (item.hasGenericAlternative) ...[

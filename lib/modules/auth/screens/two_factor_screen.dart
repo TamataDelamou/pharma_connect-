@@ -152,15 +152,30 @@ class _TwoFactorScreenState extends State<TwoFactorScreen> {
                         return;
                       }
 
-                      setState(() => _isLoading = true);
-                      // Simuler la vérification
-                      await Future.delayed(const Duration(seconds: 1));
-                      setState(() => _isLoading = false);
-
-                      // Simuler une vérification réussie
-                      if (context.mounted) {
-                        context.go('/dashboard');
-                      }
+                      // Audit Module 1 (29/08/2026) : ce bouton acceptait
+                      // auparavant n'importe quelle saisie de 6 chiffres
+                      // comme "vérifiée" (délai simulé, succès automatique).
+                      // Un écran de sécurité qui ne vérifie rien est pire que
+                      // son absence : il donne une fausse assurance sur des
+                      // comptes que le cahier classe justement "2FA
+                      // obligatoire" (pharmacie, grossiste, admin). Aucun
+                      // fournisseur SMS/email n'est configuré pour un second
+                      // facteur indépendant — même blocage déjà documenté
+                      // pour l'OTP principal (rapport Étape 1, §1.3 point 4)
+                      // — donc plutôt qu'une vérification simulée, un
+                      // blocage honnête en attendant. Cet écran n'est de
+                      // toute façon invoqué par aucun flux actuel (voir le
+                      // correctif du redirect dans app_router.dart).
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Authentification à deux facteurs temporairement '
+                            'indisponible (fournisseur SMS/email non '
+                            'configuré). Contactez le support.',
+                          ),
+                          backgroundColor: PharmaConnectColors.accentOrange,
+                        ),
+                      );
                     },
                   ),
                   const SizedBox(height: 16),

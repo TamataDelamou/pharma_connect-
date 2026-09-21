@@ -26,10 +26,22 @@ class SearchService {
     List<String> productIds,
   ) async {
     if (productIds.isEmpty) return {};
+    // RG-AUT-04 (audit Module 2, 29/08/2026) : « un compte pharmacie
+    // suspendu... est immédiatement retiré des résultats de recherche
+    // patients ». Cette jointure n'appliquait jusqu'ici aucun filtre sur
+    // pharmacies.status : une officine 'suspended', 'rejected',
+    // 'underReview', ou même 'pending' (candidature en auto-inscription pas
+    // encore revue — voir Module 1, PharmacyService) apparaissait au même
+    // titre qu'une officine 'active' dans la recherche publique. `!inner`
+    // est nécessaire pour que le filtre sur la ressource imbriquée soit
+    // réellement appliqué par PostgREST (un simple `pharmacies(*)` avec
+    // `.eq('pharmacy.status', ...)` ne filtre pas, il ne fait que passer
+    // silencieusement l'objet à null).
     final rows = await _client
         .from('stock_items')
-        .select('*, pharmacy:pharmacies(*)')
-        .inFilter('product_id', productIds);
+        .select('*, pharmacy:pharmacies!inner(*)')
+        .inFilter('product_id', productIds)
+        .eq('pharmacy.status', 'active');
 
     final byProduct = <String, List<PharmacyStock>>{};
     for (final row in rows) {

@@ -8,6 +8,13 @@ import '../../../core/widgets/cards/glass_card.dart';
 class WalletBalanceCard extends StatelessWidget {
   final int balance;
   final String? userName;
+  // Bug corrigé (audit Module 8, 29/08/2026) : ce widget affichait des
+  // valeurs fictives codées en dur (3400 pour le cashback, 12000 pour "en
+  // attente"), totalement déconnectées de Wallet.cashbackAvailable /
+  // Wallet.pendingBalance — champs pourtant présents sur le modèle mais
+  // jamais transmis par wallet_screen.dart.
+  final int cashbackAvailable;
+  final int pendingBalance;
   final VoidCallback? onTopUp;
   final VoidCallback? onHistory;
 
@@ -15,6 +22,8 @@ class WalletBalanceCard extends StatelessWidget {
     super.key,
     required this.balance,
     this.userName,
+    this.cashbackAvailable = 0,
+    this.pendingBalance = 0,
     this.onTopUp,
     this.onHistory,
   });
@@ -123,7 +132,7 @@ class WalletBalanceCard extends StatelessWidget {
                         style: PharmaConnectTypography.micro,
                       ),
                       Text(
-                        CurrencyFormatter.format(3400),
+                        CurrencyFormatter.format(cashbackAvailable),
                         style: PharmaConnectTypography.body1.copyWith(
                           fontWeight: FontWeight.w600,
                           color: PharmaConnectColors.accentGreen,
@@ -148,7 +157,7 @@ class WalletBalanceCard extends StatelessWidget {
                         style: PharmaConnectTypography.micro,
                       ),
                       Text(
-                        CurrencyFormatter.format(12000),
+                        CurrencyFormatter.format(pendingBalance),
                         style: PharmaConnectTypography.body1.copyWith(
                           fontWeight: FontWeight.w600,
                           color: PharmaConnectColors.accentOrange,

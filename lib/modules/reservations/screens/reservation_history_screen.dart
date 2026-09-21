@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
 import '../../../core/theme/colors.dart';
 import '../../../core/theme/typography.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../models/reservation.dart';
 import '../providers/reservation_provider.dart';
 import '../widgets/reservation_status_card.dart';
@@ -24,12 +25,17 @@ class _ReservationHistoryScreenState extends State<ReservationHistoryScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // TODO: from auth — même patientId que reservation_checkout_screen.dart
-      context.read<ReservationProvider>().loadPatientReservations(
-        'patient_123',
-      );
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _load());
+  }
+
+  // Bug corrigé (audit Module 6, 29/08/2026) : 'patient_123' en dur, comme
+  // dans reservation_checkout_screen.dart — reservations.patient_id est de
+  // type uuid, cette liste ne pouvait jamais rien retourner en production
+  // pour un vrai compte.
+  void _load() {
+    final patientId = context.read<AuthProvider>().userId;
+    if (patientId == null) return;
+    context.read<ReservationProvider>().loadPatientReservations(patientId);
   }
 
   @override
@@ -81,11 +87,57 @@ class _ReservationHistoryScreenState extends State<ReservationHistoryScreen>
               indicatorWeight: 3,
               dividerColor: Colors.transparent,
             ),
+            if (provider.isOffline && provider.reservations.isNotEmpty) ...[
+              // Bandeau informatif hors-ligne (directive standing) — même
+              // patron que prescription_list_screen.dart (Module 5) : ne
+              // jamais masquer les données en cache derrière une erreur.
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(10),
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  color: PharmaConnectColors.accentAmber.withValues(
+                    alpha: 0.1,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: PharmaConnectColors.accentAmber.withValues(
+                      alpha: 0.2,
+                    ),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.cloud_off,
+                      size: 16,
+                      color: PharmaConnectColors.accentAmber,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        provider.error ??
+                            'Hors connexion — dernières données synchronisées.',
+                        style: PharmaConnectTypography.micro.copyWith(
+                          color: PharmaConnectColors.accentAmber,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             const SizedBox(height: 16),
             Expanded(
               child: provider.isLoading
                   ? const Center(child: CircularProgressIndicator())
-                  : provider.error != null
+                  // Bug corrigé (audit Module 6, 29/08/2026) : sans le
+                  // `&& provider.reservations.isEmpty`, le message
+                  // informatif hors-ligne (qui alimente aussi `error`)
+                  // masquerait la liste mise en cache derrière un écran
+                  // d'erreur bloquant — même bug déjà corrigé dans
+                  // prescription_list_screen.dart (Module 5).
+                  : provider.error != null && provider.reservations.isEmpty
                   ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -99,9 +151,7 @@ class _ReservationHistoryScreenState extends State<ReservationHistoryScreen>
                           ),
                           const SizedBox(height: 16),
                           ElevatedButton(
-                            onPressed: () => context
-                                .read<ReservationProvider>()
-                                .loadPatientReservations('patient_123'),
+                            onPressed: _load,
                             child: const Text('Réessayer'),
                           ),
                         ],

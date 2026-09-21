@@ -9,6 +9,7 @@ import '../../../core/theme/typography.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/buttons/tertiary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../models/delivery.dart';
 import '../models/delivery_status.dart';
 import '../providers/delivery_provider.dart';
@@ -43,7 +44,17 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen>
       if (widget.deliveryId != null) {
         provider.loadDelivery(widget.deliveryId!);
       } else {
-        provider.loadDeliveries();
+        // Audit Module 7 (29/08/2026) : loadDeliveries() (non filtré) ne
+        // bénéficie d'aucun repli hors-ligne — on passe par
+        // loadDeliveriesForPatient, qui suit le même patron déjà audité que
+        // loadPatientReservations (Module 6), pour que l'écran continue à
+        // afficher la livraison active en cours même sans connexion.
+        final userId = context.read<AuthProvider>().userId;
+        if (userId != null) {
+          provider.loadDeliveriesForPatient(userId);
+        } else {
+          provider.loadDeliveries();
+        }
       }
     });
   }
@@ -166,6 +177,39 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen>
                 DeliveryStatusBadge(status: delivery.status),
               ],
             ),
+            if (provider.isOffline) ...[
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: PharmaConnectColors.accentOrange.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: PharmaConnectColors.accentOrange.withValues(alpha: 0.4),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.cloud_off,
+                      size: 16,
+                      color: PharmaConnectColors.accentOrange,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        provider.error ??
+                            'Hors connexion — dernière position connue affichée.',
+                        style: PharmaConnectTypography.body2,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             const SizedBox(height: 16),
 
             // Carte
@@ -298,6 +342,44 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen>
                       const SizedBox(height: 8),
                     ],
 
+                    // Code de remise (RG-LIV-02, audit Module 7, 29/08/2026) :
+                    // communiqué de vive voix par le patient au livreur, qui
+                    // le saisit pour clôturer la livraison — voir
+                    // DeliveryService.completeDelivery.
+                    if (delivery.confirmationCode != null &&
+                        (delivery.status == DeliveryStatus.inProgress ||
+                            delivery.status == DeliveryStatus.arrived)) ...[
+                      GlassCard(
+                        padding: const EdgeInsets.all(12),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.vpn_key,
+                              color: PharmaConnectColors.accentCyan,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Votre code de remise',
+                                    style: PharmaConnectTypography.body2,
+                                  ),
+                                  Text(
+                                    delivery.confirmationCode!,
+                                    style: PharmaConnectTypography.heading2
+                                        .copyWith(letterSpacing: 4),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+
                     // Actions
                     if (delivery.status == DeliveryStatus.arrived) ...[
                       GlassCard(
@@ -360,6 +442,14 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen>
     );
   }
 
+  // RG-LIV-02 (audit Module 7, 29/08/2026) : ce dialogue fabriquait un faux
+  // code jamais vérifié. Le patient confirme désormais avec SON PROPRE code
+  // de remise (delivery.confirmationCode, déjà affiché au-dessus sur cet
+  // écran) — auto-rempli, puisque le patient le connaît déjà et n'a rien à
+  // saisir de nouveau. Limite documentée au registre : une confirmation
+  // faite par le patient sur son propre appareil n'est pas une preuve
+  // indépendante à deux parties comme lorsque c'est le livreur qui saisit
+  // le code communiqué par le patient (driver_dashboard_screen.dart).
   void _showConfirmationDialog(BuildContext context, Delivery delivery) {
     showDialog(
       context: context,
@@ -378,18 +468,27 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen>
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(context);
-              final success = await context
-                  .read<DeliveryProvider>()
-                  .completeDelivery(
-                    deliveryId: delivery.id,
-                    confirmationCode:
-                        'CONF${DateTime.now().millisecondsSinceEpoch}',
-                  );
-              if (success && context.mounted) {
+              final provider = context.read<DeliveryProvider>();
+              final success = await provider.completeDelivery(
+                deliveryId: delivery.id,
+                enteredConfirmationCode: delivery.confirmationCode,
+              );
+              if (!context.mounted) return;
+              if (success) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Livraison confirmée avec succès !'),
                     backgroundColor: PharmaConnectColors.accentGreen,
+                  ),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      provider.error ??
+                          'Impossible de confirmer la réception.',
+                    ),
+                    backgroundColor: PharmaConnectColors.accentRed,
                   ),
                 );
               }

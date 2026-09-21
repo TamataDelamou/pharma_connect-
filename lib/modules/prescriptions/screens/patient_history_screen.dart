@@ -50,7 +50,12 @@ class PatientHistoryScreen extends StatelessWidget {
             Expanded(
               child: provider.isLoading
                   ? const Center(child: CircularProgressIndicator())
-                  : provider.error != null
+                  // Même garde qu'à prescription_list_screen.dart (audit
+                  // Module 5) : un repli hors-ligne réussi renseigne aussi
+                  // `error` (message informatif) — sans `&& ...isEmpty`, cet
+                  // écran masquerait la liste mise en cache derrière un
+                  // message d'erreur plein écran.
+                  : provider.error != null && provider.prescriptions.isEmpty
                   ? Center(
                       child: Text(
                         'Erreur : ${provider.error}',

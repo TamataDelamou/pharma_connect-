@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 import '../models/delivery.dart';
@@ -9,6 +10,7 @@ import '../../../core/services/supabase_service.dart';
 
 class DeliveryService {
   SupabaseClient get _client => SupabaseService().client;
+  static final Random _random = Random();
 
   static const _deliverySelect =
       '*, driver:delivery_drivers(*), proof:delivery_proofs(*)';
@@ -60,6 +62,19 @@ class DeliveryService {
         .from('delivery_drivers')
         .select()
         .eq('id', id)
+        .maybeSingle();
+    return row != null ? DeliveryDriver.fromJson(row) : null;
+  }
+
+  /// Retrouve la fiche livreur (delivery_drivers) rattachée à l'utilisateur
+  /// authentifié (audit Module 7, 29/08/2026) : driver_dashboard_screen.dart
+  /// utilisait jusqu'ici un id de livreur en dur ('drv_001') faute d'un
+  /// moyen de résoudre AuthProvider.userId vers la bonne fiche.
+  Future<DeliveryDriver?> getDriverForUser(String userId) async {
+    final row = await _client
+        .from('delivery_drivers')
+        .select()
+        .eq('user_id', userId)
         .maybeSingle();
     return row != null ? DeliveryDriver.fromJson(row) : null;
   }
@@ -204,6 +219,12 @@ class DeliveryService {
       pickupPointId: pickupPointId,
       pickupPointName: pickupPointName,
       trackingHistory: const ['Livraison programmée'],
+      // RG-LIV-02 (audit Module 7, 29/08/2026) : code de remise généré ici,
+      // à la planification — pas au moment de la clôture par le livreur (ce
+      // qui rendait jusqu'ici impossible toute vérification, voir
+      // completeDelivery ci-dessous). Affiché au patient dans
+      // delivery_tracking_screen.dart pour qu'il le communique au livreur.
+      confirmationCode: _generateConfirmationCode(),
     );
 
     final row = await _client
@@ -214,10 +235,24 @@ class DeliveryService {
     return Delivery.fromJson(row);
   }
 
+  // RG-LIV-01 (audit Module 7, 29/08/2026) : un produit nécessitant une
+  // chaîne du froid ne peut être confié qu'à un livreur certifié. Le sélecteur
+  // de livreur de delivery_schedule_screen.dart (_DriverPickerSheet) filtre
+  // déjà correctement la liste proposée sur `isColdChainCertified`, mais
+  // cette règle n'était vérifiée nulle part côté service : rien n'empêchait
+  // un appel direct à assignDriver() avec un livreur non certifié pour une
+  // livraison chaîne du froid (aucune défense en profondeur derrière le
+  // filtre d'UI).
   Future<Delivery> assignDriver(String deliveryId, String driverId) async {
     final current = await getDelivery(deliveryId);
     final driver = await getDriver(driverId);
     if (driver == null) throw Exception('Driver not found');
+    if (current.isColdChainRequired && !driver.isColdChainCertified) {
+      throw StateError(
+        'RG-LIV-01 : ${driver.name} n\'est pas certifié chaîne du froid — '
+        'cette livraison nécessite un livreur avec contenant isotherme validé.',
+      );
+    }
 
     final row = await _client
         .from('deliveries')
@@ -288,21 +323,55 @@ class DeliveryService {
     return Delivery.fromJson(row);
   }
 
+  // RG-LIV-02 (audit Module 7, 29/08/2026) : « toute livraison est clôturée
+  // par une preuve de remise (signature électronique, code, ou photo) ».
+  // Avant correctif, les deux écrans qui appellent cette méthode
+  // (driver_dashboard_screen.dart et delivery_tracking_screen.dart)
+  // fabriquaient eux-mêmes un `confirmationCode` du type
+  // 'CONF${DateTime.now().millisecondsSinceEpoch}' au moment même du clic
+  // "confirmer" — une chaîne inventée côté client, jamais vérifiée contre
+  // quoi que ce soit, qui n'apportait donc aucune preuve réelle : n'importe
+  // quel appel à cette méthode "réussissait" sa preuve de remise par
+  // construction. Corrigé en deux temps : (1) un vrai code est désormais
+  // généré à la planification (scheduleDelivery) et communiqué au patient ;
+  // (2) cette méthode exige soit que le code saisi corresponde à ce code de
+  // référence, soit une signature ou une photo réellement fournie — une
+  // livraison sans aucune preuve exploitable n'est plus acceptée.
   Future<Delivery> completeDelivery({
     required String deliveryId,
     String? signatureData,
     String? imageUrl,
-    String? confirmationCode,
+    String? enteredConfirmationCode,
     String? recipientName,
     String? recipientPhone,
     String? notes,
   }) async {
     final current = await getDelivery(deliveryId);
 
+    String? verifiedCode;
+    if (enteredConfirmationCode != null && enteredConfirmationCode.trim().isNotEmpty) {
+      final expected = current.confirmationCode;
+      if (expected == null ||
+          enteredConfirmationCode.trim().toUpperCase() != expected.toUpperCase()) {
+        throw StateError(
+          'Code de remise incorrect — vérifiez le code communiqué par le patient.',
+        );
+      }
+      verifiedCode = expected;
+    }
+
+    final hasSignature = signatureData != null && signatureData.isNotEmpty;
+    final hasPhoto = imageUrl != null && imageUrl.isNotEmpty;
+    if (verifiedCode == null && !hasSignature && !hasPhoto) {
+      throw StateError(
+        'RG-LIV-02 : aucune preuve de remise fournie (code, signature ou photo requis).',
+      );
+    }
+
     final proof = DeliveryProof(
       signatureData: signatureData,
       imageUrl: imageUrl,
-      confirmationCode: confirmationCode,
+      confirmationCode: verifiedCode,
       timestamp: DateTime.now(),
       recipientName: recipientName ?? current.patientName,
       recipientPhone: recipientPhone ?? current.patientPhone,
@@ -369,5 +438,14 @@ class DeliveryService {
   Future<void> sendStatusNotification(String deliveryId) async {
     // Idem — voir AlertService.createAlert pour le patron de notification
     // persistée quand ce module sera relié aux alertes.
+  }
+
+  // ==================== UTILITAIRES ====================
+
+  /// Code de remise à 6 chiffres (RG-LIV-02) — assez court pour être
+  /// communiqué oralement, même patron que les OTP de vérification déjà
+  /// utilisés ailleurs dans le projet.
+  String _generateConfirmationCode() {
+    return (100000 + _random.nextInt(900000)).toString();
   }
 }

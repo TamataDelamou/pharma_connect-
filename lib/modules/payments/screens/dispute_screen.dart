@@ -9,6 +9,7 @@ import '../../../core/utils/currency_formatter.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../../../core/widgets/inputs/glass_input.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../models/transaction_status.dart';
 import '../providers/payment_provider.dart';
 
@@ -24,11 +25,17 @@ class _DisputeScreenState extends State<DisputeScreen> {
   final _descriptionController = TextEditingController();
   String? _selectedTransactionId;
 
+  // Correctif (audit Module 8, 29/08/2026) : appel non filtré — fonctionnait
+  // par accident via RLS (transactions_select_own), mais sans expliciter
+  // l'utilisateur comme les autres écrans du module. Corrigé par cohérence
+  // et parce que la nouvelle policy transactions_staff_select (migration
+  // 20260829019000) élargit désormais ce que RLS peut renvoyer sans filtre.
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<PaymentProvider>().loadTransactions();
+      final userId = context.read<AuthProvider>().userId;
+      context.read<PaymentProvider>().loadTransactions(userId: userId);
     });
   }
 
@@ -208,9 +215,17 @@ class _DisputeScreenState extends State<DisputeScreen> {
                                 return;
                               }
 
+                              // Bug corrigé (audit Module 8, 29/08/2026) :
+                              // _descriptionController était validé comme
+                              // obligatoire dans l'UI mais jamais transmis
+                              // à markAsDisputed — seul reason était envoyé,
+                              // la description saisie par le patient était
+                              // silencieusement perdue.
                               final success = await provider.markAsDisputed(
                                 _selectedTransactionId!,
-                                reason: _reasonController.text.trim(),
+                                reason:
+                                    '${_reasonController.text.trim()} — '
+                                    '${_descriptionController.text.trim()}',
                               );
 
                               if (success && context.mounted) {

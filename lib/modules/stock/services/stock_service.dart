@@ -10,19 +10,42 @@ import '../../../core/services/supabase_service.dart';
 class StockService {
   SupabaseClient get _client => SupabaseService().client;
 
-  // stock_items.pharmacy_id est NOT NULL en base mais n'a pas d'équivalent
-  // dans StockItem (Dart) — voir le commentaire sur StockItem.fromJson.
-  // Faute d'une notion de "pharmacie sélectionnée" ailleurs dans l'app, ces
-  // requêtes lisent le stock toutes officines confondues.
   static const _stockItemSelect =
       '*, product:products(*, category:categories(name), manufacturer:manufacturers(name)), batches:stock_batches(*)';
 
-  Future<List<StockItem>> getStockItems({String? productId}) async {
+  /// Audit Module 4 (29/08/2026) : version brute (JSON non désérialisé) de
+  /// getStockItems, utilisée directement par StockProvider pour alimenter le
+  /// cache hors-ligne (StockItem.fromJson perdrait des champs bruts utiles
+  /// à la ré-écriture locale). getStockItems ci-dessous délègue à celle-ci.
+  Future<List<Map<String, dynamic>>> getStockItemsRaw({
+    String? pharmacyId,
+    String? productId,
+  }) async {
     var query = _client.from('stock_items').select(_stockItemSelect);
+    // RG multi-officines : sans ce filtre, le stock de TOUTES les officines
+    // était mélangé dans une même liste (voir StockItem.fromJson) — un
+    // pharmacien voyait/pouvait tenter d'ajuster le stock d'une officine
+    // qui n'est pas la sienne, bloqué seulement au moment de l'écriture par
+    // la RLS (is_pharmacy_staff). pharmacyId reste optionnel pour un futur
+    // usage back-office (is_gsg_admin) qui aurait légitimement besoin d'une
+    // vue toutes officines.
+    if (pharmacyId != null) {
+      query = query.eq('pharmacy_id', pharmacyId);
+    }
     if (productId != null) {
       query = query.eq('product_id', productId);
     }
-    final rows = await query;
+    return await query;
+  }
+
+  Future<List<StockItem>> getStockItems({
+    String? pharmacyId,
+    String? productId,
+  }) async {
+    final rows = await getStockItemsRaw(
+      pharmacyId: pharmacyId,
+      productId: productId,
+    );
     return rows.map((row) => StockItem.fromJson(row)).toList();
   }
 
@@ -35,11 +58,21 @@ class StockService {
     return row != null ? StockItem.fromJson(row) : null;
   }
 
-  Future<StockItem?> getStockItemByProduct(String productId) async {
+  /// `pharmacyId` est requis : `product_id` seul n'identifie pas une ligne
+  /// unique dès que plusieurs officines stockent le même produit (c'est le
+  /// cas normal du modèle multi-officines, contrainte unique sur
+  /// (pharmacy_id, product_id)) — sans ce filtre, `.maybeSingle()` levait
+  /// une exception dès qu'une deuxième officine stockait le produit
+  /// recherché (audit Module 4, 29/08/2026).
+  Future<StockItem?> getStockItemByProduct(
+    String productId, {
+    required String pharmacyId,
+  }) async {
     final row = await _client
         .from('stock_items')
         .select(_stockItemSelect)
         .eq('product_id', productId)
+        .eq('pharmacy_id', pharmacyId)
         .maybeSingle();
     return row != null ? StockItem.fromJson(row) : null;
   }
@@ -90,11 +123,15 @@ class StockService {
   /// Logique FEFO : priorise les lots les plus proches de la péremption.
   Future<bool> reserveStock({
     required String productId,
+    required String pharmacyId,
     required int quantity,
     String? referenceId,
     String? userId,
   }) async {
-    final stockItem = await getStockItemByProduct(productId);
+    final stockItem = await getStockItemByProduct(
+      productId,
+      pharmacyId: pharmacyId,
+    );
     if (stockItem == null) return false;
     if (stockItem.availableQuantity < quantity) return false;
 
@@ -141,11 +178,15 @@ class StockService {
   /// Confirme une réservation (transforme en vente).
   Future<bool> confirmReservation({
     required String productId,
+    required String pharmacyId,
     required int quantity,
     String? referenceId,
     String? userId,
   }) async {
-    final stockItem = await getStockItemByProduct(productId);
+    final stockItem = await getStockItemByProduct(
+      productId,
+      pharmacyId: pharmacyId,
+    );
     if (stockItem == null) return false;
 
     final sortedBatches = List<StockBatch>.from(stockItem.batches)
@@ -188,7 +229,7 @@ class StockService {
         .update({
           'total_quantity': newTotal,
           'reserved_quantity': newReserved,
-          'status': _computeStockStatus(
+          'status': computeStockStatus(
             newTotal,
             stockItem.thresholdLow,
             stockItem.thresholdCritical,
@@ -203,10 +244,14 @@ class StockService {
   /// réservée en premier.
   Future<bool> cancelReservation({
     required String productId,
+    required String pharmacyId,
     required int quantity,
     String? referenceId,
   }) async {
-    final stockItem = await getStockItemByProduct(productId);
+    final stockItem = await getStockItemByProduct(
+      productId,
+      pharmacyId: pharmacyId,
+    );
     if (stockItem == null) return false;
 
     final sortedBatches = List<StockBatch>.from(stockItem.batches)
@@ -248,7 +293,10 @@ class StockService {
     return true;
   }
 
-  StockStatus _computeStockStatus(
+  /// Rendu public + static (audit Module 4, 29/08/2026) : réutilisé par
+  /// StockProvider pour calculer un statut cohérent lors d'un ajustement mis
+  /// en file d'attente hors-ligne, sans dupliquer cette logique.
+  static StockStatus computeStockStatus(
     int quantity,
     int thresholdLow,
     int thresholdCritical,
@@ -259,10 +307,48 @@ class StockService {
     return StockStatus.inStock;
   }
 
+  // ==================== SEUILS (Module 10 — ALR, arbitrage D15) ====================
+  //
+  // Écran « Paramétrage des seuils par produit » (cahier ALR, manquant avant
+  // cet audit — voir registre D15). Les colonnes existaient déjà et étaient
+  // déjà en écriture pour le staff d'officine (policy stock_items_write_staff,
+  // Module 4) ; seule cette méthode et l'écran qui l'appelle manquaient.
+  // Recalcule aussi `status` immédiatement (computeStockStatus) : changer un
+  // seuil peut, à quantité inchangée, faire basculer un article en/hors
+  // alerte sans qu'aucun mouvement de stock n'ait eu lieu.
+
+  Future<bool> updateThresholds({
+    required String stockItemId,
+    required int thresholdLow,
+    required int thresholdCritical,
+  }) async {
+    if (thresholdLow < 0 || thresholdCritical < 0) return false;
+    if (thresholdCritical > thresholdLow) return false;
+
+    final item = await getStockItem(stockItemId);
+    if (item == null) return false;
+
+    await _client
+        .from('stock_items')
+        .update({
+          'threshold_low': thresholdLow,
+          'threshold_critical': thresholdCritical,
+          'status': computeStockStatus(
+            item.availableQuantity,
+            thresholdLow,
+            thresholdCritical,
+          ).name,
+        })
+        .eq('id', stockItemId);
+
+    return true;
+  }
+
   // ==================== AJUSTEMENTS ====================
 
   Future<bool> adjustStock({
     required String productId,
+    required String pharmacyId,
     required int quantity, // positif = ajout, négatif = retrait
     required AdjustmentReason reason,
     String? batchId,
@@ -270,7 +356,10 @@ class StockService {
     String? userName,
     String? notes,
   }) async {
-    final stockItem = await getStockItemByProduct(productId);
+    final stockItem = await getStockItemByProduct(
+      productId,
+      pharmacyId: pharmacyId,
+    );
     if (stockItem == null) return false;
 
     final newTotal = stockItem.totalQuantity + quantity;
@@ -278,7 +367,7 @@ class StockService {
         .from('stock_items')
         .update({
           'total_quantity': newTotal,
-          'status': _computeStockStatus(
+          'status': computeStockStatus(
             newTotal,
             stockItem.thresholdLow,
             stockItem.thresholdCritical,
@@ -334,56 +423,122 @@ class StockService {
     String? userId,
     String? notes,
   }) async {
-    // Dans un vrai système multi-officines, ceci ferait deux écritures (une
-    // par pharmacy_id). Le modèle actuel ne scope pas stock_items par
-    // officine côté Dart (voir StockItem.fromJson) : on retire simplement du
-    // stock local, comme le faisait le mock.
-    final stockItem = await getStockItemByProduct(productId);
-    if (stockItem == null) return false;
-    if (stockItem.availableQuantity < quantity) return false;
+    // Audit Module 4 (29/08/2026) : `fromPharmacyId`/`toPharmacyId` étaient
+    // déjà des paramètres de cette fonction mais n'étaient jamais utilisés —
+    // `getStockItemByProduct(productId)` sans filtre officine pouvait
+    // décrémenter le stock d'une AUTRE pharmacie que `fromPharmacyId`, et
+    // aucune écriture n'était faite côté `toPharmacyId` : la quantité
+    // transférée disparaissait purement et simplement (aucune ligne
+    // stock_items n'était créditée nulle part). Corrigé : décrémente
+    // uniquement le stock de fromPharmacyId, et crédite (ou crée) la ligne
+    // stock_items de toPharmacyId pour ce même produit.
+    final sourceItem = await getStockItemByProduct(
+      productId,
+      pharmacyId: fromPharmacyId,
+    );
+    if (sourceItem == null) return false;
+    if (sourceItem.availableQuantity < quantity) return false;
 
-    final newTotal = stockItem.totalQuantity - quantity;
+    final newSourceTotal = sourceItem.totalQuantity - quantity;
     await _client
         .from('stock_items')
         .update({
-          'total_quantity': newTotal,
-          'status': _computeStockStatus(
-            newTotal,
-            stockItem.thresholdLow,
-            stockItem.thresholdCritical,
+          'total_quantity': newSourceTotal,
+          'status': computeStockStatus(
+            newSourceTotal,
+            sourceItem.thresholdLow,
+            sourceItem.thresholdCritical,
           ).name,
         })
-        .eq('id', stockItem.id);
+        .eq('id', sourceItem.id);
 
     await _recordMovement(
-      stockItemId: stockItem.id,
+      stockItemId: sourceItem.id,
       type: StockMovementType.transfer,
       quantity: -quantity,
       userId: userId,
       notes: notes ?? 'Transfert vers $toPharmacyId depuis $fromPharmacyId',
     );
 
+    final destItem = await getStockItemByProduct(
+      productId,
+      pharmacyId: toPharmacyId,
+    );
+    if (destItem != null) {
+      final newDestTotal = destItem.totalQuantity + quantity;
+      await _client
+          .from('stock_items')
+          .update({
+            'total_quantity': newDestTotal,
+            'status': computeStockStatus(
+              newDestTotal,
+              destItem.thresholdLow,
+              destItem.thresholdCritical,
+            ).name,
+          })
+          .eq('id', destItem.id);
+      await _recordMovement(
+        stockItemId: destItem.id,
+        type: StockMovementType.transfer,
+        quantity: quantity,
+        userId: userId,
+        notes: notes ?? 'Transfert reçu de $fromPharmacyId',
+      );
+    } else {
+      // Aucune ligne stock_items n'existe encore pour ce produit dans
+      // l'officine destinataire : on en crée une (même seuils par défaut
+      // que la migration stock.sql). La RLS d'écriture (is_pharmacy_staff)
+      // s'applique normalement à cet insert comme à n'importe quel autre.
+      final inserted = await _client
+          .from('stock_items')
+          .insert({
+            'pharmacy_id': toPharmacyId,
+            'product_id': productId,
+            'total_quantity': quantity,
+            'status': computeStockStatus(quantity, 20, 5).name,
+          })
+          .select()
+          .single();
+      await _recordMovement(
+        stockItemId: inserted['id'] as String,
+        type: StockMovementType.transfer,
+        quantity: quantity,
+        userId: userId,
+        notes: notes ?? 'Transfert reçu de $fromPharmacyId',
+      );
+    }
+
     return true;
   }
 
   // ==================== ALERTES ====================
 
-  Future<List<StockItem>> getLowStockItems() async {
-    final items = await getStockItems();
+  Future<List<StockItem>> getLowStockItems({String? pharmacyId}) async {
+    final items = await getStockItems(pharmacyId: pharmacyId);
     return items.where((i) => i.isLowStock || i.isCriticalStock).toList();
   }
 
-  Future<List<StockItem>> getOutOfStockItems() async {
-    final items = await getStockItems();
+  Future<List<StockItem>> getOutOfStockItems({String? pharmacyId}) async {
+    final items = await getStockItems(pharmacyId: pharmacyId);
     return items.where((i) => i.isOutOfStock).toList();
   }
 
-  Future<List<StockBatch>> getExpiringBatches({int daysThreshold = 30}) async {
+  Future<List<StockBatch>> getExpiringBatches({
+    String? pharmacyId,
+    int daysThreshold = 30,
+  }) async {
     final threshold = DateTime.now().add(Duration(days: daysThreshold));
-    final rows = await _client
+    // !inner nécessaire pour que le filtre sur stock_item.pharmacy_id
+    // s'applique réellement (même piège PostgREST déjà documenté en Module 2
+    // : un embed simple sans !inner ne filtre pas, il nullifie l'objet).
+    var query = _client
         .from('stock_batches')
-        .select()
+        .select(pharmacyId != null ? '*, stock_item:stock_items!inner(pharmacy_id)' : '*')
         .lt('expiry_date', threshold.toIso8601String());
+    if (pharmacyId != null) {
+      query = query.eq('stock_item.pharmacy_id', pharmacyId);
+    }
+    final rows = await query;
     final batches = rows.map((row) => StockBatch.fromJson(row)).toList()
       ..sort((a, b) => a.expiryDate.compareTo(b.expiryDate));
     return batches.where((b) => !b.isExpired).toList();
@@ -396,6 +551,7 @@ class StockService {
   // CatalogService pour la recherche par nom de fabricant).
 
   Future<List<StockItem>> searchStock({
+    String? pharmacyId,
     String? query,
     String? batchNumber,
     String? supplierId,
@@ -403,7 +559,7 @@ class StockService {
     DateTime? expiryAfter,
     StockStatus? status,
   }) async {
-    var items = await getStockItems();
+    var items = await getStockItems(pharmacyId: pharmacyId);
 
     if (query != null && query.isNotEmpty) {
       final lower = query.toLowerCase();

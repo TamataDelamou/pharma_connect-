@@ -169,6 +169,16 @@ class PharmacyListTile extends StatelessWidget {
                       color: PharmaConnectColors.accentCyan,
                     ),
                   ),
+                  // RG-REC-02 (audit Module 2, 29/08/2026) : « le prix
+                  // affiché est indicatif tant que la pharmacie n'a pas
+                  // confirmé la réservation ». Rien ne le signalait jusqu'ici
+                  // — le prix apparaissait comme définitif.
+                  Text(
+                    'Prix indicatif',
+                    style: PharmaConnectTypography.micro.copyWith(
+                      color: PharmaConnectColors.textSecondary,
+                    ),
+                  ),
                   const SizedBox(height: 2),
                   Container(
                     padding: const EdgeInsets.symmetric(

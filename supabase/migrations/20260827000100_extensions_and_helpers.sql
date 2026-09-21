@@ -40,3 +40,41 @@ $$;
 
 comment on function public.set_updated_at() is
   'Trigger BEFORE UPDATE générique : fixe updated_at = now() sur la ligne modifiée.';
+
+-- Audit Module 19 (INF), 1er refus de clôture (30/08/2026), ticket C82 :
+-- `public.update_updated_at()` est appelée par `create trigger ... execute
+-- function public.update_updated_at()` dans 18 fichiers de migration
+-- distincts (teleconsult, homecare, triage, loyalty, eprescription,
+-- gamification x3, professional_reviews, marketplace, financing, business,
+-- stock_forecasting, pos, network_admin, cash, returns) mais n'était
+-- définie nulle part dans le projet — seule `set_updated_at()` ci-dessus
+-- existait, avec un corps identique mais un nom différent, laissant
+-- penser à un renommage partiel jamais terminé. Sur une base neuve,
+-- `supabase db push` échouait dès la première de ces 18 migrations
+-- rencontrée dans l'ordre chronologique (`ERROR: function
+-- public.update_updated_at() does not exist`) — y compris sur
+-- `20260827005500_professionals.sql`, la migration d'origine du Module 19
+-- lui-même. Confirmé bloquant par exécution réelle contre un Postgres 16
+-- local (première exécution réelle de ce type sur l'ensemble de l'audit,
+-- voir le registre A29). Ajoutée ici, dans la première migration du
+-- projet, plutôt que dans une migration corrective plus tardive : les 18
+-- fichiers appelants sont chronologiquement répartis sur toute la
+-- deuxième moitié du projet, donc seule une définition à ce stade — avant
+-- le premier appelant — respecte l'ordre chronologique d'application des
+-- migrations, sur le même principe que la contrainte de non-antériorité
+-- déjà documentée pour `is_gsg_admin()`. Corps identique à
+-- `set_updated_at()` (aucune des deux n'est renommée ni supprimée, pour
+-- ne pas modifier le comportement des tables qui utilisent déjà l'une ou
+-- l'autre).
+create or replace function public.update_updated_at()
+returns trigger
+language plpgsql
+as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
+comment on function public.update_updated_at() is
+  'Trigger BEFORE UPDATE générique, identique à set_updated_at() — ajoutée au correctif C82 (audit Module 19, 30/08/2026) car référencée par 18 fichiers de migration sans jamais avoir été définie.';

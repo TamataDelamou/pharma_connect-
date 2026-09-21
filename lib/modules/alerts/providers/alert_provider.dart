@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../models/alert.dart';
 import '../models/alert_type.dart';
@@ -5,15 +6,21 @@ import '../models/alert_severity.dart';
 import '../models/alert_status.dart';
 import '../models/alert_preferences.dart';
 import '../services/alert_service.dart';
+import '../../../core/services/offline_sync_service.dart';
 
 class AlertProvider extends ChangeNotifier {
   final AlertService _service = AlertService();
+  // Audit Module 10 (ALR, 29/08/2026) : directive standing « privilégier le
+  // mode hors-ligne », même patron que PaymentProvider (Module 8) — lecture
+  // seule, voir OfflineSyncService pour la justification.
+  final OfflineSyncService _offlineSync = OfflineSyncService();
 
   List<Alert> _alerts = [];
   Alert? _selectedAlert;
   AlertPreferences _preferences = const AlertPreferences();
   bool _isLoading = false;
   String? _error;
+  bool _isOffline = false;
 
   // Getters
   List<Alert> get alerts => _alerts;
@@ -21,6 +28,7 @@ class AlertProvider extends ChangeNotifier {
   AlertPreferences get preferences => _preferences;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  bool get isOffline => _isOffline;
 
   List<Alert> get unreadAlerts => _alerts.where((a) => !a.isRead).toList();
   List<Alert> get criticalAlerts =>
@@ -54,12 +62,45 @@ class AlertProvider extends ChangeNotifier {
         pharmacyId: pharmacyId,
         unreadOnly: unreadOnly,
       );
+      _isOffline = false;
+      // Cache best-effort, seulement pour le chargement non filtré (celui
+      // que consulte réellement AlertCenterScreen) — un filtre actif ne doit
+      // pas écraser le cache complet par une vue partielle.
+      if (userId != null &&
+          status == null &&
+          type == null &&
+          severity == null &&
+          !unreadOnly) {
+        unawaited(
+          _offlineSync.cacheAlerts(
+            userId,
+            _alerts.map((a) => a.toJson()).toList(),
+          ),
+        );
+      }
     } catch (e) {
-      _error = e.toString();
+      final fallback = userId != null
+          ? await _tryOfflineFallback(userId)
+          : false;
+      if (!fallback) {
+        _error = e.toString();
+      }
     }
 
     _isLoading = false;
     notifyListeners();
+  }
+
+  Future<bool> _tryOfflineFallback(String userId) async {
+    try {
+      final cached = await _offlineSync.getCachedAlerts(userId);
+      if (cached.isEmpty) return false;
+      _alerts = cached.map((json) => Alert.fromJson(json)).toList();
+      _isOffline = true;
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   Future<void> loadAlert(String id) async {

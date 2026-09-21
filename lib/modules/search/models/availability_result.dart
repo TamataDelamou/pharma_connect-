@@ -57,7 +57,14 @@ class PharmacyStock {
 
   bool get isOutdated => DateTime.now().difference(lastUpdated).inHours >= 24;
 
+  /// RG-REC-01 (audit Module 2, 29/08/2026) : « au-delà [de 24h sans
+  /// synchronisation], le statut passe automatiquement à "à confirmer" ».
+  /// `isOutdated` était déjà calculé mais jamais consulté nulle part dans le
+  /// module — corrigé ici, au niveau du modèle, pour que toute vue qui
+  /// consomme stockLabel/stockColor (PharmacyListTile, SearchResultCard...)
+  /// hérite automatiquement du correctif plutôt que de le dupliquer.
   String get stockLabel {
+    if (isOutdated) return 'À confirmer';
     if (stock <= 0) return 'Rupture';
     if (stock < 5) return 'Stock très faible';
     if (stock < 20) return 'Stock faible';
@@ -65,6 +72,7 @@ class PharmacyStock {
   }
 
   Color get stockColor {
+    if (isOutdated) return PharmaConnectColors.accentAmber;
     if (stock <= 0) return PharmaConnectColors.accentRed;
     if (stock < 5) return PharmaConnectColors.accentAmber;
     if (stock < 20) return PharmaConnectColors.accentOrange;

@@ -5,6 +5,8 @@ import '../../../core/kernel/kernel_badge.dart';
 import '../../../core/theme/colors.dart';
 import '../../../core/theme/typography.dart';
 import '../../../core/widgets/cards/glass_card.dart';
+import '../../auth/models/user_role.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../providers/stock_provider.dart';
 import '../widgets/stock_status_chip.dart';
 
@@ -20,7 +22,8 @@ class _StockAlertsScreenState extends State<StockAlertsScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<StockProvider>().loadAlerts();
+      final pharmacyId = context.read<AuthProvider>().pharmacyId;
+      context.read<StockProvider>().loadAlerts(pharmacyId: pharmacyId);
     });
   }
 
@@ -51,6 +54,22 @@ class _StockAlertsScreenState extends State<StockAlertsScreen> {
                     style: PharmaConnectTypography.heading2,
                   ),
                 ),
+                // Audit Module 11 (29/08/2026) : /stock/forecast et le
+                // nouvel écran /stock/forecast/orders (arbitrage D17)
+                // étaient routés et leur provider déclaré dans app.dart,
+                // mais n'avaient aucun point d'entrée de navigation nulle
+                // part dans l'app — même défaut que /alerts/thresholds et
+                // /alerts/preferences avant leur correction au Module 10.
+                if (context.watch<AuthProvider>().userRole ==
+                    UserRole.pharmacien)
+                  IconButton(
+                    icon: const Icon(
+                      Icons.insights_outlined,
+                      color: PharmaConnectColors.textPrimary,
+                    ),
+                    tooltip: 'Prévision de la demande',
+                    onPressed: () => context.push('/stock/forecast'),
+                  ),
                 const KernelBadge(),
               ],
             ),

@@ -86,13 +86,43 @@ class PaymentService {
     return Wallet.fromJson(row);
   }
 
-  Future<int> getWalletBalance(String userId) async {
+  // Bug corrigé (audit Module 8, 29/08/2026) : getWallet() utilisait
+  // .single(), qui lève une exception dès qu'aucune ligne n'existe — et
+  // aucun trigger d'inscription ni aucune insertion ne crée jamais de ligne
+  // wallets pour un nouvel utilisateur (grep sur toutes les migrations :
+  // zéro insert into wallets). Le premier appel réel de getWallet/loadWallet
+  // pour n'importe quel utilisateur aurait donc toujours échoué.
+  // getOrCreateWallet() auto-provisionne un portefeuille à zéro si absent,
+  // et devient le point d'entrée utilisé par le provider et par les
+  // méthodes d'écriture ci-dessous (topUpWallet, initiateTransaction).
+  Future<Wallet> getOrCreateWallet(String userId) async {
     final row = await _client
         .from('wallets')
-        .select('balance')
+        .select()
         .eq('user_id', userId)
+        .maybeSingle();
+    if (row != null) return Wallet.fromJson(row);
+
+    final created = await _client
+        .from('wallets')
+        .insert({
+          'user_id': userId,
+          'balance': 0,
+          'pending_balance': 0,
+          'total_earned': 0,
+          'total_spent': 0,
+          'cashback_available': 0,
+          'currency': 'GNF',
+          'last_updated': DateTime.now().toIso8601String(),
+        })
+        .select()
         .single();
-    return row['balance'] as int;
+    return Wallet.fromJson(created);
+  }
+
+  Future<int> getWalletBalance(String userId) async {
+    final wallet = await getOrCreateWallet(userId);
+    return wallet.balance;
   }
 
   Future<Wallet> topUpWallet({
@@ -100,7 +130,7 @@ class PaymentService {
     required int amount,
     required PaymentMethod method,
   }) async {
-    final current = await getWallet(userId);
+    final current = await getOrCreateWallet(userId);
 
     final row = await _client
         .from('wallets')
@@ -134,6 +164,14 @@ class PaymentService {
 
   // ==================== INITIATION ====================
 
+  // RG-PAY-01 (Cahier de conception, Critique) : "Aucune commande n'est
+  // marquée « payée » tant que la confirmation de l'agrégateur de paiement
+  // n'a pas été reçue et vérifiée côté serveur." Cette architecture
+  // Flutter+Supabase n'a pas de backend séparé capable de recevoir les
+  // webhooks Orange Money/MTN MoMo/Moov Money : la confirmation ci-dessous
+  // reste donc un délai simulé côté client, comportement hérité du mock.
+  // Non résolu par cet audit — limitation structurelle documentée au
+  // registre des écarts (nouvel item D, analogue à D1) plutôt que masquée.
   Future<Transaction> initiateTransaction({
     required String userId,
     required String userPhone,
@@ -146,14 +184,35 @@ class PaymentService {
     String? pharmacyName,
     bool useCashback = false,
   }) async {
+    // Bug corrigé (audit Module 8, 29/08/2026) : le cashback à utiliser
+    // était recalculé à 2% du montant à chaque paiement, sans jamais être
+    // comparé au solde réel wallet.cashbackAvailable — un utilisateur
+    // pouvait donc "dépenser" un cashback qu'il n'avait jamais gagné. Le
+    // montant réellement déduit est désormais plafonné par le solde
+    // effectif du portefeuille.
+    final wallet = await getOrCreateWallet(userId);
+
     final int fee = method == PaymentMethod.gsgWallet
         ? 0
         : (amount * _feePercent) ~/ 100;
-    final int cashback =
+    final int potentialCashback =
         (method.isMobileMoney || method == PaymentMethod.gsgWallet)
         ? (amount * _cashbackPercent) ~/ 100
         : 0;
-    final int finalAmount = amount + fee - (useCashback ? cashback : 0);
+    final int redeemedCashback = useCashback
+        ? (potentialCashback < wallet.cashbackAvailable
+              ? potentialCashback
+              : wallet.cashbackAvailable)
+        : 0;
+    final int finalAmount = amount + fee - redeemedCashback;
+
+    // Bug corrigé (audit Module 8, 29/08/2026) : aucune vérification de
+    // solde ni aucun débit n'existaient pour PaymentMethod.gsgWallet — un
+    // paiement par portefeuille pouvait donc être "effectué" avec un solde
+    // à zéro, sans jamais débiter quoi que ce soit.
+    if (method == PaymentMethod.gsgWallet && wallet.balance < finalAmount) {
+      throw Exception('Solde du portefeuille GSG insuffisant pour ce paiement.');
+    }
 
     final transaction = Transaction(
       id: const Uuid().v4(),
@@ -161,7 +220,7 @@ class PaymentService {
       userPhone: userPhone,
       amount: amount,
       fee: fee,
-      cashback: useCashback ? cashback : 0,
+      cashback: redeemedCashback,
       finalAmount: finalAmount,
       method: method,
       status: TransactionStatus.processing,
@@ -176,8 +235,21 @@ class PaymentService {
 
     await _client.from('transactions').insert(transaction.toJson());
 
+    // Bug corrigé (audit Module 8, 29/08/2026) : "Paiement en plusieurs
+    // fois" simulait quand même une confirmation immédiate et facturait la
+    // totalité tout de suite — createInstallment() n'était d'ailleurs
+    // jamais appelée depuis ce flux (aucun appelant nulle part dans le
+    // module). La transaction reste désormais 'processing' : c'est
+    // PaymentProvider.initiatePayment qui crée l'échéancier juste après, et
+    // payInstallmentByTransaction() qui complète la transaction (et génère
+    // la facture) au paiement de la dernière échéance.
+    if (method == PaymentMethod.installment) {
+      return transaction;
+    }
+
     // Simuler la confirmation (comportement hérité du mock — un vrai
-    // fournisseur Mobile Money confirmerait via webhook, pas un délai fixe).
+    // fournisseur Mobile Money confirmerait via webhook, pas un délai fixe ;
+    // voir RG-PAY-01 ci-dessus).
     await Future.delayed(const Duration(seconds: 2));
     final row = await _client
         .from('transactions')
@@ -190,9 +262,48 @@ class PaymentService {
         .single();
     final completed = Transaction.fromJson(row);
 
+    await _settleWallet(
+      userId: userId,
+      method: method,
+      finalAmount: finalAmount,
+      redeemedCashback: redeemedCashback,
+      earnedCashback: potentialCashback,
+    );
     await _createInvoice(completed);
 
     return completed;
+  }
+
+  // Bug corrigé (audit Module 8, 29/08/2026) : ni le débit du portefeuille
+  // (PaymentMethod.gsgWallet) ni le crédit du cashback gagné n'étaient
+  // jamais appliqués nulle part — wallet.balance et wallet.cashbackAvailable
+  // restaient donc figés quels que soient les paiements effectués. Ce
+  // helper centralise les deux mouvements au moment où une transaction est
+  // effectivement complétée (paiement direct ou dernière échéance).
+  Future<void> _settleWallet({
+    required String userId,
+    required PaymentMethod method,
+    required int finalAmount,
+    required int redeemedCashback,
+    required int earnedCashback,
+  }) async {
+    if (finalAmount == 0 && redeemedCashback == 0 && earnedCashback == 0) {
+      return;
+    }
+    final current = await getOrCreateWallet(userId);
+    final int debit = method == PaymentMethod.gsgWallet ? finalAmount : 0;
+
+    await _client
+        .from('wallets')
+        .update({
+          'balance': current.balance - debit,
+          'cashback_available':
+              current.cashbackAvailable - redeemedCashback + earnedCashback,
+          'total_spent': current.totalSpent + finalAmount,
+          'total_earned': current.totalEarned + earnedCashback,
+          'last_updated': DateTime.now().toIso8601String(),
+        })
+        .eq('user_id', userId);
   }
 
   Future<Transaction> confirmTransaction(String transactionId) async {
@@ -280,7 +391,7 @@ class PaymentService {
     return installment;
   }
 
-  Future<Installment> getInstallment(String installmentId) async {
+  Future<Installment> _getInstallmentById(String installmentId) async {
     final row = await _client
         .from('installments')
         .select('*, installment_payments(*)')
@@ -289,32 +400,58 @@ class PaymentService {
     return Installment.fromJson(row);
   }
 
-  Future<Installment> payInstallment(
-    String installmentId,
+  // Bug corrigé (audit Module 8, 29/08/2026) : cette méthode s'appelait
+  // getInstallment(installmentId) et cherchait par installments.id — mais
+  // payment_screen.dart navigue vers '/payments/installment/${transaction.id}'
+  // et installment_plan_screen.dart transmet cet identifiant de
+  // TRANSACTION, jamais l'id propre de l'échéancier. La recherche ne
+  // trouvait donc jamais rien ("Aucun échéancier trouvé" systématique).
+  // Résolution : chercher par transaction_id, l'identifiant réellement
+  // disponible côté écran, sans changer la signature attendue par
+  // installment_plan_screen.dart / PaymentProvider.
+  Future<Installment> getInstallmentByTransaction(String transactionId) async {
+    final row = await _client
+        .from('installments')
+        .select('*, installment_payments(*)')
+        .eq('transaction_id', transactionId)
+        .single();
+    return Installment.fromJson(row);
+  }
+
+  Future<Installment> payInstallmentByTransaction(
+    String transactionId,
     int paymentNumber,
   ) async {
+    final installment = await getInstallmentByTransaction(transactionId);
+
     await _client
         .from('installment_payments')
         .update({
           'status': InstallmentPaymentStatus.paid.name,
           'paid_at': DateTime.now().toIso8601String(),
         })
-        .eq('installment_id', installmentId)
+        .eq('installment_id', installment.id)
         .eq('payment_number', paymentNumber);
 
-    final installment = await getInstallment(installmentId);
-    if (installment.paidCount == installment.numberOfPayments) {
+    final updated = await _getInstallmentById(installment.id);
+    if (updated.paidCount == updated.numberOfPayments) {
       await _client
           .from('installments')
           .update({
             'status': InstallmentStatus.completed.name,
             'completed_at': DateTime.now().toIso8601String(),
           })
-          .eq('id', installmentId);
-      return getInstallment(installmentId);
+          .eq('id', installment.id);
+      // Bug corrigé (audit Module 8, 29/08/2026) : la transaction parente
+      // restait indéfiniment 'processing' même une fois l'échéancier
+      // intégralement soldé — confirmTransaction() génère aussi la facture
+      // (_createInvoice), jusqu'ici jamais produite pour un paiement en
+      // plusieurs fois.
+      await confirmTransaction(transactionId);
+      return getInstallmentByTransaction(transactionId);
     }
 
-    return installment;
+    return updated;
   }
 
   // ==================== FACTURES ====================

@@ -5,6 +5,8 @@ import '../../../core/kernel/kernel_badge.dart';
 import '../../../core/theme/colors.dart';
 import '../../../core/theme/typography.dart';
 import '../../../core/widgets/cards/glass_card.dart';
+import '../../auth/models/user_role.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../models/reservation.dart';
 import '../models/reservation_status.dart';
 import '../providers/reservation_provider.dart';
@@ -17,20 +19,76 @@ class PharmacyQueueScreen extends StatefulWidget {
 }
 
 class _PharmacyQueueScreenState extends State<PharmacyQueueScreen> {
-  // TODO: from auth — pharmacie de l'officine connectée
-  static const String _pharmacyId = 'ph_1';
-
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ReservationProvider>().refreshQueue(_pharmacyId);
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _refresh());
+  }
+
+  // Bug corrigé (audit Module 6, 29/08/2026) : cet écran utilisait un
+  // pharmacyId en dur ('ph_1') au lieu de AuthProvider.pharmacyId — la file
+  // d'attente affichée n'était donc jamais celle de l'officine réellement
+  // connectée. Même défaut que 'admin' (Module 4)/'patient_123' (Modules 5
+  // et 6).
+  Future<void> _refresh() async {
+    final pharmacyId = context.read<AuthProvider>().pharmacyId;
+    if (pharmacyId == null) return;
+    await context.read<ReservationProvider>().refreshQueue(pharmacyId);
   }
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
     final provider = context.watch<ReservationProvider>();
+    // Aucun contrôle d'accès n'existait sur cet écran (audit Module 6) :
+    // n'importe quel utilisateur authentifié pouvait consulter la file
+    // d'attente d'une officine (identités de patients incluses) et déclencher
+    // "Prêt"/"Retiré" — même patron de correction que prescription_detail_
+    // screen.dart au Module 5.
+    final isPharmacist = auth.userRole == UserRole.pharmacien;
+    final pharmacyId = auth.pharmacyId;
+
+    if (!isPharmacist) {
+      return Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.lock_outline, size: 48, color: Colors.white24),
+                const SizedBox(height: 16),
+                Text(
+                  'Réservé aux pharmaciens de l\'officine.',
+                  style: PharmaConnectTypography.body2,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                OutlinedButton(
+                  onPressed: () => context.pop(),
+                  child: const Text('Retour'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+    if (pharmacyId == null) {
+      return Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(
+              'Aucune officine rattachée à ce compte pharmacien.',
+              style: PharmaConnectTypography.body2,
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      );
+    }
+
     final queue =
         provider.reservations
             .where(
@@ -47,8 +105,7 @@ class _PharmacyQueueScreenState extends State<PharmacyQueueScreen> {
 
     return Scaffold(
       body: RefreshIndicator(
-        onRefresh: () =>
-            context.read<ReservationProvider>().refreshQueue(_pharmacyId),
+        onRefresh: _refresh,
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(
@@ -78,9 +135,7 @@ class _PharmacyQueueScreenState extends State<PharmacyQueueScreen> {
                       Icons.refresh,
                       color: PharmaConnectColors.textSecondary,
                     ),
-                    onPressed: () => context
-                        .read<ReservationProvider>()
-                        .refreshQueue(_pharmacyId),
+                    onPressed: _refresh,
                   ),
                 ],
               ),
@@ -89,11 +144,52 @@ class _PharmacyQueueScreenState extends State<PharmacyQueueScreen> {
                 '${queue.length} client(s) en attente de retrait',
                 style: PharmaConnectTypography.body2,
               ),
+              if (provider.isOffline && provider.reservations.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: PharmaConnectColors.accentAmber.withValues(
+                      alpha: 0.1,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: PharmaConnectColors.accentAmber.withValues(
+                        alpha: 0.2,
+                      ),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.cloud_off,
+                        size: 16,
+                        color: PharmaConnectColors.accentAmber,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          provider.error ??
+                              'Hors connexion — dernière file synchronisée.',
+                          style: PharmaConnectTypography.micro.copyWith(
+                            color: PharmaConnectColors.accentAmber,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
               const SizedBox(height: 24),
               Expanded(
                 child: provider.isLoading
                     ? const Center(child: CircularProgressIndicator())
-                    : provider.error != null
+                    // Bug corrigé (audit Module 6) : même garde
+                    // `&& provider.reservations.isEmpty` qu'ailleurs, pour
+                    // ne pas masquer la file en cache derrière une erreur
+                    // bloquante en mode hors-ligne.
+                    : provider.error != null && provider.reservations.isEmpty
                     ? Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -107,9 +203,7 @@ class _PharmacyQueueScreenState extends State<PharmacyQueueScreen> {
                             ),
                             const SizedBox(height: 16),
                             ElevatedButton(
-                              onPressed: () => context
-                                  .read<ReservationProvider>()
-                                  .refreshQueue(_pharmacyId),
+                              onPressed: _refresh,
                               child: const Text('Réessayer'),
                             ),
                           ],

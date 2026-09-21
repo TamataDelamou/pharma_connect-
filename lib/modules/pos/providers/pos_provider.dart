@@ -1,0 +1,238 @@
+import 'package:flutter/material.dart';
+import '../models/pos_sale.dart';
+import '../models/pos_sale_item.dart';
+import '../models/pos_receipt.dart';
+import '../services/pos_service.dart';
+
+class POSProvider extends ChangeNotifier {
+  final POSService _service = POSService();
+
+  List<POSSale> _sales = [];
+  List<POSSaleItem> _cart = [];
+  POSSale? _currentSale;
+  POSReceipt? _currentReceipt;
+  bool _isLoading = false;
+  bool _isCheckingOut = false;
+  bool _isPrinting = false;
+  String? _error;
+  String _selectedPaymentMethod = 'cash';
+  double _discountPercent = 0;
+
+  List<POSSale> get sales => _sales;
+  List<POSSaleItem> get cart => _cart;
+  POSSale? get currentSale => _currentSale;
+  POSReceipt? get currentReceipt => _currentReceipt;
+  bool get isLoading => _isLoading;
+  bool get isCheckingOut => _isCheckingOut;
+  bool get isPrinting => _isPrinting;
+  String? get error => _error;
+  String get selectedPaymentMethod => _selectedPaymentMethod;
+  double get discountPercent => _discountPercent;
+
+  double get total {
+    return _cart.fold(0, (sum, item) => sum + item.totalPrice);
+  }
+
+  double get discountAmount {
+    return total * (_discountPercent / 100);
+  }
+
+  double get taxAmount {
+    return (total - discountAmount) * 0.05; // 5% TVA
+  }
+
+  double get finalTotal {
+    return total - discountAmount + taxAmount;
+  }
+
+  // ---- Cart Management ----
+
+  void addToCart(POSSaleItem item) {
+    final existingIndex = _cart.indexWhere(
+      (i) => i.productId == item.productId,
+    );
+    if (existingIndex != -1) {
+      final existing = _cart[existingIndex];
+      _cart[existingIndex] = existing.copyWith(
+        quantity: existing.quantity + item.quantity,
+        totalPrice: (existing.quantity + item.quantity) * existing.unitPrice,
+      );
+    } else {
+      _cart.add(item);
+    }
+    notifyListeners();
+  }
+
+  void removeFromCart(String productId) {
+    _cart.removeWhere((item) => item.productId == productId);
+    notifyListeners();
+  }
+
+  void updateCartItemQuantity(String productId, int quantity) {
+    final index = _cart.indexWhere((item) => item.productId == productId);
+    if (index != -1) {
+      if (quantity <= 0) {
+        _cart.removeAt(index);
+      } else {
+        final item = _cart[index];
+        _cart[index] = item.copyWith(
+          quantity: quantity,
+          totalPrice: quantity * item.unitPrice,
+        );
+      }
+      notifyListeners();
+    }
+  }
+
+  void clearCart() {
+    _cart.clear();
+    _discountPercent = 0;
+    notifyListeners();
+  }
+
+  void setPaymentMethod(String method) {
+    _selectedPaymentMethod = method;
+    notifyListeners();
+  }
+
+  void setDiscount(double percent) {
+    _discountPercent = percent.clamp(0, 100);
+    notifyListeners();
+  }
+
+  // ---- Checkout ----
+
+  Future<bool> checkout({
+    required String pharmacyId,
+    required String cashierId,
+    String? patientId,
+  }) async {
+    if (_cart.isEmpty) return false;
+
+    _isCheckingOut = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final sale = POSSale(
+        id: '',
+        pharmacyId: pharmacyId,
+        saleNumber: '',
+        patientId: patientId,
+        cashierId: cashierId,
+        totalAmount: total.round(),
+        discountAmount: discountAmount.round(),
+        taxAmount: taxAmount.round(),
+        finalAmount: finalTotal.round(),
+        paymentMethod: _selectedPaymentMethod,
+        status: 'completed',
+        items: _cart,
+        createdAt: DateTime.now().toUtc(),
+        updatedAt: DateTime.now().toUtc(),
+      );
+
+      _currentSale = await _service.createSale(sale);
+      _currentReceipt = await _service.getReceipt(_currentSale!.id);
+      _cart.clear();
+      _discountPercent = 0;
+      _isCheckingOut = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      _isCheckingOut = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  // ---- Sales History ----
+
+  Future<void> loadSales({
+    String? pharmacyId,
+    String? status,
+    DateTime? fromDate,
+    DateTime? toDate,
+  }) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+    try {
+      _sales = await _service.getSales(
+        pharmacyId: pharmacyId,
+        status: status,
+        fromDate: fromDate,
+        toDate: toDate,
+      );
+    } catch (e) {
+      _error = e.toString();
+    }
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> loadSale(String id) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+    try {
+      _currentSale = await _service.getSale(id);
+      if (_currentSale != null) {
+        _currentReceipt = await _service.getReceipt(id);
+      }
+    } catch (e) {
+      _error = e.toString();
+    }
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<bool> refundSale(String saleId) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+    try {
+      _currentSale = await _service.refundSale(saleId);
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> printReceipt() async {
+    if (_currentSale == null) return false;
+
+    _isPrinting = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final url = await _service.generateReceiptPDF(_currentSale!.id);
+      _currentReceipt = await _service.getReceipt(_currentSale!.id);
+      _isPrinting = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      _isPrinting = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  void clearError() {
+    _error = null;
+    notifyListeners();
+  }
+
+  void clearCurrent() {
+    _currentSale = null;
+    _currentReceipt = null;
+    notifyListeners();
+  }
+}
