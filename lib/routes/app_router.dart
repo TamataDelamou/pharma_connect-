@@ -247,10 +247,8 @@ import '../modules/cash/screens/cash_report_screen.dart';
 
 //returns
 import '../modules/returns/screens/customer_returns_list_screen.dart';
-// TODO PharmaConnect: écran non cadré, cluster hors-cahier, cf. Etape1 §1.5 — audit dédié requis avant réintégration.
-// import '../modules/returns/screens/customer_return_detail_screen.dart';
-// TODO PharmaConnect: écran non cadré, cluster hors-cahier, cf. Etape1 §1.5 — audit dédié requis avant réintégration.
-// import '../modules/returns/screens/customer_return_create_screen.dart';
+import '../modules/returns/screens/customer_return_detail_screen.dart';
+import '../modules/returns/screens/customer_return_create_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -1562,21 +1560,19 @@ class AppRouter {
       // `/returns/customer/:id` capturait `/returns/customer/new` (déclarée
       // après, même profondeur à 3 segments) — réordonnancement. Dernière
       // des 14 occurrences trouvées lors de ce balayage complet.
-      // TODO PharmaConnect: écran non cadré, cluster hors-cahier, cf. Etape1 §1.5 — audit dédié requis avant réintégration.
-      // GoRoute(
-      //   path: '/returns/customer/new',
-      //   name: 'returns-customer-new',
-      //   builder: (context, state) => const CustomerReturnCreateScreen(),
-      // ),
-      // TODO PharmaConnect: écran non cadré, cluster hors-cahier, cf. Etape1 §1.5 — audit dédié requis avant réintégration.
-      // GoRoute(
-      //   path: '/returns/customer/:id',
-      //   name: 'returns-customer-detail',
-      //   builder: (context, state) {
-      //     final id = state.pathParameters['id']!;
-      //     return CustomerReturnDetailScreen(returnId: id);
-      //   },
-      // ),
+      GoRoute(
+        path: '/returns/customer/new',
+        name: 'returns-customer-new',
+        builder: (context, state) => const CustomerReturnCreateScreen(),
+      ),
+      GoRoute(
+        path: '/returns/customer/:id',
+        name: 'returns-customer-detail',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return CustomerReturnDetailScreen(returnId: id);
+        },
+      ),
     ],
   );
 }
