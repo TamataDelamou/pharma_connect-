@@ -242,10 +242,8 @@ import '../modules/sales/screens/customers_list_screen.dart';
 
 //cash
 import '../modules/cash/screens/cash_dashboard_screen.dart';
-// TODO PharmaConnect: écran non cadré, cluster hors-cahier, cf. Etape1 §1.5 — audit dédié requis avant réintégration.
-// import '../modules/cash/screens/cash_history_screen.dart';
-// TODO PharmaConnect: écran non cadré, cluster hors-cahier, cf. Etape1 §1.5 — audit dédié requis avant réintégration.
-// import '../modules/cash/screens/cash_report_screen.dart';
+import '../modules/cash/screens/cash_history_screen.dart';
+import '../modules/cash/screens/cash_report_screen.dart';
 
 //returns
 import '../modules/returns/screens/customer_returns_list_screen.dart';
@@ -1539,18 +1537,16 @@ class AppRouter {
         name: 'cash',
         builder: (context, state) => const CashDashboardScreen(),
       ),
-      // TODO PharmaConnect: écran non cadré, cluster hors-cahier, cf. Etape1 §1.5 — audit dédié requis avant réintégration.
-      // GoRoute(
-      //   path: '/cash/history',
-      //   name: 'cash-history',
-      //   builder: (context, state) => const CashHistoryScreen(),
-      // ),
-      // TODO PharmaConnect: écran non cadré, cluster hors-cahier, cf. Etape1 §1.5 — audit dédié requis avant réintégration.
-      // GoRoute(
-      //   path: '/cash/report',
-      //   name: 'cash-report',
-      //   builder: (context, state) => const CashReportScreen(),
-      // ),
+      GoRoute(
+        path: '/cash/history',
+        name: 'cash-history',
+        builder: (context, state) => const CashHistoryScreen(),
+      ),
+      GoRoute(
+        path: '/cash/report',
+        name: 'cash-report',
+        builder: (context, state) => const CashReportScreen(),
+      ),
       //returns
       GoRoute(
         path: '/returns',
