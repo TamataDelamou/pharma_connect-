@@ -7,6 +7,7 @@ import '../../../core/theme/typography.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../../../core/widgets/inputs/glass_input.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../models/stock_adjustment.dart';
 import '../providers/stock_provider.dart';
 
@@ -40,6 +41,7 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<StockProvider>();
+    final auth = context.watch<AuthProvider>();
 
     return Scaffold(
       body: Padding(
@@ -218,27 +220,60 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
                             ? quantity
                             : -quantity;
 
+                        // Audit Module 4 (29/08/2026) : userId/pharmacyId
+                        // étaient codés en dur ('admin'/'Admin') — user_id
+                        // est une colonne uuid en base, la chaîne littérale
+                        // 'admin' faisait donc échouer l'insertion à chaque
+                        // ajustement (après que stock_items ait déjà été
+                        // modifié, voir StockService.adjustStock). Désormais
+                        // pris depuis AuthProvider, comme l'exige RG-AUT-03
+                        // (traçabilité par identifiant réel du membre
+                        // d'officine).
+                        final pharmacyId = auth.pharmacyId;
+                        final userId = auth.userId;
+                        if (pharmacyId == null || userId == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Compte non rattaché à une officine vérifiée',
+                              ),
+                              backgroundColor: PharmaConnectColors.accentRed,
+                            ),
+                          );
+                          return;
+                        }
+
                         final success = await provider.adjustStock(
+                          pharmacyId: pharmacyId,
                           productId: widget.productId,
                           quantity: finalQuantity,
                           reason: _selectedReason,
-                          userId: 'admin', // TODO: récupérer de l'auth
-                          userName: 'Admin',
+                          userId: userId,
+                          userName: auth.userEmail ?? auth.userPhone ?? 'Pharmacien',
                           notes: _notesController.text.trim(),
                         );
 
                         if (success && context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Ajustement effectué avec succès'),
-                              backgroundColor: PharmaConnectColors.accentGreen,
+                            SnackBar(
+                              content: Text(
+                                provider.isOffline
+                                    ? 'Ajustement enregistré hors-ligne — '
+                                          'sera synchronisé à la reconnexion'
+                                    : 'Ajustement effectué avec succès',
+                              ),
+                              backgroundColor: provider.isOffline
+                                  ? PharmaConnectColors.accentAmber
+                                  : PharmaConnectColors.accentGreen,
                             ),
                           );
                           context.pop();
                         } else if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Erreur lors de l\'ajustement'),
+                            SnackBar(
+                              content: Text(
+                                provider.error ?? 'Erreur lors de l\'ajustement',
+                              ),
                               backgroundColor: PharmaConnectColors.accentRed,
                             ),
                           );

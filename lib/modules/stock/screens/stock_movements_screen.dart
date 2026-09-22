@@ -74,10 +74,13 @@ class _StockMovementsScreenState extends State<StockMovementsScreen> {
                           ),
                           child: Row(
                             children: [
+                              // Audit Module 4 (29/08/2026) : mêmes icônes
+                              // inversées corrigées que dans
+                              // stock_detail_screen.dart.
                               Icon(
                                 movement.quantity > 0
-                                    ? Icons.arrow_downward
-                                    : Icons.arrow_upward,
+                                    ? Icons.arrow_upward
+                                    : Icons.arrow_downward,
                                 color: movement.typeColor,
                                 size: 24,
                               ),

@@ -6,8 +6,10 @@ import '../../../core/theme/colors.dart';
 import '../../../core/theme/typography.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../../../core/widgets/inputs/glass_input.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../models/stock_status.dart';
 import '../providers/stock_provider.dart';
+import '../services/stock_summary_card.dart';
 import '../widgets/stock_status_chip.dart';
 
 class StockListScreen extends StatefulWidget {
@@ -24,7 +26,8 @@ class _StockListScreenState extends State<StockListScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<StockProvider>().loadStock();
+      final pharmacyId = context.read<AuthProvider>().pharmacyId;
+      context.read<StockProvider>().loadStock(pharmacyId: pharmacyId);
     });
   }
 
@@ -37,6 +40,44 @@ class _StockListScreenState extends State<StockListScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<StockProvider>();
+    final pharmacyId = context.watch<AuthProvider>().pharmacyId;
+
+    // Audit Module 4 (29/08/2026) : un pharmacien dont la candidature n'est
+    // pas encore vérifiée (RG-AUT-01, Module 1) n'a pas de pharmacyId — sans
+    // ce garde-fou, l'écran appelait loadStock(pharmacyId: null) et
+    // affichait le stock de TOUTES les officines mélangées.
+    if (pharmacyId == null) {
+      return Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.local_pharmacy_outlined,
+                  size: 64,
+                  color: Colors.white24,
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Aucune officine rattachée à votre compte',
+                  style: PharmaConnectTypography.heading2,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'La gestion du stock sera disponible dès que votre '
+                  'candidature de licence aura été validée par le back-office.',
+                  style: PharmaConnectTypography.body2,
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       body: Padding(
@@ -78,6 +119,28 @@ class _StockListScreenState extends State<StockListScreen> {
             ),
             const SizedBox(height: 16),
 
+            // Audit Module 4 : StockSummaryCard existait déjà comme
+            // composant mais n'était câblé dans aucun écran — un
+            // pharmacien n'avait aucune vue d'ensemble de son inventaire
+            // sans ouvrir l'écran Alertes séparément.
+            if (provider.stockItems.isNotEmpty) ...[
+              StockSummaryCard(
+                totalProducts: provider.stockItems.length,
+                totalStock: provider.stockItems.fold(
+                  0,
+                  (sum, item) => sum + item.availableQuantity,
+                ),
+                lowStockCount: provider.criticalStockItems.length,
+                outOfStockCount: provider.outOfStockItems.length,
+              ),
+              const SizedBox(height: 16),
+            ],
+
+            if (provider.isOffline) ...[
+              _buildOfflineBanner(provider),
+              const SizedBox(height: 12),
+            ],
+
             // Barre de recherche
             GlassInput(
               label: '',
@@ -89,29 +152,59 @@ class _StockListScreenState extends State<StockListScreen> {
                   : null,
               onSuffixPressed: () {
                 _searchController.clear();
-                provider.search('');
+                provider.search('', pharmacyId: pharmacyId);
               },
               onChanged: (value) {
                 setState(() {});
-                provider.search(value);
+                provider.search(value, pharmacyId: pharmacyId);
               },
             ),
             const SizedBox(height: 16),
 
             // Contenu
-            Expanded(child: _buildContent(provider)),
+            Expanded(child: _buildContent(provider, pharmacyId)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildContent(StockProvider provider) {
+  Widget _buildOfflineBanner(StockProvider provider) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: PharmaConnectColors.accentAmber.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: PharmaConnectColors.accentAmber.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.cloud_off,
+            size: 18,
+            color: PharmaConnectColors.accentAmber,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              provider.error ??
+                  'Hors-ligne — données affichées depuis le cache local.',
+              style: PharmaConnectTypography.micro,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContent(StockProvider provider, String pharmacyId) {
     if (provider.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (provider.error != null) {
+    if (provider.error != null && provider.stockItems.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -124,7 +217,7 @@ class _StockListScreenState extends State<StockListScreen> {
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => provider.loadStock(),
+              onPressed: () => provider.loadStock(pharmacyId: pharmacyId),
               child: const Text('Réessayer'),
             ),
           ],
