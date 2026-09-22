@@ -26,7 +26,11 @@ import 'modules/homecare/providers/offline_homecare_provider.dart';
 import 'modules/professionals/providers/professionals_provider.dart';
 import 'modules/healthrecord/providers/health_record_provider.dart';
 import 'modules/healthrecord/providers/preventive_alert_provider.dart';
+import 'modules/healthrecord/providers/health_goal_provider.dart';
 import 'modules/iot/providers/iot_provider.dart';
+import 'modules/loyalty/providers/loyalty_provider.dart';
+import 'modules/loyalty/providers/badge_provider.dart';
+import 'modules/loyalty/providers/personalized_reward_provider.dart';
 
 class PharmaConnectApp extends StatelessWidget {
   const PharmaConnectApp({super.key});
@@ -63,7 +67,26 @@ class PharmaConnectApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ProfessionalsProvider()),
         ChangeNotifierProvider(create: (_) => HealthRecordProvider()),
         ChangeNotifierProvider(create: (_) => PreventiveAlertProvider()),
+        // Oubli du lot Module 20/DSN : health_goals_screen.dart,
+        // health_goal_create_screen.dart et health_milestones_screen.dart
+        // appellent deja context.watch/read<HealthGoalProvider>() sans que
+        // ce provider ne soit jamais declare ici -> ProviderNotFoundException
+        // garantie a l'ouverture de ces 3 ecrans (trouve en verifiant la
+        // migration gamification_health, corrige au meme geste).
+        ChangeNotifierProvider(create: (_) => HealthGoalProvider()),
         ChangeNotifierProvider(create: (_) => IotProvider()),
+        // Module 16/FID (loyalty), deja sur main avant le reset (commit
+        // 35c0756) mais jamais cable ici : badges_gallery_screen.dart,
+        // leaderboard_screen.dart, loyalty_dashboard_screen.dart,
+        // loyalty_pharmacy_select_screen.dart et
+        // personalized_rewards_screen.dart appellent deja
+        // context.watch/read<LoyaltyProvider|BadgeProvider|
+        // PersonalizedRewardProvider>() -> ProviderNotFoundException
+        // garantie sur tout le module, trouve en verifiant les 3 migrations
+        // gamification/recompenses manquantes, corrige au meme geste.
+        ChangeNotifierProvider(create: (_) => LoyaltyProvider()),
+        ChangeNotifierProvider(create: (_) => BadgeProvider()),
+        ChangeNotifierProvider(create: (_) => PersonalizedRewardProvider()),
       ],
       child: MaterialApp.router(
         title: 'PharmaConnect',
