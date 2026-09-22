@@ -11,7 +11,18 @@ import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../../../core/widgets/inputs/glass_input.dart';
 import '../providers/auth_provider.dart';
+import '../services/pharmacy_service.dart';
+import '../widgets/phone_input_field.dart';
 
+/// RG-AUT-01 (audit Module 1, 29/08/2026) : soumet réellement la candidature
+/// d'officine à public.pharmacies via PharmacyService, à l'état 'pending'.
+/// Avant ce correctif, cet écran ne persistait rien nulle part (délai
+/// simulé) — voir le rapport de clôture Module 1 pour le détail. Le compte
+/// reste utilisable après soumission (accès au tableau de bord), mais
+/// fonctionnellement inerte pour tout ce qui exige is_pharmacy_staff() —
+/// c'est-à-dire toute écriture de stock/vente/etc. — tant que le back-office
+/// GSG n'a pas fait passer le statut à 'verified'/'active' (voir la
+/// migration 20260829013000).
 class LicenseVerificationScreen extends StatefulWidget {
   const LicenseVerificationScreen({super.key});
 
@@ -21,16 +32,22 @@ class LicenseVerificationScreen extends StatefulWidget {
 }
 
 class _LicenseVerificationScreenState extends State<LicenseVerificationScreen> {
+  final _pharmacyNameController = TextEditingController();
   final _licenseNumberController = TextEditingController();
   final _nameController = TextEditingController();
+  final _addressController = TextEditingController();
+  final _pharmacyService = PharmacyService();
+  String? _phoneE164;
   File? _licenseImage;
   final ImagePicker _picker = ImagePicker();
   bool _isSubmitting = false;
 
   @override
   void dispose() {
+    _pharmacyNameController.dispose();
     _licenseNumberController.dispose();
     _nameController.dispose();
+    _addressController.dispose();
     super.dispose();
   }
 
@@ -87,6 +104,13 @@ class _LicenseVerificationScreenState extends State<LicenseVerificationScreen> {
                   const SizedBox(height: 24),
 
                   GlassInput(
+                    label: 'Nom de l\'officine',
+                    hint: 'Ex: Pharmacie Centrale',
+                    controller: _pharmacyNameController,
+                    prefixIcon: Icons.local_pharmacy,
+                  ),
+                  const SizedBox(height: 16),
+                  GlassInput(
                     label: 'Numéro de licence',
                     hint: 'Ex: DNPM-2024-001',
                     controller: _licenseNumberController,
@@ -98,6 +122,17 @@ class _LicenseVerificationScreenState extends State<LicenseVerificationScreen> {
                     hint: 'Ex: Dr. Jean Dupont',
                     controller: _nameController,
                     prefixIcon: Icons.person,
+                  ),
+                  const SizedBox(height: 16),
+                  PhoneInputField(
+                    onChanged: (e164) => setState(() => _phoneE164 = e164),
+                  ),
+                  const SizedBox(height: 16),
+                  GlassInput(
+                    label: 'Adresse de l\'officine',
+                    hint: 'Ex: Quartier Almamya, Kaloum, Conakry',
+                    controller: _addressController,
+                    prefixIcon: Icons.location_on,
                   ),
                   const SizedBox(height: 16),
                   const Text(
@@ -180,8 +215,10 @@ class _LicenseVerificationScreenState extends State<LicenseVerificationScreen> {
                     label: 'Soumettre la vérification',
                     isLoading: _isSubmitting || auth.isLoading,
                     onPressed: () async {
-                      if (_licenseNumberController.text.trim().isEmpty ||
-                          _nameController.text.trim().isEmpty) {
+                      if (_pharmacyNameController.text.trim().isEmpty ||
+                          _nameController.text.trim().isEmpty ||
+                          _addressController.text.trim().isEmpty ||
+                          _phoneE164 == null) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text(
@@ -195,19 +232,51 @@ class _LicenseVerificationScreenState extends State<LicenseVerificationScreen> {
 
                       setState(() => _isSubmitting = true);
 
-                      // Simuler l'envoi de la vérification
-                      await Future.delayed(const Duration(seconds: 2));
+                      // RG-AUT-01 (audit Module 1, 29/08/2026) : soumission
+                      // réelle plutôt que simulée — voir PharmacyService et
+                      // la migration 20260829013000. La photo de licence
+                      // n'est pas encore téléversée (pas de bucket Storage
+                      // dédié configuré pour ce module) : chantier séparé,
+                      // documenté plutôt que simulé silencieusement.
+                      String? errorMessage;
+                      try {
+                        await _pharmacyService.submitLicenseVerification(
+                          pharmacyName: _pharmacyNameController.text.trim(),
+                          managerName: _nameController.text.trim(),
+                          phone: _phoneE164!,
+                          address: _addressController.text.trim(),
+                          licenseNumber:
+                              _licenseNumberController.text.trim(),
+                        );
+                      } catch (e) {
+                        errorMessage = e.toString();
+                      }
 
+                      if (!context.mounted) return;
                       setState(() => _isSubmitting = false);
 
-                      if (context.mounted) {
+                      if (errorMessage == null) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text('Vérification soumise avec succès !'),
+                            content: Text(
+                              'Candidature soumise. Votre compte est actif ; '
+                              'les fonctions officine (stock, ventes...) '
+                              'seront disponibles après vérification par '
+                              'l\'équipe GSG.',
+                            ),
                             backgroundColor: PharmaConnectColors.accentGreen,
                           ),
                         );
                         context.go('/dashboard');
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Échec de la soumission : $errorMessage',
+                            ),
+                            backgroundColor: PharmaConnectColors.accentRed,
+                          ),
+                        );
                       }
                     },
                   ),

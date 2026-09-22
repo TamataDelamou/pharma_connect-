@@ -169,7 +169,14 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                         );
                       }
                       if (success && context.mounted) {
-                        context.go('/dashboard');
+                        // RG-AUT-01 (audit Module 1, 29/08/2026) : un
+                        // pharmacien sans officine rattachée passe par la
+                        // vérification de licence avant le tableau de bord.
+                        context.go(
+                          auth.needsLicenseVerification
+                              ? '/license-verification'
+                              : '/dashboard',
+                        );
                       } else if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(

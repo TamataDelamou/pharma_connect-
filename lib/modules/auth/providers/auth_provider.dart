@@ -20,6 +20,8 @@ class AuthProvider extends ChangeNotifier {
   String? _pendingIdentifier; // stocke l'email ou téléphone en cours
   String? _gsgId;
   String? _gsgOrgId;
+  String? _pharmacyId;
+  bool _isGsgAdmin = false;
   String? _error; // Gestion d'erreur
 
   bool get isLoading => _isLoading;
@@ -31,7 +33,25 @@ class AuthProvider extends ChangeNotifier {
   String? get pendingIdentifier => _pendingIdentifier;
   String? get gsgId => _gsgId;
   String? get gsgOrgId => _gsgOrgId;
+  String? get pharmacyId => _pharmacyId;
+
+  /// Vrai si le compte connecté est aussi un membre actif du back-office GSG
+  /// (`public.admin_users`, audit Module 14, 29/08/2026). Reflète côté client
+  /// exactement le test déjà utilisé par la RLS `is_gsg_admin()` — sans
+  /// dupliquer sa logique : c'est une simple lecture best-effort de la même
+  /// table, jamais utilisée pour décider d'un accès (la RLS reste seule
+  /// autorité), seulement pour savoir quelles actions proposer à l'écran
+  /// (ex. Approuver/Rejeter/Décaisser en financement, request_detail_screen).
+  bool get isGsgAdmin => _isGsgAdmin;
   String? get error => _error;
+
+  /// RG-AUT-01 (audit Module 1, 29/08/2026) : un compte pharmacien sans
+  /// officine rattachée doit passer par la vérification de licence avant
+  /// le tableau de bord. `_pharmacyId` n'est jamais renseigné par
+  /// l'auto-inscription (voir pharmacy_service.dart et la migration
+  /// 20260829013000) — seul le back-office GSG le fait, après vérification.
+  bool get needsLicenseVerification =>
+      _userRole == UserRole.pharmacien && _pharmacyId == null;
 
   // === TÉLÉPHONE ===
 
@@ -145,14 +165,45 @@ class AuthProvider extends ChangeNotifier {
     UserRole? role,
   }) async {
     try {
-      await _profileService.upsertProfile(
+      final row = await _profileService.upsertProfile(
         id: userId,
         phone: phone,
         fullName: fullName,
         role: role?.name,
       );
+      // Relit toujours role/pharmacy_id depuis la ligne persistée plutôt
+      // que du seul paramètre role (audit Module 1, 29/08/2026) : une
+      // simple connexion (login_screen.dart) ne fournit pas de rôle, seule
+      // l'inscription le fait — sans cette relecture, needsLicenseVerification
+      // serait systématiquement faux pour un pharmacien qui se reconnecte.
+      if (row != null) {
+        final roleStr = row['role'] as String?;
+        if (roleStr != null) {
+          _userRole = UserRole.values.byName(roleStr);
+        }
+        _pharmacyId = row['pharmacy_id'] as String?;
+      }
     } catch (_) {
       // Best-effort — voir docstring ci-dessus.
+    }
+    await _loadAdminStatus(userId);
+  }
+
+  /// Best-effort, même rationale que `_persistProfile` ci-dessus : une
+  /// panne réseau ou l'absence de ligne `admin_users` (l'immense majorité
+  /// des comptes) ne doit jamais transformer une connexion réussie en échec
+  /// — `_isGsgAdmin` reste simplement à `false`.
+  Future<void> _loadAdminStatus(String userId) async {
+    try {
+      final row = await SupabaseService().client
+          .from('admin_users')
+          .select('is_active')
+          .eq('user_id', userId)
+          .eq('is_active', true)
+          .maybeSingle();
+      _isGsgAdmin = row != null;
+    } catch (_) {
+      _isGsgAdmin = false;
     }
   }
 
@@ -183,6 +234,8 @@ class AuthProvider extends ChangeNotifier {
     _userRole = null;
     _gsgId = null;
     _gsgOrgId = null;
+    _pharmacyId = null;
+    _isGsgAdmin = false;
     _isAuthenticated = false;
     _error = null;
     notifyListeners();
