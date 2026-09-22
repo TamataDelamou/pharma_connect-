@@ -7,6 +7,8 @@ import '../../../core/theme/spacing.dart';
 import '../../../core/theme/typography.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
+import '../../auth/models/user_role.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../providers/catalog_provider.dart';
 
 class CatalogDetailScreen extends StatefulWidget {
@@ -31,6 +33,14 @@ class _CatalogDetailScreenState extends State<CatalogDetailScreen> {
   Widget build(BuildContext context) {
     final provider = context.watch<CatalogProvider>();
     final product = provider.selectedProduct;
+    // Audit Module 3 (29/08/2026) : le bouton "Gérer le stock" menait vers
+    // /stock/adjust/:id pour n'importe quel rôle authentifié, y compris un
+    // patient — la RLS (is_pharmacy_staff, Module 0) bloque bien l'écriture
+    // réelle, mais affichait un bouton menant systématiquement à une
+    // impasse pour tout rôle non pertinent. Restreint ici côté affichage à
+    // 'pharmacien', seul rôle pouvant un jour satisfaire is_pharmacy_staff.
+    final isPharmacyRole =
+        context.watch<AuthProvider>().userRole == UserRole.pharmacien;
 
     if (provider.isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -171,6 +181,14 @@ class _CatalogDetailScreenState extends State<CatalogDetailScreen> {
                                     ? PharmaConnectColors.accentOrange
                                     : PharmaConnectColors.accentGreen,
                               ),
+                              if (product.isControlledSubstance) ...[
+                                const SizedBox(width: 8),
+                                _buildInfoChip(
+                                  'Stupéfiant/Psychotrope',
+                                  Icons.warning_amber_rounded,
+                                  PharmaConnectColors.accentRed,
+                                ),
+                              ],
                             ],
                           ),
                           if (product.description != null) ...[
@@ -193,32 +211,34 @@ class _CatalogDetailScreenState extends State<CatalogDetailScreen> {
                                   },
                                 ),
                               ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: OutlinedButton.icon(
-                                  onPressed: () {
-                                    context.push(
-                                      '/stock/adjust/${product.id}',
-                                      extra: product.name,
-                                    );
-                                  },
-                                  icon: const Icon(Icons.inventory),
-                                  label: const Text('Gérer le stock'),
-                                  style: OutlinedButton.styleFrom(
-                                    side: const BorderSide(
-                                      color: Colors.white24,
-                                    ),
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 14,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(
-                                        PharmaConnectSpacing.radiusMd,
+                              if (isPharmacyRole) ...[
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: OutlinedButton.icon(
+                                    onPressed: () {
+                                      context.push(
+                                        '/stock/adjust/${product.id}',
+                                        extra: product.name,
+                                      );
+                                    },
+                                    icon: const Icon(Icons.inventory),
+                                    label: const Text('Gérer le stock'),
+                                    style: OutlinedButton.styleFrom(
+                                      side: const BorderSide(
+                                        color: Colors.white24,
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 14,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                          PharmaConnectSpacing.radiusMd,
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
+                              ],
                             ],
                           ),
                         ],
