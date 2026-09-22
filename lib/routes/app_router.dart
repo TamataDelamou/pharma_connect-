@@ -143,6 +143,11 @@ import '../modules/analytics/screens/export_reports_screen.dart';
 import '../modules/support/screens/support_list_screen.dart';
 import '../modules/support/screens/ticket_detail_screen.dart';
 import '../modules/support/screens/new_ticket_screen.dart';
+import '../modules/support/screens/chat_bot_screen.dart';
+import '../modules/support/screens/bot_history_screen.dart';
+import '../modules/support/screens/knowledge_base_screen.dart';
+import '../modules/support/screens/escalated_conversations_screen.dart';
+import '../modules/support/screens/staff_conversation_screen.dart';
 
 // loyalty
 import '../modules/loyalty/screens/loyalty_dashboard_screen.dart';
@@ -1053,13 +1058,52 @@ class AppRouter {
         name: 'support',
         builder: (context, state) => const SupportListScreen(),
       ),
+      // C161 : `isStaff` n'est plus impose par la route -- SupportListScreen
+      // le determine lui-meme depuis AuthProvider.isGsgAdmin (voir le
+      // widget). La route est conservee comme alias pour ne pas casser un
+      // lien profond existant.
       GoRoute(
         path: '/support/staff',
         name: 'support-staff',
-        builder: (context, state) => const SupportListScreen(isStaff: true),
+        builder: (context, state) => const SupportListScreen(),
+      ),
+      // C158 : reconstruit en ecran reel (historique des conversations bot
+      // du patient courant) plutot que retire -- voir BotHistoryScreen.
+      GoRoute(
+        path: '/support/bot/history',
+        name: 'support-bot-history',
+        builder: (context, state) => const BotHistoryScreen(),
+      ),
+      // C158 : route manquante vers ChatBotScreen, ecran jusqu'ici orphelin.
+      GoRoute(
+        path: '/support/chat',
+        name: 'support-chat',
+        builder: (context, state) => const ChatBotScreen(),
+      ),
+      // Base de connaissances (fonctionnalite cahier absente jusqu'ici).
+      GoRoute(
+        path: '/support/knowledge-base',
+        name: 'support-knowledge-base',
+        builder: (context, state) => const KnowledgeBaseScreen(),
+      ),
+      // C159 : ecran staff listant les conversations bot escaladees.
+      GoRoute(
+        path: '/support/staff/conversations',
+        name: 'support-staff-conversations',
+        builder: (context, state) => const EscalatedConversationsScreen(),
+      ),
+      GoRoute(
+        path: '/support/staff/conversations/:id',
+        name: 'support-staff-conversation-detail',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return StaffConversationScreen(conversationId: id);
+        },
       ),
       // Audit Module 18 (HOM, 30/08/2026), balayage C69 : `/support/:id`
-      // capturait `/support/new` (déclarée après) — réordonnancement.
+      // capturait `/support/new` (déclarée après) — réordonnancement. Les
+      // routes statiques ci-dessus restent, pour la même raison, toutes
+      // déclarées avant `/support/:id`.
       GoRoute(
         path: '/support/new',
         name: 'support-new',
