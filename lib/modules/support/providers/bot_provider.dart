@@ -9,12 +9,14 @@ class BotProvider extends ChangeNotifier {
 
   BotConversation? _currentConversation;
   List<BotConversation> _history = [];
+  List<BotConversation> _escalatedConversations = [];
   bool _isLoading = false;
   bool _isThinking = false;
   String? _error;
 
   BotConversation? get currentConversation => _currentConversation;
   List<BotConversation> get history => _history;
+  List<BotConversation> get escalatedConversations => _escalatedConversations;
   bool get isLoading => _isLoading;
   bool get isThinking => _isThinking;
   String? get error => _error;
@@ -59,10 +61,7 @@ class BotProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await _service.getResponse(
-        _currentConversation!,
-        message,
-      );
+      await _service.getResponse(_currentConversation!, message);
       _currentConversation = await _service.getConversation(
         _currentConversation!.id,
       );
@@ -163,6 +162,71 @@ class BotProvider extends ChangeNotifier {
   void clearConversation() {
     _currentConversation = null;
     notifyListeners();
+  }
+
+  // ---- Staff (escalated conversations) ----
+
+  Future<void> loadEscalatedConversations() async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+    try {
+      _escalatedConversations = await _service.getEscalatedConversations();
+    } catch (e) {
+      _error = e.toString();
+    }
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<bool> replyAsStaff(String conversationId, String message) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final updated = await _service.addStaffMessage(conversationId, message);
+      _applyConversationUpdate(updated);
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> resolveEscalatedConversation(String conversationId) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final updated = await _service.resolveConversation(conversationId);
+      _applyConversationUpdate(updated);
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  void _applyConversationUpdate(BotConversation updated) {
+    if (_currentConversation?.id == updated.id) _currentConversation = updated;
+    final index = _escalatedConversations.indexWhere(
+      (c) => c.id == updated.id,
+    );
+    if (updated.status == 'escalated') {
+      if (index != -1) {
+        _escalatedConversations[index] = updated;
+      } else {
+        _escalatedConversations.insert(0, updated);
+      }
+    } else if (index != -1) {
+      _escalatedConversations.removeAt(index);
+    }
   }
 
   void clearError() {

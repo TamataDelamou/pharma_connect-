@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:uuid/uuid.dart';
 import '../models/bot_conversation.dart';
+import '../models/knowledge_article.dart';
 
 class BotAIService {
   final _client = SupabaseService().client;
@@ -280,6 +281,54 @@ class BotAIService {
       updatedBy: SupabaseService().currentUser?.id,
     );
     return updateConversation(updated);
+  }
+
+  // ---- Staff (escalated conversations) ----
+
+  Future<List<BotConversation>> getEscalatedConversations() async {
+    final response = await _client
+        .from('bot_conversations')
+        .select()
+        .eq('status', 'escalated')
+        .order('updated_at', ascending: false);
+    return (response as List)
+        .map((e) => BotConversation.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<BotConversation> addStaffMessage(
+    String conversationId,
+    String message,
+  ) async {
+    final conv = await getConversation(conversationId);
+    final staffMsg = BotMessage(
+      id: _uuid.v4(),
+      sender: 'staff',
+      text: message,
+      timestamp: DateTime.now().toUtc(),
+    );
+    final updated = conv.copyWith(messages: [...conv.messages, staffMsg]);
+    return updateConversation(updated);
+  }
+
+  // ---- Knowledge base ----
+
+  Future<List<KnowledgeArticle>> getKnowledgeArticles({String? query}) async {
+    try {
+      var builder = _client
+          .from('support_knowledge_articles')
+          .select()
+          .eq('is_active', true);
+      if (query != null && query.trim().isNotEmpty) {
+        builder = builder.textSearch('title', query.trim());
+      }
+      final response = await builder.order('title');
+      return (response as List)
+          .map((e) => KnowledgeArticle.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to load knowledge base: $e');
+    }
   }
 }
 

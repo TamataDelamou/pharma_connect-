@@ -42,6 +42,14 @@ class TicketCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
+                    if (ticket.isSlaBreached) ...[
+                      const Icon(
+                        Icons.warning_amber_rounded,
+                        size: 14,
+                        color: PharmaConnectColors.accentRed,
+                      ),
+                      const SizedBox(width: 4),
+                    ],
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 6,
