@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/ticket.dart';
 import '../models/ticket_response.dart';
+import '../models/support_category.dart';
 import '../services/support_service.dart';
 
 class SupportProvider extends ChangeNotifier {
@@ -10,6 +11,7 @@ class SupportProvider extends ChangeNotifier {
   List<SupportTicket> _openTickets = [];
   SupportTicket? _selectedTicket;
   List<TicketResponse> _responses = [];
+  List<SupportCategory> _categories = [];
   bool _isLoading = false;
   String? _error;
 
@@ -17,8 +19,19 @@ class SupportProvider extends ChangeNotifier {
   List<SupportTicket> get openTickets => _openTickets;
   SupportTicket? get selectedTicket => _selectedTicket;
   List<TicketResponse> get responses => _responses;
+  List<SupportCategory> get categories => _categories;
   bool get isLoading => _isLoading;
   String? get error => _error;
+
+  Future<void> loadCategories() async {
+    try {
+      _categories = await _service.getCategories();
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
 
   @visibleForTesting
   set errorForTest(String? value) => _error = value;

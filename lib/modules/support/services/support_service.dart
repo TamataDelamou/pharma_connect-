@@ -2,10 +2,28 @@ import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:uuid/uuid.dart';
 import '../models/ticket.dart';
 import '../models/ticket_response.dart';
+import '../models/support_category.dart';
 
 class SupportService {
   final _client = SupabaseService().client;
   final _uuid = const Uuid();
+
+  // ---- Categories ----
+
+  Future<List<SupportCategory>> getCategories() async {
+    try {
+      final response = await _client
+          .from('support_categories')
+          .select()
+          .eq('is_active', true)
+          .order('name');
+      return (response as List)
+          .map((e) => SupportCategory.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to load categories: $e');
+    }
+  }
 
   // ---- Tickets ----
 

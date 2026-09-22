@@ -11,6 +11,15 @@ import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/widgets/inputs/glass_input.dart';
 import '../providers/support_provider.dart';
 import '../models/ticket.dart';
+import '../models/support_category.dart';
+
+// Codes de categorie correspondant a un litige potentiel (commande, paiement
+// ou livraison) -- voir seed 20260827008000_support.sql. Pas de categorie
+// "commande" dediee dans le referentiel actuel : une facture ou une
+// livraison peuvent toutes deux porter un litige de commande, d'ou le
+// selecteur dispute_category propose dans le bloc conditionnel plutot qu'un
+// mapping 1:1 avec la categorie choisie.
+const _disputeEligibleCategoryCodes = {'BILL', 'DELIV'};
 
 class NewTicketScreen extends StatefulWidget {
   const NewTicketScreen({super.key});
@@ -23,30 +32,41 @@ class _NewTicketScreenState extends State<NewTicketScreen> {
   final _formKey = GlobalKey<FormState>();
   final _subjectController = TextEditingController();
   final _descriptionController = TextEditingController();
+  final _disputedAmountController = TextEditingController();
+  final _disputeReferenceController = TextEditingController();
   String? _categoryId;
   String _priority = 'medium';
+  String _disputeCategory = 'order';
 
   bool _isLoading = false;
 
-  // Mock categories (will be loaded from API)
-  final List<Map<String, String>> _categories = const [
-    {'id': '1', 'name': 'Technique / App'},
-    {'id': '2', 'name': 'Facturation'},
-    {'id': '3', 'name': 'Médicaments'},
-    {'id': '4', 'name': 'Livraison'},
-    {'id': '5', 'name': 'Compte utilisateur'},
-    {'id': '6', 'name': 'Autre'},
-  ];
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<SupportProvider>().loadCategories();
+    });
+  }
 
   @override
   void dispose() {
     _subjectController.dispose();
     _descriptionController.dispose();
+    _disputedAmountController.dispose();
+    _disputeReferenceController.dispose();
     super.dispose();
+  }
+
+  bool _isDisputeEligible(List<SupportCategory> categories) {
+    final selected = categories.where((c) => c.id == _categoryId);
+    if (selected.isEmpty) return false;
+    return _disputeEligibleCategoryCodes.contains(selected.first.code);
   }
 
   @override
   Widget build(BuildContext context) {
+    final categories = context.watch<SupportProvider>().categories;
+    final showDisputeFields = _isDisputeEligible(categories);
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(24),
@@ -93,18 +113,27 @@ class _NewTicketScreenState extends State<NewTicketScreen> {
                                 labelText: 'Catégorie',
                                 border: OutlineInputBorder(),
                               ),
-                              items: _categories.map((cat) {
+                              items: categories.map((cat) {
                                 return DropdownMenuItem<String>(
-                                  value: cat['id'],
-                                  child: Text(cat['name']!),
+                                  value: cat.id,
+                                  child: Text(cat.name),
                                 );
                               }).toList(),
-                              onChanged: (value) =>
-                                  setState(() => _categoryId = value),
+                              onChanged: categories.isEmpty
+                                  ? null
+                                  : (value) =>
+                                        setState(() => _categoryId = value),
                               validator: (value) => value == null
                                   ? 'Veuillez sélectionner une catégorie'
                                   : null,
                             ),
+                            if (categories.isEmpty) ...[
+                              const SizedBox(height: 4),
+                              const Text(
+                                'Chargement des catégories...',
+                                style: PharmaConnectTypography.micro,
+                              ),
+                            ],
                             const SizedBox(height: 12),
 
                             GlassInput(
@@ -170,6 +199,59 @@ class _NewTicketScreenState extends State<NewTicketScreen> {
                                 ),
                               ],
                             ),
+                            if (showDisputeFields) ...[
+                              const SizedBox(height: 16),
+                              const Divider(color: Colors.white12),
+                              const SizedBox(height: 8),
+                              const Text(
+                                '⚠️ Litige lié à une commande, un paiement ou une livraison',
+                                style: PharmaConnectTypography.label,
+                              ),
+                              const SizedBox(height: 8),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: [
+                                  _buildDisputeCategoryChip(
+                                    'order',
+                                    'Commande',
+                                  ),
+                                  _buildDisputeCategoryChip(
+                                    'payment',
+                                    'Paiement',
+                                  ),
+                                  _buildDisputeCategoryChip(
+                                    'delivery',
+                                    'Livraison',
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              GlassInput(
+                                label: 'Montant contesté (optionnel)',
+                                hint: 'Ex. 25000',
+                                controller: _disputedAmountController,
+                                prefixIcon: Icons.money_off,
+                                keyboardType: TextInputType.number,
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return null;
+                                  }
+                                  final parsed = num.tryParse(value.trim());
+                                  if (parsed == null) {
+                                    return 'Montant invalide';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 12),
+                              GlassInput(
+                                label: 'Référence liée (optionnel)',
+                                hint: 'N° de commande, de paiement ou de livraison',
+                                controller: _disputeReferenceController,
+                                prefixIcon: Icons.link,
+                              ),
+                            ],
                           ],
                         ),
                       ),
@@ -221,6 +303,32 @@ class _NewTicketScreenState extends State<NewTicketScreen> {
     );
   }
 
+  Widget _buildDisputeCategoryChip(String value, String label) {
+    final isSelected = _disputeCategory == value;
+    const color = PharmaConnectColors.accentOrange;
+    return GestureDetector(
+      onTap: () => setState(() => _disputeCategory = value),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected ? color.withValues(alpha: 0.2) : Colors.transparent,
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(
+            color: isSelected ? color : Colors.white24,
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? color : PharmaConnectColors.textSecondary,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> _submitTicket() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -234,6 +342,9 @@ class _NewTicketScreenState extends State<NewTicketScreen> {
 
     setState(() => _isLoading = true);
 
+    final categories = context.read<SupportProvider>().categories;
+    final isDispute = _isDisputeEligible(categories);
+
     final ticket = SupportTicket(
       id: 'temp_${DateTime.now().millisecondsSinceEpoch}',
       ticketNumber: '', // Will be generated by DB
@@ -245,6 +356,14 @@ class _NewTicketScreenState extends State<NewTicketScreen> {
       priority: _priority,
       createdAt: DateTime.now().toUtc(),
       updatedAt: DateTime.now().toUtc(),
+      isDispute: isDispute,
+      disputeCategory: isDispute ? _disputeCategory : null,
+      disputedAmount: isDispute && _disputedAmountController.text.trim().isNotEmpty
+          ? num.tryParse(_disputedAmountController.text.trim())
+          : null,
+      disputeReferenceId: isDispute && _disputeReferenceController.text.trim().isNotEmpty
+          ? _disputeReferenceController.text.trim()
+          : null,
     );
 
     final success = await context.read<SupportProvider>().createTicket(ticket);

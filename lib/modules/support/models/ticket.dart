@@ -20,6 +20,12 @@ class SupportTicket extends Equatable {
   final String? updatedBy;
   final String? gsgId;
   final String? gsgOrgId;
+  final String? resolutionNote;
+  final DateTime? slaDueAt;
+  final bool isDispute;
+  final String? disputeCategory; // order, payment, delivery
+  final num? disputedAmount;
+  final String? disputeReferenceId;
 
   // Derived fields
   final String? patientName;
@@ -48,6 +54,12 @@ class SupportTicket extends Equatable {
     this.updatedBy,
     this.gsgId,
     this.gsgOrgId,
+    this.resolutionNote,
+    this.slaDueAt,
+    this.isDispute = false,
+    this.disputeCategory,
+    this.disputedAmount,
+    this.disputeReferenceId,
     this.patientName,
     this.patientPhone,
     this.assigneeName,
@@ -75,6 +87,12 @@ class SupportTicket extends Equatable {
     String? updatedBy,
     String? gsgId,
     String? gsgOrgId,
+    String? resolutionNote,
+    DateTime? slaDueAt,
+    bool? isDispute,
+    String? disputeCategory,
+    num? disputedAmount,
+    String? disputeReferenceId,
     String? patientName,
     String? patientPhone,
     String? assigneeName,
@@ -101,6 +119,12 @@ class SupportTicket extends Equatable {
       updatedBy: updatedBy ?? this.updatedBy,
       gsgId: gsgId ?? this.gsgId,
       gsgOrgId: gsgOrgId ?? this.gsgOrgId,
+      resolutionNote: resolutionNote ?? this.resolutionNote,
+      slaDueAt: slaDueAt ?? this.slaDueAt,
+      isDispute: isDispute ?? this.isDispute,
+      disputeCategory: disputeCategory ?? this.disputeCategory,
+      disputedAmount: disputedAmount ?? this.disputedAmount,
+      disputeReferenceId: disputeReferenceId ?? this.disputeReferenceId,
       patientName: patientName ?? this.patientName,
       patientPhone: patientPhone ?? this.patientPhone,
       assigneeName: assigneeName ?? this.assigneeName,
@@ -129,6 +153,12 @@ class SupportTicket extends Equatable {
     if (updatedBy != null) 'updated_by': updatedBy,
     if (gsgId != null) 'gsg_id': gsgId,
     if (gsgOrgId != null) 'gsg_org_id': gsgOrgId,
+    if (resolutionNote != null) 'resolution_note': resolutionNote,
+    if (slaDueAt != null) 'sla_due_at': slaDueAt!.toIso8601String(),
+    'is_dispute': isDispute,
+    if (disputeCategory != null) 'dispute_category': disputeCategory,
+    if (disputedAmount != null) 'disputed_amount': disputedAmount,
+    if (disputeReferenceId != null) 'dispute_reference_id': disputeReferenceId,
   };
 
   factory SupportTicket.fromJson(Map<String, dynamic> json) => SupportTicket(
@@ -154,6 +184,14 @@ class SupportTicket extends Equatable {
     updatedBy: json['updated_by'] as String?,
     gsgId: json['gsg_id'] as String?,
     gsgOrgId: json['gsg_org_id'] as String?,
+    resolutionNote: json['resolution_note'] as String?,
+    slaDueAt: json['sla_due_at'] != null
+        ? DateTime.parse(json['sla_due_at'] as String)
+        : null,
+    isDispute: json['is_dispute'] as bool? ?? false,
+    disputeCategory: json['dispute_category'] as String?,
+    disputedAmount: json['disputed_amount'] as num?,
+    disputeReferenceId: json['dispute_reference_id'] as String?,
     patientName: json['patients'] != null
         ? (json['patients'] as Map<String, dynamic>)['full_name'] as String?
         : null,
@@ -194,6 +232,12 @@ class SupportTicket extends Equatable {
     updatedBy,
     gsgId,
     gsgOrgId,
+    resolutionNote,
+    slaDueAt,
+    isDispute,
+    disputeCategory,
+    disputedAmount,
+    disputeReferenceId,
     patientName,
     patientPhone,
     assigneeName,
@@ -201,6 +245,9 @@ class SupportTicket extends Equatable {
     responseCount,
     hasFeedback,
   ];
+
+  bool get isSlaBreached =>
+      isOpen && slaDueAt != null && DateTime.now().isAfter(slaDueAt!);
 
   String get statusLabel {
     switch (status) {

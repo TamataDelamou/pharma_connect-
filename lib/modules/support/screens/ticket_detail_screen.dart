@@ -9,6 +9,7 @@ import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/secondary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/widgets/inputs/glass_input.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../providers/support_provider.dart';
 import '../models/ticket_response.dart';
 
@@ -25,13 +26,11 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
   final _replyController = TextEditingController();
   final _feedbackCommentController = TextEditingController();
   int _feedbackRating = 0;
-  bool _isStaff = false;
+  bool _isInternalReply = false;
 
   @override
   void initState() {
     super.initState();
-    final user = SupabaseService().currentUser;
-    _isStaff = false; // Will be determined from profile
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<SupportProvider>().loadTicket(widget.ticketId);
     });
@@ -67,6 +66,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
     }
 
     final isPatient = ticket.patientId == SupabaseService().currentUser?.id;
+    final isStaff = context.watch<AuthProvider>().isGsgAdmin;
 
     return Scaffold(
       body: Padding(
@@ -164,6 +164,60 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                               _formatDate(ticket.resolvedAt!),
                             ),
                           ],
+                          if (ticket.slaDueAt != null) ...[
+                            const Divider(color: Colors.white12),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 4,
+                              ),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(
+                                    width: 120,
+                                    child: Text(
+                                      'Échéance SLA',
+                                      style: PharmaConnectTypography.label,
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          _formatDate(ticket.slaDueAt!),
+                                          style: PharmaConnectTypography.body1
+                                              .copyWith(
+                                                color: ticket.isSlaBreached
+                                                    ? PharmaConnectColors
+                                                          .accentRed
+                                                    : null,
+                                              ),
+                                        ),
+                                        if (ticket.isSlaBreached) ...[
+                                          const SizedBox(width: 8),
+                                          const Icon(
+                                            Icons.warning_amber_rounded,
+                                            size: 16,
+                                            color:
+                                                PharmaConnectColors.accentRed,
+                                          ),
+                                          const Text(
+                                            ' En retard',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                              color: PharmaConnectColors
+                                                  .accentRed,
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                           const Divider(color: Colors.white12),
                           _buildInfoRow(
                             'Description',
@@ -173,6 +227,51 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                         ],
                       ),
                     ),
+
+                    if (ticket.isDispute) ...[
+                      const SizedBox(height: 16),
+                      GlassCard(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.gavel,
+                                  size: 18,
+                                  color: PharmaConnectColors.accentOrange,
+                                ),
+                                const SizedBox(width: 8),
+                                const Text(
+                                  'Litige',
+                                  style: PharmaConnectTypography.heading3,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            if (ticket.disputeCategory != null)
+                              _buildInfoRow(
+                                'Type',
+                                _disputeCategoryLabel(ticket.disputeCategory!),
+                              ),
+                            if (ticket.disputedAmount != null) ...[
+                              const Divider(color: Colors.white12),
+                              _buildInfoRow(
+                                'Montant contesté',
+                                '${ticket.disputedAmount}',
+                              ),
+                            ],
+                            if (ticket.disputeReferenceId != null) ...[
+                              const Divider(color: Colors.white12),
+                              _buildInfoRow(
+                                'Référence liée',
+                                ticket.disputeReferenceId!,
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 16),
 
                     // Responses
@@ -275,12 +374,12 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                             const SizedBox(height: 8),
                             Row(
                               children: [
-                                if (_isStaff) ...[
+                                if (isStaff) ...[
                                   Checkbox(
-                                    value: false, // Would need state
-                                    onChanged: (v) {
-                                      // Toggle internal note
-                                    },
+                                    value: _isInternalReply,
+                                    onChanged: (v) => setState(
+                                      () => _isInternalReply = v ?? false,
+                                    ),
                                   ),
                                   const Text('Interne'),
                                   const SizedBox(width: 16),
@@ -298,7 +397,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                                       authorId:
                                           SupabaseService().currentUser!.id,
                                       message: message,
-                                      isInternal: false,
+                                      isInternal: isStaff && _isInternalReply,
                                       attachments: const [],
                                       createdAt: DateTime.now().toUtc(),
                                       updatedAt: DateTime.now().toUtc(),
@@ -308,6 +407,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                                     );
                                     if (success && context.mounted) {
                                       _replyController.clear();
+                                      setState(() => _isInternalReply = false);
                                       provider.loadTicket(ticket.id);
                                     }
                                   },
@@ -400,7 +500,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                     ],
 
                     // Staff actions
-                    if (_isStaff && !ticket.isClosed) ...[
+                    if (isStaff && !ticket.isClosed) ...[
                       const SizedBox(height: 16),
                       Row(
                         children: [
@@ -503,7 +603,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                     ],
 
                     // Delete (for staff)
-                    if (_isStaff && ticket.isClosed) ...[
+                    if (isStaff && ticket.isClosed) ...[
                       const SizedBox(height: 16),
                       OutlinedButton.icon(
                         onPressed: () => _confirmDelete(context, ticket.id),
@@ -554,6 +654,19 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
 
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year} à ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
+  }
+
+  String _disputeCategoryLabel(String category) {
+    switch (category) {
+      case 'order':
+        return 'Commande';
+      case 'payment':
+        return 'Paiement';
+      case 'delivery':
+        return 'Livraison';
+      default:
+        return category;
+    }
   }
 
   Color _statusColor(String status) {
