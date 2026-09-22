@@ -10,6 +10,14 @@ class Product {
   final String manufacturer;
   final bool isPrescriptionRequired;
   final String? description;
+  // RG-CAT-02 (audit Module 3, 29/08/2026) : classification réglementaire du
+  // référentiel produit. 'libre'/'sur_ordonnance' restent visibles
+  // publiquement (isPrescriptionRequired porte déjà cette distinction
+  // d'affichage) ; 'stupefiant'/'psychotrope' sont filtrés côté RLS pour le
+  // rôle patient (voir migration 20260829014000) — cette classe n'atteint
+  // donc le client que pour un utilisateur déjà autorisé à la voir.
+  final String regulatoryClass;
+  final String? barcode;
 
   Product({
     required this.id,
@@ -23,7 +31,12 @@ class Product {
     required this.manufacturer,
     required this.isPrescriptionRequired,
     this.description,
+    this.regulatoryClass = 'libre',
+    this.barcode,
   });
+
+  bool get isControlledSubstance =>
+      regulatoryClass == 'stupefiant' || regulatoryClass == 'psychotrope';
 
   factory Product.fromJson(Map<String, dynamic> json) {
     final category = json['category'] as Map<String, dynamic>?;
@@ -40,6 +53,8 @@ class Product {
       manufacturer: manufacturer?['name'] as String? ?? '',
       isPrescriptionRequired: json['is_prescription_required'] as bool? ?? false,
       description: json['description'] as String?,
+      regulatoryClass: json['regulatory_class'] as String? ?? 'libre',
+      barcode: json['barcode'] as String?,
     );
   }
 
@@ -55,6 +70,8 @@ class Product {
     String? manufacturer,
     bool? isPrescriptionRequired,
     String? description,
+    String? regulatoryClass,
+    String? barcode,
   }) {
     return Product(
       id: id ?? this.id,
@@ -69,6 +86,8 @@ class Product {
       isPrescriptionRequired:
           isPrescriptionRequired ?? this.isPrescriptionRequired,
       description: description ?? this.description,
+      regulatoryClass: regulatoryClass ?? this.regulatoryClass,
+      barcode: barcode ?? this.barcode,
     );
   }
 }
