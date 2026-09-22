@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
 import '../../../core/theme/colors.dart';
 import '../../../core/theme/typography.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../models/delivery.dart';
 import '../providers/delivery_provider.dart';
 import '../widgets/delivery_card.dart';
@@ -24,8 +25,22 @@ class _DeliveryHistoryScreenState extends State<DeliveryHistoryScreen>
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<DeliveryProvider>().loadDeliveries();
+      _load();
     });
+  }
+
+  // Audit Module 7 (29/08/2026) : loadDeliveries() (non filtré, sans repli
+  // hors-ligne) remplacé par loadDeliveriesForPatient — même patron déjà
+  // audité que ReservationProvider.loadPatientReservations (Module 6),
+  // avec mise en cache local des livraisons du patient.
+  void _load() {
+    final userId = context.read<AuthProvider>().userId;
+    final provider = context.read<DeliveryProvider>();
+    if (userId != null) {
+      provider.loadDeliveriesForPatient(userId);
+    } else {
+      provider.loadDeliveries();
+    }
   }
 
   @override
@@ -77,11 +92,50 @@ class _DeliveryHistoryScreenState extends State<DeliveryHistoryScreen>
               indicatorWeight: 3,
               dividerColor: Colors.transparent,
             ),
+            // Bannière hors-ligne (audit Module 7, 29/08/2026) : mêmes règles
+            // que les autres écrans déjà audités — ne s'affiche que quand
+            // des livraisons issues du cache sont réellement montrées, pour
+            // ne jamais masquer la liste avec un message d'erreur bloquant
+            // (bug corrigé ci-dessous : provider.error != null seul cachait
+            // la liste même quand des données mises en cache existaient).
+            if (provider.isOffline && provider.deliveries.isNotEmpty) ...[
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  color: PharmaConnectColors.accentOrange.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: PharmaConnectColors.accentOrange.withValues(alpha: 0.4),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.cloud_off,
+                      size: 16,
+                      color: PharmaConnectColors.accentOrange,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        provider.error ??
+                            'Hors connexion — dernières livraisons synchronisées affichées.',
+                        style: PharmaConnectTypography.body2,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             const SizedBox(height: 16),
             Expanded(
               child: provider.isLoading
                   ? const Center(child: CircularProgressIndicator())
-                  : provider.error != null
+                  : provider.error != null && provider.deliveries.isEmpty
                   ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -95,8 +149,7 @@ class _DeliveryHistoryScreenState extends State<DeliveryHistoryScreen>
                           ),
                           const SizedBox(height: 16),
                           ElevatedButton(
-                            onPressed: () =>
-                                context.read<DeliveryProvider>().loadDeliveries(),
+                            onPressed: _load,
                             child: const Text('Réessayer'),
                           ),
                         ],
