@@ -43,6 +43,7 @@ import 'modules/regulator/providers/inspection_provider.dart';
 import 'modules/regulator/providers/marketing_authorization_provider.dart';
 import 'modules/analytics/providers/analytics_provider.dart';
 import 'modules/analytics/providers/dashboard_customization_provider.dart';
+import 'modules/solidarity/providers/solidarity_provider.dart';
 
 class PharmaConnectApp extends StatelessWidget {
   const PharmaConnectApp({super.key});
@@ -116,6 +117,12 @@ class PharmaConnectApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => MarketingAuthorizationProvider()),
         ChangeNotifierProvider(create: (_) => AnalyticsProvider()),
         ChangeNotifierProvider(create: (_) => DashboardCustomizationProvider()),
+        // Module 29 (CSR, reconciliation 22/09/2026) : solidarity_dashboard_screen.dart,
+        // solidarity_program_detail_screen.dart et solidarity_program_form_screen.dart
+        // appellent deja context.watch/read<SolidarityProvider>() sans que ce provider
+        // ne soit jamais declare ici -> ProviderNotFoundException garantie sur tout le
+        // module, trouve en verifiant les usages reels au moment de la reconciliation.
+        ChangeNotifierProvider(create: (_) => SolidarityProvider()),
       ],
       child: MaterialApp.router(
         title: 'PharmaConnect',
