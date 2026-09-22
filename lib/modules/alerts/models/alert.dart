@@ -203,4 +203,44 @@ class Alert {
         return 'Traité';
     }
   }
+
+  /// Recommandation courte associée au type d'alerte, affichée sur l'écran
+  /// de détail (Module 10 — ALR, audit 29/08/2026). Le cahier de conception
+  /// prévoit un écran « Détail d'une alerte avec recommandation » parmi les
+  /// écrans principaux d'ALR ; ce getter centralise le texte plutôt que de
+  /// le dupliquer dans le widget d'écran.
+  String get recommendation {
+    switch (type) {
+      case AlertType.stockLow:
+        return 'Planifiez un réapprovisionnement auprès de votre grossiste-répartiteur avant que le stock ne devienne critique.';
+      case AlertType.stockCritical:
+        return 'Réapprovisionnement urgent recommandé : le stock disponible est proche du seuil critique paramétré pour ce produit.';
+      case AlertType.stockOut:
+        return 'Produit en rupture : passez commande immédiatement et signalez l\'indisponibilité si des réservations sont en attente.';
+      case AlertType.expirySoon:
+        return 'Priorisez l\'écoulement de ce lot (mise en avant, promotion) — le moteur FEFO le propose déjà en premier lors des ventes.';
+      case AlertType.expired:
+        return 'Retirez ce lot de la vente sans délai et enregistrez sa mise au rebut via un ajustement de stock (motif péremption).';
+      case AlertType.counterfeit:
+        return 'Isolez immédiatement le produit concerné et signalez-le au régulateur conformément à la procédure de traçabilité.';
+      case AlertType.recall:
+        return 'Consultez la fiche de rappel et retirez les lots concernés de la vente sans délai.';
+      case AlertType.orderDelayed:
+        return 'Contactez le livreur ou le grossiste pour connaître la cause du retard et informer le patient si nécessaire.';
+      case AlertType.paymentFailed:
+        return 'Vérifiez la transaction avec le patient — un nouveau moyen de paiement peut être nécessaire.';
+      case AlertType.paymentDisputed:
+        return 'Consultez le dossier de litige et répondez dans les délais impartis.';
+      case AlertType.prescriptionReceived:
+        return 'Validez ou rejetez cette ordonnance dès que possible pour ne pas retarder la prise en charge du patient.';
+      case AlertType.reservationReady:
+        return 'Le patient peut venir retirer sa commande — un rappel automatique lui a été envoyé si activé dans ses préférences.';
+      case AlertType.reservationExpired:
+        return 'La réservation n\'a pas été retirée à temps : le stock associé a été libéré, contactez le patient si besoin.';
+      case AlertType.deliveryArrived:
+        return 'Le livreur est arrivé à destination — aucune action requise, suivez la confirmation de remise.';
+      default:
+        return 'Consultez les détails ci-dessus et l\'action associée pour traiter cette alerte.';
+    }
+  }
 }

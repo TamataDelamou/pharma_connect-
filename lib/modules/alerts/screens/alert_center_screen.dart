@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
 import '../../../core/theme/colors.dart';
 import '../../../core/theme/typography.dart';
+import '../../auth/models/user_role.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../providers/alert_provider.dart';
 import '../widgets/alert_card.dart';
 import '../widgets/alert_filter_chips.dart';
@@ -22,7 +24,12 @@ class _AlertCenterScreenState extends State<AlertCenterScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<AlertProvider>().loadAlerts();
+      // userId (audit Module 10, 29/08/2026) : nécessaire pour le repli
+      // hors-ligne (voir AlertProvider.loadAlerts) — RLS restreint déjà
+      // correctement les lignes retournées côté serveur sans ce paramètre,
+      // mais le cache local, lui, a besoin d'une clé de propriétaire.
+      final userId = context.read<AuthProvider>().userId;
+      context.read<AlertProvider>().loadAlerts(userId: userId);
     });
   }
 
@@ -66,6 +73,30 @@ class _AlertCenterScreenState extends State<AlertCenterScreen> {
                 ),
                 const KernelBadge(),
                 const SizedBox(width: 16),
+                // Audit Module 10 (29/08/2026) : /alerts/preferences n'était
+                // référencée nulle part dans l'app (route accessible
+                // uniquement par navigation directe) — même défaut que
+                // /alerts/thresholds (nouvel écran, arbitrage D15). Ce menu
+                // corrige les deux d'un coup.
+                PopupMenuButton<String>(
+                  icon: const Icon(
+                    Icons.more_vert,
+                    color: PharmaConnectColors.textPrimary,
+                  ),
+                  onSelected: (route) => context.push(route),
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(
+                      value: '/alerts/preferences',
+                      child: Text('Préférences de notification'),
+                    ),
+                    if (context.read<AuthProvider>().userRole ==
+                        UserRole.pharmacien)
+                      const PopupMenuItem(
+                        value: '/alerts/thresholds',
+                        child: Text('Paramétrage des seuils'),
+                      ),
+                  ],
+                ),
                 if (provider.unreadCount > 0) ...[
                   TextButton.icon(
                     onPressed: () async {
@@ -88,6 +119,40 @@ class _AlertCenterScreenState extends State<AlertCenterScreen> {
                 ],
               ],
             ),
+            if (provider.isOffline) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: PharmaConnectColors.accentOrange.withValues(
+                    alpha: 0.15,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(
+                      Icons.wifi_off,
+                      size: 16,
+                      color: PharmaConnectColors.accentOrange,
+                    ),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Hors ligne — dernières alertes connues affichées.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: PharmaConnectColors.accentOrange,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             const SizedBox(height: 16),
 
             // Filtres
@@ -239,14 +304,12 @@ class _AlertCenterScreenState extends State<AlertCenterScreen> {
                 padding: const EdgeInsets.only(bottom: 8),
                 child: AlertCard(
                   alert: alert,
-                  onTap: () async {
-                    if (!alert.isRead) {
-                      await provider.markAsRead(alert.id);
-                    }
-                    if (alert.actionRoute != null) {
-                      context.push(alert.actionRoute!);
-                    }
-                  },
+                  // Audit Module 10 (29/08/2026) : ouvrait auparavant
+                  // directement actionRoute, sautant tout affichage du détail
+                  // et de la recommandation (écran manquant, voir rapport
+                  // d'audit) — le détail propose maintenant lui-même le
+                  // bouton d'action vers actionRoute.
+                  onTap: () => context.push('/alerts/detail/${alert.id}'),
                   onDismiss: () => provider.dismissAlert(alert.id),
                 ),
               ),
