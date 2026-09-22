@@ -15,6 +15,7 @@ class SearchProvider extends ChangeNotifier {
   String _query = '';
   SearchStatus _status = SearchStatus.idle;
   String? _error;
+  bool _isOffline = false;
   List<SearchResult> _results = [];
   List<SearchSuggestion> _suggestions = [];
   List<String> _searchHistory = [];
@@ -27,6 +28,7 @@ class SearchProvider extends ChangeNotifier {
   String get query => _query;
   SearchStatus get status => _status;
   String? get error => _error;
+  bool get isOffline => _isOffline;
   List<SearchResult> get results => _results;
   List<SearchSuggestion> get suggestions => _suggestions;
   List<String> get searchHistory => _searchHistory;
@@ -63,6 +65,7 @@ class SearchProvider extends ChangeNotifier {
     _query = searchQuery;
     _status = SearchStatus.searching;
     _error = null;
+    _isOffline = false;
     _showSuggestions = false;
     notifyListeners();
 
@@ -76,10 +79,27 @@ class SearchProvider extends ChangeNotifier {
       );
       _results = results;
       _status = SearchStatus.loaded;
+      _isOffline = false;
       await _service.addToHistory(searchQuery);
     } catch (e) {
-      _error = e.toString();
-      _status = SearchStatus.error;
+      // Directive utilisateur (29/08/2026) : « privilégier le mode
+      // hors-ligne tant que cela est possible ». Avant ce correctif, toute
+      // erreur réseau effaçait `_results` déjà affichés et basculait sur un
+      // écran d'erreur vide — y compris quand une recherche précédente avait
+      // déjà rempli l'écran avec des résultats valides. On préserve
+      // désormais ces résultats (marqués `_isOffline`) plutôt que de les
+      // remplacer par un état d'erreur dur ; l'écran d'erreur reste réservé
+      // au cas où il n'y avait rien à montrer avant l'échec.
+      if (_results.isNotEmpty) {
+        _isOffline = true;
+        _error =
+            'Connexion indisponible — résultats précédents affichés, '
+            'possiblement pas à jour.';
+        _status = SearchStatus.loaded;
+      } else {
+        _error = e.toString();
+        _status = SearchStatus.error;
+      }
     }
 
     notifyListeners();
