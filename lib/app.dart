@@ -19,6 +19,14 @@ import 'modules/traceability/providers/traceability_provider.dart';
 import 'modules/teleconsult/providers/teleconsult_provider.dart';
 import 'modules/marketplace/providers/marketplace_provider.dart';
 import 'modules/financing/providers/financing_provider.dart';
+import 'modules/triage/providers/triage_provider.dart';
+import 'modules/triage/providers/triage_ai_provider.dart';
+import 'modules/homecare/providers/homecare_provider.dart';
+import 'modules/homecare/providers/offline_homecare_provider.dart';
+import 'modules/professionals/providers/professionals_provider.dart';
+import 'modules/healthrecord/providers/health_record_provider.dart';
+import 'modules/healthrecord/providers/preventive_alert_provider.dart';
+import 'modules/iot/providers/iot_provider.dart';
 
 class PharmaConnectApp extends StatelessWidget {
   const PharmaConnectApp({super.key});
@@ -44,6 +52,18 @@ class PharmaConnectApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => TeleconsultProvider()),
         ChangeNotifierProvider(create: (_) => MarketplaceProvider()),
         ChangeNotifierProvider(create: (_) => FinancingProvider()),
+        ChangeNotifierProvider(create: (_) => TriageProvider()),
+        // Audit Module 17 (TRI, 30/08/2026) : TriageAIScreen appelle deja
+        // context.watch<TriageAIProvider>() sans que ce provider ne soit
+        // jamais declare ici -> ProviderNotFoundException garantie a
+        // l'ouverture de l'ecran (confirme par grep avant ajout).
+        ChangeNotifierProvider(create: (_) => TriageAIProvider()),
+        ChangeNotifierProvider(create: (_) => HomecareProvider()),
+        ChangeNotifierProvider(create: (_) => OfflineHomecareProvider()),
+        ChangeNotifierProvider(create: (_) => ProfessionalsProvider()),
+        ChangeNotifierProvider(create: (_) => HealthRecordProvider()),
+        ChangeNotifierProvider(create: (_) => PreventiveAlertProvider()),
+        ChangeNotifierProvider(create: (_) => IotProvider()),
       ],
       child: MaterialApp.router(
         title: 'PharmaConnect',
