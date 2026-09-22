@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../models/transaction.dart';
 import '../models/transaction_status.dart';
@@ -6,9 +7,11 @@ import '../models/installment.dart';
 import '../models/wallet.dart';
 import '../models/invoice.dart';
 import '../services/payment_service.dart';
+import '../../../core/services/offline_sync_service.dart';
 
 class PaymentProvider extends ChangeNotifier {
   final PaymentService _service = PaymentService();
+  final OfflineSyncService _offlineSync = OfflineSyncService();
 
   List<Transaction> _transactions = [];
   Transaction? _selectedTransaction;
@@ -17,6 +20,7 @@ class PaymentProvider extends ChangeNotifier {
   Invoice? _currentInvoice;
   int _walletBalance = 0;
   bool _isLoading = false;
+  bool _isOffline = false;
   String? _error;
 
   // Getters
@@ -27,6 +31,12 @@ class PaymentProvider extends ChangeNotifier {
   Invoice? get currentInvoice => _currentInvoice;
   int get walletBalance => _walletBalance;
   bool get isLoading => _isLoading;
+  // Directive standing « privilégier le mode hors-ligne » (audit Module 8,
+  // 29/08/2026) : appliquée ici seulement à la LECTURE (solde, historique).
+  // Voir offline_sync_service.dart pour la justification de ne PAS étendre
+  // ce repli aux écritures (initiation de paiement, recharge, échéance) —
+  // risque de double débit/double confirmation au rejeu.
+  bool get isOffline => _isOffline;
   String? get error => _error;
 
   List<Transaction> get completedTransactions {
@@ -49,9 +59,15 @@ class PaymentProvider extends ChangeNotifier {
 
   // ==================== LOAD ====================
 
+  // Directive standing « privilégier le mode hors-ligne » (audit Module 8,
+  // 29/08/2026), lecture seule — même patron que
+  // DeliveryProvider.loadDeliveriesForPatient (Module 7). La clé de cache
+  // reste userId : les vues filtrées par statut/pharmacie ne bénéficient
+  // pas du repli (cas d'usage back-office, pas prioritaire hors-ligne).
   Future<void> loadTransactions({
     TransactionStatus? status,
     String? userId,
+    String? pharmacyId,
     DateTime? fromDate,
     DateTime? toDate,
   }) async {
@@ -63,11 +79,31 @@ class PaymentProvider extends ChangeNotifier {
       _transactions = await _service.getTransactions(
         status: status,
         userId: userId,
+        pharmacyId: pharmacyId,
         fromDate: fromDate,
         toDate: toDate,
       );
+      _isOffline = false;
+      if (userId != null) {
+        unawaited(
+          _offlineSync.cacheTransactions(
+            userId,
+            _transactions.map((t) => t.toJson()).toList(),
+          ),
+        );
+      }
     } catch (e) {
-      _error = e.toString();
+      final cached = userId != null
+          ? await _offlineSync.getCachedTransactions(userId)
+          : <Map<String, dynamic>>[];
+      if (cached.isNotEmpty) {
+        _transactions = cached.map((row) => Transaction.fromJson(row)).toList();
+        _isOffline = true;
+        _error =
+            'Hors connexion — dernières transactions synchronisées affichées (${_transactions.length}).';
+      } else {
+        _error = e.toString();
+      }
     }
 
     _isLoading = false;
@@ -90,29 +126,51 @@ class PaymentProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Bug corrigé (audit Module 8, 29/08/2026) : appelait service.getWallet
+  // (.single(), lève une exception si aucune ligne n'existe) — remplacé par
+  // getOrCreateWallet, qui auto-provisionne. Repli hors-ligne (lecture
+  // seule) ajouté, même patron que loadTransactions ci-dessus.
   Future<void> loadWallet(String userId) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      _wallet = await _service.getWallet(userId);
+      _wallet = await _service.getOrCreateWallet(userId);
       _walletBalance = _wallet?.balance ?? 0;
+      _isOffline = false;
+      unawaited(_offlineSync.cacheWallet(userId, _wallet!.toJson()));
     } catch (e) {
-      _error = e.toString();
+      final cached = await _offlineSync.getCachedWallet(userId);
+      if (cached != null) {
+        _wallet = Wallet.fromJson(cached);
+        _walletBalance = _wallet?.balance ?? 0;
+        _isOffline = true;
+        _error = 'Hors connexion — dernier solde synchronisé affiché.';
+      } else {
+        _error = e.toString();
+      }
     }
 
     _isLoading = false;
     notifyListeners();
   }
 
-  Future<void> loadInstallment(String installmentId) async {
+  // Bug corrigé (audit Module 8, 29/08/2026) : loadInstallment(id) passait
+  // un id de TRANSACTION (voir installment_plan_screen.dart) à
+  // service.getInstallment(installmentId), qui cherchait par
+  // installments.id — jamais de correspondance. Signature inchangée
+  // (aucune modification requise côté écran) ; résolution corrigée en
+  // interne via getInstallmentByTransaction.
+  Future<void> loadInstallment(String transactionId) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      _currentInstallment = await _service.getInstallment(installmentId);
+      _currentInstallment = await _service.getInstallmentByTransaction(
+        transactionId,
+      );
     } catch (e) {
       _error = e.toString();
     }
@@ -134,6 +192,12 @@ class PaymentProvider extends ChangeNotifier {
     String? pharmacyId,
     String? pharmacyName,
     bool useCashback = false,
+    // Bug corrigé (audit Module 8, 29/08/2026) : PaymentService.createInstallment
+    // existait déjà, complet et correct, mais n'avait aucun appelant nulle
+    // part dans le module — "Paiement en plusieurs fois" ne créait jamais
+    // d'échéancier. numberOfPayments n'est utilisé que pour
+    // PaymentMethod.installment (3 par défaut).
+    int numberOfPayments = 3,
   }) async {
     _isLoading = true;
     _error = null;
@@ -152,6 +216,14 @@ class PaymentProvider extends ChangeNotifier {
         pharmacyName: pharmacyName,
         useCashback: useCashback,
       );
+      if (method == PaymentMethod.installment) {
+        _currentInstallment = await _service.createInstallment(
+          transactionId: transaction.id,
+          totalAmount: transaction.finalAmount,
+          numberOfPayments: numberOfPayments,
+          startDate: DateTime.now(),
+        );
+      }
       _transactions.add(transaction);
       _isLoading = false;
       notifyListeners();
@@ -261,10 +333,13 @@ class PaymentProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> payInstallment(String installmentId, int paymentNumber) async {
+  // Signature inchangée (installment_plan_screen.dart transmet en réalité
+  // widget.transactionId, voir loadInstallment ci-dessus) — résolution
+  // corrigée en interne via payInstallmentByTransaction.
+  Future<bool> payInstallment(String transactionId, int paymentNumber) async {
     try {
-      final updated = await _service.payInstallment(
-        installmentId,
+      final updated = await _service.payInstallmentByTransaction(
+        transactionId,
         paymentNumber,
       );
       _currentInstallment = updated;

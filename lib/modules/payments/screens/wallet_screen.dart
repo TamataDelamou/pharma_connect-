@@ -3,9 +3,12 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/kernel/kernel_badge.dart';
+import '../../../core/services/offline_sync_service.dart';
 import '../../../core/theme/colors.dart';
 import '../../../core/theme/typography.dart';
 import '../../../core/utils/currency_formatter.dart';
+import '../../auth/providers/auth_provider.dart';
+import '../../auth/services/profile_service.dart';
 import '../models/payment_method.dart';
 import '../providers/payment_provider.dart';
 import '../widgets/transaction_list_tile.dart';
@@ -19,13 +22,30 @@ class WalletScreen extends StatefulWidget {
 }
 
 class _WalletScreenState extends State<WalletScreen> {
+  final ProfileService _profileService = ProfileService();
+  final OfflineSyncService _offlineSync = OfflineSyncService();
+  String? _userName;
+
+  // Bug corrigé (audit Module 8, 29/08/2026) : 'patient_123' en dur pour
+  // loadWallet ET loadTransactions — 3e/4e occurrence de ce défaut dans ce
+  // seul écran (voir aussi 'Jean Dupont' plus bas). Ces appels
+  // n'atteignaient jamais les vraies données de l'utilisateur connecté.
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final auth = context.read<AuthProvider>();
+      final userId = auth.userId;
+      if (userId == null) return;
       final provider = context.read<PaymentProvider>();
-      provider.loadWallet('patient_123');
-      provider.loadTransactions(userId: 'patient_123');
+      provider.loadWallet(userId);
+      provider.loadTransactions(userId: userId);
+      final fullName = await _profileService.getFullName(userId);
+      if (mounted) {
+        setState(() {
+          _userName = fullName ?? auth.userEmail ?? auth.userPhone;
+        });
+      }
     });
   }
 
@@ -80,13 +100,53 @@ class _WalletScreenState extends State<WalletScreen> {
             ),
             const SizedBox(height: 24),
 
+            // Mode hors-ligne (directive standing, lecture seule — audit
+            // Module 8, 29/08/2026) : voir OfflineSyncService pour la
+            // justification de ne pas étendre ce repli aux écritures.
+            if (provider.isOffline) ...[
+              Container(
+                padding: const EdgeInsets.all(12),
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: PharmaConnectColors.accentAmber.withValues(
+                    alpha: 0.1,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: PharmaConnectColors.accentAmber.withValues(
+                      alpha: 0.2,
+                    ),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.wifi_off,
+                      color: PharmaConnectColors.accentAmber,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        provider.error ??
+                            'Hors connexion — dernières données synchronisées affichées.',
+                        style: PharmaConnectTypography.micro,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+
             if (provider.isLoading) ...[
               const Expanded(child: Center(child: CircularProgressIndicator())),
             ] else if (provider.wallet != null) ...[
               // Solde
               WalletBalanceCard(
                 balance: provider.wallet!.balance,
-                userName: 'Jean Dupont',
+                userName: _userName,
+                cashbackAvailable: provider.wallet!.cashbackAvailable,
+                pendingBalance: provider.wallet!.pendingBalance,
                 onTopUp: () => _showTopUpDialog(context),
                 onHistory: () => context.go('/transactions'),
               ),
@@ -230,9 +290,30 @@ class _WalletScreenState extends State<WalletScreen> {
                 );
                 return;
               }
+              final userId = context.read<AuthProvider>().userId;
+              if (userId == null) return;
+              // Décision D13 (audit Module 8, 29/08/2026, arbitrée par le
+              // porteur du projet) : recharge de portefeuille bloquée
+              // explicitement hors connexion, même logique que
+              // payment_screen.dart.
+              final hasInternet = await _offlineSync.hasInternet();
+              if (!hasInternet) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Recharge indisponible hors connexion. '
+                        'Reconnectez-vous pour recharger votre portefeuille.',
+                      ),
+                      backgroundColor: PharmaConnectColors.accentRed,
+                    ),
+                  );
+                }
+                return;
+              }
               Navigator.pop(context);
               final success = await context.read<PaymentProvider>().topUpWallet(
-                userId: 'patient_123',
+                userId: userId,
                 amount: amount,
                 method: selectedMethod,
               );
