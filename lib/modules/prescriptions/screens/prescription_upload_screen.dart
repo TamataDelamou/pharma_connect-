@@ -8,7 +8,10 @@ import '../../../core/theme/colors.dart';
 import '../../../core/theme/typography.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/buttons/tertiary_button.dart';
+import '../../auth/providers/auth_provider.dart';
+import '../../auth/services/profile_service.dart';
 import '../providers/prescription_provider.dart';
+import '../widgets/upload_guidance_overlay.dart';
 
 class PrescriptionUploadScreen extends StatefulWidget {
   const PrescriptionUploadScreen({super.key});
@@ -21,6 +24,14 @@ class PrescriptionUploadScreen extends StatefulWidget {
 class _PrescriptionUploadScreenState extends State<PrescriptionUploadScreen> {
   File? _selectedImage;
   final ImagePicker _picker = ImagePicker();
+  final ProfileService _profileService = ProfileService();
+  // Amélioration UX (audit Module 5, directive standing post-Module 3) :
+  // upload_guidance_overlay.dart existait déjà dans le module mais n'était
+  // référencé nulle part (grep : aucun import hors de sa propre définition)
+  // — un écran de conseils entièrement construit et jamais montré à
+  // l'utilisateur. Affiché une fois par visite de cet écran, avant la
+  // première prise de photo.
+  bool _hasShownGuidance = false;
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +98,7 @@ class _PrescriptionUploadScreenState extends State<PrescriptionUploadScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ElevatedButton.icon(
-                onPressed: () => _pickImage(ImageSource.camera),
+                onPressed: () => _pickImageWithGuidance(ImageSource.camera),
                 icon: const Icon(Icons.camera_alt),
                 label: const Text('Appareil photo'),
                 style: ElevatedButton.styleFrom(
@@ -101,7 +112,7 @@ class _PrescriptionUploadScreenState extends State<PrescriptionUploadScreen> {
               ),
               const SizedBox(width: 16),
               OutlinedButton.icon(
-                onPressed: () => _pickImage(ImageSource.gallery),
+                onPressed: () => _pickImageWithGuidance(ImageSource.gallery),
                 icon: const Icon(Icons.photo_library),
                 label: const Text('Galerie'),
                 style: OutlinedButton.styleFrom(
@@ -164,9 +175,38 @@ class _PrescriptionUploadScreenState extends State<PrescriptionUploadScreen> {
                       provider.uploadStatus ==
                           PrescriptionUploadStatus.uploading,
                   onPressed: () async {
-                    // Simuler l'ID patient
-                    const patientId = 'patient_123';
-                    const patientName = 'Jean Dupont';
+                    // Bug corrigé (audit Module 5, 29/08/2026) : cet écran
+                    // envoyait un patientId ('patient_123') et un
+                    // patientName ('Jean Dupont') en dur, quel que soit
+                    // l'utilisateur réellement connecté. Au-delà de
+                    // l'incohérence produit, 'patient_123' n'est pas un uuid
+                    // valide : prescriptions.patient_id est de type uuid, et
+                    // prescriptions_select_own (RLS) compare auth.uid() à
+                    // patient_id — l'insertion échouait donc pour tout le
+                    // monde en production (même défaut que le userId 'admin'
+                    // en dur trouvé dans stock_adjustment_screen.dart au
+                    // Module 4).
+                    final auth = context.read<AuthProvider>();
+                    final patientId = auth.userId;
+                    if (patientId == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Vous devez être connecté pour déposer une ordonnance.',
+                          ),
+                          backgroundColor: PharmaConnectColors.accentRed,
+                        ),
+                      );
+                      return;
+                    }
+                    final fullName = await _profileService.getFullName(
+                      patientId,
+                    );
+                    final patientName =
+                        fullName ??
+                        auth.userEmail ??
+                        auth.userPhone ??
+                        'Patient';
                     await provider.uploadPrescription(
                       _selectedImage!.path,
                       patientId,
@@ -195,26 +235,83 @@ class _PrescriptionUploadScreenState extends State<PrescriptionUploadScreen> {
           ],
           if (provider.uploadError != null) ...[
             const SizedBox(height: 16),
+            // Le mode hors-ligne (directive standing, mode offline) n'est
+            // pas une erreur — c'est une confirmation que l'ordonnance a
+            // bien été prise en compte localement. La distinguer visuellement
+            // d'un échec réel évite d'inquiéter le patient à tort.
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: PharmaConnectColors.accentRed.withValues(alpha: 0.1),
+                color: (provider.isOffline
+                        ? PharmaConnectColors.accentAmber
+                        : PharmaConnectColors.accentRed)
+                    .withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: PharmaConnectColors.accentRed.withValues(alpha: 0.2),
+                  color: (provider.isOffline
+                          ? PharmaConnectColors.accentAmber
+                          : PharmaConnectColors.accentRed)
+                      .withValues(alpha: 0.2),
                 ),
               ),
-              child: Text(
-                provider.uploadError!,
-                style: PharmaConnectTypography.body2.copyWith(
-                  color: PharmaConnectColors.accentRed,
-                ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    provider.isOffline
+                        ? Icons.cloud_off
+                        : Icons.error_outline,
+                    size: 18,
+                    color: provider.isOffline
+                        ? PharmaConnectColors.accentAmber
+                        : PharmaConnectColors.accentRed,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      provider.uploadError!,
+                      style: PharmaConnectTypography.body2.copyWith(
+                        color: provider.isOffline
+                            ? PharmaConnectColors.accentAmber
+                            : PharmaConnectColors.accentRed,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
         ],
       ),
     );
+  }
+
+  Future<void> _pickImageWithGuidance(ImageSource source) async {
+    if (_hasShownGuidance) {
+      await _pickImage(source);
+      return;
+    }
+    final shouldContinue = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => Padding(
+        padding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          bottom: MediaQuery.of(sheetContext).viewInsets.bottom + 16,
+          top: 16,
+        ),
+        child: UploadGuidanceOverlay(
+          onContinue: () => Navigator.pop(sheetContext, true),
+          onCancel: () => Navigator.pop(sheetContext, false),
+        ),
+      ),
+    );
+    _hasShownGuidance = true;
+    if (shouldContinue == true) {
+      await _pickImage(source);
+    }
   }
 
   Future<void> _pickImage(ImageSource source) async {
@@ -226,7 +323,17 @@ class _PrescriptionUploadScreenState extends State<PrescriptionUploadScreen> {
         });
       }
     } catch (e) {
-      // handle error
+      // Erreur silencieuse corrigée (audit Module 5, 29/08/2026) : un refus
+      // de permission caméra/galerie laissait l'utilisateur devant un écran
+      // inchangé, sans aucune explication.
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Impossible d\'accéder à l\'image : $e'),
+            backgroundColor: PharmaConnectColors.accentRed,
+          ),
+        );
+      }
     }
   }
 }

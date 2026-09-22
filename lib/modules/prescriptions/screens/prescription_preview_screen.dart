@@ -91,6 +91,10 @@ class _PrescriptionPreviewScreenState extends State<PrescriptionPreviewScreen> {
                           item: item,
                           isExtracted: true,
                           showActions: true,
+                          isControlledSubstance:
+                              provider.controlledSubstanceMap[item
+                                  .medicationName] ??
+                              false,
                           onEdit: () => _showEditDialog(context, index, item),
                           onSubstitute: item.hasGenericAlternative
                               ? () => _showSubstitutionDialog(
