@@ -208,7 +208,10 @@ class _SolidarityDashboardScreenState extends State<SolidarityDashboardScreen>
           padding: const EdgeInsets.only(bottom: 8),
           child: ProgramCard(
             program: program,
-            onTap: () => context.push('/solidarity/program/${program.id}'),
+            onTap: () => context.push(
+              '/solidarity/program/${program.id}',
+              extra: widget.isStaff,
+            ),
           ),
         );
       },
