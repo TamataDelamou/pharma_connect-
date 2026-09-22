@@ -31,6 +31,18 @@ import 'modules/iot/providers/iot_provider.dart';
 import 'modules/loyalty/providers/loyalty_provider.dart';
 import 'modules/loyalty/providers/badge_provider.dart';
 import 'modules/loyalty/providers/personalized_reward_provider.dart';
+import 'modules/family/providers/family_provider.dart';
+import 'modules/family/providers/family_challenge_provider.dart';
+import 'modules/hospitals/providers/hospitals_provider.dart';
+import 'modules/insurance/providers/insurance_provider.dart';
+import 'modules/eprescription/providers/eprescription_provider.dart';
+import 'modules/chains/providers/chain_provider.dart';
+import 'modules/chains/providers/network_admin_provider.dart';
+import 'modules/regulator/providers/regulator_provider.dart';
+import 'modules/regulator/providers/inspection_provider.dart';
+import 'modules/regulator/providers/marketing_authorization_provider.dart';
+import 'modules/analytics/providers/analytics_provider.dart';
+import 'modules/analytics/providers/dashboard_customization_provider.dart';
 
 class PharmaConnectApp extends StatelessWidget {
   const PharmaConnectApp({super.key});
@@ -87,6 +99,23 @@ class PharmaConnectApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => LoyaltyProvider()),
         ChangeNotifierProvider(create: (_) => BadgeProvider()),
         ChangeNotifierProvider(create: (_) => PersonalizedRewardProvider()),
+        ChangeNotifierProvider(create: (_) => FamilyProvider()),
+        // Non demande par la consigne du lot, trouve en verifiant les usages
+        // reels : family_challenges_screen.dart, family_challenge_detail_screen.dart
+        // et family_journal_screen.dart (ce dernier deja sur main avant ce
+        // lot) appellent deja context.watch/read<FamilyChallengeProvider>()
+        // sans que ce provider ne soit jamais declare ici.
+        ChangeNotifierProvider(create: (_) => FamilyChallengeProvider()),
+        ChangeNotifierProvider(create: (_) => HospitalsProvider()),
+        ChangeNotifierProvider(create: (_) => InsuranceProvider()),
+        ChangeNotifierProvider(create: (_) => EPrescriptionProvider()),
+        ChangeNotifierProvider(create: (_) => ChainProvider()),
+        ChangeNotifierProvider(create: (_) => NetworkAdminProvider()),
+        ChangeNotifierProvider(create: (_) => RegulatorProvider()),
+        ChangeNotifierProvider(create: (_) => InspectionProvider()),
+        ChangeNotifierProvider(create: (_) => MarketingAuthorizationProvider()),
+        ChangeNotifierProvider(create: (_) => AnalyticsProvider()),
+        ChangeNotifierProvider(create: (_) => DashboardCustomizationProvider()),
       ],
       child: MaterialApp.router(
         title: 'PharmaConnect',
