@@ -440,7 +440,7 @@ class SalesProvider extends ChangeNotifier {
 
   // ---- Invoice Payments ----
   // Le recalcul de paidAmount/status de la facture n'est volontairement pas
-  // fait ici : règle métier non tranchée (cf. registre C164).
+  // fait ici : règle métier non tranchée (cf. registre C175).
 
   Future<void> loadInvoicePayments(String invoiceId) async {
     _isLoading = true;
