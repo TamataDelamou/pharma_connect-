@@ -46,6 +46,12 @@ import 'modules/analytics/providers/dashboard_customization_provider.dart';
 import 'modules/solidarity/providers/solidarity_provider.dart';
 import 'modules/support/providers/support_provider.dart';
 import 'modules/support/providers/bot_provider.dart';
+import 'modules/business/providers/business_provider.dart';
+import 'modules/pos/providers/pos_provider.dart';
+import 'modules/pos/providers/offline_pos_provider.dart';
+import 'modules/sales/providers/sales_provider.dart';
+import 'modules/cash/providers/cash_provider.dart';
+import 'modules/returns/providers/returns_provider.dart';
 
 class PharmaConnectApp extends StatelessWidget {
   const PharmaConnectApp({super.key});
@@ -133,6 +139,20 @@ class PharmaConnectApp extends StatelessWidget {
         // garantie sur tout le module, trouve en verifiant les usages reels.
         ChangeNotifierProvider(create: (_) => SupportProvider()),
         ChangeNotifierProvider(create: (_) => BotProvider()),
+        // Cluster hors-cahier (reconciliation 26/09/2026, D54) : les ecrans
+        // deja restaures (business_dashboard_screen.dart, company_*_screen.dart,
+        // pos_*_screen.dart, offline_pos_indicator.dart, customers_list_screen.dart,
+        // cash_*_screen.dart, customer_return_*_screen.dart) appellent deja
+        // context.watch/read<BusinessProvider|POSProvider|OfflinePOSProvider|
+        // SalesProvider|CashProvider|ReturnsProvider>() sans qu'aucun de ces
+        // 6 providers ne soit jamais declare ici -> ProviderNotFoundException
+        // garantie sur tout le cluster, trouve en verifiant les usages reels.
+        ChangeNotifierProvider(create: (_) => BusinessProvider()),
+        ChangeNotifierProvider(create: (_) => POSProvider()),
+        ChangeNotifierProvider(create: (_) => OfflinePOSProvider()),
+        ChangeNotifierProvider(create: (_) => SalesProvider()),
+        ChangeNotifierProvider(create: (_) => CashProvider()),
+        ChangeNotifierProvider(create: (_) => ReturnsProvider()),
       ],
       child: MaterialApp.router(
         title: 'PharmaConnect',
