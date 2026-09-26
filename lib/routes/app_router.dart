@@ -202,6 +202,7 @@ import '../modules/iot/screens/device_create_screen.dart';
 // business
 import '../modules/business/screens/business_dashboard_screen.dart';
 import '../modules/business/screens/company_detail_screen.dart';
+import '../modules/business/screens/company_create_screen.dart';
 
 //forecast
 import '../modules/stock/screens/demand_forecast_screen.dart';
@@ -244,17 +245,13 @@ import '../modules/sales/screens/customers_list_screen.dart';
 
 //cash
 import '../modules/cash/screens/cash_dashboard_screen.dart';
-// TODO PharmaConnect: écran non cadré, cluster hors-cahier, cf. Etape1 §1.5 — audit dédié requis avant réintégration.
-// import '../modules/cash/screens/cash_history_screen.dart';
-// TODO PharmaConnect: écran non cadré, cluster hors-cahier, cf. Etape1 §1.5 — audit dédié requis avant réintégration.
-// import '../modules/cash/screens/cash_report_screen.dart';
+import '../modules/cash/screens/cash_history_screen.dart';
+import '../modules/cash/screens/cash_report_screen.dart';
 
 //returns
 import '../modules/returns/screens/customer_returns_list_screen.dart';
-// TODO PharmaConnect: écran non cadré, cluster hors-cahier, cf. Etape1 §1.5 — audit dédié requis avant réintégration.
-// import '../modules/returns/screens/customer_return_detail_screen.dart';
-// TODO PharmaConnect: écran non cadré, cluster hors-cahier, cf. Etape1 §1.5 — audit dédié requis avant réintégration.
-// import '../modules/returns/screens/customer_return_create_screen.dart';
+import '../modules/returns/screens/customer_return_detail_screen.dart';
+import '../modules/returns/screens/customer_return_create_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -1422,12 +1419,11 @@ class AppRouter {
       // Audit Module 18 (HOM, 30/08/2026), balayage C69 :
       // `/business/company/:id` capturait `/business/company/new` (déclarée
       // après, même profondeur à 3 segments) — réordonnancement.
-      // TODO PharmaConnect: écran non cadré, cluster hors-cahier, cf. Etape1 §1.5 — audit dédié requis avant réintégration.
-      // GoRoute(
-      //   path: '/business/company/new',
-      //   name: 'business-company-new',
-      //   builder: (context, state) => const CompanyCreateScreen(),
-      // ),
+      GoRoute(
+        path: '/business/company/new',
+        name: 'business-company-new',
+        builder: (context, state) => const CompanyCreateScreen(),
+      ),
       GoRoute(
         path: '/business/company/:id',
         name: 'business-company-detail',
@@ -1436,15 +1432,14 @@ class AppRouter {
           return CompanyDetailScreen(companyId: id);
         },
       ),
-      // TODO PharmaConnect: écran non cadré, cluster hors-cahier, cf. Etape1 §1.5 — audit dédié requis avant réintégration.
-      // GoRoute(
-      //   path: '/business/company/edit/:id',
-      //   name: 'business-company-edit',
-      //   builder: (context, state) {
-      //     final id = state.pathParameters['id']!;
-      //     return CompanyCreateScreen(companyId: id);
-      //   },
-      // ),
+      GoRoute(
+        path: '/business/company/edit/:id',
+        name: 'business-company-edit',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return CompanyCreateScreen(companyId: id);
+        },
+      ),
       // Audit Module 11 (29/08/2026), arbitrage D17 : nouvel écran « Commande
       // recommandée » — placé avant '/stock/forecast/:productId' pour éviter
       // toute ambiguïté de correspondance de route ('orders' ne doit jamais
@@ -1568,18 +1563,16 @@ class AppRouter {
         name: 'cash',
         builder: (context, state) => const CashDashboardScreen(),
       ),
-      // TODO PharmaConnect: écran non cadré, cluster hors-cahier, cf. Etape1 §1.5 — audit dédié requis avant réintégration.
-      // GoRoute(
-      //   path: '/cash/history',
-      //   name: 'cash-history',
-      //   builder: (context, state) => const CashHistoryScreen(),
-      // ),
-      // TODO PharmaConnect: écran non cadré, cluster hors-cahier, cf. Etape1 §1.5 — audit dédié requis avant réintégration.
-      // GoRoute(
-      //   path: '/cash/report',
-      //   name: 'cash-report',
-      //   builder: (context, state) => const CashReportScreen(),
-      // ),
+      GoRoute(
+        path: '/cash/history',
+        name: 'cash-history',
+        builder: (context, state) => const CashHistoryScreen(),
+      ),
+      GoRoute(
+        path: '/cash/report',
+        name: 'cash-report',
+        builder: (context, state) => const CashReportScreen(),
+      ),
       //returns
       GoRoute(
         path: '/returns',
@@ -1595,21 +1588,19 @@ class AppRouter {
       // `/returns/customer/:id` capturait `/returns/customer/new` (déclarée
       // après, même profondeur à 3 segments) — réordonnancement. Dernière
       // des 14 occurrences trouvées lors de ce balayage complet.
-      // TODO PharmaConnect: écran non cadré, cluster hors-cahier, cf. Etape1 §1.5 — audit dédié requis avant réintégration.
-      // GoRoute(
-      //   path: '/returns/customer/new',
-      //   name: 'returns-customer-new',
-      //   builder: (context, state) => const CustomerReturnCreateScreen(),
-      // ),
-      // TODO PharmaConnect: écran non cadré, cluster hors-cahier, cf. Etape1 §1.5 — audit dédié requis avant réintégration.
-      // GoRoute(
-      //   path: '/returns/customer/:id',
-      //   name: 'returns-customer-detail',
-      //   builder: (context, state) {
-      //     final id = state.pathParameters['id']!;
-      //     return CustomerReturnDetailScreen(returnId: id);
-      //   },
-      // ),
+      GoRoute(
+        path: '/returns/customer/new',
+        name: 'returns-customer-new',
+        builder: (context, state) => const CustomerReturnCreateScreen(),
+      ),
+      GoRoute(
+        path: '/returns/customer/:id',
+        name: 'returns-customer-detail',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return CustomerReturnDetailScreen(returnId: id);
+        },
+      ),
     ],
   );
 }
