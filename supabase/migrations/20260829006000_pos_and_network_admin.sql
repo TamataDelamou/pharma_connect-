@@ -1,0 +1,35 @@
+-- Fichier neutralisé (audit Module 0, 29/08/2026) — ne pas supprimer
+-- physiquement : `supabase migration list` compare l'historique par nom de
+-- fichier, et ce dépôt n'a pas d'accès `rm` depuis la session qui a fait cet
+-- audit. Ce fichier portait le même timestamp (20260829006000) que
+-- 20260829006000_pos.sql et créait EXACTEMENT les mêmes tables
+-- (public.pos_sales, public.pos_sale_items, public.pos_receipts) ainsi que
+-- public.network_admin_roles + la vue network_dashboard, elles-mêmes
+-- recréées en détail par 20260829007000_network_admin.sql. Un `supabase db
+-- push` aurait échoué sur ce fichier avec "relation already exists" dès que
+-- le premier des deux (l'ordre lexicographique place *_pos.sql avant
+-- *_pos_and_network_admin.sql) aurait été appliqué. Repéré en croisant les
+-- deux fichiers ligne à ligne pendant l'audit transverse (Module 0).
+--
+-- Ce fichier avait par ailleurs deux défauts que sa version retenue
+-- n'a plus : sa policy "Pharmacy staff manage POS" comparait
+-- `pharmacy_id = pharmacy_id` (la même colonne des deux côtés — un bug de
+-- capture de nom qui rend le test toujours vrai dès que la colonne n'est pas
+-- nulle, au lieu de comparer la colonne de public.profiles à celle de
+-- public.pos_sales), et sa policy de bootstrap sur network_admin_roles
+-- testait `profiles.role = 'admin'`, une valeur que la contrainte CHECK de
+-- profiles.role n'autorise pas (voir 20260829003800_admin_helpers.sql).
+--
+-- Contenu utile déjà repris ailleurs :
+--   - public.pos_sales / pos_sale_items / pos_receipts, indexes, triggers,
+--     generate_sale_number()/generate_receipt_number() → 20260829006000_pos.sql
+--   - public.network_admin_roles, network_dashboard, network_activity_log,
+--     network_alerts → 20260829007000_network_admin.sql (version plus
+--     complète, avec journalisation d'activité et fonctions de gestion)
+--   - La policy "Network admins view all POS" (lecture des ventes par les
+--     administrateurs réseau) a été déplacée dans network_admin.sql, seul
+--     endroit où network_admin_roles ET pos_sales existent déjà au moment où
+--     la policy est créée.
+--
+-- Aucune instruction SQL exécutable ne reste dans ce fichier.
+select 1;

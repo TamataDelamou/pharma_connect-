@@ -1,0 +1,17 @@
+-- Fichier neutralisé (audit Module 0, 29/08/2026) — ne pas supprimer
+-- physiquement, voir la même note dans 20260829006000_pos_and_network_admin.sql.
+-- Ce fichier portait le même timestamp (20260829008000) que
+-- 20260829008000_sales_management.sql et créait un sous-ensemble strict des
+-- mêmes tables (public.customers, suppliers, customer_orders,
+-- customer_order_items, quotations, quotation_items, invoices,
+-- invoice_payments, supplier_orders, supplier_order_items) — sales_management.sql
+-- couvre tout cela plus les retours et la caisse. Un `supabase db push`
+-- aurait échoué sur le second des deux fichiers appliqués (ordre
+-- lexicographique : *_sales.sql avant *_sales_management.sql) avec
+-- "relation already exists".
+--
+-- Contenu utile déjà repris ailleurs :
+--   - Toutes les tables ci-dessus → 20260829008000_sales_management.sql
+--
+-- Aucune instruction SQL exécutable ne reste dans ce fichier.
+select 1;
