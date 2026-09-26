@@ -236,12 +236,9 @@ import '../modules/sales/screens/customers_list_screen.dart';
 // import '../modules/sales/screens/customer_create_screen.dart';
 // TODO PharmaConnect: écran non cadré, cluster hors-cahier, cf. Etape1 §1.5 — audit dédié requis avant réintégration.
 // import '../modules/sales/screens/suppliers_list_screen.dart';
-// TODO PharmaConnect: écran non cadré, cluster hors-cahier, cf. Etape1 §1.5 — audit dédié requis avant réintégration.
-// import '../modules/sales/screens/orders_list_screen.dart';
-// TODO PharmaConnect: écran non cadré, cluster hors-cahier, cf. Etape1 §1.5 — audit dédié requis avant réintégration.
-// import '../modules/sales/screens/quotations_list_screen.dart';
-// TODO PharmaConnect: écran non cadré, cluster hors-cahier, cf. Etape1 §1.5 — audit dédié requis avant réintégration.
-// import '../modules/sales/screens/invoices_list_screen.dart';
+import '../modules/sales/screens/orders_list_screen.dart';
+import '../modules/sales/screens/quotations_list_screen.dart';
+import '../modules/sales/screens/invoices_list_screen.dart';
 
 //cash
 import '../modules/cash/screens/cash_dashboard_screen.dart';
@@ -1539,24 +1536,21 @@ class AppRouter {
       //   name: 'sales-suppliers',
       //   builder: (context, state) => const SuppliersListScreen(),
       // ),
-      // TODO PharmaConnect: écran non cadré, cluster hors-cahier, cf. Etape1 §1.5 — audit dédié requis avant réintégration.
-      // GoRoute(
-      //   path: '/sales/orders',
-      //   name: 'sales-orders',
-      //   builder: (context, state) => const OrdersListScreen(),
-      // ),
-      // TODO PharmaConnect: écran non cadré, cluster hors-cahier, cf. Etape1 §1.5 — audit dédié requis avant réintégration.
-      // GoRoute(
-      //   path: '/sales/quotations',
-      //   name: 'sales-quotations',
-      //   builder: (context, state) => const QuotationsListScreen(),
-      // ),
-      // TODO PharmaConnect: écran non cadré, cluster hors-cahier, cf. Etape1 §1.5 — audit dédié requis avant réintégration.
-      // GoRoute(
-      //   path: '/sales/invoices',
-      //   name: 'sales-invoices',
-      //   builder: (context, state) => const InvoicesListScreen(),
-      // ),
+      GoRoute(
+        path: '/sales/orders',
+        name: 'sales-orders',
+        builder: (context, state) => const OrdersListScreen(),
+      ),
+      GoRoute(
+        path: '/sales/quotations',
+        name: 'sales-quotations',
+        builder: (context, state) => const QuotationsListScreen(),
+      ),
+      GoRoute(
+        path: '/sales/invoices',
+        name: 'sales-invoices',
+        builder: (context, state) => const InvoicesListScreen(),
+      ),
       //cash
       GoRoute(
         path: '/cash',
