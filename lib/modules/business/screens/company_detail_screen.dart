@@ -67,7 +67,7 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
                   padding: EdgeInsets.zero,
                 ),
                 const SizedBox(width: 8),
-                const Expanded(
+                Expanded(
                   child: Text(
                     company.name,
                     style: PharmaConnectTypography.heading2,
