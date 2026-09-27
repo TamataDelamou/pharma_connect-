@@ -130,15 +130,15 @@ class OfflineSalesService {
     String productId,
     int quantity,
   ) async {
+    // Cache local SQLite, pas le stock de référence : le décrément serveur
+    // d'une vente hors ligne passera par stock_apply_movement à la
+    // synchronisation (C195). Même motif rawUpdate que
+    // offline_sync_service.dart::markFailed() (Module 4).
     final db = await database;
-    await db.update(
-      'products',
-      {
-        'stock': sqlExpr('stock - $quantity'),
-        'updated_at': DateTime.now().toIso8601String(),
-      },
-      where: 'pharmacy_id = ? AND id = ?',
-      whereArgs: [pharmacyId, productId],
+    await db.rawUpdate(
+      'UPDATE products SET stock = stock - ?, updated_at = ? '
+      'WHERE pharmacy_id = ? AND id = ?',
+      [quantity, DateTime.now().toIso8601String(), pharmacyId, productId],
     );
   }
 

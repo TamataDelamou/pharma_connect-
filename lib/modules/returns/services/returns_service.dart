@@ -158,32 +158,37 @@ class ReturnsService {
 
     // Restore stock for each item
     for (final item in items as List) {
-      if (item['product_id'] != null) {
-        await _restoreStock(item['product_id'], item['quantity']);
+      final saleItemId = item['sale_item_id'] as String?;
+      if (saleItemId != null) {
+        await _restoreStock(saleItemId, item['quantity'] as int, returnId);
       }
     }
   }
 
-  Future<void> _restoreStock(String productId, int quantity) async {
-    // Find a batch to restore
-    final batch = await _client
-        .from('stock_batches')
-        .select()
-        .eq('product_id', productId)
-        .gt('quantity', 0)
-        .order('expiry_date', ascending: true)
-        .limit(1)
+  Future<void> _restoreStock(
+    String saleItemId,
+    int quantity,
+    String returnId,
+  ) async {
+    final saleItem = await _client
+        .from('pos_sale_items')
+        .select('batch_id')
+        .eq('id', saleItemId)
         .maybeSingle();
 
-    if (batch != null) {
-      await _client
-          .from('stock_batches')
-          .update({
-            'quantity': sqlExpr('quantity + $quantity'),
-            'updated_at': DateTime.now().toUtc().toIso8601String(),
-          })
-          .eq('id', batch['id']);
-    }
+    final batchId = saleItem?['batch_id'] as String?;
+    if (batchId == null) return;
+
+    await _client.rpc(
+      'stock_apply_movement',
+      params: {
+        'p_batch_id': batchId,
+        'p_delta': quantity,
+        'p_type': 'adjustment',
+        'p_reference_id': returnId,
+        'p_reason': 'Retour client',
+      },
+    );
   }
 
   // ---- Return Reasons ----

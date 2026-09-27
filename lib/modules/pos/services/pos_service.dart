@@ -47,7 +47,7 @@ class POSService {
       if (sale.items != null) {
         for (final item in sale.items!) {
           await _createSaleItem(id, item);
-          await _updateStock(item);
+          await _updateStock(item, id);
         }
       }
 
@@ -72,16 +72,19 @@ class POSService {
     await _client.from('pos_sale_items').insert(itemData);
   }
 
-  Future<void> _updateStock(POSSaleItem item) async {
-    if (item.batchId != null) {
-      await _client
-          .from('stock_batches')
-          .update({
-            'quantity': sqlExpr('quantity - ${item.quantity}'),
-            'updated_at': DateTime.now().toUtc().toIso8601String(),
-          })
-          .eq('id', item.batchId);
-    }
+  Future<void> _updateStock(POSSaleItem item, String saleId) async {
+    final batchId = item.batchId;
+    if (batchId == null) return;
+    await _client.rpc(
+      'stock_apply_movement',
+      params: {
+        'p_batch_id': batchId,
+        'p_delta': -item.quantity,
+        'p_type': 'sale',
+        'p_reference_id': saleId,
+        'p_reason': 'Vente POS',
+      },
+    );
   }
 
   Future<void> _generateReceipt(String saleId) async {
@@ -167,14 +170,18 @@ class POSService {
           .eq('sale_id', saleId);
 
       for (final item in items as List) {
-        if (item['batch_id'] != null) {
-          await _client
-              .from('stock_batches')
-              .update({
-                'quantity': sqlExpr('quantity + ${item['quantity']}'),
-                'updated_at': DateTime.now().toUtc().toIso8601String(),
-              })
-              .eq('id', item['batch_id']);
+        final batchId = item['batch_id'] as String?;
+        if (batchId != null) {
+          await _client.rpc(
+            'stock_apply_movement',
+            params: {
+              'p_batch_id': batchId,
+              'p_delta': item['quantity'] as int,
+              'p_type': 'adjustment',
+              'p_reference_id': saleId,
+              'p_reason': 'Remboursement vente POS',
+            },
+          );
         }
       }
 
