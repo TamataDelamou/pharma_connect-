@@ -136,7 +136,8 @@ import '../modules/insurance/screens/reimbursement_status_screen.dart';
 // analitycs
 import '../modules/analytics/screens/analytics_dashboard_screen.dart';
 import '../modules/analytics/screens/dashboard_editor_screen.dart';
-import '../modules/analytics/screens/forecast_screen.dart';
+// TODO PharmaConnect: écran non construit, cluster forecast différé (C188 / D54)
+// import '../modules/analytics/screens/forecast_screen.dart';
 import '../modules/analytics/screens/export_reports_screen.dart';
 
 //support
@@ -205,8 +206,10 @@ import '../modules/business/screens/company_detail_screen.dart';
 import '../modules/business/screens/company_create_screen.dart';
 
 //forecast
-import '../modules/stock/screens/demand_forecast_screen.dart';
-import '../modules/stock/screens/reorder_recommendation_screen.dart';
+// TODO PharmaConnect: écran non construit, cluster forecast différé (C188 / D54)
+// import '../modules/stock/screens/demand_forecast_screen.dart';
+// TODO PharmaConnect: écran non construit, cluster forecast différé (C188 / D54)
+// import '../modules/stock/screens/reorder_recommendation_screen.dart';
 
 // pos
 import '../modules/pos/screens/pos_checkout_screen.dart';
@@ -521,11 +524,12 @@ class AppRouter {
       // `/stock/:id` (id='forecast'). Même bug de shadowing go_router que
       // C69/le balayage transverse Module 18. Relocalisée ici, avant la
       // route dynamique.
-      GoRoute(
-        path: '/stock/forecast',
-        name: 'stock-forecast',
-        builder: (context, state) => const DemandForecastScreen(),
-      ),
+      // TODO PharmaConnect: écran non construit, cluster forecast différé (C188 / D54)
+      // GoRoute(
+      //   path: '/stock/forecast',
+      //   name: 'stock-forecast',
+      //   builder: (context, state) => const DemandForecastScreen(),
+      // ),
       GoRoute(
         path: '/stock/:id',
         name: 'stock-detail',
@@ -1033,11 +1037,12 @@ class AppRouter {
         name: 'analytics-dashboard-editor',
         builder: (context, state) => const DashboardEditorScreen(),
       ),
-      GoRoute(
-        path: '/analytics/forecast',
-        name: 'analytics-forecast',
-        builder: (context, state) => const ForecastScreen(),
-      ),
+      // TODO PharmaConnect: écran non construit, cluster forecast différé (C188 / D54)
+      // GoRoute(
+      //   path: '/analytics/forecast',
+      //   name: 'analytics-forecast',
+      //   builder: (context, state) => const ForecastScreen(),
+      // ),
       // BI-8 : livrable de ce correctif — écran d'export de rapports
       // agrégés (CSV), sans données de santé nominatives, scopé aux mêmes
       // vues/fonctions "_scoped" que AnalyticsDashboardScreen (BI-1/BI-2).
@@ -1445,19 +1450,21 @@ class AppRouter {
       // ancien alias inutilisé du "//forecast") déplacée avant '/stock/:id'
       // — voir plus haut dans ce fichier — car elle était déclarée bien
       // après lui et donc jamais atteignable.
-      GoRoute(
-        path: '/stock/forecast/orders',
-        name: 'stock-forecast-orders',
-        builder: (context, state) => const ReorderRecommendationScreen(),
-      ),
-      GoRoute(
-        path: '/stock/forecast/:productId',
-        name: 'stock-forecast-product',
-        builder: (context, state) {
-          final id = state.pathParameters['productId']!;
-          return DemandForecastScreen(productId: id);
-        },
-      ),
+      // TODO PharmaConnect: écran non construit, cluster forecast différé (C188 / D54)
+      // GoRoute(
+      //   path: '/stock/forecast/orders',
+      //   name: 'stock-forecast-orders',
+      //   builder: (context, state) => const ReorderRecommendationScreen(),
+      // ),
+      // TODO PharmaConnect: écran non construit, cluster forecast différé (C188 / D54)
+      // GoRoute(
+      //   path: '/stock/forecast/:productId',
+      //   name: 'stock-forecast-product',
+      //   builder: (context, state) {
+      //     final id = state.pathParameters['productId']!;
+      //     return DemandForecastScreen(productId: id);
+      //   },
+      // ),
       // pos
       GoRoute(
         path: '/pos',
