@@ -19,7 +19,7 @@ create table support_knowledge_articles (
   content text not null,
   category text,
   keywords text[],
-  embeddings vector(384), -- for semantic search
+  embeddings extensions.vector(384), -- for semantic search (C181 : type qualifie, extensions n'est pas dans le search_path du db push distant)
   is_active boolean default true,
   view_count integer default 0,
   helpful_count integer default 0,
