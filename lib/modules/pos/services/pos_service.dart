@@ -103,7 +103,7 @@ class POSService {
       var query = _client
           .from('pos_sales')
           .select(
-            '*, patients:patient_id(full_name), cashiers:cashier_id(full_name), items:sale_items(*)',
+            '*, patients:patient_id(full_name), cashiers:cashier_id(full_name), items:pos_sale_items(*)',
           );
 
       if (pharmacyId != null) {
@@ -135,7 +135,7 @@ class POSService {
       final response = await _client
           .from('pos_sales')
           .select(
-            '*, patients:patient_id(full_name), cashiers:cashier_id(full_name), items:sale_items(*)',
+            '*, patients:patient_id(full_name), cashiers:cashier_id(full_name), items:pos_sale_items(*)',
           )
           .eq('id', id)
           .maybeSingle();
