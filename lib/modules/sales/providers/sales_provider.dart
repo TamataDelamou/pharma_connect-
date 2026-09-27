@@ -457,27 +457,33 @@ class SalesProvider extends ChangeNotifier {
     _isLoading = true;
     _error = null;
     notifyListeners();
+    final InvoicePayment saved;
     try {
-      final saved = await _service.createInvoicePayment(payment);
-      _invoicePayments.insert(0, saved);
-      // La base a recalculé paid_amount/status : relire la facture.
-      final invoice = await _service.getSalesInvoice(saved.invoiceId);
-      if (invoice != null) {
-        final index = _salesInvoices.indexWhere((i) => i.id == invoice.id);
-        if (index != -1) _salesInvoices[index] = invoice;
-        if (_selectedSalesInvoice?.id == invoice.id) {
-          _selectedSalesInvoice = invoice;
-        }
-      }
-      _isLoading = false;
-      notifyListeners();
-      return true;
+      saved = await _service.createInvoicePayment(payment);
     } catch (e) {
       _error = e.toString();
       _isLoading = false;
       notifyListeners();
       return false;
     }
+    _invoicePayments.insert(0, saved);
+    // Le paiement est enregistré : la réussite ne dépend plus de la relecture.
+    // La base a recalculé paid_amount/status, on relit la facture.
+    try {
+      final invoice = await _service.getSalesInvoice(saved.invoiceId);
+      if (invoice == null) throw Exception('facture introuvable');
+      final index = _salesInvoices.indexWhere((i) => i.id == invoice.id);
+      if (index != -1) _salesInvoices[index] = invoice;
+      if (_selectedSalesInvoice?.id == invoice.id) {
+        _selectedSalesInvoice = invoice;
+      }
+    } catch (_) {
+      _error =
+          "Paiement enregistré ; l'affichage de la facture n'a pas pu être actualisé.";
+    }
+    _isLoading = false;
+    notifyListeners();
+    return true;
   }
 
   void clearSelected() {
