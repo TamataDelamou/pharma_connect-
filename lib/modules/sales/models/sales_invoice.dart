@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+// overdue n'est jamais stocké en base (C185) : il sert seulement à
+// l'affichage, via SalesInvoice.displayStatus.
 enum SalesInvoiceStatus { draft, sent, paid, overdue, cancelled }
 
 extension SalesInvoiceStatusExtension on SalesInvoiceStatus {
@@ -133,7 +135,10 @@ class SalesInvoice extends Equatable {
       'due_date': dueDate!.toIso8601String().split('T').first,
     'total_amount': totalAmount,
     'paid_amount': paidAmount,
-    'status': status.name,
+    'status': (status == SalesInvoiceStatus.overdue
+            ? SalesInvoiceStatus.sent
+            : status)
+        .name,
     if (notes != null) 'notes': notes,
     'created_at': createdAt.toIso8601String(),
     'updated_at': updatedAt.toIso8601String(),
@@ -208,4 +213,18 @@ class SalesInvoice extends Equatable {
 
   int get remainingAmount => totalAmount - paidAmount;
   bool get isPaid => status == SalesInvoiceStatus.paid;
+
+  // C185 : « en retard » est calculé à la volée, jamais stocké : envoyée,
+  // avec une échéance antérieure à la date du jour (comparaison sur la date
+  // seule). Une facture payée, en brouillon ou annulée n'est jamais en retard.
+  bool get isOverdue {
+    if (status != SalesInvoiceStatus.sent || dueDate == null) return false;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final due = DateTime(dueDate!.year, dueDate!.month, dueDate!.day);
+    return due.isBefore(today);
+  }
+
+  SalesInvoiceStatus get displayStatus =>
+      isOverdue ? SalesInvoiceStatus.overdue : status;
 }

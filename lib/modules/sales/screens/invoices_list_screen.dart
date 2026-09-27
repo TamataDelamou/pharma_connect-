@@ -140,7 +140,7 @@ class _InvoicesListScreenState extends State<InvoicesListScreen> {
                   width: 4,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: _statusColor(invoice.status),
+                    color: _statusColor(invoice.displayStatus),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -165,16 +165,16 @@ class _InvoicesListScreenState extends State<InvoicesListScreen> {
                             ),
                             decoration: BoxDecoration(
                               color: _statusColor(
-                                invoice.status,
+                                invoice.displayStatus,
                               ).withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
-                              invoice.status.label,
+                              invoice.displayStatus.label,
                               style: TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w500,
-                                color: _statusColor(invoice.status),
+                                color: _statusColor(invoice.displayStatus),
                               ),
                             ),
                           ),
@@ -196,7 +196,7 @@ class _InvoicesListScreenState extends State<InvoicesListScreen> {
                           'Reste dû : ${CurrencyFormatter.format(invoice.remainingAmount)}',
                           style: PharmaConnectTypography.body2.copyWith(
                             fontSize: 12,
-                            color: invoice.status == SalesInvoiceStatus.overdue
+                            color: invoice.isOverdue
                                 ? PharmaConnectColors.accentRed
                                 : PharmaConnectColors.accentOrange,
                           ),

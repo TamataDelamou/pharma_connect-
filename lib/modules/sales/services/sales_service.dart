@@ -461,7 +461,11 @@ class SalesService {
       if (customerId != null) {
         query = query.eq('customer_id', customerId);
       }
-      if (status != null) {
+      if (status == SalesInvoiceStatus.overdue) {
+        // C185 : overdue n'est pas stocké, il se déduit de status et due_date.
+        final today = DateTime.now().toIso8601String().split('T').first;
+        query = query.eq('status', 'sent').lt('due_date', today);
+      } else if (status != null) {
         query = query.eq('status', status.name);
       }
 
