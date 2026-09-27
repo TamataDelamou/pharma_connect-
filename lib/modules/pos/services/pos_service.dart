@@ -1,4 +1,10 @@
+import 'dart:typed_data';
+
+import 'package:intl/intl.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
 import 'package:pharma_connect/core/services/supabase_service.dart';
+import 'package:pharma_connect/core/utils/currency_formatter.dart';
 import 'package:uuid/uuid.dart';
 import '../models/pos_sale.dart';
 import '../models/pos_sale_item.dart';
@@ -98,9 +104,7 @@ class POSService {
           .from('pos_sales')
           .select(
             '*, patients:patient_id(full_name), cashiers:cashier_id(full_name), items:sale_items(*)',
-          )
-          .order('created_at', ascending: false)
-          .limit(limit);
+          );
 
       if (pharmacyId != null) {
         query = query.eq('pharmacy_id', pharmacyId);
@@ -115,7 +119,9 @@ class POSService {
         query = query.lte('created_at', toDate.toIso8601String());
       }
 
-      final response = await query;
+      final response = await query
+          .order('created_at', ascending: false)
+          .limit(limit);
       return (response as List)
           .map((e) => POSSale.fromJson(e as Map<String, dynamic>))
           .toList();
@@ -237,94 +243,65 @@ class POSService {
   }
 
   Future<Uint8List> _buildReceiptPDF(POSSale sale) async {
-    // Using pdf package
-    final pdf = Document();
+    final pdf = pw.Document();
+    final bold = pw.TextStyle(fontWeight: pw.FontWeight.bold);
 
     pdf.addPage(
-      MultiPage(
-        pageFormat: A4,
-        margin: const EdgeInsets.all(20),
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(20),
         build: (context) => [
-          Header(
+          pw.Header(
             text: 'PHARMACONNECT',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            textStyle: pw.TextStyle(
+              fontSize: 18,
+              fontWeight: pw.FontWeight.bold,
+            ),
           ),
-          Header(
+          pw.Header(
             text: 'Reçu de vente #${sale.saleNumber}',
-            style: TextStyle(fontSize: 14),
+            textStyle: const pw.TextStyle(fontSize: 14),
           ),
-          Divider(),
-          Text(
+          pw.Divider(),
+          pw.Text(
             'Date: ${DateFormat('dd/MM/yyyy HH:mm').format(sale.createdAt)}',
           ),
-          Text('Pharmacie: ${sale.pharmacyId}'),
-          if (sale.patientName != null) Text('Patient: ${sale.patientName}'),
-          if (sale.cashierName != null) Text('Caissier: ${sale.cashierName}'),
-          Divider(),
-          Table(
-            header: [
-              TableCell(
-                child: Text(
-                  'Produit',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-              TableCell(
-                child: Text(
-                  'Qté',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-              TableCell(
-                child: Text(
-                  'Prix',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-              TableCell(
-                child: Text(
-                  'Total',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
+          pw.Text('Pharmacie: ${sale.pharmacyId}'),
+          if (sale.patientName != null) pw.Text('Patient: ${sale.patientName}'),
+          if (sale.cashierName != null)
+            pw.Text('Caissier: ${sale.cashierName}'),
+          pw.Divider(),
+          pw.TableHelper.fromTextArray(
+            headers: ['Produit', 'Qté', 'Prix', 'Total'],
+            headerStyle: bold,
+            data: [
+              for (final item in sale.items ?? const <POSSaleItem>[])
+                [
+                  item.productName,
+                  '${item.quantity}',
+                  CurrencyFormatter.format(item.unitPrice),
+                  CurrencyFormatter.format(item.totalPrice),
+                ],
             ],
-            rows:
-                sale.items
-                    ?.map(
-                      (item) => [
-                        TableCell(child: Text(item.productName)),
-                        TableCell(child: Text('${item.quantity}')),
-                        TableCell(
-                          child: Text(CurrencyFormatter.format(item.unitPrice)),
-                        ),
-                        TableCell(
-                          child: Text(
-                            CurrencyFormatter.format(item.totalPrice),
-                          ),
-                        ),
-                      ],
-                    )
-                    .toList() ??
-                [],
           ),
-          Divider(),
-          Text('Total: ${CurrencyFormatter.format(sale.totalAmount)}'),
-          Text('Remise: ${CurrencyFormatter.format(sale.discountAmount)}'),
-          Text('TVA: ${CurrencyFormatter.format(sale.taxAmount)}'),
-          Text(
+          pw.Divider(),
+          pw.Text('Total: ${CurrencyFormatter.format(sale.totalAmount)}'),
+          pw.Text('Remise: ${CurrencyFormatter.format(sale.discountAmount)}'),
+          pw.Text('TVA: ${CurrencyFormatter.format(sale.taxAmount)}'),
+          pw.Text(
             'À payer: ${CurrencyFormatter.format(sale.finalAmount)}',
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: bold,
           ),
-          Text('Paiement: ${sale.paymentLabel}'),
-          Divider(),
-          Text(
+          pw.Text('Paiement: ${sale.paymentLabel}'),
+          pw.Divider(),
+          pw.Text(
             'Merci de votre visite !',
-            style: TextStyle(fontStyle: FontStyle.italic),
+            style: pw.TextStyle(fontStyle: pw.FontStyle.italic),
           ),
         ],
       ),
     );
 
-    return await pdf.save();
+    return pdf.save();
   }
 }
