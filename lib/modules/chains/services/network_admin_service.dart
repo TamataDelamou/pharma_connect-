@@ -107,7 +107,7 @@ class NetworkAdminService {
   Future<NetworkDashboard?> getDashboard(String groupId) async {
     try {
       final response = await _client
-          .from('network_dashboard')
+          .from('network_dashboard_scoped')
           .select()
           .eq('group_id', groupId)
           .maybeSingle();
@@ -121,7 +121,7 @@ class NetworkAdminService {
   Future<List<NetworkDashboard>> getAllDashboards() async {
     try {
       final response = await _client
-          .from('network_dashboard')
+          .from('network_dashboard_scoped')
           .select()
           .order('group_name', ascending: true);
       return (response as List)
