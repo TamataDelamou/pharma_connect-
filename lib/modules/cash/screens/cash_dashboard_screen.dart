@@ -7,9 +7,10 @@ import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/secondary_button.dart';
-import 'package:pharma_connect/core/widgets/cards/glass_card.dart.dart';
+import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/utils/currency_formatter.dart';
 import '../providers/cash_provider.dart';
+import '../models/cash_movement.dart';
 
 class CashDashboardScreen extends StatefulWidget {
   const CashDashboardScreen({super.key});
@@ -277,7 +278,6 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
               Expanded(
                 child: PrimaryButton(
                   label: '🔒 Fermer la caisse',
-                  backgroundColor: PharmaConnectColors.accentOrange,
                   onPressed: () => _showCloseDialog(context, provider),
                 ),
               ),
