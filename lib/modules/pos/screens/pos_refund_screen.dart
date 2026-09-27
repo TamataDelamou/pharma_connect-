@@ -8,6 +8,7 @@ import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/utils/currency_formatter.dart';
 import '../providers/pos_provider.dart';
+import '../models/pos_sale.dart';
 
 class POSRefundScreen extends StatefulWidget {
   final String? saleId;
@@ -193,7 +194,6 @@ class _POSRefundScreenState extends State<POSRefundScreen> {
                                   : '🔄 Confirmer le remboursement',
                               isLoading: provider.isLoading,
                               onPressed: () => _confirmRefund(provider),
-                              backgroundColor: PharmaConnectColors.accentOrange,
                             ),
                           ],
                         ),

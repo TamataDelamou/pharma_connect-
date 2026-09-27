@@ -247,7 +247,7 @@ class _POSInventoryScreenState extends State<POSInventoryScreen> {
     if (_searchQuery.isNotEmpty) {
       filtered = filtered
           .where(
-            (item) => item['name']!.toLowerCase().contains(
+            (item) => (item['name']?.toString() ?? '').toLowerCase().contains(
               _searchQuery.toLowerCase(),
             ),
           )
@@ -275,84 +275,93 @@ class _POSInventoryScreenState extends State<POSInventoryScreen> {
         final stock = item['stock'] as int;
         final status = item['status'] as String;
 
-        return GlassCard(
-          padding: const EdgeInsets.all(12),
-          margin: const EdgeInsets.only(bottom: 4),
-          child: Row(
-            children: [
-              Container(
-                width: 4,
-                height: 30,
-                decoration: BoxDecoration(
-                  color: status == 'in_stock'
-                      ? PharmaConnectColors.accentGreen
-                      : status == 'low_stock'
-                      ? PharmaConnectColors.accentOrange
-                      : PharmaConnectColors.accentRed,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item['name']!,
-                      style: PharmaConnectTypography.body1.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        Text(
-                          'Stock: $stock',
-                          style: TextStyle(
-                            color: status == 'in_stock'
-                                ? PharmaConnectColors.accentGreen
-                                : status == 'low_stock'
-                                ? PharmaConnectColors.accentOrange
-                                : PharmaConnectColors.accentRed,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          CurrencyFormatter.format(item['price'] as int),
-                          style: PharmaConnectTypography.micro,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: status == 'in_stock'
-                      ? PharmaConnectColors.accentGreen.withValues(alpha: 0.15)
-                      : status == 'low_stock'
-                      ? PharmaConnectColors.accentOrange.withValues(alpha: 0.15)
-                      : PharmaConnectColors.accentRed.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  status == 'in_stock'
-                      ? 'En stock'
-                      : status == 'low_stock'
-                      ? 'Stock bas'
-                      : 'Rupture',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 4),
+          child: GlassCard(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                Container(
+                  width: 4,
+                  height: 30,
+                  decoration: BoxDecoration(
                     color: status == 'in_stock'
                         ? PharmaConnectColors.accentGreen
                         : status == 'low_stock'
                         ? PharmaConnectColors.accentOrange
                         : PharmaConnectColors.accentRed,
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item['name']?.toString() ?? '',
+                        style: PharmaConnectTypography.body1.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                            'Stock: $stock',
+                            style: TextStyle(
+                              color: status == 'in_stock'
+                                  ? PharmaConnectColors.accentGreen
+                                  : status == 'low_stock'
+                                  ? PharmaConnectColors.accentOrange
+                                  : PharmaConnectColors.accentRed,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            CurrencyFormatter.format(item['price'] as int),
+                            style: PharmaConnectTypography.micro,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: status == 'in_stock'
+                        ? PharmaConnectColors.accentGreen.withValues(
+                            alpha: 0.15,
+                          )
+                        : status == 'low_stock'
+                        ? PharmaConnectColors.accentOrange.withValues(
+                            alpha: 0.15,
+                          )
+                        : PharmaConnectColors.accentRed.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    status == 'in_stock'
+                        ? 'En stock'
+                        : status == 'low_stock'
+                        ? 'Stock bas'
+                        : 'Rupture',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w500,
+                      color: status == 'in_stock'
+                          ? PharmaConnectColors.accentGreen
+                          : status == 'low_stock'
+                          ? PharmaConnectColors.accentOrange
+                          : PharmaConnectColors.accentRed,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },

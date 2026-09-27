@@ -319,79 +319,81 @@ class _POSSalesHistoryScreenState extends State<POSSalesHistoryScreen> {
   }
 
   Widget _buildSaleCard(POSSale sale) {
-    return GlassCard(
-      padding: const EdgeInsets.all(16),
-      margin: const EdgeInsets.only(bottom: 8),
-      onTap: () => context.push('/pos/receipt/${sale.id}'),
-      child: Row(
-        children: [
-          Container(
-            width: 4,
-            height: 40,
-            decoration: BoxDecoration(
-              color: sale.status == 'completed'
-                  ? PharmaConnectColors.accentGreen
-                  : sale.status == 'refunded'
-                  ? PharmaConnectColors.accentOrange
-                  : PharmaConnectColors.accentRed,
-              borderRadius: BorderRadius.circular(2),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: GlassCard(
+        padding: const EdgeInsets.all(16),
+        onTap: () => context.push('/pos/receipt/${sale.id}'),
+        child: Row(
+          children: [
+            Container(
+              width: 4,
+              height: 40,
+              decoration: BoxDecoration(
+                color: sale.status == 'completed'
+                    ? PharmaConnectColors.accentGreen
+                    : sale.status == 'refunded'
+                    ? PharmaConnectColors.accentOrange
+                    : PharmaConnectColors.accentRed,
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      sale.saleNumber,
-                      style: PharmaConnectTypography.body1.copyWith(
-                        fontWeight: FontWeight.w600,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        sale.saleNumber,
+                        style: PharmaConnectTypography.body1.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      sale.paymentLabel,
-                      style: PharmaConnectTypography.micro,
-                    ),
-                    const Spacer(),
-                    Text(
-                      sale.statusLabel,
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w500,
-                        color: sale.status == 'completed'
-                            ? PharmaConnectColors.accentGreen
-                            : sale.status == 'refunded'
-                            ? PharmaConnectColors.accentOrange
-                            : PharmaConnectColors.accentRed,
+                      const SizedBox(width: 8),
+                      Text(
+                        sale.paymentLabel,
+                        style: PharmaConnectTypography.micro,
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Text(
-                      _formatDate(sale.createdAt),
-                      style: PharmaConnectTypography.micro,
-                    ),
-                    const Spacer(),
-                    Text(
-                      CurrencyFormatter.format(sale.finalAmount),
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        color: PharmaConnectColors.accentCyan,
+                      const Spacer(),
+                      Text(
+                        sale.statusLabel,
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                          color: sale.status == 'completed'
+                              ? PharmaConnectColors.accentGreen
+                              : sale.status == 'refunded'
+                              ? PharmaConnectColors.accentOrange
+                              : PharmaConnectColors.accentRed,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Text(
+                        _formatDate(sale.createdAt),
+                        style: PharmaConnectTypography.micro,
+                      ),
+                      const Spacer(),
+                      Text(
+                        CurrencyFormatter.format(sale.finalAmount),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          color: PharmaConnectColors.accentCyan,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-          const Icon(Icons.chevron_right, color: Colors.white24),
-        ],
+            const Icon(Icons.chevron_right, color: Colors.white24),
+          ],
+        ),
       ),
     );
   }
