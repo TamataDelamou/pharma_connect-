@@ -207,5 +207,5 @@ class SalesInvoice extends Equatable {
   ];
 
   int get remainingAmount => totalAmount - paidAmount;
-  bool get isPaid => paidAmount >= totalAmount;
+  bool get isPaid => status == SalesInvoiceStatus.paid;
 }

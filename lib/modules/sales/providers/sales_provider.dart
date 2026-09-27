@@ -439,8 +439,6 @@ class SalesProvider extends ChangeNotifier {
   }
 
   // ---- Invoice Payments ----
-  // Le recalcul de paidAmount/status de la facture n'est volontairement pas
-  // fait ici : règle métier non tranchée (cf. registre C175).
 
   Future<void> loadInvoicePayments(String invoiceId) async {
     _isLoading = true;
@@ -462,6 +460,15 @@ class SalesProvider extends ChangeNotifier {
     try {
       final saved = await _service.createInvoicePayment(payment);
       _invoicePayments.insert(0, saved);
+      // La base a recalculé paid_amount/status : relire la facture.
+      final invoice = await _service.getSalesInvoice(saved.invoiceId);
+      if (invoice != null) {
+        final index = _salesInvoices.indexWhere((i) => i.id == invoice.id);
+        if (index != -1) _salesInvoices[index] = invoice;
+        if (_selectedSalesInvoice?.id == invoice.id) {
+          _selectedSalesInvoice = invoice;
+        }
+      }
       _isLoading = false;
       notifyListeners();
       return true;

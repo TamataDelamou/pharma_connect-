@@ -555,11 +555,8 @@ class SalesService {
     }
   }
 
-  // Note métier (C164 lot 1/3, non tranchée — voir section 4 du document) :
-  // insertion isolée, sans mise à jour de sales_invoices.paid_amount/status.
-  // Le porteur du projet n'a pas encore décidé si cette synchronisation doit
-  // être automatique (trigger SQL, recalcul service, ou mise à jour manuelle
-  // côté UI) — ne pas l'ajouter ici tant que ce point n'est pas arbitré.
+  // paid_amount et status de la facture sont recalculés par la base
+  // (déclencheurs de 20260927050000_sales_invoice_payments_integrity.sql).
   Future<InvoicePayment> createInvoicePayment(InvoicePayment payment) async {
     try {
       final data = payment
