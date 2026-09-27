@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'pos_sale_item.dart';
 
 class POSSale extends Equatable {
   final String id;
