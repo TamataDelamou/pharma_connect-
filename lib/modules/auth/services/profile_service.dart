@@ -53,4 +53,19 @@ class ProfileService {
       return null;
     }
   }
+
+  /// C199 : relecture du profil à la restauration d'une session existante
+  /// (redémarrage de l'app), sans rien écrire. Best-effort, comme
+  /// getFullName() : un échec réseau ne doit pas bloquer l'ouverture.
+  Future<Map<String, dynamic>?> getProfile(String userId) async {
+    try {
+      return await _client
+          .from('profiles')
+          .select('role, pharmacy_id')
+          .eq('id', userId)
+          .maybeSingle();
+    } catch (_) {
+      return null;
+    }
+  }
 }

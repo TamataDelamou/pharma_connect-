@@ -224,6 +224,43 @@ class AuthProvider extends ChangeNotifier {
         });
   }
 
+  // === RESTAURATION DE SESSION (C199) ===
+
+  /// Supabase persiste la session sur l'appareil et le routeur envoie
+  /// directement sur /dashboard au redémarrage, mais l'état de ce provider
+  /// n'était rempli qu'à la vérification OTP. Sans cette relecture,
+  /// pharmacyId/userRole/isGsgAdmin restaient null après chaque réouverture
+  /// de l'app, pour tous les modules qui s'appuient sur AuthProvider.
+  Future<void> restoreSession() async {
+    final user = SupabaseService().currentUser;
+    if (user == null) return;
+
+    _userId = user.id;
+    _userEmail = user.email;
+    _userPhone = user.phone;
+    _isAuthenticated = true;
+
+    final row = await _profileService.getProfile(user.id);
+    if (row != null) {
+      final roleStr = row['role'] as String?;
+      if (roleStr != null) {
+        // Rôle inconnu de l'enum : _userRole reste null plutôt que de faire
+        // échouer l'ouverture de l'app.
+        try {
+          _userRole = UserRole.values.byName(roleStr);
+        } catch (_) {}
+      }
+      _pharmacyId = row['pharmacy_id'] as String?;
+    }
+    await _loadAdminStatus(user.id);
+    notifyListeners();
+
+    _bridgeToGsgKernel(
+      user.id,
+      SupabaseService().auth.currentSession?.accessToken,
+    );
+  }
+
   // === DÉCONNEXION ===
 
   Future<void> logout() async {
