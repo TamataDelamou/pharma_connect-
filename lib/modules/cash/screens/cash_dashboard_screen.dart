@@ -11,6 +11,7 @@ import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/utils/currency_formatter.dart';
 import '../providers/cash_provider.dart';
 import '../models/cash_movement.dart';
+import '../../auth/providers/auth_provider.dart';
 
 class CashDashboardScreen extends StatefulWidget {
   const CashDashboardScreen({super.key});
@@ -25,14 +26,29 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final userId = SupabaseService().currentUser?.id;
+      final pharmacyId = context.read<AuthProvider>().pharmacyId;
+      if (pharmacyId == null) return;
       if (userId != null) {
-        context.read<CashProvider>().loadCurrentSession('default_pharmacy');
+        context.read<CashProvider>().loadCurrentSession(pharmacyId);
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final pharmacyId = context.watch<AuthProvider>().pharmacyId;
+    if (pharmacyId == null) {
+      return const Scaffold(
+        body: Center(
+          child: Text(
+            'Aucune officine rattachée à ce compte pharmacien.',
+            style: PharmaConnectTypography.body2,
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+
     final provider = context.watch<CashProvider>();
 
     return Scaffold(
@@ -132,8 +148,12 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
                             onPressed: () {
                               provider.clearError();
                               final userId = SupabaseService().currentUser?.id;
+                              final pharmacyId = context
+                                  .read<AuthProvider>()
+                                  .pharmacyId;
+                              if (pharmacyId == null) return;
                               if (userId != null) {
-                                provider.loadCurrentSession('default_pharmacy');
+                                provider.loadCurrentSession(pharmacyId);
                               }
                             },
                             width: 200,
@@ -402,9 +422,18 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
               if (amount == null || amount < 0) return;
               final userId = SupabaseService().currentUser?.id;
               if (userId == null) return;
+              final pharmacyId = context.read<AuthProvider>().pharmacyId;
+              if (pharmacyId == null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Aucune officine rattachée à ce compte'),
+                  ),
+                );
+                return;
+              }
               Navigator.pop(ctx);
               final success = await provider.openSession(
-                pharmacyId: 'default_pharmacy',
+                pharmacyId: pharmacyId,
                 cashierId: userId,
                 openingBalance: amount,
                 notes: notesController.text.trim(),

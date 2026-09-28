@@ -9,6 +9,7 @@ import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/utils/currency_formatter.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../providers/pos_provider.dart';
+import '../../auth/providers/auth_provider.dart';
 
 class POSSalesReportScreen extends StatefulWidget {
   const POSSalesReportScreen({super.key});
@@ -30,13 +31,11 @@ class _POSSalesReportScreenState extends State<POSSalesReportScreen> {
   }
 
   void _loadData() {
+    final pharmacyId = context.read<AuthProvider>().pharmacyId;
+    if (pharmacyId == null) return;
     final provider = context.read<POSProvider>();
     final (start, end) = _getPeriodRange();
-    provider.loadSales(
-      pharmacyId: 'default_pharmacy',
-      fromDate: start,
-      toDate: end,
-    );
+    provider.loadSales(pharmacyId: pharmacyId, fromDate: start, toDate: end);
   }
 
   (DateTime, DateTime) _getPeriodRange() {
@@ -64,6 +63,19 @@ class _POSSalesReportScreenState extends State<POSSalesReportScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final pharmacyId = context.watch<AuthProvider>().pharmacyId;
+    if (pharmacyId == null) {
+      return const Scaffold(
+        body: Center(
+          child: Text(
+            'Aucune officine rattachée à ce compte pharmacien.',
+            style: PharmaConnectTypography.body2,
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+
     final provider = context.watch<POSProvider>();
 
     return Scaffold(

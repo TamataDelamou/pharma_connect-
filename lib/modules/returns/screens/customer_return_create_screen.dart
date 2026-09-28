@@ -15,6 +15,7 @@ import 'package:pharma_connect/shared/models/product.dart';
 import '../providers/returns_provider.dart';
 import '../models/customer_return.dart';
 import '../models/customer_return_item.dart';
+import '../../auth/providers/auth_provider.dart';
 
 class CustomerReturnCreateScreen extends StatefulWidget {
   const CustomerReturnCreateScreen({super.key});
@@ -64,6 +65,19 @@ class _CustomerReturnCreateScreenState
 
   @override
   Widget build(BuildContext context) {
+    final pharmacyId = context.watch<AuthProvider>().pharmacyId;
+    if (pharmacyId == null) {
+      return const Scaffold(
+        body: Center(
+          child: Text(
+            'Aucune officine rattachée à ce compte pharmacien.',
+            style: PharmaConnectTypography.body2,
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+
     final reasons = context.watch<ReturnsProvider>().reasons;
 
     return Scaffold(
@@ -468,12 +482,20 @@ class _CustomerReturnCreateScreenState
   Future<void> _createReturn() async {
     if (!_formKey.currentState!.validate()) return;
 
+    final pharmacyId = context.read<AuthProvider>().pharmacyId;
+    if (pharmacyId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Aucune officine rattachée à ce compte')),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
 
     final now = DateTime.now().toUtc();
     final returnData = CustomerReturn(
       id: '',
-      pharmacyId: 'default_pharmacy',
+      pharmacyId: pharmacyId,
       customerId: _customerIdController.text.trim().isNotEmpty
           ? _customerIdController.text.trim()
           : null,

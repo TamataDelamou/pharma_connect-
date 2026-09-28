@@ -9,6 +9,7 @@ import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/utils/currency_formatter.dart';
 import '../providers/sales_provider.dart';
 import '../models/quotation.dart';
+import '../../auth/providers/auth_provider.dart';
 
 class QuotationsListScreen extends StatefulWidget {
   const QuotationsListScreen({super.key});
@@ -25,13 +26,26 @@ class _QuotationsListScreenState extends State<QuotationsListScreen> {
   }
 
   void _loadQuotations() {
-    context.read<SalesProvider>().loadQuotations(
-      pharmacyId: 'default_pharmacy',
-    );
+    final pharmacyId = context.read<AuthProvider>().pharmacyId;
+    if (pharmacyId == null) return;
+    context.read<SalesProvider>().loadQuotations(pharmacyId: pharmacyId);
   }
 
   @override
   Widget build(BuildContext context) {
+    final pharmacyId = context.watch<AuthProvider>().pharmacyId;
+    if (pharmacyId == null) {
+      return const Scaffold(
+        body: Center(
+          child: Text(
+            'Aucune officine rattachée à ce compte pharmacien.',
+            style: PharmaConnectTypography.body2,
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+
     final provider = context.watch<SalesProvider>();
 
     return Scaffold(

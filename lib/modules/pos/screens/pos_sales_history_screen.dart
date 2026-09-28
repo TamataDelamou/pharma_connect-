@@ -9,6 +9,7 @@ import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/utils/currency_formatter.dart';
 import '../providers/pos_provider.dart';
 import '../models/pos_sale.dart';
+import '../../auth/providers/auth_provider.dart';
 
 class POSSalesHistoryScreen extends StatefulWidget {
   const POSSalesHistoryScreen({super.key});
@@ -31,10 +32,11 @@ class _POSSalesHistoryScreenState extends State<POSSalesHistoryScreen> {
   }
 
   void _loadSales() {
+    final pharmacyId = context.read<AuthProvider>().pharmacyId;
+    if (pharmacyId == null) return;
     final provider = context.read<POSProvider>();
-    // In production, get pharmacy_id from user profile
     provider.loadSales(
-      pharmacyId: 'default_pharmacy',
+      pharmacyId: pharmacyId,
       status: _selectedStatus,
       fromDate: _startDate,
       toDate: _endDate,
@@ -43,6 +45,19 @@ class _POSSalesHistoryScreenState extends State<POSSalesHistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final pharmacyId = context.watch<AuthProvider>().pharmacyId;
+    if (pharmacyId == null) {
+      return const Scaffold(
+        body: Center(
+          child: Text(
+            'Aucune officine rattachée à ce compte pharmacien.',
+            style: PharmaConnectTypography.body2,
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+
     final provider = context.watch<POSProvider>();
 
     return Scaffold(

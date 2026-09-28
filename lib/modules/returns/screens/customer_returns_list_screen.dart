@@ -10,6 +10,7 @@ import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/utils/currency_formatter.dart';
 import '../providers/returns_provider.dart';
 import '../models/customer_return.dart';
+import '../../auth/providers/auth_provider.dart';
 
 class CustomerReturnsListScreen extends StatefulWidget {
   const CustomerReturnsListScreen({super.key});
@@ -31,9 +32,11 @@ class _CustomerReturnsListScreenState extends State<CustomerReturnsListScreen>
     _tabController.addListener(_onTabChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final userId = SupabaseService().currentUser?.id;
+      final pharmacyId = context.read<AuthProvider>().pharmacyId;
+      if (pharmacyId == null) return;
       if (userId != null) {
         context.read<ReturnsProvider>().loadCustomerReturns(
-          pharmacyId: 'default_pharmacy',
+          pharmacyId: pharmacyId,
         );
       }
     });
@@ -59,9 +62,11 @@ class _CustomerReturnsListScreenState extends State<CustomerReturnsListScreen>
 
   void _loadReturns() {
     final userId = SupabaseService().currentUser?.id;
+    final pharmacyId = context.read<AuthProvider>().pharmacyId;
+    if (pharmacyId == null) return;
     if (userId != null) {
       context.read<ReturnsProvider>().loadCustomerReturns(
-        pharmacyId: 'default_pharmacy',
+        pharmacyId: pharmacyId,
         status: _selectedStatus,
       );
     }
@@ -75,6 +80,19 @@ class _CustomerReturnsListScreenState extends State<CustomerReturnsListScreen>
 
   @override
   Widget build(BuildContext context) {
+    final pharmacyId = context.watch<AuthProvider>().pharmacyId;
+    if (pharmacyId == null) {
+      return const Scaffold(
+        body: Center(
+          child: Text(
+            'Aucune officine rattachée à ce compte pharmacien.',
+            style: PharmaConnectTypography.body2,
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+
     final provider = context.watch<ReturnsProvider>();
 
     return Scaffold(

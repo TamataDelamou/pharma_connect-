@@ -11,6 +11,7 @@ import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/utils/currency_formatter.dart';
 import '../providers/pos_provider.dart';
 import '../models/pos_sale_item.dart';
+import '../../auth/providers/auth_provider.dart';
 
 class POSCheckoutScreen extends StatefulWidget {
   const POSCheckoutScreen({super.key});
@@ -48,6 +49,19 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final pharmacyId = context.watch<AuthProvider>().pharmacyId;
+    if (pharmacyId == null) {
+      return const Scaffold(
+        body: Center(
+          child: Text(
+            'Aucune officine rattachée à ce compte pharmacien.',
+            style: PharmaConnectTypography.body2,
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+
     final provider = context.watch<POSProvider>();
 
     return Scaffold(
@@ -427,8 +441,16 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
       return;
     }
 
+    final pharmacyId = context.read<AuthProvider>().pharmacyId;
+    if (pharmacyId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Aucune officine rattachée à ce compte')),
+      );
+      return;
+    }
+
     final success = await provider.checkout(
-      pharmacyId: 'default_pharmacy', // Should come from user profile
+      pharmacyId: pharmacyId,
       cashierId: userId,
     );
 

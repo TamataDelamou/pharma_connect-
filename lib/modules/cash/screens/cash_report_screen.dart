@@ -8,6 +8,7 @@ import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/utils/currency_formatter.dart';
 import '../providers/cash_provider.dart';
+import '../../auth/providers/auth_provider.dart';
 
 class CashReportScreen extends StatefulWidget {
   const CashReportScreen({super.key});
@@ -29,8 +30,10 @@ class _CashReportScreenState extends State<CashReportScreen> {
   }
 
   void _loadReport() {
+    final pharmacyId = context.read<AuthProvider>().pharmacyId;
+    if (pharmacyId == null) return;
     context.read<CashProvider>().loadReport(
-      pharmacyId: 'default_pharmacy',
+      pharmacyId: pharmacyId,
       fromDate: _fromDate,
       toDate: _toDate,
     );
@@ -57,6 +60,19 @@ class _CashReportScreenState extends State<CashReportScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final pharmacyId = context.watch<AuthProvider>().pharmacyId;
+    if (pharmacyId == null) {
+      return const Scaffold(
+        body: Center(
+          child: Text(
+            'Aucune officine rattachée à ce compte pharmacien.',
+            style: PharmaConnectTypography.body2,
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+
     final provider = context.watch<CashProvider>();
 
     return Scaffold(

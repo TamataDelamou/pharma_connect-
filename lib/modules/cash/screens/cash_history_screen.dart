@@ -9,6 +9,7 @@ import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/utils/currency_formatter.dart';
 import '../providers/cash_provider.dart';
 import '../models/cash_drawer_session.dart';
+import '../../auth/providers/auth_provider.dart';
 
 class CashHistoryScreen extends StatefulWidget {
   const CashHistoryScreen({super.key});
@@ -29,9 +30,11 @@ class _CashHistoryScreenState extends State<CashHistoryScreen> {
   }
 
   void _loadSessions() {
+    final pharmacyId = context.read<AuthProvider>().pharmacyId;
+    if (pharmacyId == null) return;
     final now = DateTime.now();
     context.read<CashProvider>().loadSessions(
-      pharmacyId: 'default_pharmacy',
+      pharmacyId: pharmacyId,
       fromDate: now.subtract(Duration(days: _selectedRange)),
       toDate: now,
     );
@@ -39,6 +42,19 @@ class _CashHistoryScreenState extends State<CashHistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final pharmacyId = context.watch<AuthProvider>().pharmacyId;
+    if (pharmacyId == null) {
+      return const Scaffold(
+        body: Center(
+          child: Text(
+            'Aucune officine rattachée à ce compte pharmacien.',
+            style: PharmaConnectTypography.body2,
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+
     final provider = context.watch<CashProvider>();
 
     return Scaffold(

@@ -9,6 +9,7 @@ import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/utils/currency_formatter.dart';
 import '../providers/sales_provider.dart';
+import '../../auth/providers/auth_provider.dart';
 
 class CustomersListScreen extends StatefulWidget {
   const CustomersListScreen({super.key});
@@ -25,16 +26,29 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final userId = SupabaseService().currentUser?.id;
+      final pharmacyId = context.read<AuthProvider>().pharmacyId;
+      if (pharmacyId == null) return;
       if (userId != null) {
-        context.read<SalesProvider>().loadCustomers(
-          pharmacyId: 'default_pharmacy',
-        );
+        context.read<SalesProvider>().loadCustomers(pharmacyId: pharmacyId);
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final pharmacyId = context.watch<AuthProvider>().pharmacyId;
+    if (pharmacyId == null) {
+      return const Scaffold(
+        body: Center(
+          child: Text(
+            'Aucune officine rattachée à ce compte pharmacien.',
+            style: PharmaConnectTypography.body2,
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+
     final provider = context.watch<SalesProvider>();
 
     return Scaffold(
@@ -88,11 +102,10 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
               ),
               onChanged: (value) {
                 final userId = SupabaseService().currentUser?.id;
+                final pharmacyId = context.read<AuthProvider>().pharmacyId;
+                if (pharmacyId == null) return;
                 if (userId != null) {
-                  provider.loadCustomers(
-                    pharmacyId: 'default_pharmacy',
-                    search: value,
-                  );
+                  provider.loadCustomers(pharmacyId: pharmacyId, search: value);
                 }
               },
             ),
