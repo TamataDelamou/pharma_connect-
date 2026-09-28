@@ -5,14 +5,22 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/utils/currency_formatter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' show FileOptions;
 import 'package:uuid/uuid.dart';
 import '../models/pos_sale.dart';
 import '../models/pos_sale_item.dart';
 import '../models/pos_receipt.dart';
 
+/// C193 : usage d'un lien signé vers un reçu. Durées décidées par le porteur
+/// du projet le 28/09/2026.
+enum ReceiptLinkPurpose { consultation, export }
+
 class POSService {
   final _client = SupabaseService().client;
   final _uuid = const Uuid();
+
+  static const receiptConsultationLinkTtl = Duration(minutes: 15);
+  static const receiptExportLinkTtl = Duration(hours: 24);
 
   // ---- Sales ----
 
@@ -230,23 +238,66 @@ class POSService {
       // Generate PDF content
       final pdf = await _buildReceiptPDF(sale);
 
-      // Upload to Supabase Storage
-      final fileName = 'receipt_${sale.saleNumber}.pdf';
-      final path = 'receipts/${sale.pharmacyId}/$fileName';
-      await _client.storage.from('receipts').uploadBinary(path, pdf);
+      // C193 : bucket privé ; chemin <pharmacy_id>/<sale_id>.pdf, contrôlé
+      // par les policies storage.objects (is_pharmacy_staff).
+      final path = '${sale.pharmacyId}/${sale.id}.pdf';
+      await _client.storage
+          .from('receipts')
+          .uploadBinary(
+            path,
+            pdf,
+            fileOptions: const FileOptions(
+              contentType: 'application/pdf',
+              upsert: true,
+            ),
+          );
 
-      final url = _client.storage.from('receipts').getPublicUrl(path);
-
-      // Update receipt URL
       await _client
           .from('pos_receipts')
-          .update({'receipt_url': url})
+          .update({'receipt_path': path})
           .eq('sale_id', saleId);
 
-      return url;
+      return path;
     } catch (e) {
       throw Exception('Failed to generate receipt PDF: $e');
     }
+  }
+
+  Future<String> _getReceiptPath(String saleId) async {
+    final row = await _client
+        .from('pos_receipts')
+        .select('receipt_path')
+        .eq('sale_id', saleId)
+        .maybeSingle();
+    final path = row?['receipt_path'] as String?;
+    if (path == null) {
+      throw Exception('Reçu PDF non généré pour cette vente');
+    }
+    return path;
+  }
+
+  /// Consultation dans l'app : téléchargement authentifié, lié à la session
+  /// (jeton de l'utilisateur connecté). Aucun lien n'est créé.
+  Future<Uint8List> downloadReceiptPdf(String saleId) async {
+    final path = await _getReceiptPath(saleId);
+    return _client.storage.from('receipts').download(path);
+  }
+
+  /// Lien signé à durée limitée : 15 min (consultation hors de l'app) ou
+  /// 24 h (export / téléchargement). Seul un membre du personnel de
+  /// l'officine peut le créer ; une fois créé, il est valable pour quiconque
+  /// le détient jusqu'à son expiration.
+  Future<String> createReceiptLink(
+    String saleId,
+    ReceiptLinkPurpose purpose,
+  ) async {
+    final path = await _getReceiptPath(saleId);
+    final ttl = purpose == ReceiptLinkPurpose.export
+        ? receiptExportLinkTtl
+        : receiptConsultationLinkTtl;
+    return _client.storage
+        .from('receipts')
+        .createSignedUrl(path, ttl.inSeconds);
   }
 
   Future<Uint8List> _buildReceiptPDF(POSSale sale) async {

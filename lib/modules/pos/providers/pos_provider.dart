@@ -212,7 +212,7 @@ class POSProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final url = await _service.generateReceiptPDF(_currentSale!.id);
+      await _service.generateReceiptPDF(_currentSale!.id);
       _currentReceipt = await _service.getReceipt(_currentSale!.id);
       _isPrinting = false;
       notifyListeners();
