@@ -21,10 +21,18 @@ class POSSale extends Equatable {
   final String? gsgId;
   final String? gsgOrgId;
 
+  // C204 : traçabilité du remboursement (lecture seule, fixée par
+  // pos_refund_sale ; jamais envoyée à la création).
+  final DateTime? refundedAt;
+  final String? refundedBy;
+  final String? refundReason;
+  final String? refundStockDisposition; // restock, quarantine
+
   // Derived
   final List<POSSaleItem>? items;
   final String? patientName;
   final String? cashierName;
+  final String? refundedByName;
 
   const POSSale({
     required this.id,
@@ -45,9 +53,14 @@ class POSSale extends Equatable {
     this.updatedBy,
     this.gsgId,
     this.gsgOrgId,
+    this.refundedAt,
+    this.refundedBy,
+    this.refundReason,
+    this.refundStockDisposition,
     this.items,
     this.patientName,
     this.cashierName,
+    this.refundedByName,
   });
 
   POSSale copyWith({
@@ -69,9 +82,14 @@ class POSSale extends Equatable {
     String? updatedBy,
     String? gsgId,
     String? gsgOrgId,
+    DateTime? refundedAt,
+    String? refundedBy,
+    String? refundReason,
+    String? refundStockDisposition,
     List<POSSaleItem>? items,
     String? patientName,
     String? cashierName,
+    String? refundedByName,
   }) {
     return POSSale(
       id: id ?? this.id,
@@ -92,9 +110,15 @@ class POSSale extends Equatable {
       updatedBy: updatedBy ?? this.updatedBy,
       gsgId: gsgId ?? this.gsgId,
       gsgOrgId: gsgOrgId ?? this.gsgOrgId,
+      refundedAt: refundedAt ?? this.refundedAt,
+      refundedBy: refundedBy ?? this.refundedBy,
+      refundReason: refundReason ?? this.refundReason,
+      refundStockDisposition:
+          refundStockDisposition ?? this.refundStockDisposition,
       items: items ?? this.items,
       patientName: patientName ?? this.patientName,
       cashierName: cashierName ?? this.cashierName,
+      refundedByName: refundedByName ?? this.refundedByName,
     );
   }
 
@@ -138,6 +162,12 @@ class POSSale extends Equatable {
     updatedBy: json['updated_by'] as String?,
     gsgId: json['gsg_id'] as String?,
     gsgOrgId: json['gsg_org_id'] as String?,
+    refundedAt: json['refunded_at'] != null
+        ? DateTime.parse(json['refunded_at'] as String)
+        : null,
+    refundedBy: json['refunded_by'] as String?,
+    refundReason: json['refund_reason'] as String?,
+    refundStockDisposition: json['refund_stock_disposition'] as String?,
     items: json['items'] != null
         ? (json['items'] as List)
               .map((e) => POSSaleItem.fromJson(e as Map<String, dynamic>))
@@ -148,6 +178,9 @@ class POSSale extends Equatable {
         : null,
     cashierName: json['cashiers'] != null
         ? (json['cashiers'] as Map<String, dynamic>)['full_name'] as String?
+        : null,
+    refundedByName: json['refunders'] != null
+        ? (json['refunders'] as Map<String, dynamic>)['full_name'] as String?
         : null,
   );
 
@@ -171,9 +204,14 @@ class POSSale extends Equatable {
     updatedBy,
     gsgId,
     gsgOrgId,
+    refundedAt,
+    refundedBy,
+    refundReason,
+    refundStockDisposition,
     items,
     patientName,
     cashierName,
+    refundedByName,
   ];
 
   String get statusLabel {
@@ -209,4 +247,15 @@ class POSSale extends Equatable {
   bool get isCompleted => status == 'completed';
   bool get isRefunded => status == 'refunded';
   bool get isCancelled => status == 'cancelled';
+
+  String? get refundStockDispositionLabel {
+    switch (refundStockDisposition) {
+      case 'restock':
+        return 'Remis en stock';
+      case 'quarantine':
+        return 'Quarantaine';
+      default:
+        return refundStockDisposition;
+    }
+  }
 }

@@ -5,7 +5,8 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/utils/currency_formatter.dart';
-import 'package:supabase_flutter/supabase_flutter.dart' show FileOptions;
+import 'package:supabase_flutter/supabase_flutter.dart'
+    show FileOptions, PostgrestException;
 import '../models/pos_sale.dart';
 import '../models/pos_sale_item.dart';
 import '../models/pos_receipt.dart';
@@ -13,6 +14,16 @@ import '../models/pos_receipt.dart';
 /// C193 : usage d'un lien signé vers un reçu. Durées décidées par le porteur
 /// du projet le 28/09/2026.
 enum ReceiptLinkPurpose { consultation, export }
+
+/// C204 : refus du serveur lors d'un remboursement, message lisible tel
+/// qu'affiché à l'utilisateur.
+class POSRefundException implements Exception {
+  final String message;
+  const POSRefundException(this.message);
+
+  @override
+  String toString() => message;
+}
 
 class POSService {
   final _client = SupabaseService().client;
@@ -118,19 +129,90 @@ class POSService {
     }
   }
 
-  /// C197 : remboursement atomique ; la RPC refuse une vente qui n'est plus
-  /// 'completed' (pas de double réintégration du stock).
-  Future<POSSale> refundSale(String saleId) async {
+  /// C197 / C204 : remboursement atomique. Le serveur fait foi pour la règle
+  /// (jour même et plafond de l'officine hors titulaire, motif obligatoire,
+  /// destination du stock) : elle n'est pas reproduite ici.
+  /// [stockDisposition] : 'restock' (remise en stock) ou 'quarantine'.
+  Future<POSSale> refundSale(
+    String saleId, {
+    required String reason,
+    required String stockDisposition,
+  }) async {
     try {
-      await _client.rpc('pos_refund_sale', params: {'p_sale_id': saleId});
-      final refunded = await getSale(saleId);
-      if (refunded == null) {
-        throw Exception('Vente introuvable après remboursement');
-      }
-      return refunded;
+      await _client.rpc(
+        'pos_refund_sale',
+        params: {
+          'p_sale_id': saleId,
+          'p_reason': reason,
+          'p_disposition': stockDisposition,
+        },
+      );
+    } on PostgrestException catch (e) {
+      throw POSRefundException(serverMessage(e.message));
     } catch (e) {
       throw Exception('Failed to refund sale: $e');
     }
+    final refunded = await getSale(saleId);
+    if (refunded == null) {
+      throw Exception('Vente introuvable après remboursement');
+    }
+    return refunded;
+  }
+
+  /// C204 : remboursements dont refunded_at tombe dans la période. Les
+  /// remboursements antérieurs à C204 (refunded_at null) n'y figurent pas.
+  Future<List<POSSale>> getRefunds({
+    required String pharmacyId,
+    required DateTime fromDate,
+    required DateTime toDate,
+  }) async {
+    try {
+      final response = await _client
+          .from('pos_sales')
+          .select('*, refunders:refunded_by(full_name)')
+          .eq('pharmacy_id', pharmacyId)
+          .eq('status', 'refunded')
+          .gte('refunded_at', fromDate.toUtc().toIso8601String())
+          .lte('refunded_at', toDate.toUtc().toIso8601String())
+          .order('refunded_at', ascending: false);
+      return (response as List)
+          .map((e) => POSSale.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to load refunds: $e');
+    }
+  }
+
+  /// Message d'erreur serveur (« POS: … », « STK: … », sans accents) rendu
+  /// lisible : préfixe technique retiré, accents rétablis sur les mots des
+  /// messages POS, montants groupés par milliers.
+  static String serverMessage(String raw) {
+    var message = raw.replaceFirst(RegExp(r'^(POS|STK): '), '');
+    const accents = {
+      'reserve au titulaire': 'réservé au titulaire',
+      'superieur': 'supérieur',
+      'precedent': 'précédent',
+      'acces refuse': 'accès refusé',
+      'completee': 'complétée',
+      'remboursee': 'remboursée',
+      'a preciser': 'à préciser',
+    };
+    accents.forEach((from, to) => message = message.replaceAll(from, to));
+    message = message.replaceAllMapped(
+      RegExp(r'(montant|plafond) (\d+)'),
+      (m) => '${m[1]} ${_groupThousands(m[2]!)}',
+    );
+    if (message.isEmpty) return message;
+    return message[0].toUpperCase() + message.substring(1);
+  }
+
+  static String _groupThousands(String digits) {
+    final buffer = StringBuffer();
+    for (var i = 0; i < digits.length; i++) {
+      if (i > 0 && (digits.length - i) % 3 == 0) buffer.write(' ');
+      buffer.write(digits[i]);
+    }
+    return buffer.toString();
   }
 
   Future<void> cancelSale(String saleId) async {

@@ -9,6 +9,7 @@ import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/utils/currency_formatter.dart';
 import '../providers/pos_provider.dart';
 import '../models/pos_sale.dart';
+import '../widgets/refund_confirmation_dialog.dart';
 
 class POSRefundScreen extends StatefulWidget {
   final String? saleId;
@@ -340,47 +341,41 @@ class _POSRefundScreenState extends State<POSRefundScreen> {
   }
 
   Future<void> _confirmRefund(POSProvider provider) async {
-    if (_selectedSale == null) return;
+    final sale = _selectedSale;
+    if (sale == null) return;
 
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: PharmaConnectColors.primaryDeep,
-        title: const Text('🔄 Confirmer le remboursement'),
+    // C204 : motif (prérempli depuis le champ de l'écran) et destination du
+    // stock choisis dans le dialogue commun.
+    final decision = await showRefundConfirmationDialog(
+      context,
+      saleNumber: sale.saleNumber,
+      finalAmount: sale.finalAmount,
+      initialReason: _reasonController.text.trim(),
+    );
+    if (decision == null || !mounted) return;
+
+    final success = await provider.refundSale(
+      sale.id,
+      reason: decision.reason,
+      stockDisposition: decision.stockDisposition,
+    );
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
         content: Text(
-          'Êtes-vous sûr de vouloir rembourser la vente #${_selectedSale!.saleNumber} ?'
-          '\n\nMontant: ${CurrencyFormatter.format(_selectedSale!.finalAmount)}'
-          '\nLe stock sera réintégré.',
+          success
+              ? 'Remboursement effectué avec succès'
+              : provider.error ?? 'Remboursement refusé',
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Annuler'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(ctx);
-              final success = await provider.refundSale(_selectedSale!.id);
-              if (success && context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Remboursement effectué avec succès'),
-                    backgroundColor: PharmaConnectColors.accentGreen,
-                  ),
-                );
-                setState(() {
-                  _selectedSale = provider.currentSale;
-                });
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: PharmaConnectColors.accentOrange,
-              foregroundColor: PharmaConnectColors.textPrimary,
-            ),
-            child: const Text('Confirmer le remboursement'),
-          ),
-        ],
+        backgroundColor: success
+            ? PharmaConnectColors.accentGreen
+            : PharmaConnectColors.accentRed,
       ),
     );
+    if (success) {
+      setState(() {
+        _selectedSale = provider.currentSale;
+      });
+    }
   }
 }

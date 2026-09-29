@@ -8,6 +8,7 @@ import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/utils/currency_formatter.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '../models/pos_sale.dart';
 import '../providers/pos_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 
@@ -36,6 +37,9 @@ class _POSSalesReportScreenState extends State<POSSalesReportScreen> {
     final provider = context.read<POSProvider>();
     final (start, end) = _getPeriodRange();
     provider.loadSales(pharmacyId: pharmacyId, fromDate: start, toDate: end);
+    // C204 (contrôle après coup) : remboursements dont refunded_at tombe dans
+    // la période, indépendamment de la date de la vente.
+    provider.loadRefunds(pharmacyId: pharmacyId, fromDate: start, toDate: end);
   }
 
   (DateTime, DateTime) _getPeriodRange() {
@@ -144,6 +148,10 @@ class _POSSalesReportScreenState extends State<POSSalesReportScreen> {
 
             // Top products
             Expanded(child: _buildTopProducts(provider)),
+            const SizedBox(height: 16),
+
+            // Refunds (C204)
+            Expanded(child: _buildRefunds(provider)),
           ],
         ),
       ),
@@ -417,6 +425,101 @@ class _POSSalesReportScreenState extends State<POSSalesReportScreen> {
         ),
       ],
     );
+  }
+
+  /// C204 : liste des remboursements de la période (motif, auteur,
+  /// destination du stock). Les remboursements antérieurs à C204 n'ont pas
+  /// de refunded_at et n'apparaissent donc pas ici : c'est attendu.
+  Widget _buildRefunds(POSProvider provider) {
+    final refunds = provider.refunds;
+    final total = refunds.fold<int>(0, (sum, s) => sum + s.finalAmount);
+
+    return GlassCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Text(
+                '🔄 Remboursements',
+                style: PharmaConnectTypography.heading3,
+              ),
+              const Spacer(),
+              Text(
+                '${refunds.length} · ${CurrencyFormatter.format(total)}',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: refunds.isEmpty
+                      ? PharmaConnectColors.textSecondary
+                      : PharmaConnectColors.accentOrange,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Expanded(
+            child: provider.isLoadingRefunds
+                ? const Center(child: CircularProgressIndicator())
+                : provider.refundsError != null
+                ? Center(
+                    child: Text(
+                      provider.refundsError!,
+                      style: PharmaConnectTypography.micro,
+                    ),
+                  )
+                : refunds.isEmpty
+                ? const Center(child: Text('Aucun remboursement'))
+                : ListView.separated(
+                    itemCount: refunds.length,
+                    separatorBuilder: (_, _) =>
+                        const Divider(color: Colors.white12, height: 12),
+                    itemBuilder: (_, i) => _buildRefundRow(refunds[i]),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRefundRow(POSSale sale) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              'Vente #${sale.saleNumber}',
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+            const Spacer(),
+            Text(
+              CurrencyFormatter.format(sale.finalAmount),
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                color: PharmaConnectColors.accentOrange,
+              ),
+            ),
+          ],
+        ),
+        Text(
+          'Vendue le ${_formatDateTime(sale.createdAt)} · '
+          'remboursée le ${sale.refundedAt != null ? _formatDateTime(sale.refundedAt!) : '—'} '
+          'par ${sale.refundedByName ?? sale.refundedBy ?? '—'}',
+          style: PharmaConnectTypography.micro,
+        ),
+        Text(
+          'Motif : ${sale.refundReason ?? '—'} · '
+          '${sale.refundStockDispositionLabel ?? '—'}',
+          style: PharmaConnectTypography.body2,
+        ),
+      ],
+    );
+  }
+
+  String _formatDateTime(DateTime date) {
+    final local = date.toLocal();
+    return '${local.day}/${local.month}/${local.year} '
+        '${local.hour}:${local.minute.toString().padLeft(2, '0')}';
   }
 
   Widget _buildTopProducts(POSProvider provider) {

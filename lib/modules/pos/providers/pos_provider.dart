@@ -17,6 +17,9 @@ class POSProvider extends ChangeNotifier {
   String? _error;
   String _selectedPaymentMethod = 'cash';
   double _discountPercent = 0;
+  List<POSSale> _refunds = [];
+  bool _isLoadingRefunds = false;
+  String? _refundsError;
 
   List<POSSale> get sales => _sales;
   List<POSSaleItem> get cart => _cart;
@@ -28,6 +31,9 @@ class POSProvider extends ChangeNotifier {
   String? get error => _error;
   String get selectedPaymentMethod => _selectedPaymentMethod;
   double get discountPercent => _discountPercent;
+  List<POSSale> get refunds => _refunds;
+  bool get isLoadingRefunds => _isLoadingRefunds;
+  String? get refundsError => _refundsError;
 
   double get total {
     return _cart.fold(0, (sum, item) => sum + item.totalPrice);
@@ -187,21 +193,59 @@ class POSProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> refundSale(String saleId) async {
+  /// C204 : motif et destination du stock obligatoires ; la règle (jour
+  /// même, plafond, titulaire) est appliquée par le serveur. En cas de refus,
+  /// [error] porte le message du serveur, lisible tel quel.
+  Future<bool> refundSale(
+    String saleId, {
+    required String reason,
+    required String stockDisposition,
+  }) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
     try {
-      _currentSale = await _service.refundSale(saleId);
+      _currentSale = await _service.refundSale(
+        saleId,
+        reason: reason,
+        stockDisposition: stockDisposition,
+      );
       _isLoading = false;
       notifyListeners();
       return true;
+    } on POSRefundException catch (e) {
+      _error = e.message;
+      _isLoading = false;
+      notifyListeners();
+      return false;
     } catch (e) {
       _error = e.toString();
       _isLoading = false;
       notifyListeners();
       return false;
     }
+  }
+
+  /// C204 : liste des remboursements de la période (rapports POS).
+  Future<void> loadRefunds({
+    required String pharmacyId,
+    required DateTime fromDate,
+    required DateTime toDate,
+  }) async {
+    _isLoadingRefunds = true;
+    _refundsError = null;
+    notifyListeners();
+    try {
+      _refunds = await _service.getRefunds(
+        pharmacyId: pharmacyId,
+        fromDate: fromDate,
+        toDate: toDate,
+      );
+    } catch (e) {
+      _refundsError = e.toString();
+    }
+    _isLoadingRefunds = false;
+    notifyListeners();
   }
 
   Future<bool> printReceipt() async {

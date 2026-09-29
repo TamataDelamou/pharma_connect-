@@ -8,7 +8,9 @@ import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/secondary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/utils/currency_formatter.dart';
+import '../models/pos_sale.dart';
 import '../providers/pos_provider.dart';
+import '../widgets/refund_confirmation_dialog.dart';
 
 class POSReceiptScreen extends StatefulWidget {
   final String? saleId;
@@ -237,7 +239,7 @@ class _POSReceiptScreenState extends State<POSReceiptScreen> {
                           child: SecondaryButton(
                             label: '🔄 Rembourser',
                             onPressed: sale.isCompleted
-                                ? () => _confirmRefund(context, sale.id)
+                                ? () => _confirmRefund(context, sale)
                                 : null,
                           ),
                         ),
@@ -305,45 +307,34 @@ class _POSReceiptScreenState extends State<POSReceiptScreen> {
     return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
   }
 
-  void _confirmRefund(BuildContext context, String saleId) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: PharmaConnectColors.primaryDeep,
-        title: const Text('🔄 Remboursement'),
-        content: const Text(
-          'Êtes-vous sûr de vouloir rembourser cette vente ? '
-          'Le stock sera réintégré et la vente ne sera plus valide.',
+  Future<void> _confirmRefund(BuildContext context, POSSale sale) async {
+    // C204 : motif et destination du stock choisis dans le dialogue commun.
+    final decision = await showRefundConfirmationDialog(
+      context,
+      saleNumber: sale.saleNumber,
+      finalAmount: sale.finalAmount,
+    );
+    if (decision == null || !context.mounted) return;
+
+    final provider = context.read<POSProvider>();
+    final success = await provider.refundSale(
+      sale.id,
+      reason: decision.reason,
+      stockDisposition: decision.stockDisposition,
+    );
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          success
+              ? 'Vente remboursée avec succès'
+              : provider.error ?? 'Remboursement refusé',
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Annuler'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(ctx);
-              final success = await context.read<POSProvider>().refundSale(
-                saleId,
-              );
-              if (success && context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Vente remboursée avec succès'),
-                    backgroundColor: PharmaConnectColors.accentGreen,
-                  ),
-                );
-                context.pop();
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: PharmaConnectColors.accentOrange,
-              foregroundColor: PharmaConnectColors.textPrimary,
-            ),
-            child: const Text('Confirmer le remboursement'),
-          ),
-        ],
+        backgroundColor: success
+            ? PharmaConnectColors.accentGreen
+            : PharmaConnectColors.accentRed,
       ),
     );
+    if (success) context.pop();
   }
 }
