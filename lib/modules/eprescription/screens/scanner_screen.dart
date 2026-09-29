@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -22,6 +24,7 @@ class ScannerScreen extends StatefulWidget {
 class _ScannerScreenState extends State<ScannerScreen> {
   final ScannerService _scannerService = ScannerService();
   ScannedPrescription? _scanResult;
+  Future<Uint8List>? _scanImageFuture;
   bool _isProcessing = false;
   String? _error;
 
@@ -141,16 +144,33 @@ class _ScannerScreenState extends State<ScannerScreen> {
                               style: PharmaConnectTypography.heading3,
                             ),
                             const SizedBox(height: 8),
-                            if (_scanResult!.imageUrl.isNotEmpty)
+                            if (_scanResult!.imagePath != null)
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(8),
-                                child: Image.network(
-                                  _scanResult!.imageUrl,
-                                  height: 150,
-                                  width: double.infinity,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      const Icon(Icons.broken_image, size: 50),
+                                child: FutureBuilder<Uint8List>(
+                                  future: _scanImageFuture,
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasData) {
+                                      return Image.memory(
+                                        snapshot.data!,
+                                        height: 150,
+                                        width: double.infinity,
+                                        fit: BoxFit.cover,
+                                      );
+                                    }
+                                    if (snapshot.hasError) {
+                                      return const Icon(
+                                        Icons.broken_image,
+                                        size: 50,
+                                      );
+                                    }
+                                    return const SizedBox(
+                                      height: 150,
+                                      child: Center(
+                                        child: CircularProgressIndicator(),
+                                      ),
+                                    );
+                                  },
                                 ),
                               ),
                             const SizedBox(height: 8),
@@ -275,6 +295,9 @@ class _ScannerScreenState extends State<ScannerScreen> {
 
       setState(() {
         _scanResult = result;
+        _scanImageFuture = result.imagePath != null
+            ? _scannerService.downloadScanImage(result.imagePath!)
+            : null;
         _isProcessing = false;
       });
     } catch (e) {

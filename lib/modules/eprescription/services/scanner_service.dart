@@ -1,6 +1,9 @@
+import 'dart:typed_data';
+
 import 'package:image_picker/image_picker.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' show FileOptions;
 import 'package:uuid/uuid.dart';
 import '../models/eprescription.dart';
 import '../models/eprescription_item.dart';
@@ -27,7 +30,8 @@ class ScannerService {
     required XFile image,
   }) async {
     // Upload image
-    final imageUrl = await _uploadImage(patientId, image);
+    final scanId = _uuid.v4();
+    final imagePath = await _uploadImage(patientId, scanId, image);
 
     // OCR processing
     final ocrResult = await _performOCR(image);
@@ -36,9 +40,9 @@ class ScannerService {
     final extractedItems = _extractItems(ocrResult);
 
     final scanned = ScannedPrescription(
-      id: _uuid.v4(),
+      id: scanId,
       patientId: patientId,
-      imageUrl: imageUrl,
+      imagePath: imagePath,
       ocrResult: ocrResult,
       extractedItems: extractedItems,
       status: 'completed',
@@ -52,12 +56,53 @@ class ScannerService {
     return scanned;
   }
 
-  Future<String> _uploadImage(String patientId, XFile image) async {
+  // C200 : bucket privé ; chemin <patient_id>/<scan_id>.jpg, contrôlé par
+  // les policies storage.objects (propriétaire, ou lecture GSG admin).
+  // pickImage() sans imageQuality rend le fichier d'origine : JPEG pour
+  // l'appareil photo, mais la galerie peut fournir un PNG, un HEIC… Le
+  // contentType déclaré doit toujours correspondre au fichier : JPEG et PNG
+  // (seuls formats du bucket) sont acceptés, tout autre format est refusé
+  // avant téléversement.
+  Future<String> _uploadImage(
+    String patientId,
+    String scanId,
+    XFile image,
+  ) async {
+    final (extension, contentType) = _imageFormat(image);
     final bytes = await image.readAsBytes();
-    final path =
-        'prescriptions/$patientId/${DateTime.now().millisecondsSinceEpoch}.jpg';
-    await _client.storage.from('prescriptions').uploadBinary(path, bytes);
-    return _client.storage.from('prescriptions').getPublicUrl(path);
+    final path = '$patientId/$scanId.$extension';
+    await _client.storage
+        .from('prescriptions')
+        .uploadBinary(
+          path,
+          bytes,
+          fileOptions: FileOptions(contentType: contentType, upsert: false),
+        );
+    return path;
+  }
+
+  /// Format de l'image d'après son mimeType, à défaut son extension.
+  (String, String) _imageFormat(XFile image) {
+    final mimeType = image.mimeType?.toLowerCase();
+    final name = image.name.toLowerCase();
+    if (mimeType == 'image/jpeg' ||
+        (mimeType == null &&
+            (name.endsWith('.jpg') || name.endsWith('.jpeg')))) {
+      return ('jpg', 'image/jpeg');
+    }
+    if (mimeType == 'image/png' ||
+        (mimeType == null && name.endsWith('.png'))) {
+      return ('png', 'image/png');
+    }
+    throw Exception(
+      "Format d'image non pris en charge : utilisez une photo JPEG ou PNG.",
+    );
+  }
+
+  /// C200 : lecture de l'image par le jeton de l'utilisateur connecté
+  /// (propriétaire ou GSG admin). Aucun lien public ni signé.
+  Future<Uint8List> downloadScanImage(String imagePath) {
+    return _client.storage.from('prescriptions').download(imagePath);
   }
 
   Future<Map<String, dynamic>> _performOCR(XFile image) async {
@@ -156,7 +201,7 @@ class ScannerService {
 class ScannedPrescription {
   final String id;
   final String patientId;
-  final String imageUrl;
+  final String? imagePath;
   final Map<String, dynamic> ocrResult;
   final List<Map<String, String>> extractedItems;
   final String status;
@@ -171,7 +216,7 @@ class ScannedPrescription {
   ScannedPrescription({
     required this.id,
     required this.patientId,
-    required this.imageUrl,
+    this.imagePath,
     required this.ocrResult,
     required this.extractedItems,
     required this.status,
@@ -187,7 +232,7 @@ class ScannedPrescription {
   Map<String, dynamic> toJson() => {
     'id': id,
     'patient_id': patientId,
-    'image_url': imageUrl,
+    if (imagePath != null) 'image_path': imagePath,
     'ocr_result': ocrResult,
     'extracted_items': extractedItems,
     'status': status,
@@ -204,7 +249,7 @@ class ScannedPrescription {
       ScannedPrescription(
         id: json['id'] as String,
         patientId: json['patient_id'] as String,
-        imageUrl: json['image_url'] as String,
+        imagePath: json['image_path'] as String?,
         ocrResult: json['ocr_result'] as Map<String, dynamic>? ?? {},
         extractedItems:
             (json['extracted_items'] as List?)?.cast<Map<String, String>>() ??
