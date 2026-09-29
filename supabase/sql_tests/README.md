@@ -4,8 +4,9 @@ Tests manuels à lancer sur la base **locale** (`supabase start`, conteneur `sup
 
 | Fichier | Objet |
 |---|---|
-| `c197_c203_pos_atomic_sale.sql` | Vente et remboursement POS atomiques (`pos_create_sale`, `pos_refund_sale`) : cas 1 à 10 de C197, cas 11 à 16 des contrôles C203. |
+| `c197_c203_pos_atomic_sale.sql` | Vente et remboursement POS atomiques (`pos_create_sale`, `pos_refund_sale`) : cas 1 à 10 de C197 (remboursements avec la signature C204), cas 11 à 16 des contrôles C203. |
 | `c202_document_numbering.sql` | Numérotation globale (C202) des retours client et fournisseur, tickets de support, e-ordonnances et contrats : deux identités aux portées RLS disjointes créent chacune un document. |
+| `c204_pos_refund_policy.sql` | Règle de remboursement POS (C204, décision D57) : jour même et plafond hors titulaire, motif obligatoire, remise en stock ou quarantaine, une seule signature `pos_refund_sale(uuid, text, text)`, lecture et écriture de `pos_refund_quarantine`. |
 | `c208_manager_attachment.sql` | Rattachement du titulaire (`pharmacies.manager_id`) à son officine (`profiles.pharmacy_id`, C208) : insertion directe active, changement de titulaire, officine pending, rattrapage. |
 | `concurrency_numbering.sh` | Deux sessions `psql` simultanées (retours client, puis ventes POS de deux officines) : numéros distincts et consécutifs, la seconde session attend la première. |
 
@@ -18,6 +19,7 @@ Depuis la racine du dépôt :
 ```bash
 docker exec -i supabase_db_pharma_connect psql -U postgres -d postgres < supabase/sql_tests/c197_c203_pos_atomic_sale.sql
 docker exec -i supabase_db_pharma_connect psql -U postgres -d postgres < supabase/sql_tests/c202_document_numbering.sql
+docker exec -i supabase_db_pharma_connect psql -U postgres -d postgres < supabase/sql_tests/c204_pos_refund_policy.sql
 docker exec -i supabase_db_pharma_connect psql -U postgres -d postgres < supabase/sql_tests/c208_manager_attachment.sql
 bash supabase/sql_tests/concurrency_numbering.sh
 ```

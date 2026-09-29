@@ -10,6 +10,11 @@
 -- par request.jwt.claims + set local role authenticated ; chaque cas
 -- d'erreur tourne dans un bloc DO qui capte le SQLSTATE.
 --
+-- Depuis C204, pos_refund_sale(id, motif, destination) : les remboursements
+-- des cas 7 à 10 passent le motif 'Test C197' et la destination 'restock'.
+-- A n'est pas titulaire de Kaloum, mais rembourse le jour même (transaction
+-- de test) des ventes sous le plafond de 100 000 : la règle C204 l'autorise.
+--
 -- Exécution : docker exec -i supabase_db_pharma_connect psql -U postgres -d postgres < supabase/sql_tests/c197_c203_pos_atomic_sale.sql
 -- Une seule transaction, terminée par rollback : aucune donnée ne reste.
 
@@ -227,13 +232,13 @@ select pg_temp.verdict('6',
 -- Remet L1 à 8 avant le cas 7, par la RPC elle-même (vente 6a remboursée).
 select pg_temp.as_user(:'A');
 set local role authenticated;
-select public.pos_refund_sale(:'sale6a');
+select public.pos_refund_sale(:'sale6a', 'Test C197', 'restock');
 reset role;
 
 -- ==================== Cas 7 : A rembourse la vente du cas 1 ====================
 select pg_temp.as_user(:'A');
 set local role authenticated;
-select public.pos_refund_sale(:'sale1');
+select public.pos_refund_sale(:'sale1', 'Test C197', 'restock');
 reset role;
 select pg_temp.verdict('7',
   (select status = 'refunded' from public.pos_sales where id = :'sale1')
@@ -248,7 +253,7 @@ select pg_temp.snap() as before \gset
 select pg_temp.as_user(:'A');
 set local role authenticated;
 do $$ begin
-  perform public.pos_refund_sale((select v::uuid from t_ctx where k = 'S1'));
+  perform public.pos_refund_sale((select v::uuid from t_ctx where k = 'S1'), 'Test C197', 'restock');
 exception when others then insert into t_out values ('8', sqlstate, sqlerrm);
 end $$;
 reset role;
@@ -266,7 +271,7 @@ select pg_temp.snap() as before \gset
 select pg_temp.as_user(:'B');
 set local role authenticated;
 do $$ begin
-  perform public.pos_refund_sale((select v::uuid from t_ctx where k = 'S9'));
+  perform public.pos_refund_sale((select v::uuid from t_ctx where k = 'S9'), 'Test C197', 'restock');
 exception when others then insert into t_out values ('9', sqlstate, sqlerrm);
 end $$;
 reset role;
@@ -284,7 +289,7 @@ do $$ begin
 exception when others then insert into t_out values ('10a', sqlstate, sqlerrm);
 end $$;
 do $$ begin
-  perform public.pos_refund_sale((select v::uuid from t_ctx where k = 'S9'));
+  perform public.pos_refund_sale((select v::uuid from t_ctx where k = 'S9'), 'Test C197', 'restock');
 exception when others then insert into t_out values ('10b', sqlstate, sqlerrm);
 end $$;
 reset role;
@@ -292,9 +297,9 @@ select pg_temp.expect_err('10a', '42501', 'permission denied for function pos_cr
 select pg_temp.expect_err('10b', '42501', 'permission denied for function pos_refund_sale', :'before');
 select pg_temp.verdict('10-droits',
   not has_function_privilege('anon', 'public.pos_create_sale(uuid, text, integer, integer, integer, integer, jsonb, uuid, text)', 'execute')
-  and not has_function_privilege('anon', 'public.pos_refund_sale(uuid)', 'execute')
+  and not has_function_privilege('anon', 'public.pos_refund_sale(uuid, text, text)', 'execute')
   and has_function_privilege('authenticated', 'public.pos_create_sale(uuid, text, integer, integer, integer, integer, jsonb, uuid, text)', 'execute')
-  and has_function_privilege('authenticated', 'public.pos_refund_sale(uuid)', 'execute'),
+  and has_function_privilege('authenticated', 'public.pos_refund_sale(uuid, text, text)', 'execute'),
   'execute : anon refuse, authenticated accorde (pos_create_sale, pos_refund_sale)');
 
 -- ==================== Cas 11 (C203) : remise > total ====================
