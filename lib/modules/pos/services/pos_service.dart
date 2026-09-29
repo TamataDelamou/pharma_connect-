@@ -6,7 +6,6 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/utils/currency_formatter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show FileOptions;
-import 'package:uuid/uuid.dart';
 import '../models/pos_sale.dart';
 import '../models/pos_sale_item.dart';
 import '../models/pos_receipt.dart';
@@ -17,90 +16,52 @@ enum ReceiptLinkPurpose { consultation, export }
 
 class POSService {
   final _client = SupabaseService().client;
-  final _uuid = const Uuid();
 
   static const receiptConsultationLinkTtl = Duration(minutes: 15);
   static const receiptExportLinkTtl = Duration(hours: 24);
 
   // ---- Sales ----
 
+  /// C197 : vente complète (vente, lignes, mouvements de stock, reçu) en une
+  /// seule transaction côté serveur. Caissier, auteur et statut sont fixés
+  /// par la RPC, pas par le client.
   Future<POSSale> createSale(POSSale sale) async {
     try {
-      final now = DateTime.now().toUtc();
-      final id = _uuid.v4();
-      final data = sale
-          .copyWith(
-            id: id,
-            status: 'completed',
-            createdAt: now,
-            updatedAt: now,
-            createdBy: SupabaseService().currentUser?.id,
-            updatedBy: SupabaseService().currentUser?.id,
-          )
-          .toJson();
+      final saleId =
+          await _client.rpc(
+                'pos_create_sale',
+                params: {
+                  'p_pharmacy_id': sale.pharmacyId,
+                  'p_payment_method': sale.paymentMethod,
+                  'p_total_amount': sale.totalAmount,
+                  'p_discount_amount': sale.discountAmount,
+                  'p_tax_amount': sale.taxAmount,
+                  'p_final_amount': sale.finalAmount,
+                  'p_patient_id': sale.patientId,
+                  'p_notes': sale.notes,
+                  'p_items': [
+                    for (final item in sale.items ?? const <POSSaleItem>[])
+                      {
+                        'product_id': item.productId,
+                        'product_name': item.productName,
+                        'quantity': item.quantity,
+                        'unit_price': item.unitPrice,
+                        'total_price': item.totalPrice,
+                        'batch_id': item.batchId,
+                        'discount_percentage': item.discountPercentage,
+                        'notes': item.notes,
+                      },
+                  ],
+                },
+              )
+              as String;
 
-      data.removeWhere(
-        (key, value) =>
-            key == 'items' || key == 'patient_name' || key == 'cashier_name',
-      );
-
-      // Insert sale
-      final response = await _client
-          .from('pos_sales')
-          .insert(data)
-          .select()
-          .single();
-
-      // Create sale items and update stock
-      if (sale.items != null) {
-        for (final item in sale.items!) {
-          await _createSaleItem(id, item);
-          await _updateStock(item, id);
-        }
-      }
-
-      // Generate receipt
-      await _generateReceipt(id);
-
-      return POSSale.fromJson(response as Map<String, dynamic>);
+      final created = await getSale(saleId);
+      if (created == null) throw Exception('Vente créée mais introuvable');
+      return created;
     } catch (e) {
       throw Exception('Failed to create sale: $e');
     }
-  }
-
-  Future<void> _createSaleItem(String saleId, POSSaleItem item) async {
-    final itemData = item
-        .copyWith(
-          id: _uuid.v4(),
-          saleId: saleId,
-          createdAt: DateTime.now().toUtc(),
-        )
-        .toJson();
-
-    await _client.from('pos_sale_items').insert(itemData);
-  }
-
-  Future<void> _updateStock(POSSaleItem item, String saleId) async {
-    final batchId = item.batchId;
-    if (batchId == null) return;
-    await _client.rpc(
-      'stock_apply_movement',
-      params: {
-        'p_batch_id': batchId,
-        'p_delta': -item.quantity,
-        'p_type': 'sale',
-        'p_reference_id': saleId,
-        'p_reason': 'Vente POS',
-      },
-    );
-  }
-
-  Future<void> _generateReceipt(String saleId) async {
-    await _client.from('pos_receipts').insert({
-      'sale_id': saleId,
-      'printed_at': DateTime.now().toUtc().toIso8601String(),
-      'printed_by': SupabaseService().currentUser?.id,
-    });
   }
 
   Future<List<POSSale>> getSales({
@@ -157,43 +118,16 @@ class POSService {
     }
   }
 
+  /// C197 : remboursement atomique ; la RPC refuse une vente qui n'est plus
+  /// 'completed' (pas de double réintégration du stock).
   Future<POSSale> refundSale(String saleId) async {
     try {
-      // Update sale status
-      final response = await _client
-          .from('pos_sales')
-          .update({
-            'status': 'refunded',
-            'updated_at': DateTime.now().toUtc().toIso8601String(),
-            'updated_by': SupabaseService().currentUser?.id,
-          })
-          .eq('id', saleId)
-          .select()
-          .single();
-
-      // Restore stock
-      final items = await _client
-          .from('pos_sale_items')
-          .select()
-          .eq('sale_id', saleId);
-
-      for (final item in items as List) {
-        final batchId = item['batch_id'] as String?;
-        if (batchId != null) {
-          await _client.rpc(
-            'stock_apply_movement',
-            params: {
-              'p_batch_id': batchId,
-              'p_delta': item['quantity'] as int,
-              'p_type': 'adjustment',
-              'p_reference_id': saleId,
-              'p_reason': 'Remboursement vente POS',
-            },
-          );
-        }
+      await _client.rpc('pos_refund_sale', params: {'p_sale_id': saleId});
+      final refunded = await getSale(saleId);
+      if (refunded == null) {
+        throw Exception('Vente introuvable après remboursement');
       }
-
-      return POSSale.fromJson(response as Map<String, dynamic>);
+      return refunded;
     } catch (e) {
       throw Exception('Failed to refund sale: $e');
     }
