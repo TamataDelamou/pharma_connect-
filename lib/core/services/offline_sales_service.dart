@@ -203,6 +203,10 @@ class OfflineSalesService {
 
   // ---- Sync ----
 
+  // ATTENTION (C195 / C197) : méthode non appelée. Elle insère directement dans
+  // pos_sales et pos_sale_items, sans reçu ni mouvement de stock, et contourne
+  // les contrôles serveur. Ne pas la rebrancher telle quelle : la reconstruction
+  // de C195 doit passer par la RPC pos_create_sale (une vente = une transaction).
   Future<void> syncOfflineSales() async {
     if (!(await hasInternet())) return;
 
