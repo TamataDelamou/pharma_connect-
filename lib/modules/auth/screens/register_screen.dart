@@ -37,8 +37,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
     {'label': 'Grossiste répartiteur', 'value': UserRole.grossiste},
     {'label': 'Livreur', 'value': UserRole.livreur},
     {'label': 'Professionnel de santé', 'value': UserRole.professionnel},
-    {'label': 'Régulateur / Institution', 'value': UserRole.regulateur},
+    // C211 / D58 : pas d'auto-inscription comme régulateur ; les comptes
+    // institutionnels sont créés et validés par GSG (admin_set_user_role).
   ];
+
+  // C211 / D58 : rôles déclarés dont les droits ne s'ouvrent qu'après
+  // vérification (officine validée, fiche professionnelle vérifiée ou
+  // validation GSG).
+  static const _rolesNeedingVerification = {
+    UserRole.pharmacien,
+    UserRole.grossiste,
+    UserRole.livreur,
+    UserRole.professionnel,
+  };
 
   @override
   void dispose() {
@@ -163,6 +174,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       if (value != null) setState(() => _selectedRole = value);
                     },
                   ),
+                  if (_rolesNeedingVerification.contains(_selectedRole)) ...[
+                    const SizedBox(height: 8),
+                    const Row(
+                      children: [
+                        Icon(
+                          Icons.verified_user_outlined,
+                          size: 16,
+                          color: PharmaConnectColors.textSecondary,
+                        ),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Votre compte professionnel sera activé après '
+                            'vérification par GSG.',
+                            style: PharmaConnectTypography.micro,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                   const SizedBox(height: 16),
 
                   // Identifiant (téléphone ou email)

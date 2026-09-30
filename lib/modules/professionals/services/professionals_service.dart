@@ -71,12 +71,18 @@ class ProfessionalsService {
             updatedBy: SupabaseService().currentUser?.id,
           )
           .toJson();
+      // C212 : la vérification (is_verified, verification_status,
+      // rejection_reason) est posée par l'administration GSG, jamais envoyée
+      // depuis la fiche du professionnel.
       data.removeWhere(
         (key, value) =>
             key == 'full_name' ||
             key == 'phone' ||
             key == 'email' ||
-            key == 'profiles',
+            key == 'profiles' ||
+            key == 'is_verified' ||
+            key == 'verification_status' ||
+            key == 'rejection_reason',
       );
 
       final response = await _client
@@ -98,12 +104,18 @@ class ProfessionalsService {
             updatedBy: SupabaseService().currentUser?.id,
           )
           .toJson();
+      // C212 : la vérification (is_verified, verification_status,
+      // rejection_reason) est posée par l'administration GSG, jamais envoyée
+      // depuis la fiche du professionnel.
       data.removeWhere(
         (key, value) =>
             key == 'full_name' ||
             key == 'phone' ||
             key == 'email' ||
-            key == 'profiles',
+            key == 'profiles' ||
+            key == 'is_verified' ||
+            key == 'verification_status' ||
+            key == 'rejection_reason',
       );
 
       final response = await _client

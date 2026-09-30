@@ -17,19 +17,29 @@ class ProfileService {
   /// à une simple connexion où ces valeurs ne sont pas re-fournies en
   /// paramètre — sans quoi needsLicenseVerification serait toujours faux
   /// pour un pharmacien qui se reconnecte au lieu de s'inscrire.
+  ///
+  /// C211 / D58 : le rôle n'est envoyé qu'à la création du profil. Sur un
+  /// profil existant (connexion, ou nouvelle inscription avec un identifiant
+  /// déjà connu), le serveur refuse tout changement de rôle hors
+  /// administration GSG (42501) : le rôle en base fait foi et est relu.
   Future<Map<String, dynamic>?> upsertProfile({
     required String id,
     String? phone,
     String? fullName,
     String? role,
   }) async {
+    final existing = await _client
+        .from('profiles')
+        .select('id')
+        .eq('id', id)
+        .maybeSingle();
     return await _client
         .from('profiles')
         .upsert({
           'id': id,
           if (phone != null) 'phone': phone,
           if (fullName != null) 'full_name': fullName,
-          if (role != null) 'role': role,
+          if (role != null && existing == null) 'role': role,
         })
         .select()
         .single();
