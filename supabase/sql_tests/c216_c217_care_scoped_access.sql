@@ -16,7 +16,7 @@ begin;
 -- c2160000-…-0000000000xx :
 --   01 PAT1, 02 PAT2 patients ; 03 ADM admin GSG ;
 --   10 PRO1 (consultation avec PAT1) ; 11 PRO2 (aucun lien) ;
---   12 PRO3 (interaction créée par lui avec PAT2) ; 13 PRO4 (consultation annulée avec PAT1) ;
+--   12 PRO3 (interaction avec PAT2, antérieure à C219) ; 13 PRO4 (consultation annulée avec PAT1) ;
 --   14 PRO5 (soin à domicile avec PAT2) ; 15 PRONV (non vérifié, consultation avec PAT1) ;
 --   20 PH pharmacien de Kaloum ; 21 PHD pharmacien de Dixinn ;
 --   30 NURSE (affiliée H1) ; 31 DOC1 (affilié H1) ; 32 DOC2 (affilié H2) ;
@@ -156,13 +156,16 @@ $$;
 -- ==================== Dossiers de santé ====================
 select pg_temp.as_user(:'PRO1'); set local role authenticated; select pg_temp.seen('PRO1'); reset role;
 select pg_temp.as_user(:'PRO2'); set local role authenticated; select pg_temp.seen('PRO2'); reset role;
-select pg_temp.as_user(:'PRO3'); set local role authenticated;
+-- Depuis C219 (D63), un professionnel ne peut plus créer seul une interaction
+-- sans lien de soin : l'interaction de PRO3 est insérée ici en postgres, comme
+-- une interaction enregistrée avant C219.
 do $$ begin
   insert into public.professional_patient_interactions (professional_id, patient_id, type)
-    values (auth.uid(), 'c2160000-0000-0000-0000-000000000002', 'consultation');
+    values ('c2160000-0000-0000-0000-000000000012', 'c2160000-0000-0000-0000-000000000002', 'consultation');
   insert into t_out values ('3-interaction', 'OK', null);
 exception when others then insert into t_out values ('3-interaction', sqlstate, sqlerrm);
 end $$;
+select pg_temp.as_user(:'PRO3'); set local role authenticated;
 select pg_temp.seen('PRO3'); reset role;
 select pg_temp.as_user(:'PRO4'); set local role authenticated; select pg_temp.seen('PRO4'); reset role;
 select pg_temp.as_user(:'PRO5'); set local role authenticated; select pg_temp.seen('PRO5'); reset role;
@@ -179,7 +182,7 @@ select pg_temp.verdict('1-annexes',
   'PRO1 : synthese, objectifs et etapes de PAT1 seulement');
 select pg_temp.verdict('2', (select sum(n) = 0 from t_seen where who = 'PRO2'), 'PRO2 (aucun lien) ne voit rien');
 select pg_temp.expect('3-interaction', 'OK', pg_temp.n('PRO3', 'rec_pat2') = 0 and pg_temp.n('PRO3', 'sum_pat2') = 0,
-  '; PRO3 cree seul une interaction avec PAT2 mais ne voit toujours pas son dossier');
+  '; PRO3 a une interaction avec PAT2 (anterieure a C219) mais ne voit toujours pas son dossier');
 select pg_temp.verdict('4', (select sum(n) = 0 from t_seen where who = 'PRO4'), 'PRO4 (consultation annulee) ne voit rien');
 select pg_temp.verdict('5', pg_temp.n('PRO5', 'rec_pat2') = 1 and pg_temp.n('PRO5', 'rec_pat1') = 0 and pg_temp.n('PRO5', 'goal_pat2') = 1,
   'PRO5 (soin a domicile avec PAT2) voit le dossier de PAT2 seulement');
