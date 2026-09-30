@@ -58,8 +58,10 @@ class _PendingInvitationsCardState extends State<PendingInvitationsCard> {
         await auth.restoreSession();
         messenger.showSnackBar(
           SnackBar(
-            content: Text('Vous faites partie du personnel de '
-                '${invitation.pharmacyName}'),
+            content: Text(
+              'Vous faites partie du personnel de '
+              '${invitation.pharmacyName}',
+            ),
             backgroundColor: PharmaConnectColors.accentGreen,
           ),
         );

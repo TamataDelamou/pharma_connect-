@@ -110,14 +110,15 @@ class _PharmacyStaffScreenState extends State<PharmacyStaffScreen> {
       'invite',
       () => _service.invite(pharmacyId, phone),
       'Invitation envoyée : elle apparaîtra à la prochaine connexion de '
-      'l\'employé.',
+          'l\'employé.',
     );
   }
 
   Future<void> _cancel(StaffEntry entry) async {
     final confirmed = await _confirm(
       title: 'Annuler l\'invitation',
-      message: 'L\'invitation de ${entry.displayName} ne pourra plus être '
+      message:
+          'L\'invitation de ${entry.displayName} ne pourra plus être '
           'acceptée.',
       actionLabel: 'Annuler l\'invitation',
     );
@@ -134,7 +135,8 @@ class _PharmacyStaffScreenState extends State<PharmacyStaffScreen> {
     if (pharmacyId == null) return;
     final confirmed = await _confirm(
       title: 'Retirer du personnel',
-      message: '${entry.displayName} perdra immédiatement l\'accès au stock, '
+      message:
+          '${entry.displayName} perdra immédiatement l\'accès au stock, '
           'aux ventes et à la caisse de l\'officine.',
       actionLabel: 'Retirer',
     );
@@ -149,7 +151,8 @@ class _PharmacyStaffScreenState extends State<PharmacyStaffScreen> {
   Future<void> _leave() async {
     final confirmed = await _confirm(
       title: 'Quitter l\'officine',
-      message: 'Vous perdrez l\'accès au stock, aux ventes et à la caisse de '
+      message:
+          'Vous perdrez l\'accès au stock, aux ventes et à la caisse de '
           'cette officine. Seul son titulaire pourra vous inviter à nouveau.',
       actionLabel: 'Quitter',
     );

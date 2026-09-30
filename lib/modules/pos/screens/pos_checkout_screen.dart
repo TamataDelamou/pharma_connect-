@@ -622,9 +622,7 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
             Icon(
               Icons.add_circle_outline,
               size: 20,
-              color: canAdd
-                  ? PharmaConnectColors.accentGreen
-                  : Colors.white24,
+              color: canAdd ? PharmaConnectColors.accentGreen : Colors.white24,
             ),
           ],
         ),
@@ -637,9 +635,9 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
   void _addStockProduct(StockProduct product, POSProvider provider) {
     final requested = int.tryParse(_quantityController.text.trim()) ?? 1;
     if (requested <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Quantité invalide')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Quantité invalide')));
       return;
     }
     final remaining =
@@ -694,7 +692,10 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
             ),
             const SizedBox(height: 8),
             for (final item in unchecked)
-              Text('• ${item.productName}', style: PharmaConnectTypography.body1),
+              Text(
+                '• ${item.productName}',
+                style: PharmaConnectTypography.body1,
+              ),
             const SizedBox(height: 12),
             const Text(
               'Votre réponse est enregistrée avec la vente.',

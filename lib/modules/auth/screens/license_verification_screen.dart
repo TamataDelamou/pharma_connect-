@@ -249,8 +249,7 @@ class _LicenseVerificationScreenState extends State<LicenseVerificationScreen> {
                           managerName: _nameController.text.trim(),
                           phone: _phoneE164!,
                           address: _addressController.text.trim(),
-                          licenseNumber:
-                              _licenseNumberController.text.trim(),
+                          licenseNumber: _licenseNumberController.text.trim(),
                         );
                       } catch (e) {
                         errorMessage = e.toString();
