@@ -245,6 +245,7 @@ class POSService {
       'incoherent': 'incohérent',
       'different de': 'différent de',
       'a 1 pres': 'à 1 près',
+      'non renseigne': 'non renseigné',
     };
     accents.forEach((from, to) => message = message.replaceAll(from, to));
     message = message.replaceAllMapped(
