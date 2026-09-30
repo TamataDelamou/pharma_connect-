@@ -39,6 +39,14 @@ update public.stock_batches b set quantity = 3
   from public.stock_items si
   where si.id = b.stock_item_id and b.batch_number = 'LOT-2026-0017'
     and si.pharmacy_id = '55555555-5555-5555-5555-555555550001';
+-- C218 : le serveur impose le prix du stock ; prix de vente des lots de test
+-- alignés sur ceux des lignes de ce fichier (L1 1 500, L2 2 000, LB 1 000).
+update public.stock_items si set unit_price = v.price
+  from public.stock_batches b,
+       (values ('LOT-2026-0009', '55555555-5555-5555-5555-555555550001'::uuid, 1500),
+               ('LOT-2026-0017', '55555555-5555-5555-5555-555555550001'::uuid, 2000),
+               ('LOT-2026-0028', '55555555-5555-5555-5555-555555550002'::uuid, 1000)) as v(num, ph, price)
+  where b.stock_item_id = si.id and b.batch_number = v.num and si.pharmacy_id = v.ph;
 
 -- Contexte partagé avec les blocs DO (exécutés sous le rôle authenticated).
 create temp table t_ctx (k text primary key, v text);

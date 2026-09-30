@@ -13,6 +13,7 @@ Tests manuels à lancer sur la base **locale** (`supabase start`, conteneur `sup
 | `c209_pharmacy_staff_invitations.sql` | Rattachement du personnel non titulaire (C209, décision D59) : invitation par le titulaire d'une officine validée (numéro de téléphone), acceptation ou refus par l'employé, annulation, retrait, départ, liste du personnel, cloisonnement entre officines. |
 | `c201_pos_sale_from_stock.sql` | Vente sur le vrai stock (C201, décision D60) : recherche en stock, lots choisis par le serveur (péremption la plus proche, périmés et réservés exclus, répartition sur plusieurs lots), lot périmé refusé, ligne sans produit refusée, ordonnance tracée sans blocage, remboursement d'une vente répartie. |
 | `c216_c217_care_scoped_access.sql` | Accès aux données de santé (C216, décision D61) : dossiers par lien de soin (consultation ou soin à domicile non annulés), lien non falsifiable, ordonnances visibles de l'officine destinataire seulement, triage limité à l'hôpital d'affiliation, stupéfiants retirés aux livreurs ; journal d'audit réservé à GSG et `admin_log_action` (C217). |
+| `c218_c210_price_and_suspended_pharmacy.sql` | Prix de vente imposé par le serveur (C218 : prix du stock, prix non renseigné refusé, ligne par produit ou par lot) et officine non active sans accès (C210 : suspendue, en attente, en révision ou rejetée ; rattachement conservé, accès rétabli à la réactivation). |
 | `concurrency_numbering.sh` | Deux sessions `psql` simultanées (retours client, puis ventes POS de deux officines) : numéros distincts et consécutifs, la seconde session attend la première. |
 
 Chaque cas affiche une ligne `CAS n OK : …` ou `CAS n ECHEC : …` (`RESULTAT … OK/ECHEC` pour le script de concurrence).
@@ -31,6 +32,7 @@ docker exec -i supabase_db_pharma_connect psql -U postgres -d postgres < supabas
 docker exec -i supabase_db_pharma_connect psql -U postgres -d postgres < supabase/sql_tests/c209_pharmacy_staff_invitations.sql
 docker exec -i supabase_db_pharma_connect psql -U postgres -d postgres < supabase/sql_tests/c201_pos_sale_from_stock.sql
 docker exec -i supabase_db_pharma_connect psql -U postgres -d postgres < supabase/sql_tests/c216_c217_care_scoped_access.sql
+docker exec -i supabase_db_pharma_connect psql -U postgres -d postgres < supabase/sql_tests/c218_c210_price_and_suspended_pharmacy.sql
 bash supabase/sql_tests/concurrency_numbering.sh
 ```
 

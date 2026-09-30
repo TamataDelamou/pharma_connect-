@@ -33,6 +33,18 @@ insert into auth.users (id, email) values
 insert into public.profiles (id, role, pharmacy_id, full_name) values
   ('$A', 'pharmacien', '$PA', 'Pharmacien A Kaloum'),
   ('$B', 'pharmacien', '$PB', 'Pharmacien B Dixinn');
+-- C218 : prix de vente du stock aligné sur celui des ventes du script (1 000),
+-- et au moins une unité en stock sur chaque lot vendu.
+update public.stock_items si set unit_price = 1000
+  from public.stock_batches b
+  where b.stock_item_id = si.id
+    and ((b.batch_number = 'LOT-2026-0009' and si.pharmacy_id = '$PA')
+      or (b.batch_number = 'LOT-2026-0028' and si.pharmacy_id = '$PB'));
+update public.stock_batches b set quantity = greatest(b.quantity, 5)
+  from public.stock_items si
+  where b.stock_item_id = si.id
+    and ((b.batch_number = 'LOT-2026-0009' and si.pharmacy_id = '$PA')
+      or (b.batch_number = 'LOT-2026-0028' and si.pharmacy_id = '$PB'));
 SQL
 
 # Une session : identité, insertion, horodatages, pause de 2 s, commit.

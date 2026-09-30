@@ -8,7 +8,7 @@
 --       titulaire ne lève que la règle jour/plafond ;
 --   E : pharmacien de Kaloum, non titulaire ;
 --   B : pharmacien de Dixinn.
--- Lots de Kaloum : L1 = LOT-2026-0009, L2 = LOT-2026-0017, ramenés à 100.
+-- Lots de Kaloum : L1 = LOT-2026-0009, L2 = LOT-2026-0017, portés à 200.
 -- Vieillissement d'une vente (en tant que postgres) :
 --   update pos_sales set created_at = now() - interval '1 day'.
 --
@@ -32,9 +32,15 @@ insert into public.profiles (id, role, pharmacy_id, full_name) values
 update public.pharmacies set manager_id = '71000000-0000-0000-0000-000000000001'
   where id = '55555555-5555-5555-5555-555555550001';
 
-update public.stock_batches b set quantity = 100
+update public.stock_batches b set quantity = 200
   from public.stock_items si
   where si.id = b.stock_item_id and b.batch_number in ('LOT-2026-0009', 'LOT-2026-0017')
+    and si.pharmacy_id = '55555555-5555-5555-5555-555555550001';
+-- C218 : le serveur impose le prix du stock ; prix de vente des lots de test
+-- alignés sur ceux des lignes de ce fichier (L1 1 500, L2 2 000).
+update public.stock_items si set unit_price = case b.batch_number when 'LOT-2026-0009' then 1500 else 2000 end
+  from public.stock_batches b
+  where b.stock_item_id = si.id and b.batch_number in ('LOT-2026-0009', 'LOT-2026-0017')
     and si.pharmacy_id = '55555555-5555-5555-5555-555555550001';
 
 create temp table t_ctx (k text primary key, v text);
@@ -117,9 +123,9 @@ select public.pos_create_sale(:'PA', 'cash', 6500, 0, 0, 6500,
   jsonb_build_array(
     jsonb_build_object('product_name', 'Produit L1', 'quantity', 3, 'unit_price', 1500, 'total_price', 4500, 'batch_id', :'l1'),
     jsonb_build_object('product_name', 'Produit L2', 'quantity', 1, 'unit_price', 2000, 'total_price', 2000, 'batch_id', :'l2'))) as s2 \gset
--- s3 : au-dessus du plafond (150 000 > 100 000).
+-- s3 : au-dessus du plafond (150 000 > 100 000) : 100 x L1 à 1 500 (C218 : prix du stock).
 select public.pos_create_sale(:'PA', 'cash', 150000, 0, 0, 150000,
-  jsonb_build_array(jsonb_build_object('product_name', 'Produit L1', 'quantity', 1, 'unit_price', 150000, 'total_price', 150000, 'batch_id', :'l1'))) as s3 \gset
+  jsonb_build_array(jsonb_build_object('product_name', 'Produit L1', 'quantity', 100, 'unit_price', 1500, 'total_price', 150000, 'batch_id', :'l1'))) as s3 \gset
 -- s4 : petite vente, vieillie d'un jour ; s6 : petite vente du jour.
 select public.pos_create_sale(:'PA', 'cash', 1500, 0, 0, 1500, pg_temp.items_small()) as s4 \gset
 select public.pos_create_sale(:'PA', 'cash', 1500, 0, 0, 1500, pg_temp.items_small()) as s6 \gset
