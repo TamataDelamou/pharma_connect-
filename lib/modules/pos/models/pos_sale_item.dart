@@ -15,6 +15,11 @@ class POSSaleItem extends Equatable {
   final String? gsgId;
   final String? gsgOrgId;
 
+  /// C201 / D60 : produit sur ordonnance (avertissement non bloquant) et
+  /// confirmation, par le vendeur, d'avoir vu l'ordonnance.
+  final bool prescriptionRequired;
+  final bool prescriptionChecked;
+
   const POSSaleItem({
     required this.id,
     required this.saleId,
@@ -29,6 +34,8 @@ class POSSaleItem extends Equatable {
     required this.createdAt,
     this.gsgId,
     this.gsgOrgId,
+    this.prescriptionRequired = false,
+    this.prescriptionChecked = false,
   });
 
   POSSaleItem copyWith({
@@ -45,6 +52,8 @@ class POSSaleItem extends Equatable {
     DateTime? createdAt,
     String? gsgId,
     String? gsgOrgId,
+    bool? prescriptionRequired,
+    bool? prescriptionChecked,
   }) {
     return POSSaleItem(
       id: id ?? this.id,
@@ -60,6 +69,8 @@ class POSSaleItem extends Equatable {
       createdAt: createdAt ?? this.createdAt,
       gsgId: gsgId ?? this.gsgId,
       gsgOrgId: gsgOrgId ?? this.gsgOrgId,
+      prescriptionRequired: prescriptionRequired ?? this.prescriptionRequired,
+      prescriptionChecked: prescriptionChecked ?? this.prescriptionChecked,
     );
   }
 
@@ -77,6 +88,8 @@ class POSSaleItem extends Equatable {
     'created_at': createdAt.toIso8601String(),
     if (gsgId != null) 'gsg_id': gsgId,
     if (gsgOrgId != null) 'gsg_org_id': gsgOrgId,
+    'prescription_required': prescriptionRequired,
+    'prescription_checked': prescriptionChecked,
   };
 
   factory POSSaleItem.fromJson(Map<String, dynamic> json) => POSSaleItem(
@@ -93,6 +106,8 @@ class POSSaleItem extends Equatable {
     createdAt: DateTime.parse(json['created_at'] as String),
     gsgId: json['gsg_id'] as String?,
     gsgOrgId: json['gsg_org_id'] as String?,
+    prescriptionRequired: json['prescription_required'] as bool? ?? false,
+    prescriptionChecked: json['prescription_checked'] as bool? ?? false,
   );
 
   @override
@@ -110,5 +125,7 @@ class POSSaleItem extends Equatable {
     createdAt,
     gsgId,
     gsgOrgId,
+    prescriptionRequired,
+    prescriptionChecked,
   ];
 }

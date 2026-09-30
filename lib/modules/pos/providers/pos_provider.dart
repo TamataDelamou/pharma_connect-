@@ -90,6 +90,34 @@ class POSProvider extends ChangeNotifier {
     }
   }
 
+  /// Quantité déjà dans le panier pour un produit (plafond de l'ajout).
+  int quantityInCart(String productId) => _cart
+      .where((i) => i.productId == productId)
+      .fold(0, (sum, i) => sum + i.quantity);
+
+  /// C201 / D60 : confirmation « ordonnance vue » pour un produit du panier.
+  void setPrescriptionChecked(String productId, bool checked) {
+    final index = _cart.indexWhere((item) => item.productId == productId);
+    if (index == -1) return;
+    _cart[index] = _cart[index].copyWith(prescriptionChecked: checked);
+    notifyListeners();
+  }
+
+  /// Confirme l'ordonnance pour toutes les lignes sur ordonnance du panier.
+  void checkAllPrescriptions() {
+    for (var i = 0; i < _cart.length; i++) {
+      if (_cart[i].prescriptionRequired) {
+        _cart[i] = _cart[i].copyWith(prescriptionChecked: true);
+      }
+    }
+    notifyListeners();
+  }
+
+  /// Lignes sur ordonnance dont l'ordonnance n'a pas été confirmée.
+  List<POSSaleItem> get uncheckedPrescriptionItems => _cart
+      .where((i) => i.prescriptionRequired && !i.prescriptionChecked)
+      .toList();
+
   void clearCart() {
     _cart.clear();
     _discountPercent = 0;
@@ -144,6 +172,11 @@ class POSProvider extends ChangeNotifier {
       _isCheckingOut = false;
       notifyListeners();
       return true;
+    } on POSSaleException catch (e) {
+      _error = e.message;
+      _isCheckingOut = false;
+      notifyListeners();
+      return false;
     } catch (e) {
       _error = e.toString();
       _isCheckingOut = false;

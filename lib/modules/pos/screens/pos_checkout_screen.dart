@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -11,6 +13,8 @@ import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/utils/currency_formatter.dart';
 import '../providers/pos_provider.dart';
 import '../models/pos_sale_item.dart';
+import '../models/stock_product.dart';
+import '../services/pos_service.dart';
 import '../../auth/providers/auth_provider.dart';
 
 class POSCheckoutScreen extends StatefulWidget {
@@ -23,28 +27,63 @@ class POSCheckoutScreen extends StatefulWidget {
 class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
   final _searchController = TextEditingController();
   final _quantityController = TextEditingController();
+  final POSService _posService = POSService();
 
-  List<Map<String, dynamic>> _mockProducts = const [
-    {'id': 'p1', 'name': 'Doliprane 1000mg', 'price': 5000},
-    {'id': 'p2', 'name': 'Amoxicilline 500mg', 'price': 7500},
-    {'id': 'p3', 'name': 'Efferalgan 500mg', 'price': 4500},
-    {'id': 'p4', 'name': 'Ibuprofène 400mg', 'price': 6000},
-    {'id': 'p5', 'name': 'Ventoline 100µg', 'price': 12000},
-    {'id': 'p6', 'name': 'Paracétamol 500mg', 'price': 3500},
-    {'id': 'p7', 'name': 'Spasfon 80mg', 'price': 8000},
-  ];
+  // C201 : produits du stock réel de l'officine (plus de catalogue fictif).
+  List<StockProduct> _results = [];
+  bool _isSearching = false;
+  String? _searchError;
+  Timer? _debounce;
 
   @override
   void initState() {
     super.initState();
     _quantityController.text = '1';
+    WidgetsBinding.instance.addPostFrameCallback((_) => _search());
   }
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _searchController.dispose();
     _quantityController.dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged(String _) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 350), _search);
+  }
+
+  /// Recherche dans le stock de l'officine (nom ou DCI) ; sans texte, les
+  /// premiers produits disponibles.
+  Future<void> _search() async {
+    if (!mounted) return;
+    final pharmacyId = context.read<AuthProvider>().pharmacyId;
+    if (pharmacyId == null) return;
+    setState(() {
+      _isSearching = true;
+      _searchError = null;
+    });
+    try {
+      final results = await _posService.searchStockProducts(
+        pharmacyId,
+        query: _searchController.text,
+      );
+      if (!mounted) return;
+      setState(() {
+        _results = results;
+        _isSearching = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _searchError = e is POSSaleException
+            ? e.message
+            : 'Recherche impossible, vérifiez la connexion.';
+        _isSearching = false;
+      });
+    }
   }
 
   @override
@@ -134,8 +173,12 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
                             Expanded(
                               child: TextField(
                                 controller: _searchController,
+                                onChanged: _onSearchChanged,
+                                onSubmitted: (_) => _search(),
+                                textInputAction: TextInputAction.search,
                                 decoration: const InputDecoration(
-                                  hintText: 'Rechercher un produit...',
+                                  hintText:
+                                      'Rechercher un produit en stock (nom ou DCI)...',
                                   prefixIcon: Icon(Icons.search),
                                   border: OutlineInputBorder(),
                                 ),
@@ -143,9 +186,9 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
                             ),
                             const SizedBox(width: 8),
                             PrimaryButton(
-                              label: 'Ajouter',
-                              onPressed: () => _addProductToCart(provider),
-                              width: 100,
+                              label: 'Rechercher',
+                              onPressed: _search,
+                              width: 120,
                               height: 50,
                             ),
                           ],
@@ -188,6 +231,8 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
                             ),
                           ],
                         ),
+                        const SizedBox(height: 8),
+                        _buildSearchResults(provider),
                         const SizedBox(height: 16),
 
                         // Cart items
@@ -352,6 +397,41 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
                   '${item.quantity} x ${CurrencyFormatter.format(item.unitPrice)}',
                   style: PharmaConnectTypography.micro,
                 ),
+                if (item.prescriptionRequired)
+                  InkWell(
+                    onTap: () => provider.setPrescriptionChecked(
+                      item.productId!,
+                      !item.prescriptionChecked,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            item.prescriptionChecked
+                                ? Icons.check_box
+                                : Icons.check_box_outline_blank,
+                            size: 18,
+                            color: item.prescriptionChecked
+                                ? PharmaConnectColors.accentGreen
+                                : PharmaConnectColors.accentOrange,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            item.prescriptionChecked
+                                ? 'Ordonnance vue'
+                                : 'Sur ordonnance : confirmer l\'ordonnance',
+                            style: PharmaConnectTypography.micro.copyWith(
+                              color: item.prescriptionChecked
+                                  ? PharmaConnectColors.accentGreen
+                                  : PharmaConnectColors.accentOrange,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
@@ -406,30 +486,245 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
     );
   }
 
-  void _addProductToCart(POSProvider provider) {
-    final search = _searchController.text.trim();
-    if (search.isEmpty) return;
-
-    final product = _mockProducts.firstWhere(
-      (p) => p['name']!.toLowerCase().contains(search.toLowerCase()),
-      orElse: () => _mockProducts.first,
+  Widget _buildSearchResults(POSProvider provider) {
+    if (_isSearching && _results.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 12),
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+    if (_searchError != null) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Text(
+          _searchError!,
+          style: PharmaConnectTypography.body2.copyWith(
+            color: PharmaConnectColors.accentRed,
+          ),
+        ),
+      );
+    }
+    if (_results.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Text(
+          _searchController.text.trim().isEmpty
+              ? 'Aucun produit dans le stock de l\'officine'
+              : 'Aucun produit en stock ne correspond à la recherche',
+          style: PharmaConnectTypography.body2,
+        ),
+      );
+    }
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxHeight: 220),
+      child: ListView.builder(
+        shrinkWrap: true,
+        itemCount: _results.length,
+        itemBuilder: (context, index) =>
+            _buildResultTile(_results[index], provider),
+      ),
     );
+  }
 
-    final quantity = int.tryParse(_quantityController.text) ?? 1;
+  Widget _buildResultTile(StockProduct product, POSProvider provider) {
+    final remaining =
+        product.availableQuantity - provider.quantityInCart(product.productId);
+    final canAdd = remaining > 0 && product.unitPrice > 0;
+    final details = [
+      if (product.form != null && product.form!.isNotEmpty) product.form!,
+      if (product.genericName != null &&
+          product.genericName!.isNotEmpty &&
+          product.genericName != product.name)
+        product.genericName!,
+    ].join(' · ');
 
-    final item = POSSaleItem(
-      id: 'temp_${DateTime.now().millisecondsSinceEpoch}',
-      saleId: '',
-      productId: product['id'],
-      productName: product['name'],
-      quantity: quantity,
-      unitPrice: product['price'],
-      totalPrice: product['price'] * quantity,
-      createdAt: DateTime.now().toUtc(),
+    return InkWell(
+      onTap: canAdd ? () => _addStockProduct(product, provider) : null,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        margin: const EdgeInsets.only(bottom: 4),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: canAdd ? 0.05 : 0.02),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          product.displayName,
+                          style: PharmaConnectTypography.body1.copyWith(
+                            fontWeight: FontWeight.w500,
+                            color: canAdd
+                                ? null
+                                : PharmaConnectColors.textSecondary,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (product.prescriptionRequired) ...[
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 4,
+                            vertical: 1,
+                          ),
+                          decoration: BoxDecoration(
+                            color: PharmaConnectColors.accentOrange.withValues(
+                              alpha: 0.15,
+                            ),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: const Text(
+                            'Ordonnance',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: PharmaConnectColors.accentOrange,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  Text(
+                    [
+                      if (details.isNotEmpty) details,
+                      product.isAvailable
+                          ? '${product.availableQuantity} disponible${product.availableQuantity > 1 ? 's' : ''}'
+                          : 'Rupture (aucun lot vendable)',
+                    ].join(' · '),
+                    style: PharmaConnectTypography.micro,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              product.unitPrice > 0
+                  ? CurrencyFormatter.format(product.unitPrice)
+                  : 'Prix non renseigné',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: canAdd
+                    ? PharmaConnectColors.accentCyan
+                    : PharmaConnectColors.textSecondary,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Icon(
+              Icons.add_circle_outline,
+              size: 20,
+              color: canAdd
+                  ? PharmaConnectColors.accentGreen
+                  : Colors.white24,
+            ),
+          ],
+        ),
+      ),
     );
+  }
 
-    provider.addToCart(item);
-    _searchController.clear();
+  /// Ajoute un produit du stock au panier. Le lot n'est pas choisi ici : le
+  /// serveur prend les lots dont la péremption est la plus proche (D60).
+  void _addStockProduct(StockProduct product, POSProvider provider) {
+    final requested = int.tryParse(_quantityController.text.trim()) ?? 1;
+    if (requested <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Quantité invalide')),
+      );
+      return;
+    }
+    final remaining =
+        product.availableQuantity - provider.quantityInCart(product.productId);
+    if (requested > remaining) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            remaining > 0
+                ? 'Stock insuffisant : $remaining ${product.displayName} encore disponible${remaining > 1 ? 's' : ''}'
+                : 'Tout le stock disponible de ${product.displayName} est déjà dans le panier',
+          ),
+          backgroundColor: PharmaConnectColors.accentOrange,
+        ),
+      );
+      return;
+    }
+
+    provider.addToCart(
+      POSSaleItem(
+        id: 'temp_${DateTime.now().millisecondsSinceEpoch}',
+        saleId: '',
+        productId: product.productId,
+        productName: product.displayName,
+        quantity: requested,
+        unitPrice: product.unitPrice,
+        totalPrice: product.unitPrice * requested,
+        prescriptionRequired: product.prescriptionRequired,
+        createdAt: DateTime.now().toUtc(),
+      ),
+    );
+    _quantityController.text = '1';
+  }
+
+  /// D60 : avertissement non bloquant pour les produits sur ordonnance dont
+  /// l'ordonnance n'a pas été confirmée. Renvoie false si la vente est annulée.
+  Future<bool> _confirmPrescriptions(POSProvider provider) async {
+    final unchecked = provider.uncheckedPrescriptionItems;
+    if (unchecked.isEmpty) return true;
+    final choice = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: PharmaConnectColors.primaryDeep,
+        title: const Text('Médicaments sur ordonnance'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Ces produits sont délivrés sur ordonnance :',
+              style: PharmaConnectTypography.body2,
+            ),
+            const SizedBox(height: 8),
+            for (final item in unchecked)
+              Text('• ${item.productName}', style: PharmaConnectTypography.body1),
+            const SizedBox(height: 12),
+            const Text(
+              'Votre réponse est enregistrée avec la vente.',
+              style: PharmaConnectTypography.micro,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Annuler'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, 'without'),
+            child: const Text('Vendre sans ordonnance'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, 'checked'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: PharmaConnectColors.accentGreen,
+              foregroundColor: PharmaConnectColors.textPrimary,
+            ),
+            child: const Text('Ordonnance vue'),
+          ),
+        ],
+      ),
+    );
+    if (choice == null) return false;
+    if (choice == 'checked') provider.checkAllPrescriptions();
+    return true;
   }
 
   Future<void> _checkout(POSProvider provider) async {
@@ -449,10 +744,14 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
       return;
     }
 
+    if (!await _confirmPrescriptions(provider)) return;
+    if (!mounted) return;
+
     final success = await provider.checkout(
       pharmacyId: pharmacyId,
       cashierId: userId,
     );
+    if (success) unawaited(_search());
 
     if (success && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(

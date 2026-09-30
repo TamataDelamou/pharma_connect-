@@ -166,7 +166,9 @@ class RoleBasedDashboard extends StatelessWidget {
                 a.route == '/stock' ||
                 a.route == '/prescriptions' ||
                 a.route == '/reservations' ||
-                a.route == '/search',
+                a.route == '/search' ||
+                a.route == '/pos' ||
+                a.route == '/pharmacy/staff',
           )
           .toList();
     }
@@ -179,7 +181,10 @@ class RoleBasedDashboard extends StatelessWidget {
           )
           .toList();
     }
-    return all;
+    // C201 / C209 : caisse et personnel réservés aux pharmaciens.
+    return all
+        .where((a) => a.route != '/pos' && a.route != '/pharmacy/staff')
+        .toList();
   }
 
   int _getKpiCount(UserRole? role) {

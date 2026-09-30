@@ -10,10 +10,21 @@ import 'package:supabase_flutter/supabase_flutter.dart'
 import '../models/pos_sale.dart';
 import '../models/pos_sale_item.dart';
 import '../models/pos_receipt.dart';
+import '../models/stock_product.dart';
 
 /// C193 : usage d'un lien signé vers un reçu. Durées décidées par le porteur
 /// du projet le 28/09/2026.
 enum ReceiptLinkPurpose { consultation, export }
+
+/// C201 : refus du serveur lors d'une vente (stock insuffisant, lot périmé,
+/// accès refusé…), message lisible tel qu'affiché à l'utilisateur.
+class POSSaleException implements Exception {
+  final String message;
+  const POSSaleException(this.message);
+
+  @override
+  String toString() => message;
+}
 
 /// C204 : refus du serveur lors d'un remboursement, message lisible tel
 /// qu'affiché à l'utilisateur.
@@ -61,6 +72,7 @@ class POSService {
                         'batch_id': item.batchId,
                         'discount_percentage': item.discountPercentage,
                         'notes': item.notes,
+                        'prescription_checked': item.prescriptionChecked,
                       },
                   ],
                 },
@@ -70,8 +82,40 @@ class POSService {
       final created = await getSale(saleId);
       if (created == null) throw Exception('Vente créée mais introuvable');
       return created;
+    } on PostgrestException catch (e) {
+      throw POSSaleException(serverMessage(e.message));
     } catch (e) {
       throw Exception('Failed to create sale: $e');
+    }
+  }
+
+  /// C201 / D60 : produits du stock de l'officine pour l'encaissement (prix,
+  /// quantité vendable hors lots périmés et réservés, ordonnance). Recherche
+  /// sur le nom et la DCI ; sans [query], les premiers produits du stock.
+  Future<List<StockProduct>> searchStockProducts(
+    String pharmacyId, {
+    String? query,
+    int limit = 30,
+  }) async {
+    final trimmed = query?.trim();
+    try {
+      final rows =
+          await _client.rpc(
+                'pos_search_stock_products',
+                params: {
+                  'p_pharmacy_id': pharmacyId,
+                  'p_query': (trimmed == null || trimmed.isEmpty)
+                      ? null
+                      : trimmed,
+                  'p_limit': limit,
+                },
+              )
+              as List<dynamic>;
+      return rows
+          .map((row) => StockProduct.fromJson(row as Map<String, dynamic>))
+          .toList();
+    } on PostgrestException catch (e) {
+      throw POSSaleException(serverMessage(e.message));
     }
   }
 
@@ -196,6 +240,11 @@ class POSService {
       'completee': 'complétée',
       'remboursee': 'remboursée',
       'a preciser': 'à préciser',
+      'est perime': 'est périmé',
+      'doit designer': 'doit désigner',
+      'incoherent': 'incohérent',
+      'different de': 'différent de',
+      'a 1 pres': 'à 1 près',
     };
     accents.forEach((from, to) => message = message.replaceAll(from, to));
     message = message.replaceAllMapped(

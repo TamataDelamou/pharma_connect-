@@ -71,6 +71,20 @@ class DashboardProvider extends ChangeNotifier {
           route: '/stats',
           color: PharmaConnectColors.accentOrange,
         ),
+        // C201 / C209 : vente au comptoir sur le stock réel, personnel de
+        // l'officine. Proposées aux pharmaciens uniquement.
+        QuickAction(
+          label: 'Caisse',
+          icon: Icons.point_of_sale,
+          route: '/pos',
+          color: PharmaConnectColors.accentGreen,
+        ),
+        QuickAction(
+          label: 'Personnel',
+          icon: Icons.groups,
+          route: '/pharmacy/staff',
+          color: PharmaConnectColors.accentCyan,
+        ),
       ],
       activities: [
         ActivityItem(
