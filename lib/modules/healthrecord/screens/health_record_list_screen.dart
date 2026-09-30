@@ -31,9 +31,18 @@ class _HealthRecordListScreenState extends State<HealthRecordListScreen> {
     });
   }
 
+  /// C219 : vrai pour le dossier de l'utilisateur lui-même ; faux quand un
+  /// professionnel consulte le dossier d'un patient (lien de soin ou accès
+  /// d'urgence, lecture seule).
+  bool get _isOwnRecord {
+    final userId = SupabaseService().currentUser?.id;
+    return widget.patientId == null || widget.patientId == userId;
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<HealthRecordProvider>();
+    final isOwnRecord = _isOwnRecord;
 
     return Scaffold(
       body: Padding(
@@ -44,36 +53,58 @@ class _HealthRecordListScreenState extends State<HealthRecordListScreen> {
             // Header
             Row(
               children: [
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Dossier de santé',
+                        isOwnRecord
+                            ? 'Dossier de santé'
+                            : 'Dossier de santé du patient',
                         style: PharmaConnectTypography.heading1,
                       ),
-                      SizedBox(height: 4),
+                      const SizedBox(height: 4),
                       Text(
-                        'Consultez et gérez vos informations médicales',
+                        isOwnRecord
+                            ? 'Consultez et gérez vos informations médicales'
+                            : 'Consultation en lecture seule, enregistrée et '
+                                  'visible par le patient',
                         style: PharmaConnectTypography.body2,
                       ),
                     ],
                   ),
                 ),
                 const KernelBadge(),
-                const SizedBox(width: 16),
-                ElevatedButton.icon(
-                  onPressed: () => context.push('/healthrecord/edit'),
-                  icon: const Icon(Icons.add),
-                  label: const Text('Nouveau'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: PharmaConnectColors.accentCyan,
-                    foregroundColor: PharmaConnectColors.textOnAccent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                if (isOwnRecord) ...[
+                  const SizedBox(width: 16),
+                  // C219 / D63 : le patient voit qui a ouvert son dossier en
+                  // urgence et peut mettre fin à un accès en cours.
+                  OutlinedButton.icon(
+                    onPressed: () =>
+                        context.push('/healthrecord/emergency-access'),
+                    icon: const Icon(Icons.emergency),
+                    label: const Text('Accès d\'urgence'),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(
+                        color: PharmaConnectColors.accentCyan,
+                      ),
+                      foregroundColor: PharmaConnectColors.accentCyan,
                     ),
                   ),
-                ),
+                  const SizedBox(width: 8),
+                  ElevatedButton.icon(
+                    onPressed: () => context.push('/healthrecord/edit'),
+                    icon: const Icon(Icons.add),
+                    label: const Text('Nouveau'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: PharmaConnectColors.accentCyan,
+                      foregroundColor: PharmaConnectColors.textOnAccent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
             const SizedBox(height: 24),
@@ -126,23 +157,26 @@ class _HealthRecordListScreenState extends State<HealthRecordListScreen> {
     }
 
     if (provider.records.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            const Icon(
               Icons.medical_information_outlined,
               size: 64,
               color: Colors.white24,
             ),
-            SizedBox(height: 16),
-            Text(
+            const SizedBox(height: 16),
+            const Text(
               'Aucun dossier de santé',
               style: PharmaConnectTypography.heading3,
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
-              'Créez votre premier dossier pour suivre vos informations médicales',
+              _isOwnRecord
+                  ? 'Créez votre premier dossier pour suivre vos informations médicales'
+                  : 'Aucun dossier accessible pour ce patient (lien de soin '
+                        'ou accès d\'urgence requis)',
               style: PharmaConnectTypography.body2,
               textAlign: TextAlign.center,
             ),

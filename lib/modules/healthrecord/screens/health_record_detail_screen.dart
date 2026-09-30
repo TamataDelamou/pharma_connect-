@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
+import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/theme/colors.dart';
 import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
@@ -78,20 +79,24 @@ class _HealthRecordDetailScreenState extends State<HealthRecordDetailScreen> {
                   ),
                 ),
                 const KernelBadge(),
-                const SizedBox(width: 16),
-                ElevatedButton.icon(
-                  onPressed: () =>
-                      context.push('/healthrecord/edit/${record.id}'),
-                  icon: const Icon(Icons.edit),
-                  label: const Text('Modifier'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: PharmaConnectColors.accentCyan,
-                    foregroundColor: PharmaConnectColors.textOnAccent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                // C219 : seul le patient modifie son dossier ; un
+                // professionnel (lien de soin ou accès d'urgence) le consulte.
+                if (record.patientId == SupabaseService().currentUser?.id) ...[
+                  const SizedBox(width: 16),
+                  ElevatedButton.icon(
+                    onPressed: () =>
+                        context.push('/healthrecord/edit/${record.id}'),
+                    icon: const Icon(Icons.edit),
+                    label: const Text('Modifier'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: PharmaConnectColors.accentCyan,
+                      foregroundColor: PharmaConnectColors.textOnAccent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                   ),
-                ),
+                ],
               ],
             ),
             const SizedBox(height: 24),

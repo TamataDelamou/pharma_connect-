@@ -84,6 +84,7 @@ import '../modules/pharmacy_staff/screens/pharmacy_staff_screen.dart';
 import '../modules/healthrecord/screens/health_record_list_screen.dart';
 import '../modules/healthrecord/screens/health_record_detail_screen.dart';
 import '../modules/healthrecord/screens/health_record_edit_screen.dart';
+import '../modules/healthrecord/screens/emergency_access_screen.dart';
 
 //teleconsult
 import '../modules/teleconsult/screens/teleconsult_list_screen.dart';
@@ -712,6 +713,22 @@ class AppRouter {
         builder: (context, state) {
           final id = state.pathParameters['id']!;
           return HealthRecordEditScreen(recordId: id);
+        },
+      ),
+      // C219 / D63 : accès d'urgence au dossier de santé. Déclarées avant
+      // `/healthrecord/:id` (qui capturerait `/healthrecord/emergency-access`).
+      // Droits vérifiés côté serveur (lien de soin ou accès d'urgence en cours).
+      GoRoute(
+        path: '/healthrecord/emergency-access',
+        name: 'healthrecord-emergency-access',
+        builder: (context, state) => const EmergencyAccessScreen(),
+      ),
+      GoRoute(
+        path: '/healthrecord/patient/:patientId',
+        name: 'healthrecord-patient',
+        builder: (context, state) {
+          final patientId = state.pathParameters['patientId']!;
+          return HealthRecordListScreen(patientId: patientId);
         },
       ),
       // Route teleconsult

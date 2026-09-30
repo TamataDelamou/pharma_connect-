@@ -12,6 +12,7 @@ import '../providers/triage_provider.dart';
 import '../models/triage_status.dart';
 import '../models/triage_patient.dart';
 import '../models/triage_assessment.dart';
+import '../../healthrecord/widgets/emergency_access_dialog.dart';
 
 // Audit Module 17 (TRI, 30/08/2026), correctifs de compilation (bugs 2-4) :
 // ce fichier utilisait `SupabaseService()` (lignes ~56, ~605),
@@ -106,6 +107,25 @@ class _TriageDetailScreenState extends State<TriageDetailScreen> {
                   ),
                 ),
                 const KernelBadge(),
+                // C219 / D63 : bris de glace. Un professionnel affilié à
+                // l'hôpital ouvre le dossier de santé du patient pendant la
+                // prise en charge (motif obligatoire, 24 heures, tracé et
+                // visible par le patient). Le serveur vérifie l'affiliation.
+                if (!patient.status.isCompleted &&
+                    SupabaseService().currentUser?.id != patient.patientId) ...[
+                  const SizedBox(width: 16),
+                  OutlinedButton.icon(
+                    onPressed: () => _openEmergencyAccess(context, patient),
+                    icon: const Icon(Icons.emergency),
+                    label: const Text('Dossier de santé (urgence)'),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(
+                        color: PharmaConnectColors.accentRed,
+                      ),
+                      foregroundColor: PharmaConnectColors.accentRed,
+                    ),
+                  ),
+                ],
                 if (patient.status.isActive && isNurse) ...[
                   const SizedBox(width: 16),
                   // Audit Module 17 (TRI, 30/08/2026) : TriageAIScreen
@@ -499,6 +519,25 @@ class _TriageDetailScreenState extends State<TriageDetailScreen> {
       default:
         return key;
     }
+  }
+
+  /// C219 / D63 : déclaration de l'urgence puis ouverture du dossier de
+  /// santé du patient en lecture.
+  Future<void> _openEmergencyAccess(
+    BuildContext context,
+    TriagePatient patient,
+  ) async {
+    final granted = await showEmergencyAccessDialog(
+      context,
+      triagePatientId: patient.id,
+    );
+    if (!granted || !context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Accès d\'urgence accordé pour 24 heures.'),
+      ),
+    );
+    context.push('/healthrecord/patient/${patient.patientId}');
   }
 
   String _formatDate(DateTime date) {
