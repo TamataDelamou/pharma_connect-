@@ -1,11 +1,42 @@
 import 'package:pharma_connect/core/services/supabase_service.dart';
-import 'package:uuid/uuid.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' show PostgrestException;
 import '../models/cash_drawer_session.dart';
 import '../models/cash_movement.dart';
 
+/// C205 : refus du serveur sur une opération de caisse, message lisible tel
+/// qu'affiché à l'utilisateur.
+class CashException implements Exception {
+  final String message;
+  const CashException(this.message);
+
+  @override
+  String toString() => message;
+}
+
+/// C205 / D62 : une session de caisse appartient à un caissier (au plus une
+/// ouverte par officine). Ouverture, dépôts / retraits et fermeture passent
+/// par des RPC contrôlées côté serveur ; les ventes et remboursements POS y
+/// sont enregistrés automatiquement par le serveur.
 class CashService {
   final _client = SupabaseService().client;
-  final _uuid = const Uuid();
+
+  /// Message d'erreur serveur (« CAISSE: … », sans accents) rendu lisible.
+  static String serverMessage(String raw) {
+    var message = raw.replaceFirst(RegExp(r'^(CAISSE|POS): '), '');
+    const accents = {
+      'acces refuse': 'accès refusé',
+      'reserve au': 'réservé au',
+      'deja': 'déjà',
+      'qu\'a son nom': 'qu\'à son nom',
+      'especes': 'espèces',
+      'superieur': 'supérieur',
+      'depots': 'dépôts',
+      'compte invalide': 'compté invalide',
+    };
+    accents.forEach((from, to) => message = message.replaceAll(from, to));
+    if (message.isEmpty) return message;
+    return message[0].toUpperCase() + message.substring(1);
+  }
 
   // ---- Sessions ----
 
@@ -31,6 +62,8 @@ class CashService {
         throw Exception('Session introuvable après ouverture : $sessionId');
       }
       return session;
+    } on PostgrestException catch (e) {
+      throw CashException(serverMessage(e.message));
     } catch (e) {
       throw Exception('Failed to open cash drawer: $e');
     }
@@ -55,6 +88,8 @@ class CashService {
         throw Exception('Session introuvable après fermeture : $sessionId');
       }
       return session;
+    } on PostgrestException catch (e) {
+      throw CashException(serverMessage(e.message));
     } catch (e) {
       throw Exception('Failed to close cash drawer: $e');
     }
@@ -111,12 +146,18 @@ class CashService {
     }
   }
 
+  /// C205 : la caisse ouverte de l'utilisateur connecté dans cette officine
+  /// (une session appartient à un caissier ; plusieurs caissiers peuvent
+  /// avoir chacun leur caisse ouverte).
   Future<CashDrawerSession?> getCurrentOpenSession(String pharmacyId) async {
+    final userId = SupabaseService().currentUser?.id;
+    if (userId == null) return null;
     try {
       final response = await _client
           .from('cash_drawer_sessions')
           .select('*, cashiers:cashier_id(full_name)')
           .eq('pharmacy_id', pharmacyId)
+          .eq('cashier_id', userId)
           .eq('status', CashSessionStatus.open.name)
           .maybeSingle();
       if (response == null) return null;
@@ -143,6 +184,10 @@ class CashService {
     }
   }
 
+  /// C205 : dépôt ou retrait d'espèces (RPC cash_add_movement). Les ventes et
+  /// remboursements ne se saisissent plus ici : le serveur les enregistre avec
+  /// la vente ou le remboursement POS. [referenceId] et [referenceType] sont
+  /// conservés pour ne pas changer les appelants, mais ne sont plus envoyés.
   Future<CashMovement> addMovement({
     required String sessionId,
     required CashMovementType type,
@@ -151,26 +196,32 @@ class CashService {
     String? referenceType,
     String? notes,
   }) async {
+    if (type != CashMovementType.deposit &&
+        type != CashMovementType.withdrawal) {
+      throw const CashException(
+        'Seuls les dépôts et retraits se saisissent à la main.',
+      );
+    }
     try {
-      final now = DateTime.now().toUtc();
-      final id = _uuid.v4();
-      final data = {
-        'id': id,
-        'cash_drawer_session_id': sessionId,
-        'type': type.name,
-        'amount': amount,
-        'reference_id': referenceId,
-        'reference_type': referenceType,
-        'notes': notes,
-        'created_at': now.toIso8601String(),
-        'created_by': SupabaseService().currentUser?.id,
-      };
+      final id =
+          await _client.rpc(
+                'cash_add_movement',
+                params: {
+                  'p_session_id': sessionId,
+                  'p_type': type.name,
+                  'p_amount': amount,
+                  'p_notes': notes,
+                },
+              )
+              as String;
       final response = await _client
           .from('cash_movements')
-          .insert(data)
           .select()
+          .eq('id', id)
           .single();
-      return CashMovement.fromJson(response as Map<String, dynamic>);
+      return CashMovement.fromJson(response);
+    } on PostgrestException catch (e) {
+      throw CashException(serverMessage(e.message));
     } catch (e) {
       throw Exception('Failed to add cash movement: $e');
     }

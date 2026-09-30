@@ -246,6 +246,7 @@ class POSService {
       'different de': 'différent de',
       'a 1 pres': 'à 1 près',
       'non renseigne': 'non renseigné',
+      'en especes': 'en espèces',
     };
     accents.forEach((from, to) => message = message.replaceAll(from, to));
     message = message.replaceAllMapped(
