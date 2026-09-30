@@ -78,6 +78,7 @@ import '../modules/admin/screens/pharmacies_management_screen.dart';
 import '../modules/admin/screens/audit_log_screen.dart';
 import '../modules/admin/screens/system_config_screen.dart';
 import '../modules/admin/screens/role_verification_screen.dart';
+import '../modules/pharmacy_staff/screens/pharmacy_staff_screen.dart';
 
 // Importer les écrans
 import '../modules/healthrecord/screens/health_record_list_screen.dart';
@@ -1478,6 +1479,13 @@ class AppRouter {
         path: '/pos',
         name: 'pos',
         builder: (context, state) => const POSCheckoutScreen(),
+      ),
+      // C209 : personnel de l'officine (invitations, retrait, départ).
+      // Réservé au titulaire côté serveur (pharmacy_list_staff).
+      GoRoute(
+        path: '/pharmacy/staff',
+        name: 'pharmacy-staff',
+        builder: (context, state) => const PharmacyStaffScreen(),
       ),
       GoRoute(
         path: '/pos/receipt/:id',

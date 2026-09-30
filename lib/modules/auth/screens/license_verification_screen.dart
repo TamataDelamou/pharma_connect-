@@ -13,6 +13,7 @@ import '../../../core/widgets/inputs/glass_input.dart';
 import '../providers/auth_provider.dart';
 import '../services/pharmacy_service.dart';
 import '../widgets/phone_input_field.dart';
+import '../../pharmacy_staff/widgets/pending_invitations_card.dart';
 
 /// RG-AUT-01 (audit Module 1, 29/08/2026) : soumet réellement la candidature
 /// d'officine à public.pharmacies via PharmacyService, à l'état 'pending'.
@@ -102,6 +103,9 @@ class _LicenseVerificationScreenState extends State<LicenseVerificationScreen> {
                     style: PharmaConnectTypography.body2,
                   ),
                   const SizedBox(height: 24),
+                  // C209 : un employé d'une officine déjà inscrite accepte
+                  // ici l'invitation de son titulaire.
+                  const PendingInvitationsCard(),
 
                   GlassInput(
                     label: 'Nom de l\'officine',
