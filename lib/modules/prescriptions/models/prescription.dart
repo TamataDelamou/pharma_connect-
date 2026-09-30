@@ -20,6 +20,10 @@ class Prescription {
   final List<PrescriptionItem> items;
   final double? ocrConfidenceScore;
 
+  /// C216 / D61 : officine destinataire choisie par le patient. Seul son
+  /// personnel voit et traite l'ordonnance.
+  final String? pharmacyId;
+
   Prescription({
     required this.id,
     required this.patientId,
@@ -35,6 +39,7 @@ class Prescription {
     this.notes,
     required this.items,
     this.ocrConfidenceScore,
+    this.pharmacyId,
   });
 
   factory Prescription.fromJson(Map<String, dynamic> json) => Prescription(
@@ -58,6 +63,7 @@ class Prescription {
         .map((i) => PrescriptionItem.fromJson(i as Map<String, dynamic>))
         .toList(),
     ocrConfidenceScore: (json['ocr_confidence_score'] as num?)?.toDouble(),
+    pharmacyId: json['pharmacy_id'] as String?,
   );
 
   // items n'est jamais écrit ici : prescription_items est une table séparée.
@@ -75,6 +81,7 @@ class Prescription {
     'ocr_data': ocrData,
     'notes': notes,
     'ocr_confidence_score': ocrConfidenceScore,
+    'pharmacy_id': pharmacyId,
   };
 
   Prescription copyWith({
@@ -92,6 +99,7 @@ class Prescription {
     String? notes,
     List<PrescriptionItem>? items,
     double? ocrConfidenceScore,
+    String? pharmacyId,
   }) {
     return Prescription(
       id: id ?? this.id,
@@ -108,6 +116,7 @@ class Prescription {
       notes: notes ?? this.notes,
       items: items ?? this.items,
       ocrConfidenceScore: ocrConfidenceScore ?? this.ocrConfidenceScore,
+      pharmacyId: pharmacyId ?? this.pharmacyId,
     );
   }
 

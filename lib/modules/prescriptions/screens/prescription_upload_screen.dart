@@ -11,6 +11,7 @@ import '../../../core/widgets/buttons/tertiary_button.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../auth/services/profile_service.dart';
 import '../providers/prescription_provider.dart';
+import '../widgets/destination_pharmacy_picker.dart';
 import '../widgets/upload_guidance_overlay.dart';
 
 class PrescriptionUploadScreen extends StatefulWidget {
@@ -32,6 +33,9 @@ class _PrescriptionUploadScreenState extends State<PrescriptionUploadScreen> {
   // l'utilisateur. Affiché une fois par visite de cet écran, avant la
   // première prise de photo.
   bool _hasShownGuidance = false;
+
+  // C216 / D61 : officine destinataire, obligatoire avant l'envoi.
+  String? _pharmacyId;
 
   @override
   Widget build(BuildContext context) {
@@ -153,6 +157,11 @@ class _PrescriptionUploadScreenState extends State<PrescriptionUploadScreen> {
             ),
           ),
           const SizedBox(height: 16),
+          DestinationPharmacyPicker(
+            value: _pharmacyId,
+            onChanged: (id) => setState(() => _pharmacyId = id),
+          ),
+          const SizedBox(height: 16),
           Row(
             children: [
               Expanded(
@@ -186,6 +195,18 @@ class _PrescriptionUploadScreenState extends State<PrescriptionUploadScreen> {
                     // monde en production (même défaut que le userId 'admin'
                     // en dur trouvé dans stock_adjustment_screen.dart au
                     // Module 4).
+                    final pharmacyId = _pharmacyId;
+                    if (pharmacyId == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Choisissez l\'officine qui recevra l\'ordonnance.',
+                          ),
+                          backgroundColor: PharmaConnectColors.accentOrange,
+                        ),
+                      );
+                      return;
+                    }
                     final auth = context.read<AuthProvider>();
                     final patientId = auth.userId;
                     if (patientId == null) {
@@ -211,6 +232,7 @@ class _PrescriptionUploadScreenState extends State<PrescriptionUploadScreen> {
                       _selectedImage!.path,
                       patientId,
                       patientName,
+                      pharmacyId: pharmacyId,
                     );
                     if (provider.uploadStatus ==
                             PrescriptionUploadStatus.ready &&

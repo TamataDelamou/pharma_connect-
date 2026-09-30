@@ -37,6 +37,7 @@ class PrescriptionService {
     required List<PrescriptionItem> items,
     String? doctorName,
     double? ocrConfidenceScore,
+    String? pharmacyId,
   }) async {
     final prescription = Prescription(
       id: const Uuid().v4(),
@@ -48,6 +49,7 @@ class PrescriptionService {
       imageUrl: imageUrl,
       items: const [],
       ocrConfidenceScore: ocrConfidenceScore ?? 0.9,
+      pharmacyId: pharmacyId,
     );
 
     await _client.from('prescriptions').insert(prescription.toJson());

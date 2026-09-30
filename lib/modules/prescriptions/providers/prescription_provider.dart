@@ -165,11 +165,14 @@ class PrescriptionProvider extends ChangeNotifier {
 
   // ==================== UPLOAD & OCR ====================
 
+  /// [pharmacyId] : officine destinataire (C216 / D61) ; seule elle verra
+  /// et traitera l'ordonnance.
   Future<void> uploadPrescription(
     String imagePath,
     String patientId,
-    String patientName,
-  ) async {
+    String patientName, {
+    String? pharmacyId,
+  }) async {
     _uploadStatus = PrescriptionUploadStatus.uploading;
     _uploadError = null;
     _extractedItems = [];
@@ -207,6 +210,7 @@ class PrescriptionProvider extends ChangeNotifier {
             imageUrl: imagePath,
             items: _extractedItems,
             ocrConfidenceScore: _ocrConfidenceScore,
+            pharmacyId: pharmacyId,
           );
         } catch (e) {
           // Le réseau semblait disponible (checkConnectivity) mais l'appel
@@ -217,6 +221,7 @@ class PrescriptionProvider extends ChangeNotifier {
             patientId,
             patientName,
             imagePath,
+            pharmacyId,
           );
         }
       } else {
@@ -224,6 +229,7 @@ class PrescriptionProvider extends ChangeNotifier {
           patientId,
           patientName,
           imagePath,
+          pharmacyId,
         );
       }
 
@@ -256,6 +262,7 @@ class PrescriptionProvider extends ChangeNotifier {
     String patientId,
     String patientName,
     String imagePath,
+    String? pharmacyId,
   ) async {
     _isOffline = true;
     final prescriptionId = const Uuid().v4();
@@ -278,6 +285,7 @@ class PrescriptionProvider extends ChangeNotifier {
       imageUrl: imagePath,
       items: itemsWithIds,
       ocrConfidenceScore: _ocrConfidenceScore,
+      pharmacyId: pharmacyId,
     );
 
     await _offlineSync.queueOperation(

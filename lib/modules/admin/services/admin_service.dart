@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 import '../models/admin_user.dart';
@@ -378,6 +379,11 @@ class AdminService {
 
   // ==================== AUDIT ====================
 
+  /// C217 : journalisation par la RPC admin_log_action. L'auteur (user_id,
+  /// user_name) est fixé par le serveur à partir de la session : [userId] et
+  /// [userName] sont conservés pour ne pas changer les appelants, mais ne
+  /// sont plus envoyés. Réservé à l'administration GSG ; un échec de
+  /// journalisation ne fait pas échouer l'action déjà réalisée.
   Future<void> logAction({
     required String userId,
     required String userName,
@@ -388,22 +394,21 @@ class AdminService {
     bool isSuccess = true,
     String? errorMessage,
   }) async {
-    final log = AuditLog(
-      id: const Uuid().v4(),
-      userId: userId,
-      userName: userName,
-      action: action,
-      resource: resource,
-      resourceId: resourceId,
-      changes: changes,
-      ipAddress: '127.0.0.1',
-      userAgent: 'Admin Backend',
-      timestamp: DateTime.now(),
-      isSuccess: isSuccess,
-      errorMessage: errorMessage,
-    );
-
-    await _client.from('audit_logs').insert(log.toJson());
+    try {
+      await _client.rpc(
+        'admin_log_action',
+        params: {
+          'p_action': action,
+          'p_resource': resource,
+          'p_resource_id': resourceId,
+          'p_changes': changes,
+          'p_is_success': isSuccess,
+          'p_error_message': errorMessage,
+        },
+      );
+    } catch (e) {
+      debugPrint('Journal d\'audit non ecrit ($action) : $e');
+    }
   }
 
   Future<List<AuditLog>> getAuditLogs({
