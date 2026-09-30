@@ -31,6 +31,12 @@ insert into public.profiles (id, role, pharmacy_id, full_name) values
   ('b1000000-0000-0000-0000-000000000001', 'pharmacien', '55555555-5555-5555-5555-555555550002', 'Pharmacien B Dixinn');
 update public.pharmacies set manager_id = '71000000-0000-0000-0000-000000000001'
   where id = '55555555-5555-5555-5555-555555550001';
+-- C205 : une vente ou un remboursement en especes exige une caisse ouverte du
+-- vendeur ; caisses ouvertes ici pour les identites qui vendent ou remboursent.
+insert into public.cash_drawer_sessions (pharmacy_id, cashier_id, opening_balance, status) values
+  ('55555555-5555-5555-5555-555555550001', '71000000-0000-0000-0000-000000000001', 0, 'open'),
+  ('55555555-5555-5555-5555-555555550001', 'e1000000-0000-0000-0000-000000000001', 0, 'open'),
+  ('55555555-5555-5555-5555-555555550002', 'b1000000-0000-0000-0000-000000000001', 0, 'open');
 
 update public.stock_batches b set quantity = 200
   from public.stock_items si

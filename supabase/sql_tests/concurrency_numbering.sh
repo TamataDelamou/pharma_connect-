@@ -33,6 +33,9 @@ insert into auth.users (id, email) values
 insert into public.profiles (id, role, pharmacy_id, full_name) values
   ('$A', 'pharmacien', '$PA', 'Pharmacien A Kaloum'),
   ('$B', 'pharmacien', '$PB', 'Pharmacien B Dixinn');
+-- C205 : caisse ouverte obligatoire pour une vente en especes.
+insert into public.cash_drawer_sessions (pharmacy_id, cashier_id, opening_balance, status) values
+  ('$PA', '$A', 0, 'open'), ('$PB', '$B', 0, 'open');
 -- C218 : prix de vente du stock aligné sur celui des ventes du script (1 000),
 -- et au moins une unité en stock sur chaque lot vendu.
 update public.stock_items si set unit_price = 1000

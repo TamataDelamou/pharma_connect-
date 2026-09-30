@@ -30,6 +30,11 @@ insert into auth.users (id, email) values
 insert into public.profiles (id, role, pharmacy_id, full_name) values
   ('aaaaaaaa-0000-0000-0000-00000000000a', 'pharmacien', '55555555-5555-5555-5555-555555550001', 'Pharmacien A Kaloum'),
   ('bbbbbbbb-0000-0000-0000-00000000000b', 'pharmacien', '55555555-5555-5555-5555-555555550002', 'Pharmacien B Dixinn');
+-- C205 : une vente ou un remboursement en especes exige une caisse ouverte du
+-- vendeur ; caisses ouvertes ici pour les identites qui vendent ou remboursent.
+insert into public.cash_drawer_sessions (pharmacy_id, cashier_id, opening_balance, status) values
+  ('55555555-5555-5555-5555-555555550001', 'aaaaaaaa-0000-0000-0000-00000000000a', 0, 'open'),
+  ('55555555-5555-5555-5555-555555550002', 'bbbbbbbb-0000-0000-0000-00000000000b', 0, 'open');
 
 update public.stock_batches b set quantity = 10
   from public.stock_items si

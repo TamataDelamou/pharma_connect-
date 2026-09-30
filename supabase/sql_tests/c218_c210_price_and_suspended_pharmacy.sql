@@ -19,6 +19,10 @@ insert into public.profiles (id, role, pharmacy_id, full_name) values
   ('c2180000-0000-0000-0000-000000000002', 'pharmacien', null, 'Titulaire T Kaloum');
 update public.pharmacies set manager_id = 'c2180000-0000-0000-0000-000000000002'
   where id = '55555555-5555-5555-5555-555555550001';
+-- C205 : une vente ou un remboursement en especes exige une caisse ouverte du
+-- vendeur ; caisses ouvertes ici pour les identites qui vendent ou remboursent.
+insert into public.cash_drawer_sessions (pharmacy_id, cashier_id, opening_balance, status) values
+  ('55555555-5555-5555-5555-555555550001', 'c2180000-0000-0000-0000-000000000001', 0, 'open');
 
 -- Paracétamol à Kaloum : prix 1 500, un lot de test de 50 unités.
 update public.stock_items set unit_price = 1500
