@@ -197,9 +197,7 @@ class AdminService {
             )
             as List<dynamic>;
     return rows
-        .map(
-          (row) => VerificationRequest.fromJson(row as Map<String, dynamic>),
-        )
+        .map((row) => VerificationRequest.fromJson(row as Map<String, dynamic>))
         .toList();
   }
 
@@ -274,11 +272,7 @@ class AdminService {
   }
 
   Future<AdminPharmacy> getPharmacy(String id) async {
-    final row = await _client
-        .from('pharmacies')
-        .select()
-        .eq('id', id)
-        .single();
+    final row = await _client.from('pharmacies').select().eq('id', id).single();
     return AdminPharmacy.fromJson(row);
   }
 

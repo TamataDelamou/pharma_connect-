@@ -146,11 +146,8 @@ class _RoleVerificationScreenState extends State<RoleVerificationScreen> {
     if (!confirmed || !mounted) return;
     await _run(
       r,
-      () => _service.setUserRole(
-        r.userId,
-        role: r.declaredRole,
-        verified: false,
-      ),
+      () =>
+          _service.setUserRole(r.userId, role: r.declaredRole, verified: false),
       '${r.displayName} : validation retirée',
     );
   }
@@ -172,11 +169,8 @@ class _RoleVerificationScreenState extends State<RoleVerificationScreen> {
     if (reason == null || !mounted) return;
     await _run(
       r,
-      () => _service.verifyProfessional(
-        r.userId,
-        approve: false,
-        reason: reason,
-      ),
+      () =>
+          _service.verifyProfessional(r.userId, approve: false, reason: reason),
       '${r.displayName} : fiche rejetée',
     );
   }
@@ -393,10 +387,7 @@ class _RoleVerificationScreenState extends State<RoleVerificationScreen> {
             spacing: 6,
             runSpacing: 6,
             children: [
-              _Tag(
-                label: r.role.label,
-                color: PharmaConnectColors.accentCyan,
-              ),
+              _Tag(label: r.role.label, color: PharmaConnectColors.accentCyan),
               _Tag(
                 label: _stateLabel(r),
                 color: _stateColor(r.verificationState),
@@ -467,23 +458,35 @@ class _RoleVerificationScreenState extends State<RoleVerificationScreen> {
     if (r.isInstitutionalRole) {
       if (r.isVerified) {
         return [
-          _outlined('Retirer la validation', PharmaConnectColors.accentOrange,
-              () => _revokeRole(r)),
+          _outlined(
+            'Retirer la validation',
+            PharmaConnectColors.accentOrange,
+            () => _revokeRole(r),
+          ),
         ];
       }
       return [
-        _filled('Valider', PharmaConnectColors.accentGreen,
-            () => _approveRole(r)),
-        _outlined('Refuser', PharmaConnectColors.accentRed,
-            () => _rejectRole(r)),
+        _filled(
+          'Valider',
+          PharmaConnectColors.accentGreen,
+          () => _approveRole(r),
+        ),
+        _outlined(
+          'Refuser',
+          PharmaConnectColors.accentRed,
+          () => _rejectRole(r),
+        ),
       ];
     }
     if (r.isProfessional) {
       if (r.professionalStatus == null) return const [];
       return [
         if (!r.isVerified)
-          _filled('Vérifier', PharmaConnectColors.accentGreen,
-              () => _verifyProfessional(r)),
+          _filled(
+            'Vérifier',
+            PharmaConnectColors.accentGreen,
+            () => _verifyProfessional(r),
+          ),
         if (!r.isRejected)
           _outlined(
             r.isVerified ? 'Retirer la vérification' : 'Rejeter',
@@ -503,8 +506,11 @@ class _RoleVerificationScreenState extends State<RoleVerificationScreen> {
     }
     if (r.isPatient) {
       return [
-        _outlined('Attribuer un rôle', PharmaConnectColors.accentCyan,
-            () => _assignRole(r)),
+        _outlined(
+          'Attribuer un rôle',
+          PharmaConnectColors.accentCyan,
+          () => _assignRole(r),
+        ),
       ];
     }
     return const [];
@@ -656,7 +662,8 @@ class _AssignRoleDialogState extends State<_AssignRoleDialog> {
         ElevatedButton(
           onPressed: _role == null
               ? null
-              : () => Navigator.pop(context, (role: _role!, verified: _verified)),
+              : () =>
+                    Navigator.pop(context, (role: _role!, verified: _verified)),
           style: ElevatedButton.styleFrom(
             backgroundColor: PharmaConnectColors.accentCyan,
             foregroundColor: PharmaConnectColors.textPrimary,

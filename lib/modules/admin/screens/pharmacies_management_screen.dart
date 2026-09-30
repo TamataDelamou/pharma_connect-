@@ -24,7 +24,9 @@ class _PharmaciesManagementScreenState
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final queryStatus = GoRouterState.of(context).uri.queryParameters['status'];
+      final queryStatus = GoRouterState.of(
+        context,
+      ).uri.queryParameters['status'];
       PharmacyStatus? initial;
       for (final status in PharmacyStatus.values) {
         if (status.name == queryStatus) {
@@ -282,10 +284,7 @@ class _PharmacyCard extends StatelessWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 4,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: pharmacy.statusColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(6),
@@ -321,7 +320,9 @@ class _PharmacyCard extends StatelessWidget {
                 OutlinedButton(
                   onPressed: onVerify,
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: PharmaConnectColors.accentCyan),
+                    side: const BorderSide(
+                      color: PharmaConnectColors.accentCyan,
+                    ),
                     foregroundColor: PharmaConnectColors.accentCyan,
                   ),
                   child: const Text('Vérifier la licence'),
@@ -340,7 +341,9 @@ class _PharmacyCard extends StatelessWidget {
                 OutlinedButton(
                   onPressed: onReject,
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: PharmaConnectColors.accentRed),
+                    side: const BorderSide(
+                      color: PharmaConnectColors.accentRed,
+                    ),
                     foregroundColor: PharmaConnectColors.accentRed,
                   ),
                   child: const Text('Rejeter'),

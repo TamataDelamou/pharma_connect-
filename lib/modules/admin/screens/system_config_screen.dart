@@ -35,10 +35,7 @@ class _SystemConfigScreenState extends State<SystemConfigScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (config.description != null) ...[
-              Text(
-                config.description!,
-                style: PharmaConnectTypography.body2,
-              ),
+              Text(config.description!, style: PharmaConnectTypography.body2),
               const SizedBox(height: 12),
             ],
             TextField(
