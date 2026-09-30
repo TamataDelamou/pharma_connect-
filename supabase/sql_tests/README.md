@@ -11,6 +11,7 @@ Tests manuels à lancer sur la base **locale** (`supabase start`, conteneur `sup
 | `c211_verified_roles.sql` | Rôle déclaré ≠ rôle vérifié (C211, C212, décision D58) : verrouillage de `profiles.role` / `pharmacy_id` / `role_verified_*` et de la vérification des professionnels, `has_verified_role`, `admin_set_user_role`, policies fondées sur un rôle vérifié. |
 | `c214_admin_role_validation.sql` | Validation des rôles et vérification des professionnels par l'administration GSG (C214) : `admin_list_verification_requests`, `admin_review_role`, `admin_verify_professional`, `admin_set_user_role` journalisée, droits réservés à `is_gsg_admin()`, journal `audit_logs`. |
 | `c209_pharmacy_staff_invitations.sql` | Rattachement du personnel non titulaire (C209, décision D59) : invitation par le titulaire d'une officine validée (numéro de téléphone), acceptation ou refus par l'employé, annulation, retrait, départ, liste du personnel, cloisonnement entre officines. |
+| `c201_pos_sale_from_stock.sql` | Vente sur le vrai stock (C201, décision D60) : recherche en stock, lots choisis par le serveur (péremption la plus proche, périmés et réservés exclus, répartition sur plusieurs lots), lot périmé refusé, ligne sans produit refusée, ordonnance tracée sans blocage, remboursement d'une vente répartie. |
 | `concurrency_numbering.sh` | Deux sessions `psql` simultanées (retours client, puis ventes POS de deux officines) : numéros distincts et consécutifs, la seconde session attend la première. |
 
 Chaque cas affiche une ligne `CAS n OK : …` ou `CAS n ECHEC : …` (`RESULTAT … OK/ECHEC` pour le script de concurrence).
@@ -27,6 +28,7 @@ docker exec -i supabase_db_pharma_connect psql -U postgres -d postgres < supabas
 docker exec -i supabase_db_pharma_connect psql -U postgres -d postgres < supabase/sql_tests/c211_verified_roles.sql
 docker exec -i supabase_db_pharma_connect psql -U postgres -d postgres < supabase/sql_tests/c214_admin_role_validation.sql
 docker exec -i supabase_db_pharma_connect psql -U postgres -d postgres < supabase/sql_tests/c209_pharmacy_staff_invitations.sql
+docker exec -i supabase_db_pharma_connect psql -U postgres -d postgres < supabase/sql_tests/c201_pos_sale_from_stock.sql
 bash supabase/sql_tests/concurrency_numbering.sh
 ```
 
