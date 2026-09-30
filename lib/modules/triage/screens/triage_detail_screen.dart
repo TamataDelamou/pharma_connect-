@@ -133,8 +133,7 @@ class _TriageDetailScreenState extends State<TriageDetailScreen> {
                   // n'était accessible depuis aucun écran — bouton ajouté
                   // ici, même visibilité que « Évaluer ».
                   OutlinedButton.icon(
-                    onPressed: () =>
-                        context.push('/triage/${patient.id}/ai'),
+                    onPressed: () => context.push('/triage/${patient.id}/ai'),
                     icon: const Icon(Icons.psychology),
                     label: const Text('Analyse IA'),
                     style: OutlinedButton.styleFrom(
@@ -533,9 +532,7 @@ class _TriageDetailScreenState extends State<TriageDetailScreen> {
     );
     if (!granted || !context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Accès d\'urgence accordé pour 24 heures.'),
-      ),
+      const SnackBar(content: Text('Accès d\'urgence accordé pour 24 heures.')),
     );
     context.push('/healthrecord/patient/${patient.patientId}');
   }

@@ -78,9 +78,9 @@ class _EmergencyAccessScreenState extends State<EmergencyAccessScreen> {
     try {
       await _service.end(access.id);
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Accès d\'urgence terminé.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Accès d\'urgence terminé.')),
+      );
       await _load();
     } catch (e) {
       if (!mounted) return;
