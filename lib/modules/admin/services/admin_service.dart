@@ -7,6 +7,7 @@ import '../models/admin_pharmacy.dart';
 import '../models/pharmacy_status.dart';
 import '../models/audit_log.dart';
 import '../models/system_config.dart';
+import '../models/verification_request.dart';
 import '../../../core/services/supabase_service.dart';
 
 class AdminService {
@@ -169,6 +170,83 @@ class AdminService {
     final user = await getUser(id);
     final updated = user.copyWith(isVerified: true);
     return updateUser(id, updated);
+  }
+
+  // ==================== VÉRIFICATION DES RÔLES (C214) ====================
+  // Rôle déclaré ≠ rôle vérifié (D58) : ces validations passent par des RPC
+  // réservées à is_gsg_admin(), journalisées côté serveur dans audit_logs.
+
+  /// C214 : comptes à rôle déclaré et leur état de vérification.
+  /// [state] : 'pending', 'verified', 'rejected' ou 'all'. Avec [search]
+  /// (nom, téléphone ou e-mail), les patients sont inclus, pour attribuer un
+  /// rôle institutionnel à un compte existant.
+  Future<List<VerificationRequest>> getVerificationRequests({
+    String state = 'pending',
+    String? search,
+  }) async {
+    final trimmed = search?.trim();
+    final rows =
+        await _client.rpc(
+              'admin_list_verification_requests',
+              params: {
+                'p_state': state,
+                'p_search': (trimmed == null || trimmed.isEmpty)
+                    ? null
+                    : trimmed,
+              },
+            )
+            as List<dynamic>;
+    return rows
+        .map(
+          (row) => VerificationRequest.fromJson(row as Map<String, dynamic>),
+        )
+        .toList();
+  }
+
+  /// C214 : validation ou refus d'un grossiste, livreur ou régulateur.
+  /// Un refus (motif obligatoire) ramène le compte au rôle patient.
+  Future<void> reviewRole(
+    String userId, {
+    required bool approve,
+    String? reason,
+  }) async {
+    await _client.rpc(
+      'admin_review_role',
+      params: {'p_user_id': userId, 'p_approve': approve, 'p_reason': reason},
+    );
+  }
+
+  /// C214 : vérification ou rejet motivé d'une fiche professionnelle.
+  Future<void> verifyProfessional(
+    String userId, {
+    required bool approve,
+    String? reason,
+  }) async {
+    await _client.rpc(
+      'admin_verify_professional',
+      params: {'p_user_id': userId, 'p_approve': approve, 'p_reason': reason},
+    );
+  }
+
+  /// C211 / C214 : attribution d'un rôle (et validation immédiate si
+  /// [verified]). Sert à retirer une validation ou à créer un régulateur à
+  /// partir d'un compte existant.
+  Future<void> setUserRole(
+    String userId, {
+    required String role,
+    required bool verified,
+  }) async {
+    await _client.rpc(
+      'admin_set_user_role',
+      params: {'p_user_id': userId, 'p_role': role, 'p_verified': verified},
+    );
+  }
+
+  /// Message lisible d'une erreur renvoyée par les RPC d'administration
+  /// (préfixe technique « PROFIL: » retiré).
+  static String describeError(Object error) {
+    final raw = error is PostgrestException ? error.message : error.toString();
+    return raw.replaceFirst(RegExp(r'^PROFIL:\s*'), '');
   }
 
   // ==================== PHARMACIES ====================

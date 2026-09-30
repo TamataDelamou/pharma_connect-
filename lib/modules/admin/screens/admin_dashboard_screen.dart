@@ -136,6 +136,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   ),
                   const SizedBox(width: 12),
                   _buildQuickAction(
+                    icon: Icons.verified_user,
+                    label: 'Vérifications',
+                    color: PharmaConnectColors.accentAmber,
+                    onTap: () => context.push('/admin/verifications'),
+                  ),
+                  const SizedBox(width: 12),
+                  _buildQuickAction(
                     icon: Icons.history,
                     label: 'Audit',
                     color: PharmaConnectColors.accentPurple,

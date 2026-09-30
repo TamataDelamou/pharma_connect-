@@ -77,6 +77,7 @@ import '../modules/admin/screens/users_management_screen.dart';
 import '../modules/admin/screens/pharmacies_management_screen.dart';
 import '../modules/admin/screens/audit_log_screen.dart';
 import '../modules/admin/screens/system_config_screen.dart';
+import '../modules/admin/screens/role_verification_screen.dart';
 
 // Importer les écrans
 import '../modules/healthrecord/screens/health_record_list_screen.dart';
@@ -680,6 +681,13 @@ class AppRouter {
         path: '/admin/config',
         name: 'admin-config',
         builder: (context, state) => const SystemConfigScreen(),
+      ),
+      // C214 : validation des rôles déclarés et vérification des professionnels
+      // (décision D58). Accès réservé côté serveur à is_gsg_admin().
+      GoRoute(
+        path: '/admin/verifications',
+        name: 'admin-verifications',
+        builder: (context, state) => const RoleVerificationScreen(),
       ),
       // Importer les écrans
       // Audit Module 18 (HOM, 30/08/2026), balayage C69 : `/healthrecord/:id`
