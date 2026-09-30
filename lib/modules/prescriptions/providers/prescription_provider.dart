@@ -76,8 +76,7 @@ class PrescriptionProvider extends ChangeNotifier {
   /// qui écraserait silencieusement le cache d'un autre compte ; ce cas ne
   /// devrait normalement pas se produire, les routes de ce module exigeant
   /// une session active.
-  String get _cacheOwnerKey =>
-      SupabaseService().currentUser?.id ?? 'anon';
+  String get _cacheOwnerKey => SupabaseService().currentUser?.id ?? 'anon';
 
   Future<void> loadPrescriptions({PrescriptionStatus? status}) async {
     _isLoading = true;
@@ -103,9 +102,7 @@ class PrescriptionProvider extends ChangeNotifier {
       // de bloquer l'écran sur une erreur réseau.
       final cached = await _offlineSync.getCachedPrescriptions(_cacheOwnerKey);
       if (cached.isNotEmpty) {
-        var restored = cached
-            .map((row) => Prescription.fromJson(row))
-            .toList();
+        var restored = cached.map((row) => Prescription.fromJson(row)).toList();
         if (status != null) {
           restored = restored.where((p) => p.status == status).toList();
         }
@@ -148,7 +145,8 @@ class PrescriptionProvider extends ChangeNotifier {
       final cached = await _offlineSync.getRecord('cache_prescriptions', id);
       if (cached != null) {
         try {
-          final data = jsonDecode(cached['data'] as String) as Map<String, dynamic>;
+          final data =
+              jsonDecode(cached['data'] as String) as Map<String, dynamic>;
           _selectedPrescription = Prescription.fromJson(data);
           _isOffline = true;
           _error =

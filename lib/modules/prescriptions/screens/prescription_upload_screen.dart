@@ -264,25 +264,25 @@ class _PrescriptionUploadScreenState extends State<PrescriptionUploadScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: (provider.isOffline
-                        ? PharmaConnectColors.accentAmber
-                        : PharmaConnectColors.accentRed)
-                    .withValues(alpha: 0.1),
+                color:
+                    (provider.isOffline
+                            ? PharmaConnectColors.accentAmber
+                            : PharmaConnectColors.accentRed)
+                        .withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: (provider.isOffline
-                          ? PharmaConnectColors.accentAmber
-                          : PharmaConnectColors.accentRed)
-                      .withValues(alpha: 0.2),
+                  color:
+                      (provider.isOffline
+                              ? PharmaConnectColors.accentAmber
+                              : PharmaConnectColors.accentRed)
+                          .withValues(alpha: 0.2),
                 ),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Icon(
-                    provider.isOffline
-                        ? Icons.cloud_off
-                        : Icons.error_outline,
+                    provider.isOffline ? Icons.cloud_off : Icons.error_outline,
                     size: 18,
                     color: provider.isOffline
                         ? PharmaConnectColors.accentAmber

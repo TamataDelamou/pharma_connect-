@@ -58,7 +58,10 @@ class PrescriptionService {
       final itemRows = items
           .map(
             (item) => item
-                .copyWith(id: const Uuid().v4(), prescriptionId: prescription.id)
+                .copyWith(
+                  id: const Uuid().v4(),
+                  prescriptionId: prescription.id,
+                )
                 .toJson(),
           )
           .toList();
@@ -106,7 +109,9 @@ class PrescriptionService {
     final rows = await _client
         .from('prescriptions')
         .select(_prescriptionSelect);
-    final prescriptions = rows.map((row) => Prescription.fromJson(row)).toList();
+    final prescriptions = rows
+        .map((row) => Prescription.fromJson(row))
+        .toList();
 
     final lower = query.toLowerCase();
     return prescriptions

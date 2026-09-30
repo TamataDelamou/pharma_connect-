@@ -71,7 +71,8 @@ class _PrescriptionDetailScreenState extends State<PrescriptionDetailScreen> {
               ),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () => context.read<PrescriptionProvider>()
+                onPressed: () => context
+                    .read<PrescriptionProvider>()
                     .loadPrescription(widget.prescriptionId),
                 child: const Text('Réessayer'),
               ),
@@ -140,7 +141,8 @@ class _PrescriptionDetailScreenState extends State<PrescriptionDetailScreen> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        provider.error ?? 'Hors-ligne — dernière version connue.',
+                        provider.error ??
+                            'Hors-ligne — dernière version connue.',
                         style: PharmaConnectTypography.micro,
                       ),
                     ),
@@ -360,9 +362,7 @@ class _PrescriptionDetailScreenState extends State<PrescriptionDetailScreen> {
                         TertiaryButton(
                           label: 'Archiver',
                           onPressed: () async {
-                            await provider.archivePrescription(
-                              prescription.id,
-                            );
+                            await provider.archivePrescription(prescription.id);
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(

@@ -38,15 +38,24 @@ class OcrService {
   /// pour corriger une erreur de reconnaissance OCR.
   Future<List<String>> suggestCorrection(String wrongName) async {
     final products = await _catalogService.getProducts();
-    final candidates = {for (final p in products) p.name, for (final p in products) p.genericName};
+    final candidates = {
+      for (final p in products) p.name,
+      for (final p in products) p.genericName,
+    };
 
-    final scored = candidates
-        .map((name) => (name: name, distance: _levenshtein(
-              wrongName.toLowerCase(),
-              name.toLowerCase(),
-            )))
-        .toList()
-      ..sort((a, b) => a.distance.compareTo(b.distance));
+    final scored =
+        candidates
+            .map(
+              (name) => (
+                name: name,
+                distance: _levenshtein(
+                  wrongName.toLowerCase(),
+                  name.toLowerCase(),
+                ),
+              ),
+            )
+            .toList()
+          ..sort((a, b) => a.distance.compareTo(b.distance));
 
     return scored.take(3).map((c) => c.name).toList();
   }
@@ -59,7 +68,12 @@ class OcrService {
       for (var j = 1; j <= b.length; j++) {
         final current = a[i - 1] == b[j - 1]
             ? previous
-            : 1 + [previous, costs[j], costs[j - 1]].reduce((x, y) => x < y ? x : y);
+            : 1 +
+                  [
+                    previous,
+                    costs[j],
+                    costs[j - 1],
+                  ].reduce((x, y) => x < y ? x : y);
         previous = costs[j];
         costs[j] = current;
       }
