@@ -81,60 +81,34 @@ class DeliveryService {
 
   // ==================== PLANIFICATION ====================
 
+  /// C221 / D66 : création de tournée par le serveur
+  /// (`delivery_create_route`) : personnel d'une officine active pour ses
+  /// propres livraisons, ou GSG. Le serveur vérifie les livraisons (non
+  /// terminées, non confiées à un autre livreur, hors tournée en cours,
+  /// chaîne du froid) et confie au livreur celles qui n'en ont pas.
   Future<DeliveryRoute> planRoute({
     required String driverId,
     required List<String> deliveryIds,
     required DateTime date,
   }) async {
-    final deliveries = await _client
-        .from('deliveries')
-        .select(_deliverySelect)
-        .inFilter('id', deliveryIds);
-    final deliveryList = deliveries
-        .map((row) => Delivery.fromJson(row))
-        .toList();
-
-    final routeRow = await _client
-        .from('delivery_routes')
-        .insert({
-          'id': const Uuid().v4(),
-          'driver_id': driverId,
-          'date': date.toIso8601String(),
-          'status': RouteStatus.planned.name,
-        })
-        .select()
-        .single();
-    final routeId = routeRow['id'] as String;
-
-    final stops = <RouteStop>[];
-    for (int i = 0; i < deliveryList.length; i++) {
-      stops.add(
-        RouteStop(
-          id: const Uuid().v4(),
-          deliveryId: deliveryList[i].id,
-          latitude: deliveryList[i].latitude ?? 9.5,
-          longitude: deliveryList[i].longitude ?? -13.7,
-          address: deliveryList[i].deliveryAddress,
-          stopOrder: i + 1,
-          isCompleted: false,
-        ),
-      );
-    }
-
-    if (stops.isNotEmpty) {
-      await _client
-          .from('route_stops')
-          .insert(stops.map((s) => s.toJson(routeId: routeId)).toList());
-    }
-
-    return DeliveryRoute(
-      id: routeId,
-      deliveries: deliveryList,
-      driverId: driverId,
-      date: date,
-      status: RouteStatus.planned,
-      stops: stops,
+    final routeId = await _client.rpc(
+      'delivery_create_route',
+      params: {
+        'p_driver_id': driverId,
+        'p_date': date.toIso8601String().substring(0, 10),
+        'p_delivery_ids': deliveryIds,
+      },
     );
+    final route = await getRoute(routeId as String);
+    if (route == null) {
+      throw StateError('Tournée créée mais introuvable ($routeId).');
+    }
+    return route;
+  }
+
+  /// C221 / D66 : annule une tournée planifiée (non commencée).
+  Future<void> cancelRoute(String routeId) async {
+    await _client.rpc('delivery_cancel_route', params: {'p_route_id': routeId});
   }
 
   Future<DeliveryRoute?> getRoute(String id) async {
@@ -349,10 +323,12 @@ class DeliveryService {
     final current = await getDelivery(deliveryId);
 
     String? verifiedCode;
-    if (enteredConfirmationCode != null && enteredConfirmationCode.trim().isNotEmpty) {
+    if (enteredConfirmationCode != null &&
+        enteredConfirmationCode.trim().isNotEmpty) {
       final expected = current.confirmationCode;
       if (expected == null ||
-          enteredConfirmationCode.trim().toUpperCase() != expected.toUpperCase()) {
+          enteredConfirmationCode.trim().toUpperCase() !=
+              expected.toUpperCase()) {
         throw StateError(
           'Code de remise incorrect — vérifiez le code communiqué par le patient.',
         );
