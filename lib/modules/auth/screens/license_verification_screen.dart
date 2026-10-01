@@ -259,6 +259,10 @@ class _LicenseVerificationScreenState extends State<LicenseVerificationScreen> {
                       setState(() => _isSubmitting = false);
 
                       if (errorMessage == null) {
+                        // C213 : l'état du compte passe à « candidature en
+                        // cours de vérification » (bandeau du tableau de bord).
+                        await auth.refreshAccountStatus();
+                        if (!context.mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text(
@@ -282,6 +286,16 @@ class _LicenseVerificationScreenState extends State<LicenseVerificationScreen> {
                         );
                       }
                     },
+                  ),
+                  // C213 / D64 : sans officine, le compte reste utilisable
+                  // comme un compte patient ; le tableau de bord rappelle
+                  // l'inscription et les invitations.
+                  const SizedBox(height: 12),
+                  Center(
+                    child: TextButton(
+                      onPressed: () => context.go('/dashboard'),
+                      child: const Text('Plus tard : continuer sans officine'),
+                    ),
                   ),
                 ],
               ),

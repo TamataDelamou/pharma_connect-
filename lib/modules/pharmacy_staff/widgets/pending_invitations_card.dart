@@ -8,9 +8,9 @@ import '../models/staff_entry.dart';
 import '../services/pharmacy_staff_service.dart';
 
 /// C209 / D59 : invitations reçues par un pharmacien non rattaché. Affiché en
-/// tête de l'écran de vérification de licence : un employé d'une officine
-/// déjà inscrite accepte ici l'invitation de son titulaire au lieu d'inscrire
-/// une nouvelle officine.
+/// tête de l'écran de vérification de licence et, depuis C213, dans le
+/// bandeau d'état du compte : un employé d'une officine déjà inscrite accepte
+/// ici l'invitation de son titulaire au lieu d'inscrire une nouvelle officine.
 class PendingInvitationsCard extends StatefulWidget {
   const PendingInvitationsCard({super.key});
 
@@ -111,9 +111,11 @@ class _PendingInvitationsCardState extends State<PendingInvitationsCard> {
           const SizedBox(height: 8),
           for (final invitation in _invitations) _buildInvitation(invitation),
           const SizedBox(height: 8),
+          // C213 : la carte est aussi affichée dans le bandeau d'état du
+          // compte (tableau de bord), sans formulaire en dessous.
           const Text(
-            'Pour inscrire votre propre officine, remplissez plutôt le '
-            'formulaire ci-dessous.',
+            'Pour inscrire votre propre officine, utilisez plutôt le '
+            'formulaire d\'inscription d\'officine.',
             style: PharmaConnectTypography.micro,
           ),
         ],

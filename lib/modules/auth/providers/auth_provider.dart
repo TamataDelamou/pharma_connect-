@@ -5,6 +5,7 @@ import '../../../core/utils/validators.dart';
 import '../services/auth_service.dart';
 import '../services/profile_service.dart';
 import '../models/user_role.dart';
+import '../models/account_status.dart';
 
 class AuthProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
@@ -22,6 +23,7 @@ class AuthProvider extends ChangeNotifier {
   String? _gsgOrgId;
   String? _pharmacyId;
   bool _isGsgAdmin = false;
+  AccountStatus? _accountStatus;
   String? _error; // Gestion d'erreur
 
   bool get isLoading => _isLoading;
@@ -45,13 +47,48 @@ class AuthProvider extends ChangeNotifier {
   bool get isGsgAdmin => _isGsgAdmin;
   String? get error => _error;
 
+  /// C213 / D64 : état du compte lu sur le serveur (null tant qu'il n'a pas
+  /// pu être lu, par exemple hors réseau).
+  AccountStatus? get accountStatus => _accountStatus;
+
+  /// C213 / D64 : vrai si le rôle déclaré ouvre ses droits (vérifié par GSG,
+  /// pharmacien d'une officine active). Sans état lu, l'application garde le
+  /// rôle déclaré : le serveur reste seul juge des droits.
+  bool get isRoleActive =>
+      _userRole == null ||
+      _userRole == UserRole.patient ||
+      (_accountStatus?.roleActive ?? true);
+
+  /// C213 / D64 : rôle à utiliser pour les menus et les écrans. Tant que le
+  /// rôle déclaré n'est pas vérifié, le compte utilise l'application comme
+  /// un patient (un bandeau explique la situation).
+  UserRole? get effectiveRole => isRoleActive ? _userRole : UserRole.patient;
+
   /// RG-AUT-01 (audit Module 1, 29/08/2026) : un compte pharmacien sans
   /// officine rattachée doit passer par la vérification de licence avant
   /// le tableau de bord. `_pharmacyId` n'est jamais renseigné par
   /// l'auto-inscription (voir pharmacy_service.dart et la migration
   /// 20260829013000) — seul le back-office GSG le fait, après vérification.
-  bool get needsLicenseVerification =>
-      _userRole == UserRole.pharmacien && _pharmacyId == null;
+  /// C213 : une candidature déjà déposée (en attente) ou une officine
+  /// suspendue ne renvoient plus vers le formulaire, mais vers le tableau de
+  /// bord, où le bandeau d'état du compte explique la situation.
+  bool get needsLicenseVerification {
+    if (_userRole != UserRole.pharmacien || _pharmacyId != null) return false;
+    final status = _accountStatus;
+    return status == null || status.canRegisterPharmacy;
+  }
+
+  /// C213 : relit l'état du compte (après une action qui peut le changer,
+  /// ou à la demande de l'utilisateur depuis le bandeau).
+  Future<void> refreshAccountStatus() async {
+    if (_userId == null) return;
+    await _loadAccountStatus();
+    notifyListeners();
+  }
+
+  Future<void> _loadAccountStatus() async {
+    _accountStatus = await _profileService.getAccountStatus();
+  }
 
   // === TÉLÉPHONE ===
 
@@ -91,7 +128,12 @@ class AuthProvider extends ChangeNotifier {
         _isAuthenticated = true;
         _pendingIdentifier = null;
         if (role != null) _userRole = role;
-        await _persistProfile(user.id, phone: user.phone, fullName: fullName, role: role);
+        await _persistProfile(
+          user.id,
+          phone: user.phone,
+          fullName: fullName,
+          role: role,
+        );
         _setLoading(false);
         _bridgeToGsgKernel(user.id, response.session?.accessToken);
         return true;
@@ -187,6 +229,7 @@ class AuthProvider extends ChangeNotifier {
       // Best-effort — voir docstring ci-dessus.
     }
     await _loadAdminStatus(userId);
+    await _loadAccountStatus();
   }
 
   /// Best-effort, même rationale que `_persistProfile` ci-dessus : une
@@ -253,6 +296,7 @@ class AuthProvider extends ChangeNotifier {
       _pharmacyId = row['pharmacy_id'] as String?;
     }
     await _loadAdminStatus(user.id);
+    await _loadAccountStatus();
     notifyListeners();
 
     _bridgeToGsgKernel(
@@ -273,6 +317,7 @@ class AuthProvider extends ChangeNotifier {
     _gsgOrgId = null;
     _pharmacyId = null;
     _isGsgAdmin = false;
+    _accountStatus = null;
     _isAuthenticated = false;
     _error = null;
     notifyListeners();

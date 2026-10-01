@@ -6,6 +6,9 @@ import '../../core/theme/colors.dart';
 import '../../core/theme/typography.dart';
 import '../../core/widgets/cards/glass_card.dart';
 import '../../core/widgets/navigation/sidebar_navigation.dart';
+import '../auth/models/user_role.dart';
+import '../auth/providers/auth_provider.dart';
+import '../auth/widgets/account_status_banner.dart';
 import 'providers/dashboard_provider.dart';
 import 'widgets/quick_action_grid.dart';
 import 'widgets/activity_timeline.dart';
@@ -74,15 +77,39 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
   }
 
+  /// C213 / D64 : menus selon le rôle effectif. Un compte dont le rôle n'est
+  /// pas vérifié (ou un patient) n'a pas le menu « Stock & Lots ».
+  List<SidebarNavigationItem> _navItemsFor(UserRole? role) {
+    if (role != UserRole.patient) return _navItems;
+    return _navItems.where((item) => item.route != '/stock').toList();
+  }
+
+  /// C213 / D64 : actions rapides selon le rôle effectif. Patient (ou rôle
+  /// non vérifié) : recherche, ordonnances, réservations. Caisse et personnel
+  /// (C201 / C209) : pharmacien d'une officine active seulement.
+  List<QuickAction> _actionsFor(UserRole? role, List<QuickAction> all) {
+    if (role == UserRole.patient) {
+      const patientRoutes = {'/search', '/prescriptions', '/reservations'};
+      return all.where((a) => patientRoutes.contains(a.route)).toList();
+    }
+    if (role != UserRole.pharmacien) {
+      return all
+          .where((a) => a.route != '/pos' && a.route != '/pharmacy/staff')
+          .toList();
+    }
+    return all;
+  }
+
   @override
   Widget build(BuildContext context) {
     final dashboard = context.watch<DashboardProvider>();
+    final role = context.watch<AuthProvider>().effectiveRole;
 
     return Scaffold(
       body: Row(
         children: [
           SidebarNavigation(
-            items: _navItems,
+            items: _navItemsFor(role),
             currentRoute: _currentRoute,
             expanded: _sidebarExpanded,
             onItemSelected: (route) {
@@ -136,8 +163,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                         const SizedBox(height: 32),
 
+                        // C213 / D64 : état du compte (rôle en attente de
+                        // vérification, pharmacien sans officine, etc.).
+                        const AccountStatusBanner(),
+
                         // ===== ACTIONS RAPIDES =====
-                        QuickActionGrid(actions: dashboard.data.actions),
+                        QuickActionGrid(
+                          actions: _actionsFor(role, dashboard.data.actions),
+                        ),
                         const SizedBox(height: 32),
 
                         // ===== INDICATEURS CLÉS (3 cartes stats) =====

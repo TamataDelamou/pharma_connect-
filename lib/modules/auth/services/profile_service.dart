@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/services/supabase_service.dart';
+import '../models/account_status.dart';
 
 /// public.profiles n'a jusqu'ici jamais été écrite par le produit : le nom et
 /// le rôle saisis à l'inscription (register_screen.dart) n'étaient conservés
@@ -59,6 +60,19 @@ class ProfileService {
           .eq('id', userId)
           .maybeSingle();
       return row?['full_name'] as String?;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// C213 / D64 : état du compte (rôle vérifié ou non, officine, candidature,
+  /// invitations), calculé par le serveur avec la même règle que les droits.
+  /// Best-effort : retourne null en cas d'échec réseau.
+  Future<AccountStatus?> getAccountStatus() async {
+    try {
+      final response = await _client.rpc('my_account_status');
+      if (response is! Map<String, dynamic>) return null;
+      return AccountStatus.fromJson(response);
     } catch (_) {
       return null;
     }
