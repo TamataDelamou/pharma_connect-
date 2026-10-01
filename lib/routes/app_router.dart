@@ -110,6 +110,7 @@ import '../modules/family/screens/family_new_screen.dart';
 // professionnals
 import '../modules/professionals/screens/professionals_list_screen.dart';
 import '../modules/professionals/screens/professional_detail_screen.dart';
+import '../modules/professionals/screens/my_professional_profile_screen.dart';
 
 //hospitals
 import '../modules/hospitals/screens/hospitals_list_screen.dart';
@@ -868,6 +869,12 @@ class AppRouter {
         builder: (context, state) => const FamilyListScreen(),
       ),
       // professionnals
+      // C222 / D66 : fiche du professionnel connecté (création, correction).
+      GoRoute(
+        path: '/professional/my-profile',
+        name: 'professional-my-profile',
+        builder: (context, state) => const MyProfessionalProfileScreen(),
+      ),
       GoRoute(
         path: '/professionals',
         name: 'professionals',

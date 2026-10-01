@@ -129,9 +129,11 @@ class _AccountStatusBannerState extends State<AccountStatusBanner> {
           icon: Icons.badge,
           title: 'Votre fiche professionnelle n\'est pas encore enregistrée',
           message:
-              'Contactez l\'équipe GSG pour faire enregistrer et vérifier '
-              'votre numéro d\'ordre. En attendant, vous utilisez '
+              'Renseignez votre spécialité et votre numéro d\'ordre : '
+              'l\'équipe GSG les vérifiera. En attendant, vous utilisez '
               'PharmaConnect comme un patient.',
+          // C222 / D66 : le professionnel crée lui-même sa fiche.
+          children: [_profileButton('Créer ma fiche professionnelle')],
           auth: auth,
         );
       case AccountState.professionalRejected:
@@ -142,9 +144,10 @@ class _AccountStatusBannerState extends State<AccountStatusBanner> {
           message: [
             if (status.professionalRejectionReason != null)
               'Motif : ${status.professionalRejectionReason}.',
-            'Corrigez votre licence ou contactez l\'équipe GSG. En attendant, '
-                'vous utilisez PharmaConnect comme un patient.',
+            'Corrigez votre licence : la fiche repartira en vérification. '
+                'En attendant, vous utilisez PharmaConnect comme un patient.',
           ].join(' '),
+          children: [_profileButton('Corriger ma fiche')],
           auth: auth,
         );
       case AccountState.pendingReview:
@@ -162,6 +165,22 @@ class _AccountStatusBannerState extends State<AccountStatusBanner> {
           auth: auth,
         );
     }
+  }
+
+  /// C222 : accès à la fiche professionnelle depuis le bandeau.
+  Widget _profileButton(String label) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: ElevatedButton.icon(
+        onPressed: () => context.push('/professional/my-profile'),
+        icon: const Icon(Icons.badge),
+        label: Text(label),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: PharmaConnectColors.accentCyan,
+          foregroundColor: PharmaConnectColors.textOnAccent,
+        ),
+      ),
+    );
   }
 
   Widget _frame({

@@ -11,6 +11,62 @@ class ProfessionalsService {
 
   // ---- Profiles ----
 
+  /// C222 / D66 : fiche professionnelle de l'utilisateur connecté (ligne
+  /// brute), ou null s'il n'en a pas encore.
+  Future<Map<String, dynamic>?> getMyProfileRow() async {
+    final userId = SupabaseService().currentUser?.id;
+    if (userId == null) return null;
+    return await _client
+        .from('professional_profiles')
+        .select(
+          'id, specialty, license_number, license_issuing_body, '
+          'license_expiry_date, years_of_experience, bio, '
+          'is_verified, verification_status, rejection_reason',
+        )
+        .eq('id', userId)
+        .maybeSingle();
+  }
+
+  /// C222 / D66 : crée ou met à jour la fiche du professionnel connecté. Le
+  /// serveur la place en attente de vérification par GSG (création, ou
+  /// licence modifiée sur une fiche vérifiée ou refusée) ; la vérification
+  /// n'est jamais envoyée d'ici.
+  Future<void> saveMyProfile({
+    required bool exists,
+    required String specialty,
+    required String licenseNumber,
+    required String licenseIssuingBody,
+    DateTime? licenseExpiryDate,
+    int? yearsOfExperience,
+    String? bio,
+  }) async {
+    final userId = SupabaseService().currentUser?.id;
+    if (userId == null) {
+      throw StateError('Connexion requise.');
+    }
+    final data = <String, dynamic>{
+      'specialty': specialty,
+      'license_number': licenseNumber,
+      'license_issuing_body': licenseIssuingBody,
+      'license_expiry_date': licenseExpiryDate?.toIso8601String().substring(
+        0,
+        10,
+      ),
+      'years_of_experience': yearsOfExperience,
+      'bio': bio,
+      'updated_by': userId,
+    };
+    if (exists) {
+      await _client.from('professional_profiles').update(data).eq('id', userId);
+    } else {
+      await _client.from('professional_profiles').insert({
+        'id': userId,
+        'created_by': userId,
+        ...data,
+      });
+    }
+  }
+
   Future<List<ProfessionalProfile>> getProfessionals({
     String? specialty,
     bool? isVerified,
@@ -37,7 +93,10 @@ class ProfessionalsService {
         query = query.textSearch('profiles.full_name', searchQuery);
       }
 
-      final response = await query.order('profiles(full_name)', ascending: true);
+      final response = await query.order(
+        'profiles(full_name)',
+        ascending: true,
+      );
       return (response as List)
           .map((e) => ProfessionalProfile.fromJson(e as Map<String, dynamic>))
           .toList();
