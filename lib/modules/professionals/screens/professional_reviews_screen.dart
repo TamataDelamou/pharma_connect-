@@ -99,7 +99,7 @@ class _ProfessionalReviewsScreenState extends State<ProfessionalReviewsScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   _buildStatItem(
-                    '⭐ ${(_stats['avg_rating'] as double? ?? 0.0).toStringAsFixed(1)}/5',
+                    '⭐ ${((_stats['avg_rating'] as num?) ?? 0).toDouble().toStringAsFixed(1)}/5',
                     'Note moyenne',
                     PharmaConnectColors.accentAmber,
                   ),
@@ -108,16 +108,20 @@ class _ProfessionalReviewsScreenState extends State<ProfessionalReviewsScreen> {
                     'Avis',
                     PharmaConnectColors.accentCyan,
                   ),
-                  _buildStatItem(
-                    '${_stats['total_patients'] ?? 0}',
-                    'Patients',
-                    PharmaConnectColors.accentGreen,
-                  ),
-                  _buildStatItem(
-                    '${_stats['total_consultations'] ?? 0}',
-                    'Consultations',
-                    PharmaConnectColors.accentPurple,
-                  ),
+                  // C220 / D65 : patients et consultations visibles du seul
+                  // professionnel concerné et de GSG (null pour les autres).
+                  if (_stats['total_patients'] != null)
+                    _buildStatItem(
+                      '${_stats['total_patients']}',
+                      'Patients',
+                      PharmaConnectColors.accentGreen,
+                    ),
+                  if (_stats['total_consultations'] != null)
+                    _buildStatItem(
+                      '${_stats['total_consultations']}',
+                      'Consultations',
+                      PharmaConnectColors.accentPurple,
+                    ),
                 ],
               ),
             ),

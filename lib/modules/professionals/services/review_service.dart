@@ -89,29 +89,22 @@ class ReviewService {
     }
   }
 
+  /// C220 / D65 : note moyenne et nombre d'avis publics (professionnels
+  /// vérifiés) ; nombres de consultations et de patients renseignés
+  /// seulement pour le professionnel lui-même et GSG (null sinon).
   Future<Map<String, dynamic>> getStats(String professionalId) async {
     try {
       final response = await _client
-          .from('professional_stats')
+          .from('professional_stats_public')
           .select()
           .eq('professional_id', professionalId)
           .maybeSingle();
       if (response == null) {
-        return {
-          'total_reviews': 0,
-          'avg_rating': 0.0,
-          'total_consultations': 0,
-          'total_patients': 0,
-        };
+        return {'total_reviews': 0, 'avg_rating': 0.0};
       }
       return response as Map<String, dynamic>;
     } catch (e) {
-      return {
-        'total_reviews': 0,
-        'avg_rating': 0.0,
-        'total_consultations': 0,
-        'total_patients': 0,
-      };
+      return {'total_reviews': 0, 'avg_rating': 0.0};
     }
   }
 
