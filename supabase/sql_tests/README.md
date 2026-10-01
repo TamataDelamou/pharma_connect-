@@ -17,6 +17,7 @@ Tests manuels à lancer sur la base **locale** (`supabase start`, conteneur `sup
 | `c205_cash_linked_to_sales.sql` | Caisse reliée aux ventes et aux remboursements (C205, décision D62) : ouverture contrôlée (une caisse par caissier), vente et remboursement en espèces avec caisse ouverte, autres moyens tracés à part, dépôts et retraits, écritures directes interdites, solde attendu, fermeture, cloisonnement. |
 | `c219_emergency_access.sql` | Accès d'urgence au dossier de santé (C219, décision D63) : déclaration depuis un triage en cours par un professionnel affilié à l'hôpital, motif obligatoire, 24 heures, journal d'audit, visibilité patient / professionnel / GSG, échéance et renouvellement, fin anticipée, écritures directes interdites ; interactions professionnelles limitées au lien de soin. |
 | `c213_account_status.sql` | État du compte (C213, décision D64) : `my_account_status` pour un patient, un rôle refusé par GSG (motif rendu 30 jours), grossiste et livreur en attente puis validés, professionnels (fiche absente, en attente, refusée, vérifiée), pharmaciens (sans officine, candidature en attente ou refusée, officine active puis suspendue), invitations ; concordance avec `has_verified_role` ; `anon` refusé. |
+| `c220_aggregates_and_open_policies.sql` | Données agrégées et règles ouvertes à tous (C220, décision D65) : vues d'analyse fermées à `anon`, statistiques des professionnels (note publique, patients et consultations réservés), arrêts, tournées et livreurs visibles des seules parties de la livraison, administrateurs et paramètres GSG, alertes familiales non déplaçables, bilans de solidarité et classement réservés aux utilisateurs connectés. |
 | `concurrency_numbering.sh` | Deux sessions `psql` simultanées (retours client, puis ventes POS de deux officines) : numéros distincts et consécutifs, la seconde session attend la première. |
 
 Chaque cas affiche une ligne `CAS n OK : …` ou `CAS n ECHEC : …` (`RESULTAT … OK/ECHEC` pour le script de concurrence).
@@ -39,6 +40,7 @@ docker exec -i supabase_db_pharma_connect psql -U postgres -d postgres < supabas
 docker exec -i supabase_db_pharma_connect psql -U postgres -d postgres < supabase/sql_tests/c205_cash_linked_to_sales.sql
 docker exec -i supabase_db_pharma_connect psql -U postgres -d postgres < supabase/sql_tests/c219_emergency_access.sql
 docker exec -i supabase_db_pharma_connect psql -U postgres -d postgres < supabase/sql_tests/c213_account_status.sql
+docker exec -i supabase_db_pharma_connect psql -U postgres -d postgres < supabase/sql_tests/c220_aggregates_and_open_policies.sql
 bash supabase/sql_tests/concurrency_numbering.sh
 ```
 
