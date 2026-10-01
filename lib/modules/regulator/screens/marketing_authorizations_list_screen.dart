@@ -39,7 +39,7 @@ class _MarketingAuthorizationsListScreenState
     final provider = context.watch<MarketingAuthorizationProvider>();
     final auth = context.watch<AuthProvider>();
     final canManage =
-        auth.isGsgAdmin || auth.userRole == UserRole.regulateur;
+        auth.isGsgAdmin || auth.effectiveRole == UserRole.regulateur;
 
     return Scaffold(
       body: Padding(

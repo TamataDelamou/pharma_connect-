@@ -89,7 +89,7 @@ class _AlertCenterScreenState extends State<AlertCenterScreen> {
                       value: '/alerts/preferences',
                       child: Text('Préférences de notification'),
                     ),
-                    if (context.read<AuthProvider>().userRole ==
+                    if (context.read<AuthProvider>().effectiveRole ==
                         UserRole.pharmacien)
                       const PopupMenuItem(
                         value: '/alerts/thresholds',

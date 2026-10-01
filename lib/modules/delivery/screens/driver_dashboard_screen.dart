@@ -106,7 +106,7 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
 
     // Aucun contrôle d'accès n'existait sur cet écran (audit Module 7) —
     // même correctif que pharmacy_queue_screen.dart (Module 6).
-    if (auth.userRole != UserRole.livreur) {
+    if (auth.effectiveRole != UserRole.livreur) {
       return Scaffold(
         body: Center(
           child: Padding(
@@ -200,10 +200,14 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: PharmaConnectColors.accentOrange.withValues(alpha: 0.15),
+                  color: PharmaConnectColors.accentOrange.withValues(
+                    alpha: 0.15,
+                  ),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: PharmaConnectColors.accentOrange.withValues(alpha: 0.4),
+                    color: PharmaConnectColors.accentOrange.withValues(
+                      alpha: 0.4,
+                    ),
                   ),
                 ),
                 child: Row(

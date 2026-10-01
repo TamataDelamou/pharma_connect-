@@ -155,7 +155,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
                         // n'est de toute façon jamais construit à partir de
                         // ce libellé (voir traceability_service.dart) ; il
                         // ne sert qu'à l'affichage.
-                        final role = context.read<AuthProvider>().userRole;
+                        final role = context.read<AuthProvider>().effectiveRole;
                         await provider.verifyProduct(
                           serialNumber: _serialController.text.trim(),
                           gtin: _gtinController.text.trim(),

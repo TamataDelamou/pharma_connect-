@@ -61,7 +61,7 @@ class _TeleconsultListScreenState extends State<TeleconsultListScreen>
     // qui n'a pas ce rôle — la RLS le renverrait de toute façon vide, mais
     // autant éviter l'appel inutile plutôt que de laisser `build()` seul
     // masquer le résultat derrière l'écran d'accès refusé.
-    final authRole = context.read<AuthProvider>().userRole;
+    final authRole = context.read<AuthProvider>().effectiveRole;
     if (widget.asProfessional && authRole != UserRole.professionnel) return;
     if (userId != null) {
       context.read<TeleconsultProvider>().loadConsultations(
@@ -99,7 +99,7 @@ class _TeleconsultListScreenState extends State<TeleconsultListScreen>
   /// la route de navigation elle-même — voir `_effectiveNavItems`).
   @override
   Widget build(BuildContext context) {
-    final authRole = context.watch<AuthProvider>().userRole;
+    final authRole = context.watch<AuthProvider>().effectiveRole;
 
     if (widget.asProfessional && authRole != UserRole.professionnel) {
       return Scaffold(

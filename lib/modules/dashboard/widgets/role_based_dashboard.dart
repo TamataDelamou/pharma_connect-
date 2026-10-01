@@ -19,7 +19,7 @@ class RoleBasedDashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
-    final role = auth.userRole;
+    final role = auth.effectiveRole;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

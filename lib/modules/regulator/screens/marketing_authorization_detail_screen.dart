@@ -41,7 +41,7 @@ class _MarketingAuthorizationDetailScreenState
     final authorization = provider.selectedAuthorization;
     final auth = context.watch<AuthProvider>();
     final canManage =
-        auth.isGsgAdmin || auth.userRole == UserRole.regulateur;
+        auth.isGsgAdmin || auth.effectiveRole == UserRole.regulateur;
 
     if (provider.isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -96,9 +96,15 @@ class _MarketingAuthorizationDetailScreenState
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildInfoRow('Médicament', authorization.productName),
+                          _buildInfoRow(
+                            'Médicament',
+                            authorization.productName,
+                          ),
                           const Divider(color: Colors.white12),
-                          _buildInfoRow('Fabricant', authorization.manufacturer),
+                          _buildInfoRow(
+                            'Fabricant',
+                            authorization.manufacturer,
+                          ),
                           const Divider(color: Colors.white12),
                           _buildInfoRow(
                             'Numéro d\'AMM',
@@ -217,8 +223,9 @@ class _MarketingAuthorizationDetailScreenState
   Widget _buildActionChip(String label, String status, Color color) {
     return GestureDetector(
       onTap: () async {
-        final current =
-            context.read<MarketingAuthorizationProvider>().selectedAuthorization;
+        final current = context
+            .read<MarketingAuthorizationProvider>()
+            .selectedAuthorization;
         if (current != null) {
           final updated = current.copyWith(
             status: status,

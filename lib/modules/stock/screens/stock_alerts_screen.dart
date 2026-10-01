@@ -60,7 +60,7 @@ class _StockAlertsScreenState extends State<StockAlertsScreen> {
                 // mais n'avaient aucun point d'entrée de navigation nulle
                 // part dans l'app — même défaut que /alerts/thresholds et
                 // /alerts/preferences avant leur correction au Module 10.
-                if (context.watch<AuthProvider>().userRole ==
+                if (context.watch<AuthProvider>().effectiveRole ==
                     UserRole.pharmacien)
                   IconButton(
                     icon: const Icon(

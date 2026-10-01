@@ -48,7 +48,7 @@ class _AdverseReactionsListScreenState extends State<AdverseReactionsListScreen>
   }
 
   bool get _isRegulateur =>
-      context.read<AuthProvider>().userRole == UserRole.regulateur;
+      context.read<AuthProvider>().effectiveRole == UserRole.regulateur;
 
   void _onTabChanged() {
     final index = _tabController.index;
@@ -88,7 +88,7 @@ class _AdverseReactionsListScreenState extends State<AdverseReactionsListScreen>
   Widget build(BuildContext context) {
     final provider = context.watch<RegulatorProvider>();
     final auth = context.watch<AuthProvider>();
-    final isRegulateur = auth.userRole == UserRole.regulateur;
+    final isRegulateur = auth.effectiveRole == UserRole.regulateur;
     final canManage = auth.isGsgAdmin;
 
     return Scaffold(

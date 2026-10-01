@@ -45,7 +45,7 @@ class _PharmacyQueueScreenState extends State<PharmacyQueueScreen> {
     // d'attente d'une officine (identités de patients incluses) et déclencher
     // "Prêt"/"Retiré" — même patron de correction que prescription_detail_
     // screen.dart au Module 5.
-    final isPharmacist = auth.userRole == UserRole.pharmacien;
+    final isPharmacist = auth.effectiveRole == UserRole.pharmacien;
     final pharmacyId = auth.pharmacyId;
 
     if (!isPharmacist) {
@@ -99,8 +99,7 @@ class _PharmacyQueueScreenState extends State<PharmacyQueueScreen> {
             )
             .toList()
           ..sort(
-            (a, b) =>
-                (a.queuePosition ?? 0).compareTo(b.queuePosition ?? 0),
+            (a, b) => (a.queuePosition ?? 0).compareTo(b.queuePosition ?? 0),
           );
 
     return Scaffold(

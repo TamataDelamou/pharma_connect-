@@ -53,7 +53,7 @@ class _ReconciliationScreenState extends State<ReconciliationScreen> {
     // "Back-office de réconciliation pharmacie"). Même patron de correction
     // que pharmacy_queue_screen.dart (Module 6) / delivery_schedule_screen.dart
     // (Module 7).
-    final isPharmacist = auth.userRole == UserRole.pharmacien;
+    final isPharmacist = auth.effectiveRole == UserRole.pharmacien;
     final pharmacyId = auth.pharmacyId;
 
     if (!isPharmacist) {

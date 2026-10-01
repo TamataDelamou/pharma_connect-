@@ -92,7 +92,7 @@ class _ReceptionScreenState extends State<ReceptionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final role = context.watch<AuthProvider>().userRole;
+    final role = context.watch<AuthProvider>().effectiveRole;
     final isAuthorized =
         role == UserRole.pharmacien ||
         role == UserRole.grossiste ||
@@ -326,8 +326,7 @@ class _ReceptionScreenState extends State<ReceptionScreen> {
   }
 
   Widget _buildReceptionForm(TraceabilityProvider provider) {
-    final blocked =
-        _selectedBatch!.isRecalled || _selectedBatch!.isCounterfeit;
+    final blocked = _selectedBatch!.isRecalled || _selectedBatch!.isCounterfeit;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -374,8 +373,7 @@ class _ReceptionScreenState extends State<ReceptionScreen> {
         const SizedBox(height: 12),
         CheckboxListTile(
           value: _isColdChainRequired,
-          onChanged: (v) =>
-              setState(() => _isColdChainRequired = v ?? false),
+          onChanged: (v) => setState(() => _isColdChainRequired = v ?? false),
           title: const Text(
             'Ce lot nécessite la chaîne du froid',
             style: PharmaConnectTypography.body2,

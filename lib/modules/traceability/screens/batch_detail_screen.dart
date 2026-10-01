@@ -363,7 +363,7 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
   // celui déjà documenté pour la navigation (registre, item D6). Réservé
   // aux mêmes rôles que la policy RLS d'écriture sur traceable_batches.
   bool _canDeclareRecall(BuildContext context) {
-    final role = context.watch<AuthProvider>().userRole;
+    final role = context.watch<AuthProvider>().effectiveRole;
     return role == UserRole.pharmacien ||
         role == UserRole.grossiste ||
         role == UserRole.regulateur;
@@ -408,10 +408,7 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
                   decoration: const InputDecoration(labelText: 'Sévérité'),
                   items: RecallSeverity.values
                       .map(
-                        (s) => DropdownMenuItem(
-                          value: s,
-                          child: Text(s.label),
-                        ),
+                        (s) => DropdownMenuItem(value: s, child: Text(s.label)),
                       )
                       .toList(),
                   onChanged: (value) {
@@ -480,7 +477,7 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
     // documentée pour verifiedBy dans verification_screen.dart. Le rôle
     // reste identifiant et cohérent avec la chaîne d'approvisionnement.
     final role = context.mounted
-        ? context.read<AuthProvider>().userRole
+        ? context.read<AuthProvider>().effectiveRole
         : null;
     final totalUnits = int.tryParse(quantityController.text.trim()) ?? 0;
 

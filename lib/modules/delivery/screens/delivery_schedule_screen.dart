@@ -17,8 +17,7 @@ class DeliveryScheduleScreen extends StatefulWidget {
   const DeliveryScheduleScreen({super.key});
 
   @override
-  State<DeliveryScheduleScreen> createState() =>
-      _DeliveryScheduleScreenState();
+  State<DeliveryScheduleScreen> createState() => _DeliveryScheduleScreenState();
 }
 
 class _DeliveryScheduleScreenState extends State<DeliveryScheduleScreen> {
@@ -74,7 +73,7 @@ class _DeliveryScheduleScreenState extends State<DeliveryScheduleScreen> {
     // serveur (voir la migration de ce module), mais rien ne l'interdisait
     // côté UI. Même patron de correction que pharmacy_queue_screen.dart
     // (Module 6) et driver_dashboard_screen.dart (Module 7).
-    final isPharmacist = auth.userRole == UserRole.pharmacien;
+    final isPharmacist = auth.effectiveRole == UserRole.pharmacien;
     if (!isPharmacist) {
       return Scaffold(
         body: Center(
@@ -161,9 +160,10 @@ class _DeliveryScheduleScreenState extends State<DeliveryScheduleScreen> {
                           ),
                           const SizedBox(height: 16),
                           ElevatedButton(
-                            onPressed: () => context
-                                .read<DeliveryProvider>()
-                                .loadDeliveries(status: DeliveryStatus.scheduled),
+                            onPressed: () =>
+                                context.read<DeliveryProvider>().loadDeliveries(
+                                  status: DeliveryStatus.scheduled,
+                                ),
                             child: const Text('Réessayer'),
                           ),
                         ],

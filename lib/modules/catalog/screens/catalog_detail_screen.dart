@@ -40,7 +40,7 @@ class _CatalogDetailScreenState extends State<CatalogDetailScreen> {
     // impasse pour tout rôle non pertinent. Restreint ici côté affichage à
     // 'pharmacien', seul rôle pouvant un jour satisfaire is_pharmacy_staff.
     final isPharmacyRole =
-        context.watch<AuthProvider>().userRole == UserRole.pharmacien;
+        context.watch<AuthProvider>().effectiveRole == UserRole.pharmacien;
 
     if (provider.isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));

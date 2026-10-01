@@ -53,7 +53,7 @@ class _AlertThresholdSettingsScreenState
     final auth = context.watch<AuthProvider>();
     final provider = context.watch<StockProvider>();
 
-    final isPharmacist = auth.userRole == UserRole.pharmacien;
+    final isPharmacist = auth.effectiveRole == UserRole.pharmacien;
     final pharmacyId = auth.pharmacyId;
 
     if (!isPharmacist) {

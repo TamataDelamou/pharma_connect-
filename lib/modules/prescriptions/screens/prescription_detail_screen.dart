@@ -51,7 +51,7 @@ class _PrescriptionDetailScreenState extends State<PrescriptionDetailScreen> {
     // en défense en profondeur, sur le même modèle que le bouton "Gérer le
     // stock" gated en Module 3 (catalog_detail_screen.dart).
     final isPharmacist =
-        context.watch<AuthProvider>().userRole == UserRole.pharmacien;
+        context.watch<AuthProvider>().effectiveRole == UserRole.pharmacien;
 
     if (prescription == null && provider.error != null) {
       return Scaffold(

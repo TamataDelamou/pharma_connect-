@@ -68,7 +68,7 @@ class _EPrescriptionDetailScreenState extends State<EPrescriptionDetailScreen> {
     // `AuthProvider.userRole`/`pharmacyId` depuis l'audit du Module 1 (AUT).
     final authProvider = context.watch<AuthProvider>();
     final isPharmacy =
-        authProvider.userRole == UserRole.pharmacien &&
+        authProvider.effectiveRole == UserRole.pharmacien &&
         authProvider.pharmacyId != null &&
         authProvider.pharmacyId == prescription.pharmacyId;
 

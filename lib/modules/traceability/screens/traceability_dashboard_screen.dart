@@ -29,7 +29,7 @@ class _TraceabilityDashboardScreenState
       // mouvements/certificats imbriqués) n'est plus affichée qu'au staff
       // (voir build() ci-dessous) — inutile de la charger pour un patient,
       // qui ne voit que _buildPatientView().
-      final role = context.read<AuthProvider>().userRole;
+      final role = context.read<AuthProvider>().effectiveRole;
       final isStaff =
           role == UserRole.pharmacien ||
           role == UserRole.grossiste ||
@@ -44,7 +44,7 @@ class _TraceabilityDashboardScreenState
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<TraceabilityProvider>();
-    final role = context.watch<AuthProvider>().userRole;
+    final role = context.watch<AuthProvider>().effectiveRole;
     // Audit Module 12 (29/08/2026) : ce dashboard exposait la liste complète
     // des lots (mouvements, fabricant, grossiste) à tout compte authentifié,
     // patient compris — c'est une vue d'exploitation de la chaîne
