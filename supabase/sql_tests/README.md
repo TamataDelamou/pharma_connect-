@@ -18,6 +18,9 @@ Tests manuels à lancer sur la base **locale** (`supabase start`, conteneur `sup
 | `c219_emergency_access.sql` | Accès d'urgence au dossier de santé (C219, décision D63) : déclaration depuis un triage en cours par un professionnel affilié à l'hôpital, motif obligatoire, 24 heures, journal d'audit, visibilité patient / professionnel / GSG, échéance et renouvellement, fin anticipée, écritures directes interdites ; interactions professionnelles limitées au lien de soin. |
 | `c213_account_status.sql` | État du compte (C213, décision D64) : `my_account_status` pour un patient, un rôle refusé par GSG (motif rendu 30 jours), grossiste et livreur en attente puis validés, professionnels (fiche absente, en attente, refusée, vérifiée), pharmaciens (sans officine, candidature en attente ou refusée, officine active puis suspendue), invitations ; concordance avec `has_verified_role` ; `anon` refusé. |
 | `c220_aggregates_and_open_policies.sql` | Données agrégées et règles ouvertes à tous (C220, décision D65) : vues d'analyse fermées à `anon`, statistiques des professionnels (note publique, patients et consultations réservés), arrêts, tournées et livreurs visibles des seules parties de la livraison, administrateurs et paramètres GSG, alertes familiales non déplaçables, bilans de solidarité et classement réservés aux utilisateurs connectés. |
+| `c221_delivery_routes_planning.sql` | Tournées de livraison (C221, décision D66) : création par le personnel de l'officine de toutes les livraisons ou par GSG, ordre de passage, contrôles (autre officine, livraison terminée, autre livreur, tournée en cours, doublon, chaîne du froid), annulation d'une tournée planifiée, livreur limité au statut et à l'arrêt effectué. |
+| `c222_professional_self_profile.sql` | Fiche professionnelle créée par le professionnel (C222, décision D66) : création en attente, licence obligatoire, refus pour un autre compte ou un patient, liste de vérification GSG, refus puis correction de la licence (retour en attente), validation. |
+| `c224_single_pending_pharmacy_application.sql` | Une seule candidature d'officine en attente par titulaire (C224) : seconde candidature refusée pendant l'attente ou la revue, nouvelle candidature après un refus, patient refusé, écriture serveur non concernée. |
 | `concurrency_numbering.sh` | Deux sessions `psql` simultanées (retours client, puis ventes POS de deux officines) : numéros distincts et consécutifs, la seconde session attend la première. |
 
 Chaque cas affiche une ligne `CAS n OK : …` ou `CAS n ECHEC : …` (`RESULTAT … OK/ECHEC` pour le script de concurrence).
@@ -41,6 +44,9 @@ docker exec -i supabase_db_pharma_connect psql -U postgres -d postgres < supabas
 docker exec -i supabase_db_pharma_connect psql -U postgres -d postgres < supabase/sql_tests/c219_emergency_access.sql
 docker exec -i supabase_db_pharma_connect psql -U postgres -d postgres < supabase/sql_tests/c213_account_status.sql
 docker exec -i supabase_db_pharma_connect psql -U postgres -d postgres < supabase/sql_tests/c220_aggregates_and_open_policies.sql
+docker exec -i supabase_db_pharma_connect psql -U postgres -d postgres < supabase/sql_tests/c221_delivery_routes_planning.sql
+docker exec -i supabase_db_pharma_connect psql -U postgres -d postgres < supabase/sql_tests/c222_professional_self_profile.sql
+docker exec -i supabase_db_pharma_connect psql -U postgres -d postgres < supabase/sql_tests/c224_single_pending_pharmacy_application.sql
 bash supabase/sql_tests/concurrency_numbering.sh
 ```
 
