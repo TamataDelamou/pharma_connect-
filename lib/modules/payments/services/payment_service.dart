@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 import 'package:uuid/uuid.dart';
 import '../models/transaction.dart';
 import '../models/transaction_status.dart';
@@ -8,8 +9,34 @@ import '../models/wallet.dart';
 import '../models/invoice.dart';
 import '../../../core/services/supabase_service.dart';
 
+/// C225 / D67 : l'état financier (statut payé, portefeuille, échéances,
+/// factures) n'est plus écrit par l'application. L'officine qui encaisse (ou
+/// GSG) confirme ou rembourse par des fonctions serveur journalisées ; le
+/// patient peut abandonner ou contester. RG-PAY-01.
+class PaymentException implements Exception {
+  final String message;
+  const PaymentException(this.message);
+
+  @override
+  String toString() => message;
+}
+
 class PaymentService {
   SupabaseClient get _client => SupabaseService().client;
+
+  /// Appel d'une fonction serveur de paiement, erreur rendue lisible.
+  Future<void> _rpc(String name, Map<String, dynamic> params) async {
+    try {
+      await _client.rpc(name, params: params);
+    } on PostgrestException catch (e) {
+      final message = e.message.replaceFirst(RegExp(r'^PAIEMENT: '), '');
+      throw PaymentException(
+        message.isEmpty
+            ? 'Opération refusée.'
+            : message[0].toUpperCase() + message.substring(1),
+      );
+    }
+  }
 
   // Taux
   static const int _feePercent = 1;
@@ -125,41 +152,17 @@ class PaymentService {
     return wallet.balance;
   }
 
+  /// C225 / D67 : recharge désactivée. Elle créditait le solde depuis
+  /// l'application sans aucun paiement réel ; elle reviendra avec le
+  /// branchement des opérateurs Mobile Money (confirmation serveur).
   Future<Wallet> topUpWallet({
     required String userId,
     required int amount,
     required PaymentMethod method,
   }) async {
-    final current = await getOrCreateWallet(userId);
-
-    final row = await _client
-        .from('wallets')
-        .update({
-          'balance': current.balance + amount,
-          'last_updated': DateTime.now().toIso8601String(),
-        })
-        .eq('user_id', userId)
-        .select()
-        .single();
-    final updated = Wallet.fromJson(row);
-
-    final transaction = Transaction(
-      id: const Uuid().v4(),
-      userId: userId,
-      userPhone: '',
-      amount: amount,
-      fee: 0,
-      cashback: 0,
-      finalAmount: amount,
-      method: method,
-      status: TransactionStatus.completed,
-      createdAt: DateTime.now(),
-      completedAt: DateTime.now(),
-      transactionReference: 'TOPUP${const Uuid().v4().substring(0, 8)}',
+    throw const PaymentException(
+      'La recharge du portefeuille sera bientôt disponible.',
     );
-    await _client.from('transactions').insert(transaction.toJson());
-
-    return updated;
   }
 
   // ==================== INITIATION ====================
@@ -247,108 +250,51 @@ class PaymentService {
       return transaction;
     }
 
-    // Simuler la confirmation (comportement hérité du mock — un vrai
-    // fournisseur Mobile Money confirmerait via webhook, pas un délai fixe ;
-    // voir RG-PAY-01 ci-dessus).
-    await Future.delayed(const Duration(seconds: 2));
-    final row = await _client
-        .from('transactions')
-        .update({
-          'status': TransactionStatus.completed.name,
-          'completed_at': DateTime.now().toIso8601String(),
-        })
-        .eq('id', transaction.id)
-        .select()
-        .single();
-    final completed = Transaction.fromJson(row);
-
-    await _settleWallet(
-      userId: userId,
-      method: method,
-      finalAmount: finalAmount,
-      redeemedCashback: redeemedCashback,
-      earnedCashback: potentialCashback,
-    );
-    await _createInvoice(completed);
-
-    return completed;
+    // C225 / D67 : plus de confirmation simulée. La transaction reste en
+    // attente jusqu'à ce que l'officine constate l'encaissement
+    // (payment_confirm_transaction) ; le serveur règle alors le
+    // portefeuille et produit la facture.
+    return transaction;
   }
 
-  // Bug corrigé (audit Module 8, 29/08/2026) : ni le débit du portefeuille
-  // (PaymentMethod.gsgWallet) ni le crédit du cashback gagné n'étaient
-  // jamais appliqués nulle part — wallet.balance et wallet.cashbackAvailable
-  // restaient donc figés quels que soient les paiements effectués. Ce
-  // helper centralise les deux mouvements au moment où une transaction est
-  // effectivement complétée (paiement direct ou dernière échéance).
-  Future<void> _settleWallet({
-    required String userId,
-    required PaymentMethod method,
-    required int finalAmount,
-    required int redeemedCashback,
-    required int earnedCashback,
-  }) async {
-    if (finalAmount == 0 && redeemedCashback == 0 && earnedCashback == 0) {
-      return;
-    }
-    final current = await getOrCreateWallet(userId);
-    final int debit = method == PaymentMethod.gsgWallet ? finalAmount : 0;
-
-    await _client
-        .from('wallets')
-        .update({
-          'balance': current.balance - debit,
-          'cashback_available':
-              current.cashbackAvailable - redeemedCashback + earnedCashback,
-          'total_spent': current.totalSpent + finalAmount,
-          'total_earned': current.totalEarned + earnedCashback,
-          'last_updated': DateTime.now().toIso8601String(),
-        })
-        .eq('user_id', userId);
-  }
-
+  /// C225 : confirmation par l'officine qui encaisse (ou GSG).
   Future<Transaction> confirmTransaction(String transactionId) async {
-    final row = await _client
-        .from('transactions')
-        .update({
-          'status': TransactionStatus.completed.name,
-          'completed_at': DateTime.now().toIso8601String(),
-        })
-        .eq('id', transactionId)
-        .select()
-        .single();
-    final updated = Transaction.fromJson(row);
-    await _createInvoice(updated);
-    return updated;
+    await _rpc('payment_confirm_transaction', {
+      'p_transaction_id': transactionId,
+    });
+    return getTransaction(transactionId);
   }
 
+  /// C225 : remboursement par l'officine (ou GSG), motif obligatoire.
   Future<Transaction> refundTransaction(
     String transactionId, {
     String? reason,
   }) async {
-    final row = await _client
-        .from('transactions')
-        .update({
-          'status': TransactionStatus.refunded.name,
-          'refunded_at': DateTime.now().toIso8601String(),
-          'notes': reason,
-        })
-        .eq('id', transactionId)
-        .select()
-        .single();
-    return Transaction.fromJson(row);
+    await _rpc('payment_refund_transaction', {
+      'p_transaction_id': transactionId,
+      'p_reason': reason ?? '',
+    });
+    return getTransaction(transactionId);
   }
 
+  /// C225 : contestation par le patient, motif obligatoire.
   Future<Transaction> markAsDisputed(
     String transactionId, {
     String? reason,
   }) async {
-    final row = await _client
-        .from('transactions')
-        .update({'status': TransactionStatus.disputed.name, 'notes': reason})
-        .eq('id', transactionId)
-        .select()
-        .single();
-    return Transaction.fromJson(row);
+    await _rpc('payment_dispute_transaction', {
+      'p_transaction_id': transactionId,
+      'p_reason': reason ?? '',
+    });
+    return getTransaction(transactionId);
+  }
+
+  /// C225 : abandon par le patient d'une transaction non encore payée.
+  Future<Transaction> cancelTransaction(String transactionId) async {
+    await _rpc('payment_cancel_transaction', {
+      'p_transaction_id': transactionId,
+    });
+    return getTransaction(transactionId);
   }
 
   // ==================== ÉCHÉANCIER ====================
@@ -391,24 +337,6 @@ class PaymentService {
     return installment;
   }
 
-  Future<Installment> _getInstallmentById(String installmentId) async {
-    final row = await _client
-        .from('installments')
-        .select('*, installment_payments(*)')
-        .eq('id', installmentId)
-        .single();
-    return Installment.fromJson(row);
-  }
-
-  // Bug corrigé (audit Module 8, 29/08/2026) : cette méthode s'appelait
-  // getInstallment(installmentId) et cherchait par installments.id — mais
-  // payment_screen.dart navigue vers '/payments/installment/${transaction.id}'
-  // et installment_plan_screen.dart transmet cet identifiant de
-  // TRANSACTION, jamais l'id propre de l'échéancier. La recherche ne
-  // trouvait donc jamais rien ("Aucun échéancier trouvé" systématique).
-  // Résolution : chercher par transaction_id, l'identifiant réellement
-  // disponible côté écran, sans changer la signature attendue par
-  // installment_plan_screen.dart / PaymentProvider.
   Future<Installment> getInstallmentByTransaction(String transactionId) async {
     final row = await _client
         .from('installments')
@@ -418,81 +346,23 @@ class PaymentService {
     return Installment.fromJson(row);
   }
 
+  /// C225 : échéance confirmée par l'officine qui encaisse (ou GSG) ; à la
+  /// dernière, le serveur solde l'échéancier, confirme la transaction et
+  /// produit la facture.
   Future<Installment> payInstallmentByTransaction(
     String transactionId,
     int paymentNumber,
   ) async {
-    final installment = await getInstallmentByTransaction(transactionId);
-
-    await _client
-        .from('installment_payments')
-        .update({
-          'status': InstallmentPaymentStatus.paid.name,
-          'paid_at': DateTime.now().toIso8601String(),
-        })
-        .eq('installment_id', installment.id)
-        .eq('payment_number', paymentNumber);
-
-    final updated = await _getInstallmentById(installment.id);
-    if (updated.paidCount == updated.numberOfPayments) {
-      await _client
-          .from('installments')
-          .update({
-            'status': InstallmentStatus.completed.name,
-            'completed_at': DateTime.now().toIso8601String(),
-          })
-          .eq('id', installment.id);
-      // Bug corrigé (audit Module 8, 29/08/2026) : la transaction parente
-      // restait indéfiniment 'processing' même une fois l'échéancier
-      // intégralement soldé — confirmTransaction() génère aussi la facture
-      // (_createInvoice), jusqu'ici jamais produite pour un paiement en
-      // plusieurs fois.
-      await confirmTransaction(transactionId);
-      return getInstallmentByTransaction(transactionId);
-    }
-
-    return updated;
+    await _rpc('payment_confirm_installment', {
+      'p_transaction_id': transactionId,
+      'p_payment_number': paymentNumber,
+    });
+    return getInstallmentByTransaction(transactionId);
   }
 
   // ==================== FACTURES ====================
 
-  Future<void> _createInvoice(Transaction transaction) async {
-    final invoice = Invoice(
-      id: const Uuid().v4(),
-      transactionId: transaction.id,
-      invoiceNumber: 'FAC${const Uuid().v4().substring(0, 8)}',
-      pharmacyName: transaction.pharmacyName ?? 'Pharmacie',
-      pharmacyAddress: '123 Rue du Commerce, Conakry',
-      pharmacyPhone: '+224622334455',
-      patientName: transaction.userId,
-      patientAddress: 'Adresse patient',
-      patientPhone: transaction.userPhone,
-      patientEmail: 'patient@email.com',
-      issuedAt: DateTime.now(),
-      items: [
-        InvoiceItem(
-          id: const Uuid().v4(),
-          productName: 'Médicaments',
-          quantity: 1,
-          unitPrice: transaction.amount,
-          total: transaction.amount,
-          dosage: 'N/A',
-        ),
-      ],
-      subtotal: transaction.amount,
-      tax: transaction.fee ?? 0,
-      discount: transaction.cashback ?? 0,
-      total: transaction.finalAmount,
-      status: 'paid',
-    );
-
-    await _client.from('invoices').insert(invoice.toJson());
-    await _client
-        .from('invoice_items')
-        .insert(
-          invoice.items.map((i) => i.toJson(invoiceId: invoice.id)).toList(),
-        );
-  }
+  // C225 : les factures sont produites par le serveur à la confirmation.
 
   Future<Invoice?> getInvoice(String transactionId) async {
     final row = await _client

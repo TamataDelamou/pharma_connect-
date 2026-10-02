@@ -343,10 +343,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
                               '/payments/installment/${transaction.id}',
                             );
                           } else {
+                            // C225 / D67 : le paiement n'est « payé » qu'une
+                            // fois l'encaissement confirmé par l'officine.
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text(
-                                  'Paiement effectué avec succès !',
+                                  'Paiement enregistré : l\'officine le '
+                                  'confirmera dès réception.',
                                 ),
                                 backgroundColor:
                                     PharmaConnectColors.accentGreen,
