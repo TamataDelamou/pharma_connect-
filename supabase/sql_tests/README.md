@@ -21,6 +21,7 @@ Tests manuels à lancer sur la base **locale** (`supabase start`, conteneur `sup
 | `c221_delivery_routes_planning.sql` | Tournées de livraison (C221, décision D66) : création par le personnel de l'officine de toutes les livraisons ou par GSG, ordre de passage, contrôles (autre officine, livraison terminée, autre livreur, tournée en cours, doublon, chaîne du froid), annulation d'une tournée planifiée, livreur limité au statut et à l'arrêt effectué. |
 | `c222_professional_self_profile.sql` | Fiche professionnelle créée par le professionnel (C222, décision D66) : création en attente, licence obligatoire, refus pour un autre compte ou un patient, liste de vérification GSG, refus puis correction de la licence (retour en attente), validation. |
 | `c224_single_pending_pharmacy_application.sql` | Une seule candidature d'officine en attente par titulaire (C224) : seconde candidature refusée pendant l'attente ou la revue, nouvelle candidature après un refus, patient refusé, écriture serveur non concernée. |
+| `c225_payments_server_confirmed.sql` | Paiement confirmé par l'officine, jamais par le client (C225, décision D67) : création en attente seulement, aucune écriture directe du statut, du portefeuille, des échéances ni des factures ; confirmation, échéances et remboursement par l'officine qui encaisse (ou GSG) avec règlement du portefeuille, facture numérotée et journal ; abandon et contestation par le patient. |
 | `concurrency_numbering.sh` | Deux sessions `psql` simultanées (retours client, puis ventes POS de deux officines) : numéros distincts et consécutifs, la seconde session attend la première. |
 
 Chaque cas affiche une ligne `CAS n OK : …` ou `CAS n ECHEC : …` (`RESULTAT … OK/ECHEC` pour le script de concurrence).
@@ -47,6 +48,7 @@ docker exec -i supabase_db_pharma_connect psql -U postgres -d postgres < supabas
 docker exec -i supabase_db_pharma_connect psql -U postgres -d postgres < supabase/sql_tests/c221_delivery_routes_planning.sql
 docker exec -i supabase_db_pharma_connect psql -U postgres -d postgres < supabase/sql_tests/c222_professional_self_profile.sql
 docker exec -i supabase_db_pharma_connect psql -U postgres -d postgres < supabase/sql_tests/c224_single_pending_pharmacy_application.sql
+docker exec -i supabase_db_pharma_connect psql -U postgres -d postgres < supabase/sql_tests/c225_payments_server_confirmed.sql
 bash supabase/sql_tests/concurrency_numbering.sh
 ```
 
