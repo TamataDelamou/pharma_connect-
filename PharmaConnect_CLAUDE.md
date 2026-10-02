@@ -4,6 +4,40 @@ Infrastructure numérique du circuit pharmaceutique et des soins à domicile en 
 
 Référence produit : *Cahier de Conception PharmaConnect v2.1* (34 modules, 66 règles de gestion). Référence infrastructure : *GSG Platform Kernel — cahier de conception v3.0*. Référence authentification : *Modèle d'authentification Supabase — Migration Firebase vers Supabase*. Ce fichier documente l'état du **code**, pas seulement l'intention du cahier — mets-le à jour à chaque changement structurant plutôt que de laisser le cahier de conception et le dépôt diverger.
 
+## État au 02/10/2026 — à lire en premier
+
+Les sections « Mise à jour » et « État du projet » plus bas sont l'historique d'août 2026 : plusieurs constats y sont dépassés (nombre de tests, état de la CI, commandes, chantiers). La référence vivante est le registre `docs/PharmaConnect_Registre_Ecarts_A_Verifier.md` (décisions D1–D67, tickets C1–C225, section A « à prouver avant pilote » A31–A38).
+
+**Base de données**
+- 123 migrations dans `supabase/migrations/`, toutes appliquées sur le projet en ligne depuis le 02/10/2026 (`supabase db push`, après sauvegarde dans `..\pharma_connect_backups\20261002_avant_push_22\` et répétition locale). La base en ligne ne contient aucune donnée réelle (catalogue de démonstration de `seed.sql`, 2 comptes d'essai sans profil).
+- Règles d'accès durcies par l'audit C193–C225 ; principes à respecter dans tout nouveau code :
+  - rôle déclaré ≠ rôle vérifié : les droits passent par `has_verified_role()` ; un compte non validé utilise l'application comme un patient, avec un bandeau d'état (`my_account_status()`, `AuthProvider.effectiveRole`) — D58, D64, D66 ;
+  - colonnes sensibles verrouillées (`profiles.role`, `pharmacy_id`, vérification des professionnels) ; personnel d'officine rattaché par invitation du titulaire — D59 ;
+  - données de santé : accès par lien de soin, accès d'urgence tracé de 24 heures depuis le triage, journal d'audit réservé à GSG — D61, D63 ;
+  - officine suspendue ou non validée : plus aucun droit, rattachement conservé (C210) ;
+  - comptoir : vente sur le vrai stock (lots par péremption), prix imposé par le serveur, remboursement selon règle avec quarantaine, caisse du caissier obligatoire pour les espèces — D57, D60, D62 ;
+  - paiement : jamais confirmé par le client ; l'officine qui encaisse (ou GSG) confirme, rembourse et règle les échéances par fonctions serveur journalisées ; recharge du portefeuille désactivée — D67 ;
+  - vues d'analyse fermées à `anon` ; adresses de livraison, livreurs, administrateurs et paramètres GSG limités aux parties concernées — D65 ;
+  - toute écriture sensible passe par une fonction `SECURITY DEFINER` (`set search_path = public`, droits retirés à `public` et `anon`), jamais par une écriture directe du client.
+
+**Façon de travailler**
+- Ne jamais modifier une migration existante : une nouvelle migration par ticket, avec un en-tête qui explique le défaut et la décision.
+- Chaque ticket a son test dans `supabase/sql_tests/` : une transaction terminée par `rollback`, identités simulées (`request.jwt.claims` + `set local role authenticated`), une ligne `CAS n OK/ECHEC` par cas ; lancer tous les fichiers après `supabase db reset --local` (liste et commandes : `supabase/sql_tests/README.md`).
+- Chaque décision du porteur du projet est inscrite au registre (Dxx), chaque ticket aussi (Cxx : constat, résolution, commits, tests).
+- Commits : fichiers listés explicitement, jamais `git add -A`. Sous Windows, l'index git est en LF et beaucoup de fichiers du poste sont en CRLF : écrire en LF et ne jamais committer un changement de fins de ligne seul.
+
+**Vérifications de référence (02/10/2026)**
+- Tests SQL : 18 fichiers et `concurrency_numbering.sh`, tous OK.
+- `flutter analyze lib/` : 0 erreur, 267 avertissements, 223 infos (490 au total).
+- `flutter test` : 80 réussis, 23 en échec (échecs connus : tests écrits pour les anciennes données factices, voir A33).
+- `flutter build apk --debug` : réussi.
+
+**Poste de développement**
+- Ordre imposé par la mémoire disponible : tests SQL d'abord, puis arrêt de Supabase, Docker Desktop et des démons Gradle, puis `flutter analyze`, `flutter test` et `flutter build`.
+- `C:\Users\delam\.wslconfig` : `memory=5GB`, `swap=4GB` ; fichier d'échange Windows : 8 Go ; extensions Java/Gradle désactivées dans l'espace de travail VS Code de ce projet ; arrêter les conteneurs TradeLink (`docker stop tradelink-kyc-worker tradelink-clamav`) en début de session, sans les supprimer.
+
+**Avant tout pilote (registre, section A)** : connexion réelle (SMS/WhatsApp non branchés, e-mail sans code à 6 chiffres) et parcours complets avec de vrais comptes (A31, A32) ; CI rouge (A33) ; paiement opérateur Orange/MTN/Moov non branché (A34) ; mode hors ligne absent (A35) ; fonctions « IA » simulées (A36) ; Kernel GSG différé (A37). Prochaine étape : A31, la connexion réelle.
+
 ## Mise à jour (27/08/2026, suite) — P1 (fin) : test end-to-end avec un vrai compte bloqué par une limite Supabase, pas par le code
 
 Tentative de créer un compte de démo via le vrai flux d'inscription (app lancée en `flutter run -d windows` contre le projet réel) pour valider les nouvelles politiques RLS d'écriture. **Deux vrais blocages trouvés, tous deux côté configuration Supabase, aucun dans le code produit :**
