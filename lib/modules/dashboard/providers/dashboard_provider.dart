@@ -59,18 +59,14 @@ class DashboardProvider extends ChangeNotifier {
           route: '/prescriptions',
           color: PharmaConnectColors.accentPurple,
         ),
+        // C231 : `/reservations` n'existe pas ; la liste est /reservations/history.
         QuickAction(
           label: 'Réservation',
           icon: Icons.shopping_cart,
-          route: '/reservations',
+          route: '/reservations/history',
           color: PharmaConnectColors.accentGreen,
         ),
-        QuickAction(
-          label: 'Stats',
-          icon: Icons.bar_chart,
-          route: '/stats',
-          color: PharmaConnectColors.accentOrange,
-        ),
+        // C231 : action « Stats » retirée, `/stats` n'existe pas.
         // C201 / C209 : vente au comptoir sur le stock réel, personnel de
         // l'officine. Proposées aux pharmaciens uniquement.
         QuickAction(

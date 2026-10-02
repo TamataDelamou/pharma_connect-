@@ -27,6 +27,9 @@ class SidebarNavigation extends StatefulWidget {
   final bool expanded;
   final VoidCallback? onToggleExpand;
 
+  /// C231 : affiche « Se déconnecter » en bas de la barre quand il est fourni.
+  final VoidCallback? onLogout;
+
   const SidebarNavigation({
     super.key,
     required this.items,
@@ -34,6 +37,7 @@ class SidebarNavigation extends StatefulWidget {
     required this.onItemSelected,
     this.expanded = true,
     this.onToggleExpand,
+    this.onLogout,
   });
 
   @override
@@ -168,6 +172,24 @@ class _SidebarNavigationState extends State<SidebarNavigation>
                   },
                 ),
               ),
+
+              // ==================== DÉCONNEXION (C231) ====================
+              if (widget.onLogout != null) ...[
+                const Divider(color: Colors.white12, height: 1),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: _SidebarItem(
+                    item: const SidebarNavigationItem(
+                      label: 'Se déconnecter',
+                      icon: Icons.logout,
+                      route: '',
+                    ),
+                    isActive: false,
+                    expanded: widget.expanded,
+                    onTap: widget.onLogout!,
+                  ),
+                ),
+              ],
 
               // ==================== KERNEL INDICATOR ====================
               Padding(

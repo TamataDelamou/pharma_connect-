@@ -5,6 +5,7 @@ import '../../core/kernel/kernel_badge.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/typography.dart';
 import '../../core/widgets/cards/glass_card.dart';
+import '../../core/widgets/confirm_dialog.dart';
 import '../../core/widgets/navigation/sidebar_navigation.dart';
 import '../auth/models/user_role.dart';
 import '../auth/providers/auth_provider.dart';
@@ -52,22 +53,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
       icon: Icons.description,
       route: '/prescriptions',
     ),
+    // C231 : `/reservations` n'existe pas ; la liste est /reservations/history.
     const SidebarNavigationItem(
       label: 'Réservations',
       icon: Icons.shopping_cart,
-      route: '/reservations',
+      route: '/reservations/history',
     ),
     const SidebarNavigationItem(
       label: 'Livraisons',
       icon: Icons.local_shipping,
       route: '/deliveries',
     ),
-    const SidebarNavigationItem(
-      label: 'Paramètres',
-      icon: Icons.settings,
-      route: '/settings',
-    ),
+    // C231 : « Paramètres » masqué, `/settings` n'existe pas encore (C227).
   ];
+
+  /// C231 : déconnexion depuis la barre latérale, après confirmation.
+  Future<void> _confirmLogout() async {
+    final confirmed = await showConfirmDialog(
+      context,
+      title: 'Déconnexion',
+      message: 'Voulez-vous vous déconnecter ?',
+      confirmText: 'Se déconnecter',
+    );
+    if (!confirmed || !mounted) return;
+    await context.read<AuthProvider>().logout();
+    if (mounted) context.go('/login');
+  }
 
   @override
   void initState() {
@@ -89,7 +100,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
   /// (C201 / C209) : pharmacien d'une officine active seulement.
   List<QuickAction> _actionsFor(UserRole? role, List<QuickAction> all) {
     if (role == UserRole.patient) {
-      const patientRoutes = {'/search', '/prescriptions', '/reservations'};
+      // C231 : /reservations/history (voir dashboard_provider.dart).
+      const patientRoutes = {
+        '/search',
+        '/prescriptions',
+        '/reservations/history',
+      };
       return all.where((a) => patientRoutes.contains(a.route)).toList();
     }
     if (role != UserRole.pharmacien) {
@@ -119,6 +135,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             onToggleExpand: () {
               setState(() => _sidebarExpanded = !_sidebarExpanded);
             },
+            onLogout: _confirmLogout, // C231
           ),
           Expanded(
             child: SingleChildScrollView(

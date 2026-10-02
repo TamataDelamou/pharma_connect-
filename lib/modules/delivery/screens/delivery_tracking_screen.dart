@@ -129,7 +129,10 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen>
                       const SizedBox(height: 24),
                       PrimaryButton(
                         label: 'Voir l\'historique',
-                        onPressed: () => context.go('/deliveries/history'),
+                        // C231 : l'historique est servi par /deliveries
+                        // (DeliveryHistoryScreen) ; /deliveries/history
+                        // n'existe pas.
+                        onPressed: () => context.go('/deliveries'),
                         width: 200,
                       ),
                     ],
@@ -185,10 +188,14 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen>
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: PharmaConnectColors.accentOrange.withValues(alpha: 0.15),
+                  color: PharmaConnectColors.accentOrange.withValues(
+                    alpha: 0.15,
+                  ),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: PharmaConnectColors.accentOrange.withValues(alpha: 0.4),
+                    color: PharmaConnectColors.accentOrange.withValues(
+                      alpha: 0.4,
+                    ),
                   ),
                 ),
                 child: Row(
@@ -485,8 +492,7 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen>
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
-                      provider.error ??
-                          'Impossible de confirmer la réception.',
+                      provider.error ?? 'Impossible de confirmer la réception.',
                     ),
                     backgroundColor: PharmaConnectColors.accentRed,
                   ),

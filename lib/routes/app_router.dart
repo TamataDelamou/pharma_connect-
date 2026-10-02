@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 
 import '../core/services/supabase_service.dart';
+import '../core/widgets/screens/not_found_screen.dart';
 // Alerts
 import '../modules/alerts/screens/alert_center_screen.dart';
 import '../modules/alerts/screens/alert_detail_screen.dart';
@@ -282,7 +283,14 @@ class AppRouter {
       if (isAuth && isEntryAuthScreen) return '/dashboard';
       return null;
     },
+    // C231 : page « Page introuvable » en français, avec un retour qui
+    // fonctionne (celle de go_router renvoyait vers `/`, route absente).
+    errorBuilder: (context, state) =>
+        NotFoundScreen(isAuthenticated: SupabaseService().isAuthenticated),
     routes: [
+      // C231 : `/` n'avait pas de route. Non connecté, la redirection
+      // ci-dessus envoie déjà vers /login.
+      GoRoute(path: '/', redirect: (context, state) => '/dashboard'),
       // ==================== AUTH ====================
       GoRoute(
         path: '/login',
