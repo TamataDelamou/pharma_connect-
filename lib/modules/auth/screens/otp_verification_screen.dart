@@ -19,9 +19,14 @@ class OtpVerificationScreen extends StatefulWidget {
 }
 
 class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
+  // Délai avant de pouvoir redemander un code (3 minutes). Le code lui-même
+  // reste valable 1 heure (mailer_otp_exp = 3600) ; le serveur refuse de
+  // toute façon un nouvel envoi moins de 60 s après le précédent (429).
+  static const _resendDelaySeconds = 180;
+
   final _otpController = TextEditingController();
   bool _isResendEnabled = true;
-  int _resendCountdown = 60;
+  int _resendCountdown = _resendDelaySeconds;
 
   late String _identifier;
   late String _method;
@@ -48,7 +53,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
   void _startCountdown() {
     _isResendEnabled = false;
-    _resendCountdown = 60;
+    _resendCountdown = _resendDelaySeconds;
     Future.doWhile(() async {
       await Future.delayed(const Duration(seconds: 1));
       if (mounted) {
@@ -59,6 +64,42 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       }
       return _resendCountdown > 0;
     });
+  }
+
+  // Renvoie un code par le même canal que la demande initiale (login_screen
+  // et register_screen transmettent la méthode dans `extra`).
+  Future<void> _resendCode(AuthProvider auth) async {
+    final bool sent;
+    if (_method == 'phoneSms') {
+      sent = await auth.sendPhoneOtp(_identifier, 'sms');
+    } else if (_method == 'phoneWhatsapp') {
+      sent = await auth.sendPhoneOtp(_identifier, 'whatsapp');
+    } else {
+      sent = await auth.sendEmailOtp(_identifier, false);
+    }
+    if (!mounted) return;
+    if (sent) {
+      _startCountdown();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Un nouveau code a été envoyé.')),
+      );
+    } else {
+      final error = auth.error ?? '';
+      final tooSoon =
+          error.contains('over_email_send_rate_limit') ||
+          error.contains('over_sms_send_rate_limit') ||
+          error.contains('429');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            tooSoon
+                ? 'Veuillez patienter un instant avant de redemander un code.'
+                : 'Erreur lors de l\'envoi du code.',
+          ),
+          backgroundColor: PharmaConnectColors.accentRed,
+        ),
+      );
+    }
   }
 
   @override
@@ -108,12 +149,20 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     ],
                   ),
                   const SizedBox(height: 24),
-                  const Text('Vérification', style: PharmaConnectTypography.heading2),
+                  const Text(
+                    'Vérification',
+                    style: PharmaConnectTypography.heading2,
+                  ),
                   const SizedBox(height: 8),
                   Text(
                     'Un code à 6 chiffres a été envoyé à ${_identifier.isEmpty ? 'votre identifiant' : _identifier}.',
                     style: PharmaConnectTypography.body2,
                     overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Le code reste valable 1 heure.',
+                    style: PharmaConnectTypography.body2,
                   ),
                   const SizedBox(height: 32),
                   GlassInput(
@@ -136,11 +185,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                       TertiaryButton(
                         label: 'Renvoyer',
                         isDisabled: !_isResendEnabled,
-                        onPressed: _isResendEnabled
-                            ? () {
-                                // TODO: relancer l'envoi via auth
-                                _startCountdown();
-                              }
+                        onPressed: _isResendEnabled && !auth.isLoading
+                            ? () => _resendCode(auth)
                             : null,
                       ),
                     ],
@@ -150,20 +196,37 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     label: 'Vérifier et se connecter',
                     isLoading: auth.isLoading,
                     onPressed: () async {
-                      if (_otpController.text.length != 6) return;
+                      // Un code copié depuis l'e-mail arrive souvent avec un
+                      // espace ou un retour à la ligne : on ne garde que les
+                      // chiffres, et on prévient au lieu d'ignorer le clic.
+                      final code = _otpController.text.replaceAll(
+                        RegExp(r'\D'),
+                        '',
+                      );
+                      if (code.length != 6) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Saisissez les 6 chiffres du code reçu.',
+                            ),
+                            backgroundColor: PharmaConnectColors.accentRed,
+                          ),
+                        );
+                        return;
+                      }
                       bool success;
                       // Déterminer le type de vérification selon la méthode
                       if (_method == 'phoneSms' || _method == 'phoneWhatsapp') {
                         success = await auth.verifyPhoneOtp(
                           _identifier,
-                          _otpController.text,
+                          code,
                           fullName: _fullName,
                           role: _role,
                         );
                       } else {
                         success = await auth.verifyEmailOtp(
                           _identifier,
-                          _otpController.text,
+                          code,
                           fullName: _fullName,
                           role: _role,
                         );

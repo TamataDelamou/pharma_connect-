@@ -21,7 +21,7 @@ class TwoFactorScreen extends StatefulWidget {
 class _TwoFactorScreenState extends State<TwoFactorScreen> {
   final _codeController = TextEditingController();
   bool _isLoading = false;
-  int _resendCountdown = 60;
+  int _resendCountdown = 180;
   bool _isResendEnabled = true;
 
   @override
@@ -39,7 +39,7 @@ class _TwoFactorScreenState extends State<TwoFactorScreen> {
 
   void _startCountdown() {
     _isResendEnabled = false;
-    _resendCountdown = 60;
+    _resendCountdown = 180;
     Future.doWhile(() async {
       await Future.delayed(const Duration(seconds: 1));
       if (mounted) {
