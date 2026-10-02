@@ -214,7 +214,9 @@ class PaymentService {
     // paiement par portefeuille pouvait donc être "effectué" avec un solde
     // à zéro, sans jamais débiter quoi que ce soit.
     if (method == PaymentMethod.gsgWallet && wallet.balance < finalAmount) {
-      throw Exception('Solde du portefeuille GSG insuffisant pour ce paiement.');
+      throw Exception(
+        'Solde du portefeuille GSG insuffisant pour ce paiement.',
+      );
     }
 
     final transaction = Transaction(
@@ -376,7 +378,10 @@ class PaymentService {
   // ==================== STATISTIQUES ====================
 
   Future<Map<String, dynamic>> getPaymentStats(String userId) async {
-    final userTransactions = await getTransactions(userId: userId, limit: 10000);
+    final userTransactions = await getTransactions(
+      userId: userId,
+      limit: 10000,
+    );
     final completed = userTransactions
         .where((t) => t.status == TransactionStatus.completed)
         .toList();

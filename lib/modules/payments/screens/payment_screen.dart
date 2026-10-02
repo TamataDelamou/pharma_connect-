@@ -361,8 +361,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                provider.error ??
-                                    'Erreur lors du paiement',
+                                provider.error ?? 'Erreur lors du paiement',
                               ),
                               backgroundColor: PharmaConnectColors.accentRed,
                             ),
