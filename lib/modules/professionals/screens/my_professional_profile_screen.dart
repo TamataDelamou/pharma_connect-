@@ -158,8 +158,9 @@ class _MyProfessionalProfileScreenState
 
   @override
   Widget build(BuildContext context) {
+    // C226 : titre « Ma fiche professionnelle » et retour fournis par AppShell
+    // (route_titles.dart), plus de barre propre à l'écran.
     return Scaffold(
-      appBar: AppBar(title: const Text('Ma fiche professionnelle')),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : Center(

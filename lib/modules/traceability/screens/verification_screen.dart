@@ -269,11 +269,9 @@ class _BarcodeScannerPageState extends State<_BarcodeScannerPage> {
 
   @override
   Widget build(BuildContext context) {
+    // C226 : titre et retour fournis par AppShell (route_titles.dart), plus
+    // de barre propre à l'écran.
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Scanner le produit'),
-        backgroundColor: Colors.transparent,
-      ),
       body: Stack(
         children: [
           MobileScanner(

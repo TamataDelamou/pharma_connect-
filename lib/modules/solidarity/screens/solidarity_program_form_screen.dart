@@ -195,30 +195,43 @@ class _SolidarityProgramFormScreenState
                               },
                             ),
                             const SizedBox(height: 12),
-                            ListTile(
-                              contentPadding: EdgeInsets.zero,
-                              title: const Text('Date de début'),
-                              subtitle: Text(_formatDate(_startDate)),
-                              leading: const Icon(Icons.calendar_today),
-                              onTap: _pickStartDate,
-                            ),
-                            ListTile(
-                              contentPadding: EdgeInsets.zero,
-                              title: const Text('Date de fin (optionnel)'),
-                              subtitle: Text(
-                                _endDate != null
-                                    ? _formatDate(_endDate!)
-                                    : 'Non définie',
+                            // C226 : les ListTile peignent leur fond et leurs
+                            // effets sur le Material le plus proche ; la carte
+                            // colorée qui les entoure les masquait (assertion
+                            // Flutter en debug, relevée par C232).
+                            Material(
+                              type: MaterialType.transparency,
+                              child: Column(
+                                children: [
+                                  ListTile(
+                                    contentPadding: EdgeInsets.zero,
+                                    title: const Text('Date de début'),
+                                    subtitle: Text(_formatDate(_startDate)),
+                                    leading: const Icon(Icons.calendar_today),
+                                    onTap: _pickStartDate,
+                                  ),
+                                  ListTile(
+                                    contentPadding: EdgeInsets.zero,
+                                    title: const Text(
+                                      'Date de fin (optionnel)',
+                                    ),
+                                    subtitle: Text(
+                                      _endDate != null
+                                          ? _formatDate(_endDate!)
+                                          : 'Non définie',
+                                    ),
+                                    leading: const Icon(Icons.event_busy),
+                                    onTap: _pickEndDate,
+                                    trailing: _endDate != null
+                                        ? IconButton(
+                                            icon: const Icon(Icons.clear),
+                                            onPressed: () =>
+                                                setState(() => _endDate = null),
+                                          )
+                                        : null,
+                                  ),
+                                ],
                               ),
-                              leading: const Icon(Icons.event_busy),
-                              onTap: _pickEndDate,
-                              trailing: _endDate != null
-                                  ? IconButton(
-                                      icon: const Icon(Icons.clear),
-                                      onPressed: () =>
-                                          setState(() => _endDate = null),
-                                    )
-                                  : null,
                             ),
                             const SizedBox(height: 12),
                             GlassInput(
@@ -242,7 +255,9 @@ class _SolidarityProgramFormScreenState
                       ),
                       const SizedBox(height: 24),
                       PrimaryButton(
-                        label: _isLoading ? 'Création...' : 'Créer le programme',
+                        label: _isLoading
+                            ? 'Création...'
+                            : 'Créer le programme',
                         isLoading: _isLoading,
                         onPressed: _submit,
                       ),

@@ -43,6 +43,65 @@ class _KernelConnectionIndicatorState extends State<KernelConnectionIndicator>
 
   @override
   Widget build(BuildContext context) {
+    // C229 : la barre latérale s'anime entre 72 et 260 px ; en dessous de
+    // ces seuils, l'en-tête (point, textes, badge) et le détail des services
+    // débordaient. Point seul quand la place manque, badge et détail
+    // seulement s'ils tiennent.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 160;
+        final showBadge = widget.expanded && constraints.maxWidth >= 240;
+        final showDetails = widget.expanded && !compact;
+        return _buildIndicator(compact, showBadge, showDetails);
+      },
+    );
+  }
+
+  Widget _buildDot() {
+    return AnimatedBuilder(
+      animation: _pulseController,
+      builder: (context, child) {
+        return Container(
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: widget.status.isConnected
+                ? PharmaConnectColors.accentGreen
+                : PharmaConnectColors.accentRed,
+            boxShadow: widget.status.isConnected
+                ? [
+                    BoxShadow(
+                      color: PharmaConnectColors.accentGreen.withValues(
+                        alpha: 0.4 + 0.3 * _pulseController.value,
+                      ),
+                      blurRadius: 12,
+                      spreadRadius: 2,
+                    ),
+                  ]
+                : null,
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildIndicator(bool compact, bool showBadge, bool showDetails) {
+    if (compact) {
+      return Tooltip(
+        message: widget.status.isConnected
+            ? 'GSG Kernel v${widget.status.version}'
+            : 'GSG Kernel : non connecté (Dev)',
+        child: Container(
+          padding: const EdgeInsets.all(8),
+          alignment: Alignment.center,
+          decoration: PharmaConnectGlass.glassDark.copyWith(
+            borderRadius: BorderRadius.circular(PharmaConnectSpacing.radiusMd),
+          ),
+          child: _buildDot(),
+        ),
+      );
+    }
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeOut,
@@ -56,36 +115,9 @@ class _KernelConnectionIndicatorState extends State<KernelConnectionIndicator>
         children: [
           // ==================== EN-TÊTE ====================
           Row(
-            mainAxisSize: MainAxisSize.min,
             children: [
               // Indicateur de connexion
-              AnimatedBuilder(
-                animation: _pulseController,
-                builder: (context, child) {
-                  return Container(
-                    width: 10,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: widget.status.isConnected
-                          ? PharmaConnectColors.accentGreen
-                          : PharmaConnectColors.accentRed,
-                      boxShadow: widget.status.isConnected
-                          ? [
-                              BoxShadow(
-                                color: PharmaConnectColors.accentGreen
-                                    .withValues(
-                                      alpha: 0.4 + 0.3 * _pulseController.value,
-                                    ),
-                                blurRadius: 12,
-                                spreadRadius: 2,
-                              ),
-                            ]
-                          : null,
-                    ),
-                  );
-                },
-              ),
+              _buildDot(),
               const SizedBox(width: 8),
               Flexible(
                 child: Text(
@@ -96,6 +128,7 @@ class _KernelConnectionIndicatorState extends State<KernelConnectionIndicator>
                     letterSpacing: 1.0,
                   ),
                   overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
                 ),
               ),
               const SizedBox(width: 6),
@@ -110,17 +143,15 @@ class _KernelConnectionIndicatorState extends State<KernelConnectionIndicator>
                         : PharmaConnectColors.accentOrange,
                   ),
                   overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
                 ),
               ),
-              if (widget.expanded) ...[
-                const SizedBox(width: 6),
-                const KernelBadge(),
-              ],
+              if (showBadge) ...[const SizedBox(width: 6), const KernelBadge()],
             ],
           ),
 
           // ==================== DÉTAILS DES SERVICES ====================
-          if (widget.expanded) ...[
+          if (showDetails) ...[
             const SizedBox(height: 12),
             const Divider(color: Colors.white24, height: 1),
             const SizedBox(height: 12),
@@ -145,9 +176,7 @@ class _KernelConnectionIndicatorState extends State<KernelConnectionIndicator>
                   ? 'Dernière synchro : ${_formatLastSync(widget.status.lastSync)}'
                   : 'Aucune synchronisation — intégration non branchée',
               style: PharmaConnectTypography.micro.copyWith(
-                color: PharmaConnectColors.textSecondary.withValues(
-                  alpha: 0.7,
-                ),
+                color: PharmaConnectColors.textSecondary.withValues(alpha: 0.7),
               ),
               overflow: TextOverflow.ellipsis,
             ),
@@ -177,13 +206,16 @@ class _KernelConnectionIndicatorState extends State<KernelConnectionIndicator>
                     children: [
                       Text(service.icon, style: const TextStyle(fontSize: 12)),
                       const SizedBox(width: 4),
-                      Text(
-                        service.name,
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
-                          color: service.statusColor,
+                      Flexible(
+                        child: Text(
+                          service.name,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            color: service.statusColor,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 4),
