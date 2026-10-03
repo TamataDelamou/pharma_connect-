@@ -86,6 +86,7 @@ import '../modules/healthrecord/screens/health_record_list_screen.dart';
 import '../modules/healthrecord/screens/health_record_detail_screen.dart';
 import '../modules/healthrecord/screens/health_record_edit_screen.dart';
 import '../modules/healthrecord/screens/emergency_access_screen.dart';
+import '../modules/healthrecord/screens/health_goal_create_screen.dart'; // C232
 
 //teleconsult
 import '../modules/teleconsult/screens/teleconsult_list_screen.dart';
@@ -107,6 +108,7 @@ import '../modules/triage/screens/triage_ai_screen.dart';
 import '../modules/family/screens/family_list_screen.dart';
 import '../modules/family/screens/family_detail_screen.dart';
 import '../modules/family/screens/family_new_screen.dart';
+import '../modules/family/screens/family_challenge_detail_screen.dart'; // C232
 
 // professionnals
 import '../modules/professionals/screens/professionals_list_screen.dart';
@@ -161,6 +163,8 @@ import '../modules/loyalty/screens/loyalty_pharmacy_select_screen.dart';
 
 //solidarty
 import '../modules/solidarity/screens/solidarity_dashboard_screen.dart';
+import '../modules/solidarity/screens/solidarity_program_form_screen.dart'; // C232
+import '../modules/solidarity/screens/solidarity_program_detail_screen.dart'; // C232
 
 //eprescription
 import '../modules/eprescription/screens/eprescription_list_screen.dart';
@@ -732,6 +736,13 @@ class AppRouter {
         name: 'healthrecord-emergency-access',
         builder: (context, state) => const EmergencyAccessScreen(),
       ),
+      // C232 : création d'un objectif santé, écran déjà construit (table
+      // health_goals). 3 segments : pas de conflit avec `/healthrecord/:id`.
+      GoRoute(
+        path: '/healthrecord/goals/new',
+        name: 'healthrecord-goals-new',
+        builder: (context, state) => const HealthGoalCreateScreen(),
+      ),
       GoRoute(
         path: '/healthrecord/patient/:patientId',
         name: 'healthrecord-patient',
@@ -875,6 +886,15 @@ class AppRouter {
         path: '/family/alerts',
         name: 'family-alerts',
         builder: (context, state) => const FamilyListScreen(),
+      ),
+      // C232 : détail d'un défi familial, écran déjà construit (table
+      // family_challenges). 3 segments : pas de conflit avec `/family/:id`.
+      GoRoute(
+        path: '/family/challenges/:id',
+        name: 'family-challenge-detail',
+        builder: (context, state) => FamilyChallengeDetailScreen(
+          challengeId: state.pathParameters['id']!,
+        ),
       ),
       // professionnals
       // C222 / D66 : fiche du professionnel connecté (création, correction).
@@ -1189,6 +1209,23 @@ class AppRouter {
         name: 'solidarity-staff',
         builder: (context, state) =>
             const SolidarityDashboardScreen(isStaff: true),
+      ),
+      // C232 : formulaire et détail d'un programme, déjà construits. `new`
+      // avant `:id`. Création et suppression réservées à l'administration
+      // GSG (RLS is_gsg_admin()) ; les écrans n'affichent ces actions qu'à
+      // elle.
+      GoRoute(
+        path: '/solidarity/program/new',
+        name: 'solidarity-program-new',
+        builder: (context, state) => const SolidarityProgramFormScreen(),
+      ),
+      GoRoute(
+        path: '/solidarity/program/:id',
+        name: 'solidarity-program-detail',
+        builder: (context, state) => SolidarityProgramDetailScreen(
+          programId: state.pathParameters['id']!,
+          isStaff: state.extra as bool? ?? false,
+        ),
       ),
       // eprescription
       GoRoute(

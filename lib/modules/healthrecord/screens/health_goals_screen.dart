@@ -194,10 +194,9 @@ class _HealthGoalsScreenState extends State<HealthGoalsScreen>
         final goal = provider.goals[index];
         return Padding(
           padding: const EdgeInsets.only(bottom: 8),
-          child: HealthGoalCard(
-            goal: goal,
-            onTap: () => context.push('/healthrecord/goals/${goal.id}'),
-          ),
+          // C232 : écran absent — ouverture du détail d'un objectif
+          // (/healthrecord/goals/:id) masquée.
+          child: HealthGoalCard(goal: goal),
         );
       },
     );

@@ -261,7 +261,9 @@ class _FamilyListScreenState extends State<FamilyListScreen>
                 if (!alert.isRead) {
                   await provider.markAlertRead(alert.id);
                 }
-                context.push('/family/alert/${alert.id}');
+                // C232 : pas d'écran de détail d'une alerte ; la liste des
+                // alertes (/family/alerts) la montre.
+                context.push('/family/alerts');
               },
               child: Container(
                 padding: const EdgeInsets.all(12),

@@ -107,14 +107,8 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
                   ),
                   onPressed: () => context.push('/analytics/dashboard-editor'),
                 ),
-                IconButton(
-                  tooltip: 'Prévisions IA',
-                  icon: const Icon(
-                    Icons.trending_up,
-                    color: PharmaConnectColors.textSecondary,
-                  ),
-                  onPressed: () => context.push('/analytics/forecast'),
-                ),
+                // C232 : écran absent — « Prévisions IA »
+                // (/analytics/forecast, route désactivée par C188) masqué.
                 IconButton(
                   tooltip: 'Exporter des rapports',
                   icon: const Icon(

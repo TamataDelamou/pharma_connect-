@@ -40,19 +40,11 @@ class PreventiveAlertsScreen extends StatelessWidget {
                   ),
                 ),
                 const KernelBadge(),
-                const SizedBox(width: 16),
-                ElevatedButton.icon(
-                  onPressed: () => context.push('/healthrecord/alerts/new'),
-                  icon: const Icon(Icons.add),
-                  label: const Text('Configurer'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: PharmaConnectColors.accentCyan,
-                    foregroundColor: PharmaConnectColors.textOnAccent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
+                // C232 : bouton « Configurer » (/healthrecord/alerts/new)
+                // masqué, route volontairement désactivée : D33 / C95, les
+                // tables preventive_alerts, preventive_alert_history,
+                // health_record_vaccinations et health_actions n'existent
+                // pas. À rebrancher quand ce schéma sera construit.
               ],
             ),
             const SizedBox(height: 8),

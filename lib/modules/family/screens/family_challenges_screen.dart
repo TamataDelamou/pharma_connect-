@@ -57,22 +57,8 @@ class _FamilyChallengesScreenState extends State<FamilyChallengesScreen> {
                   ),
                 ),
                 const KernelBadge(),
-                const SizedBox(width: 16),
-                ElevatedButton.icon(
-                  onPressed: () => context.push(
-                    '/family/challenges/new',
-                    extra: widget.familyLinkId,
-                  ),
-                  icon: const Icon(Icons.add),
-                  label: const Text('Créer'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: PharmaConnectColors.accentCyan,
-                    foregroundColor: PharmaConnectColors.textOnAccent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
+                // C232 : écran absent — « Créer » un défi familial
+                // (/family/challenges/new) masqué.
               ],
             ),
             const SizedBox(height: 24),

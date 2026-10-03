@@ -6,9 +6,9 @@ import '../models/health_goal.dart';
 
 class HealthGoalCard extends StatelessWidget {
   final HealthGoal goal;
-  final VoidCallback onTap;
+  final VoidCallback? onTap; // C232 : facultatif, pas d'écran de détail.
 
-  const HealthGoalCard({super.key, required this.goal, required this.onTap});
+  const HealthGoalCard({super.key, required this.goal, this.onTap});
 
   @override
   Widget build(BuildContext context) {

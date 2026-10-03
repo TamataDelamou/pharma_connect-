@@ -5,7 +5,6 @@ import 'package:pharma_connect/core/kernel/kernel_badge.dart';
 import 'package:pharma_connect/core/theme/colors.dart';
 import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
-import 'package:pharma_connect/core/widgets/buttons/secondary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../providers/business_provider.dart';
 import '../models/business_company.dart';
@@ -239,44 +238,18 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
                                   ],
                                 ),
                               ),
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.chevron_right,
-                                  color: Colors.white24,
-                                ),
-                                onPressed: () {
-                                  context.push(
-                                    '/business/contract/${contract.id}',
-                                  );
-                                },
-                              ),
+                              // C232 : écran absent — ouverture du détail
+                              // d'un contrat (/business/contract/:id) masquée.
                             ],
                           ),
                         );
                       }),
-                      const SizedBox(height: 8),
-                      SecondaryButton(
-                        label: 'Voir tous les contrats',
-                        onPressed: () {
-                          context.push(
-                            '/business/contracts',
-                            extra: company.id,
-                          );
-                        },
-                      ),
+                      // C232 : écran absent — « Voir tous les contrats »
+                      // (/business/contracts) masqué.
                     ],
 
-                    const SizedBox(height: 16),
-                    SecondaryButton(
-                      label: 'Nouveau contrat',
-                      icon: Icons.add,
-                      onPressed: () {
-                        context.push(
-                          '/business/contract/new',
-                          extra: company.id,
-                        );
-                      },
-                    ),
+                    // C232 : écran absent — « Nouveau contrat »
+                    // (/business/contract/new) masqué.
                   ],
                 ),
               ),

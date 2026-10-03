@@ -75,19 +75,8 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                   ),
                 ),
                 const KernelBadge(),
-                const SizedBox(width: 16),
-                ElevatedButton.icon(
-                  onPressed: () => context.push('/sales/customer/new'),
-                  icon: const Icon(Icons.add),
-                  label: const Text('Nouveau'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: PharmaConnectColors.accentCyan,
-                    foregroundColor: PharmaConnectColors.textOnAccent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
+                // C232 : écran absent — « Nouveau » client
+                // (/sales/customer/new, route désactivée hors cahier) masqué.
               ],
             ),
             const SizedBox(height: 16),
@@ -132,8 +121,8 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                           padding: const EdgeInsets.only(bottom: 8),
                           child: GlassCard(
                             padding: const EdgeInsets.all(16),
-                            onTap: () =>
-                                context.push('/sales/customer/${customer.id}'),
+                            // C232 : écran absent — ouverture de la fiche
+                            // client (/sales/customer/:id) masquée.
                             child: Row(
                               children: [
                                 CircleAvatar(

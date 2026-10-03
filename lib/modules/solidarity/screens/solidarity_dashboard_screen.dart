@@ -6,6 +6,7 @@ import 'package:pharma_connect/core/theme/colors.dart';
 import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../providers/solidarity_provider.dart';
 import '../widgets/program_card.dart';
 
@@ -68,6 +69,11 @@ class _SolidarityDashboardScreenState extends State<SolidarityDashboardScreen>
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<SolidarityProvider>();
+    // C232 : création de programme réservée à l'administration GSG (RLS
+    // « Staff manage solidarity programs » : is_gsg_admin()). `isStaff` seul
+    // ne dépend que de l'adresse (/solidarity/staff).
+    final canManage =
+        widget.isStaff && context.watch<AuthProvider>().isGsgAdmin;
 
     return Scaffold(
       body: Padding(
@@ -94,7 +100,7 @@ class _SolidarityDashboardScreenState extends State<SolidarityDashboardScreen>
                   ),
                 ),
                 const KernelBadge(),
-                if (widget.isStaff) ...[
+                if (canManage) ...[
                   const SizedBox(width: 16),
                   ElevatedButton.icon(
                     onPressed: () => context.push('/solidarity/program/new'),

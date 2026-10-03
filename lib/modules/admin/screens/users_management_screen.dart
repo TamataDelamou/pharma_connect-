@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
 import '../../../core/theme/colors.dart';
 import '../../../core/theme/typography.dart';
-import '../../../core/widgets/buttons/primary_button.dart';
 import '../providers/admin_provider.dart';
 import '../models/admin_role.dart';
 
@@ -52,12 +51,8 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
                   ),
                 ),
                 const KernelBadge(),
-                const SizedBox(width: 16),
-                PrimaryButton(
-                  label: 'Ajouter',
-                  icon: Icons.add,
-                  onPressed: () => context.push('/admin/users/create'),
-                ),
+                // C232 : écran absent — bouton « Ajouter » (création
+                // d'utilisateur, /admin/users/create) masqué.
               ],
             ),
             const SizedBox(height: 8),

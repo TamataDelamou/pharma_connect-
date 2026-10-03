@@ -8,6 +8,7 @@ import 'package:pharma_connect/core/utils/currency_formatter.dart';
 import 'package:pharma_connect/core/widgets/buttons/tertiary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../models/solidarity_program.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../providers/solidarity_provider.dart';
 
 class SolidarityProgramDetailScreen extends StatefulWidget {
@@ -88,6 +89,10 @@ class _SolidarityProgramDetailScreenState
   Widget build(BuildContext context) {
     final provider = context.watch<SolidarityProvider>();
     final program = provider.selectedProgram;
+    // C232 : suppression réservée à l'administration GSG (RLS « Staff manage
+    // solidarity programs » : is_gsg_admin()), comme la création.
+    final canManage =
+        widget.isStaff && context.watch<AuthProvider>().isGsgAdmin;
 
     if (provider.isLoading && program == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -179,7 +184,10 @@ class _SolidarityProgramDetailScreenState
                             _buildInfoRow('Officine', program.pharmacyName!),
                             const Divider(color: Colors.white12),
                           ],
-                          _buildInfoRow('Début', _formatDate(program.startDate)),
+                          _buildInfoRow(
+                            'Début',
+                            _formatDate(program.startDate),
+                          ),
                           const Divider(color: Colors.white12),
                           _buildInfoRow(
                             'Fin',
@@ -214,7 +222,7 @@ class _SolidarityProgramDetailScreenState
                         ],
                       ),
                     ),
-                    if (widget.isStaff) ...[
+                    if (canManage) ...[
                       const SizedBox(height: 16),
                       TertiaryButton(
                         label: _isDeleting
@@ -241,7 +249,10 @@ class _SolidarityProgramDetailScreenState
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(width: 120, child: Text(label, style: PharmaConnectTypography.label)),
+          SizedBox(
+            width: 120,
+            child: Text(label, style: PharmaConnectTypography.label),
+          ),
           Expanded(child: Text(value, style: PharmaConnectTypography.body1)),
         ],
       ),
