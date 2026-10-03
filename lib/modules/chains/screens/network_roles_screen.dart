@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
@@ -45,25 +46,31 @@ class _NetworkRolesScreenState extends State<NetworkRolesScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                IconButton(
-                  icon: const Icon(
-                    Icons.arrow_back,
-                    color: PharmaConnectColors.textPrimary,
+            // C233 : en-tête adaptable (actions sous le titre sur téléphone).
+            HeaderRow(
+              leading: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      color: PharmaConnectColors.textPrimary,
+                    ),
+                    onPressed: () => context.pop(),
+                    padding: EdgeInsets.zero,
                   ),
-                  onPressed: () => context.pop(),
-                  padding: EdgeInsets.zero,
-                ),
-                const SizedBox(width: 8),
-                const Expanded(
-                  child: Text(
-                    '🌐 Rôles d\'administration réseau',
-                    style: PharmaConnectTypography.heading2,
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      '🌐 Rôles d\'administration réseau',
+                      style: PharmaConnectTypography.heading2,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                ),
+                ],
+              ),
+              trailing: [
                 const KernelBadge(),
-                const SizedBox(width: 12),
                 ElevatedButton.icon(
                   onPressed: _showAssignRoleDialog,
                   icon: const Icon(Icons.person_add),
@@ -314,8 +321,7 @@ class _NetworkRolesScreenState extends State<NetworkRolesScreen> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
-                        context.read<NetworkAdminProvider>().error ??
-                            'Erreur',
+                        context.read<NetworkAdminProvider>().error ?? 'Erreur',
                       ),
                       backgroundColor: PharmaConnectColors.accentRed,
                     ),

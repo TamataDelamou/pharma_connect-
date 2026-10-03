@@ -134,6 +134,8 @@ class _AppShellState extends State<AppShell> {
         title: Text(
           title,
           style: PharmaConnectTypography.heading3,
+          maxLines: 1, // C233 : une seule ligne, coupée avec « … ».
+          softWrap: false,
           overflow: TextOverflow.ellipsis,
         ),
         actions: [

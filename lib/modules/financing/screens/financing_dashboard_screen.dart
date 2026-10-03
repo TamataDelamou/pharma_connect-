@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
@@ -37,9 +38,7 @@ class _FinancingDashboardScreenState extends State<FinancingDashboardScreen>
       // filtre silencieusement inopérant).
       final pharmacyId = context.read<AuthProvider>().pharmacyId;
       if (pharmacyId != null) {
-        context.read<FinancingProvider>().loadRequests(
-          pharmacyId: pharmacyId,
-        );
+        context.read<FinancingProvider>().loadRequests(pharmacyId: pharmacyId);
         context.read<FinancingProvider>().loadCreditScore(pharmacyId);
       }
     });
@@ -90,26 +89,26 @@ class _FinancingDashboardScreenState extends State<FinancingDashboardScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                const Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '💰 Financement',
-                        style: PharmaConnectTypography.heading1,
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Financement pour grossistes et pharmacies',
-                        style: PharmaConnectTypography.body2,
-                      ),
-                    ],
+            // C233 : en-tête adaptable (actions sous le titre sur téléphone).
+            HeaderRow(
+              leading: const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '💰 Financement',
+                    style: PharmaConnectTypography.heading1,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Financement pour grossistes et pharmacies',
+                    style: PharmaConnectTypography.body2,
+                  ),
+                ],
+              ),
+              trailing: [
                 const KernelBadge(),
-                const SizedBox(width: 16),
                 ElevatedButton.icon(
                   onPressed: () => context.push('/financing/request/new'),
                   icon: const Icon(Icons.add),

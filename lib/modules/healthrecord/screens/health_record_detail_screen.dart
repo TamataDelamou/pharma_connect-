@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
@@ -61,23 +62,30 @@ class _HealthRecordDetailScreenState extends State<HealthRecordDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header
-            Row(
-              children: [
-                IconButton(
-                  icon: const Icon(
-                    Icons.arrow_back,
-                    color: PharmaConnectColors.textPrimary,
+            // C233 : en-tête adaptable (actions sous le titre sur téléphone).
+            HeaderRow(
+              leading: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      color: PharmaConnectColors.textPrimary,
+                    ),
+                    onPressed: () => context.pop(),
+                    padding: EdgeInsets.zero,
                   ),
-                  onPressed: () => context.pop(),
-                  padding: EdgeInsets.zero,
-                ),
-                const SizedBox(width: 8),
-                const Expanded(
-                  child: Text(
-                    'Dossier de santé',
-                    style: PharmaConnectTypography.heading2,
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      'Dossier de santé',
+                      style: PharmaConnectTypography.heading2,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                ),
+                ],
+              ),
+              trailing: [
                 const KernelBadge(),
                 // C219 : seul le patient modifie son dossier ; un
                 // professionnel (lien de soin ou accès d'urgence) le consulte.

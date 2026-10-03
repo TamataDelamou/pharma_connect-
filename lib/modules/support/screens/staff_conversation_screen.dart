@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
@@ -47,25 +48,30 @@ class _StaffConversationScreenState extends State<StaffConversationScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                IconButton(
-                  icon: const Icon(
-                    Icons.arrow_back,
-                    color: PharmaConnectColors.textPrimary,
+            // C233 : en-tête adaptable (actions sous le titre sur téléphone).
+            HeaderRow(
+              leading: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      color: PharmaConnectColors.textPrimary,
+                    ),
+                    onPressed: () => context.pop(),
+                    padding: EdgeInsets.zero,
                   ),
-                  onPressed: () => context.pop(),
-                  padding: EdgeInsets.zero,
-                ),
-                const SizedBox(width: 8),
-                const Expanded(
-                  child: Text(
-                    'Conversation escaladée',
-                    style: PharmaConnectTypography.heading2,
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      'Conversation escaladée',
+                      style: PharmaConnectTypography.heading2,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                ),
-                const KernelBadge(),
-              ],
+                ],
+              ),
+              trailing: [const KernelBadge()],
             ),
             const SizedBox(height: 16),
             Expanded(
@@ -134,9 +140,7 @@ class _StaffConversationScreenState extends State<StaffConversationScreen> {
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 4),
             child: Align(
-              alignment: isUser
-                  ? Alignment.centerLeft
-                  : Alignment.centerRight,
+              alignment: isUser ? Alignment.centerLeft : Alignment.centerRight,
               child: Container(
                 padding: const EdgeInsets.all(12),
                 constraints: BoxConstraints(
@@ -144,9 +148,7 @@ class _StaffConversationScreenState extends State<StaffConversationScreen> {
                 ),
                 decoration: BoxDecoration(
                   color: isStaff
-                      ? PharmaConnectColors.accentOrange.withValues(
-                          alpha: 0.15,
-                        )
+                      ? PharmaConnectColors.accentOrange.withValues(alpha: 0.15)
                       : Colors.white.withValues(alpha: 0.04),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(

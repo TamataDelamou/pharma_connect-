@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -85,34 +86,39 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // En-tête
-            Row(
-              children: [
-                IconButton(
-                  icon: const Icon(
-                    Icons.arrow_back,
-                    color: PharmaConnectColors.textPrimary,
+            // C233 : en-tête adaptable (actions sous le titre sur téléphone).
+            HeaderRow(
+              leading: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      color: PharmaConnectColors.textPrimary,
+                    ),
+                    onPressed: () {
+                      if (_currentStep != CheckoutStep.summary) {
+                        setState(() {
+                          _currentStep =
+                              CheckoutStep.values[_currentStep.index - 1];
+                        });
+                      } else {
+                        context.pop();
+                      }
+                    },
+                    padding: EdgeInsets.zero,
                   ),
-                  onPressed: () {
-                    if (_currentStep != CheckoutStep.summary) {
-                      setState(() {
-                        _currentStep =
-                            CheckoutStep.values[_currentStep.index - 1];
-                      });
-                    } else {
-                      context.pop();
-                    }
-                  },
-                  padding: EdgeInsets.zero,
-                ),
-                const SizedBox(width: 8),
-                const Expanded(
-                  child: Text(
-                    'Validation de la commande',
-                    style: PharmaConnectTypography.heading2,
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      'Validation de la commande',
+                      style: PharmaConnectTypography.heading2,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                ),
-                const KernelBadge(),
-              ],
+                ],
+              ),
+              trailing: [const KernelBadge()],
             ),
             const SizedBox(height: 16),
 
@@ -633,8 +639,7 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
                                     method: paymentMethod,
                                     reservationId: reservation.id,
                                     pharmacyId: pharmacyId,
-                                    pharmacyName:
-                                        provider.selectedPharmacyName,
+                                    pharmacyName: provider.selectedPharmacyName,
                                   );
                               if (transaction == null && context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
@@ -664,8 +669,7 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
                             if (!context.mounted) return;
                             final deliveryAddress = _addressController.text
                                 .trim();
-                            if (deliveryAddress.isNotEmpty &&
-                                context.mounted) {
+                            if (deliveryAddress.isNotEmpty && context.mounted) {
                               final deliveryProvider = context
                                   .read<DeliveryProvider>();
                               final delivery = await deliveryProvider
@@ -955,9 +959,8 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
               child: PrimaryButton(
                 label: 'Suivre ma livraison',
                 icon: Icons.local_shipping,
-                onPressed: () => context.go(
-                  '/deliveries/tracking/$_scheduledDeliveryId',
-                ),
+                onPressed: () =>
+                    context.go('/deliveries/tracking/$_scheduledDeliveryId'),
               ),
             ),
           ],

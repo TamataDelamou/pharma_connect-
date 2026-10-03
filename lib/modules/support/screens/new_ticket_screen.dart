@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
@@ -75,25 +76,30 @@ class _NewTicketScreenState extends State<NewTicketScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(
-                      Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+              // C233 : en-tête adaptable (actions sous le titre sur téléphone).
+              HeaderRow(
+                leading: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: PharmaConnectColors.textPrimary,
+                      ),
+                      onPressed: () => context.pop(),
+                      padding: EdgeInsets.zero,
                     ),
-                    onPressed: () => context.pop(),
-                    padding: EdgeInsets.zero,
-                  ),
-                  const SizedBox(width: 8),
-                  const Expanded(
-                    child: Text(
-                      'Nouveau ticket de support',
-                      style: PharmaConnectTypography.heading2,
+                    const SizedBox(width: 8),
+                    const Expanded(
+                      child: Text(
+                        'Nouveau ticket de support',
+                        style: PharmaConnectTypography.heading2,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                  ),
-                  const KernelBadge(),
-                ],
+                  ],
+                ),
+                trailing: [const KernelBadge()],
               ),
               const SizedBox(height: 24),
 
@@ -247,7 +253,8 @@ class _NewTicketScreenState extends State<NewTicketScreen> {
                               const SizedBox(height: 12),
                               GlassInput(
                                 label: 'Référence liée (optionnel)',
-                                hint: 'N° de commande, de paiement ou de livraison',
+                                hint:
+                                    'N° de commande, de paiement ou de livraison',
                                 controller: _disputeReferenceController,
                                 prefixIcon: Icons.link,
                               ),
@@ -358,10 +365,12 @@ class _NewTicketScreenState extends State<NewTicketScreen> {
       updatedAt: DateTime.now().toUtc(),
       isDispute: isDispute,
       disputeCategory: isDispute ? _disputeCategory : null,
-      disputedAmount: isDispute && _disputedAmountController.text.trim().isNotEmpty
+      disputedAmount:
+          isDispute && _disputedAmountController.text.trim().isNotEmpty
           ? num.tryParse(_disputedAmountController.text.trim())
           : null,
-      disputeReferenceId: isDispute && _disputeReferenceController.text.trim().isNotEmpty
+      disputeReferenceId:
+          isDispute && _disputeReferenceController.text.trim().isNotEmpty
           ? _disputeReferenceController.text.trim()
           : null,
     );

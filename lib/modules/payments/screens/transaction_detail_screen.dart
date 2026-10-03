@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
@@ -66,25 +67,30 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                IconButton(
-                  icon: const Icon(
-                    Icons.arrow_back,
-                    color: PharmaConnectColors.textPrimary,
+            // C233 : en-tête adaptable (actions sous le titre sur téléphone).
+            HeaderRow(
+              leading: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      color: PharmaConnectColors.textPrimary,
+                    ),
+                    onPressed: () => context.pop(),
+                    padding: EdgeInsets.zero,
                   ),
-                  onPressed: () => context.pop(),
-                  padding: EdgeInsets.zero,
-                ),
-                const SizedBox(width: 8),
-                const Expanded(
-                  child: Text(
-                    'Détail de la transaction',
-                    style: PharmaConnectTypography.heading2,
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      'Détail de la transaction',
+                      style: PharmaConnectTypography.heading2,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                ),
-                const KernelBadge(),
-              ],
+                ],
+              ),
+              trailing: [const KernelBadge()],
             ),
             const SizedBox(height: 24),
 
@@ -127,8 +133,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      transaction.pharmacyName ??
-                                          'Transaction',
+                                      transaction.pharmacyName ?? 'Transaction',
                                       style: PharmaConnectTypography.heading3,
                                     ),
                                     Text(
@@ -183,17 +188,12 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                         children: [
                           _DetailRow(
                             label: 'Montant',
-                            value: CurrencyFormatter.format(
-                              transaction.amount,
-                            ),
+                            value: CurrencyFormatter.format(transaction.amount),
                           ),
-                          if (transaction.fee != null &&
-                              transaction.fee != 0)
+                          if (transaction.fee != null && transaction.fee != 0)
                             _DetailRow(
                               label: 'Frais',
-                              value: CurrencyFormatter.format(
-                                transaction.fee!,
-                              ),
+                              value: CurrencyFormatter.format(transaction.fee!),
                             ),
                           if (transaction.cashback != null &&
                               transaction.cashback != 0)
@@ -295,9 +295,7 @@ class _DetailRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Text(label, style: PharmaConnectTypography.label),
-          ),
+          Expanded(child: Text(label, style: PharmaConnectTypography.label)),
           Expanded(
             flex: 2,
             child: Text(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
@@ -14,8 +15,7 @@ class InspectionDetailScreen extends StatefulWidget {
   const InspectionDetailScreen({super.key, required this.inspectionId});
 
   @override
-  State<InspectionDetailScreen> createState() =>
-      _InspectionDetailScreenState();
+  State<InspectionDetailScreen> createState() => _InspectionDetailScreenState();
 }
 
 class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
@@ -55,25 +55,30 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                IconButton(
-                  icon: const Icon(
-                    Icons.arrow_back,
-                    color: PharmaConnectColors.textPrimary,
+            // C233 : en-tête adaptable (actions sous le titre sur téléphone).
+            HeaderRow(
+              leading: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      color: PharmaConnectColors.textPrimary,
+                    ),
+                    onPressed: () => context.pop(),
+                    padding: EdgeInsets.zero,
                   ),
-                  onPressed: () => context.pop(),
-                  padding: EdgeInsets.zero,
-                ),
-                const SizedBox(width: 8),
-                const Expanded(
-                  child: Text(
-                    'Détail de l\'inspection',
-                    style: PharmaConnectTypography.heading2,
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      'Détail de l\'inspection',
+                      style: PharmaConnectTypography.heading2,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                ),
-                const KernelBadge(),
-              ],
+                ],
+              ),
+              trailing: [const KernelBadge()],
             ),
             const SizedBox(height: 24),
             Expanded(
@@ -109,7 +114,10 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
                           ],
                           if (inspection.findings != null) ...[
                             const Divider(color: Colors.white12),
-                            _buildInfoRow('Constatations', inspection.findings!),
+                            _buildInfoRow(
+                              'Constatations',
+                              inspection.findings!,
+                            ),
                           ],
                           if (inspection.violations.isNotEmpty) ...[
                             const Divider(color: Colors.white12),

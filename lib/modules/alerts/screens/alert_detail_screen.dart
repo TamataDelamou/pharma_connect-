@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
@@ -57,28 +58,33 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                IconButton(
-                  icon: const Icon(
-                    Icons.arrow_back,
-                    color: PharmaConnectColors.textPrimary,
+            // C233 : en-tête adaptable (actions sous le titre sur téléphone).
+            HeaderRow(
+              leading: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      color: PharmaConnectColors.textPrimary,
+                    ),
+                    onPressed: () {
+                      context.read<AlertProvider>().clearSelected();
+                      context.pop();
+                    },
+                    padding: EdgeInsets.zero,
                   ),
-                  onPressed: () {
-                    context.read<AlertProvider>().clearSelected();
-                    context.pop();
-                  },
-                  padding: EdgeInsets.zero,
-                ),
-                const SizedBox(width: 8),
-                const Expanded(
-                  child: Text(
-                    'Détail de l\'alerte',
-                    style: PharmaConnectTypography.heading2,
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      'Détail de l\'alerte',
+                      style: PharmaConnectTypography.heading2,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                ),
-                const KernelBadge(),
-              ],
+                ],
+              ),
+              trailing: [const KernelBadge()],
             ),
             const SizedBox(height: 24),
             Expanded(
@@ -149,9 +155,7 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: PharmaConnectColors.accentCyan.withValues(
-                    alpha: 0.15,
-                  ),
+                  color: PharmaConnectColors.accentCyan.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
@@ -229,9 +233,7 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () async {
-                    await context.read<AlertProvider>().dismissAlert(
-                      alert.id,
-                    );
+                    await context.read<AlertProvider>().dismissAlert(alert.id);
                     if (context.mounted) context.pop();
                   },
                   icon: const Icon(Icons.close),

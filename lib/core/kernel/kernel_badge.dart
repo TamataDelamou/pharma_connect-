@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/colors.dart';
 import '../theme/spacing.dart';
+import '../theme/typography.dart';
 
 class KernelBadge extends StatelessWidget {
   final bool showIcon;
@@ -17,8 +18,15 @@ class KernelBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // C233 : en largeur téléphone, le badge se réduit à son icône. Il est
+    // posé dans l'en-tête de la plupart des écrans, à côté du titre, auquel
+    // il ne laissait presque plus de place.
+    final compact =
+        (MediaQuery.maybeSizeOf(context)?.width ?? double.infinity) <
+        PharmaConnectTypography.compactBreakpoint;
+    final showLabel = this.showLabel && !(compact && showIcon);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: EdgeInsets.symmetric(horizontal: compact ? 6 : 10, vertical: 4),
       decoration: BoxDecoration(
         color: PharmaConnectColors.accentPurple.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(PharmaConnectSpacing.radiusSm),

@@ -4,6 +4,7 @@ import '../../core/kernel/kernel_badge.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/typography.dart';
 import '../../core/widgets/cards/glass_card.dart';
+import '../../core/widgets/layout/responsive.dart';
 import '../auth/models/user_role.dart';
 import '../auth/providers/auth_provider.dart';
 import '../auth/widgets/account_status_banner.dart';
@@ -57,12 +58,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     final dashboard = context.watch<DashboardProvider>();
     final role = context.watch<AuthProvider>().effectiveRole;
+    // C233 : mise en page téléphone (une colonne, marges réduites).
+    final compact = isCompactWidth(context);
 
     // C226 : la barre latérale, le menu et la déconnexion sont fournis par
     // AppShell (lib/routes/app_shell.dart) pour toutes les routes connectées.
     return Scaffold(
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(32),
+        padding: screenPadding(context),
         child: dashboard.isLoading
             ? const Center(child: CircularProgressIndicator())
             : Column(
@@ -78,6 +81,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             Text(
                               'Tableau de bord',
                               style: PharmaConnectTypography.heading1,
+                              maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
                             SizedBox(height: 4),
@@ -117,39 +121,53 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   GridView.count(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    crossAxisCount: 3,
+                    crossAxisCount: compact ? 1 : 3,
                     crossAxisSpacing: 24,
-                    mainAxisSpacing: 24,
-                    childAspectRatio: 1.2,
+                    mainAxisSpacing: compact ? 12 : 24,
+                    childAspectRatio: compact ? 2.6 : 1.2,
                     children: dashboard.data.stats.map((stat) {
                       return _buildStatCard(stat);
                     }).toList(),
                   ),
                   const SizedBox(height: 32),
 
-                  // ===== ACTIVITÉ RÉCENTE + ALERTES (2 colonnes) =====
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: GlassCard(
-                          padding: const EdgeInsets.all(20),
-                          child: ActivityTimeline(
-                            activities: dashboard.data.activities,
+                  // ===== ACTIVITÉ RÉCENTE + ALERTES =====
+                  // C233 : 2 colonnes en largeur, empilées sur téléphone.
+                  if (compact) ...[
+                    GlassCard(
+                      padding: const EdgeInsets.all(16),
+                      child: ActivityTimeline(
+                        activities: dashboard.data.activities,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    GlassCard(
+                      padding: const EdgeInsets.all(16),
+                      child: AlertCenter(alerts: dashboard.data.alerts),
+                    ),
+                  ] else
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: GlassCard(
+                            padding: const EdgeInsets.all(20),
+                            child: ActivityTimeline(
+                              activities: dashboard.data.activities,
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 24),
-                      Expanded(
-                        flex: 1,
-                        child: GlassCard(
-                          padding: const EdgeInsets.all(20),
-                          child: AlertCenter(alerts: dashboard.data.alerts),
+                        const SizedBox(width: 24),
+                        Expanded(
+                          flex: 1,
+                          child: GlassCard(
+                            padding: const EdgeInsets.all(20),
+                            child: AlertCenter(alerts: dashboard.data.alerts),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
                 ],
               ),
       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
@@ -68,22 +69,30 @@ class _PreConsultationScreenState extends State<PreConsultationScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back, color: PharmaConnectColors.textPrimary),
-                  onPressed: () => context.pop(),
-                  padding: EdgeInsets.zero,
-                ),
-                const SizedBox(width: 8),
-                const Expanded(
-                  child: Text(
-                    '🤖 Assistant pré-consultation',
-                    style: PharmaConnectTypography.heading2,
+            // C233 : en-tête adaptable (actions sous le titre sur téléphone).
+            HeaderRow(
+              leading: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      color: PharmaConnectColors.textPrimary,
+                    ),
+                    onPressed: () => context.pop(),
+                    padding: EdgeInsets.zero,
                   ),
-                ),
-                const KernelBadge(),
-              ],
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      '🤖 Assistant pré-consultation',
+                      style: PharmaConnectTypography.heading2,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+              trailing: [const KernelBadge()],
             ),
             const SizedBox(height: 24),
 
@@ -91,38 +100,43 @@ class _PreConsultationScreenState extends State<PreConsultationScreen> {
               child: provider.isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : provider.error != null
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.error_outline, size: 48, color: PharmaConnectColors.accentRed),
-                              const SizedBox(height: 16),
-                              Text(
-                                provider.error!,
-                                style: PharmaConnectTypography.body2.copyWith(
-                                  color: PharmaConnectColors.accentRed,
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              PrimaryButton(
-                                label: 'Réessayer',
-                                onPressed: () {
-                                  provider.clearError();
-                                  final userId = SupabaseService().currentUser?.id;
-                                  if (userId != null) {
-                                    provider.startSession(userId);
-                                  }
-                                },
-                                width: 200,
-                              ),
-                            ],
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.error_outline,
+                            size: 48,
+                            color: PharmaConnectColors.accentRed,
                           ),
-                        )
-                      : session == null
-                          ? const SizedBox.shrink()
-                          : session.status == 'completed' && provider.analysisResult != null
-                              ? _buildResults(provider)
-                              : _buildQuestionFlow(provider),
+                          const SizedBox(height: 16),
+                          Text(
+                            provider.error!,
+                            style: PharmaConnectTypography.body2.copyWith(
+                              color: PharmaConnectColors.accentRed,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          PrimaryButton(
+                            label: 'Réessayer',
+                            onPressed: () {
+                              provider.clearError();
+                              final userId = SupabaseService().currentUser?.id;
+                              if (userId != null) {
+                                provider.startSession(userId);
+                              }
+                            },
+                            width: 200,
+                          ),
+                        ],
+                      ),
+                    )
+                  : session == null
+                  ? const SizedBox.shrink()
+                  : session.status == 'completed' &&
+                        provider.analysisResult != null
+                  ? _buildResults(provider)
+                  : _buildQuestionFlow(provider),
             ),
           ],
         ),
@@ -195,7 +209,9 @@ class _PreConsultationScreenState extends State<PreConsultationScreen> {
                         margin: const EdgeInsets.only(bottom: 6),
                         decoration: BoxDecoration(
                           color: _selectedSymptom == label
-                              ? PharmaConnectColors.accentCyan.withValues(alpha: 0.1)
+                              ? PharmaConnectColors.accentCyan.withValues(
+                                  alpha: 0.1,
+                                )
                               : Colors.transparent,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
@@ -206,13 +222,13 @@ class _PreConsultationScreenState extends State<PreConsultationScreen> {
                         ),
                         child: Row(
                           children: [
-                            Text(
-                              label,
-                              style: PharmaConnectTypography.body1,
-                            ),
+                            Text(label, style: PharmaConnectTypography.body1),
                             const Spacer(),
                             if (_selectedSymptom == label)
-                              const Icon(Icons.check_circle, color: PharmaConnectColors.accentCyan),
+                              const Icon(
+                                Icons.check_circle,
+                                color: PharmaConnectColors.accentCyan,
+                              ),
                           ],
                         ),
                       ),
@@ -222,7 +238,10 @@ class _PreConsultationScreenState extends State<PreConsultationScreen> {
                   PrimaryButton(
                     label: 'Suivant',
                     onPressed: _selectedSymptom != null
-                        ? () => provider.selectOption(currentNode.id, _selectedSymptom!)
+                        ? () => provider.selectOption(
+                            currentNode.id,
+                            _selectedSymptom!,
+                          )
                         : null,
                   ),
                 ],
@@ -253,16 +272,24 @@ class _PreConsultationScreenState extends State<PreConsultationScreen> {
               decoration: BoxDecoration(
                 color: PharmaConnectColors.accentRed.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: PharmaConnectColors.accentRed.withValues(alpha: 0.3)),
+                border: Border.all(
+                  color: PharmaConnectColors.accentRed.withValues(alpha: 0.3),
+                ),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.warning_amber, color: PharmaConnectColors.accentRed),
+                  const Icon(
+                    Icons.warning_amber,
+                    color: PharmaConnectColors.accentRed,
+                  ),
                   const SizedBox(width: 8),
                   const Expanded(
                     child: Text(
                       '⚠️ URGENCE - Consultez immédiatement',
-                      style: TextStyle(color: PharmaConnectColors.accentRed, fontWeight: FontWeight.w700),
+                      style: TextStyle(
+                        color: PharmaConnectColors.accentRed,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ],
@@ -274,18 +301,33 @@ class _PreConsultationScreenState extends State<PreConsultationScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('📋 Analyse préliminaire', style: PharmaConnectTypography.heading3),
+                const Text(
+                  '📋 Analyse préliminaire',
+                  style: PharmaConnectTypography.heading3,
+                ),
                 const SizedBox(height: 12),
-                _buildInfoRow('Spécialité suggérée', analysis['specialty_suggestion'] ?? 'Non déterminée'),
+                _buildInfoRow(
+                  'Spécialité suggérée',
+                  analysis['specialty_suggestion'] ?? 'Non déterminée',
+                ),
                 const Divider(color: Colors.white12),
-                _buildInfoRow('Niveau d\'urgence', _urgencyLabel(analysis['urgency_level'] ?? 3)),
+                _buildInfoRow(
+                  'Niveau d\'urgence',
+                  _urgencyLabel(analysis['urgency_level'] ?? 3),
+                ),
                 const Divider(color: Colors.white12),
-                _buildInfoRow('Severité', analysis['symptoms_analysis']['severity'] ?? 'Non évaluée'),
-                if (analysis['symptoms_analysis']['possible_conditions'] != null) ...[
+                _buildInfoRow(
+                  'Severité',
+                  analysis['symptoms_analysis']['severity'] ?? 'Non évaluée',
+                ),
+                if (analysis['symptoms_analysis']['possible_conditions'] !=
+                    null) ...[
                   const Divider(color: Colors.white12),
                   _buildInfoRow(
                     'Conditions possibles',
-                    (analysis['symptoms_analysis']['possible_conditions'] as List).join(', '),
+                    (analysis['symptoms_analysis']['possible_conditions']
+                            as List)
+                        .join(', '),
                   ),
                 ],
                 if (analysis['suggested_actions'] != null) ...[
@@ -304,7 +346,10 @@ class _PreConsultationScreenState extends State<PreConsultationScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('📄 Résumé pour le médecin', style: PharmaConnectTypography.heading3),
+                const Text(
+                  '📄 Résumé pour le médecin',
+                  style: PharmaConnectTypography.heading3,
+                ),
                 const SizedBox(height: 8),
                 Text(
                   session.summary ?? 'Résumé généré automatiquement.',
@@ -323,10 +368,13 @@ class _PreConsultationScreenState extends State<PreConsultationScreen> {
                   icon: Icons.calendar_today,
                   onPressed: () {
                     // Navigate to booking with the suggested specialty
-                    context.push('/teleconsult/book', extra: {
-                      'specialty': analysis['specialty_suggestion'],
-                      'symptoms': session.symptoms,
-                    });
+                    context.push(
+                      '/teleconsult/book',
+                      extra: {
+                        'specialty': analysis['specialty_suggestion'],
+                        'symptoms': session.symptoms,
+                      },
+                    );
                   },
                 ),
               ),
@@ -359,17 +407,9 @@ class _PreConsultationScreenState extends State<PreConsultationScreen> {
         children: [
           SizedBox(
             width: 140,
-            child: Text(
-              label,
-              style: PharmaConnectTypography.label,
-            ),
+            child: Text(label, style: PharmaConnectTypography.label),
           ),
-          Expanded(
-            child: Text(
-              value,
-              style: PharmaConnectTypography.body1,
-            ),
-          ),
+          Expanded(child: Text(value, style: PharmaConnectTypography.body1)),
         ],
       ),
     );

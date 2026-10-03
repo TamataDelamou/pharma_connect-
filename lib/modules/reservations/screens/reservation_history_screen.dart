@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
@@ -54,25 +55,30 @@ class _ReservationHistoryScreenState extends State<ReservationHistoryScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                IconButton(
-                  icon: const Icon(
-                    Icons.arrow_back,
-                    color: PharmaConnectColors.textPrimary,
+            // C233 : en-tête adaptable (actions sous le titre sur téléphone).
+            HeaderRow(
+              leading: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      color: PharmaConnectColors.textPrimary,
+                    ),
+                    onPressed: () => context.pop(),
+                    padding: EdgeInsets.zero,
                   ),
-                  onPressed: () => context.pop(),
-                  padding: EdgeInsets.zero,
-                ),
-                const SizedBox(width: 8),
-                const Expanded(
-                  child: Text(
-                    'Mes réservations',
-                    style: PharmaConnectTypography.heading2,
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      'Mes réservations',
+                      style: PharmaConnectTypography.heading2,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                ),
-                const KernelBadge(),
-              ],
+                ],
+              ),
+              trailing: [const KernelBadge()],
             ),
             const SizedBox(height: 24),
             TabBar(
@@ -96,9 +102,7 @@ class _ReservationHistoryScreenState extends State<ReservationHistoryScreen>
                 padding: const EdgeInsets.all(10),
                 margin: const EdgeInsets.only(bottom: 12),
                 decoration: BoxDecoration(
-                  color: PharmaConnectColors.accentAmber.withValues(
-                    alpha: 0.1,
-                  ),
+                  color: PharmaConnectColors.accentAmber.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
                     color: PharmaConnectColors.accentAmber.withValues(
@@ -179,10 +183,7 @@ class _ReservationHistoryScreenState extends State<ReservationHistoryScreen>
           children: [
             Icon(Icons.receipt_long_outlined, size: 64, color: Colors.white24),
             SizedBox(height: 16),
-            Text(
-              'Aucune réservation',
-              style: PharmaConnectTypography.body2,
-            ),
+            Text('Aucune réservation', style: PharmaConnectTypography.body2),
           ],
         ),
       );

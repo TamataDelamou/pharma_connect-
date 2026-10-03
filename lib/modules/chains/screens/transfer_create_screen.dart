@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
@@ -90,25 +91,30 @@ class _TransferCreateScreenState extends State<TransferCreateScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(
-                      Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+              // C233 : en-tête adaptable (actions sous le titre sur téléphone).
+              HeaderRow(
+                leading: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: PharmaConnectColors.textPrimary,
+                      ),
+                      onPressed: () => context.pop(),
+                      padding: EdgeInsets.zero,
                     ),
-                    onPressed: () => context.pop(),
-                    padding: EdgeInsets.zero,
-                  ),
-                  const SizedBox(width: 8),
-                  const Expanded(
-                    child: Text(
-                      '🚚 Transfert de stock',
-                      style: PharmaConnectTypography.heading2,
+                    const SizedBox(width: 8),
+                    const Expanded(
+                      child: Text(
+                        '🚚 Transfert de stock',
+                        style: PharmaConnectTypography.heading2,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                  ),
-                  const KernelBadge(),
-                ],
+                  ],
+                ),
+                trailing: [const KernelBadge()],
               ),
               const SizedBox(height: 24),
 
@@ -246,7 +252,10 @@ class _TransferCreateScreenState extends State<TransferCreateScreen> {
                               // et revérifiés côté serveur (trigger SQL) à la
                               // réception du transfert.
                               Padding(
-                                padding: const EdgeInsets.only(top: 4, bottom: 4),
+                                padding: const EdgeInsets.only(
+                                  top: 4,
+                                  bottom: 4,
+                                ),
                                 child: Text(
                                   'Lot et date de péremption obligatoires (RG-CHN-01) — un lot expiré sera rejeté à la réception.',
                                   style: PharmaConnectTypography.micro.copyWith(
@@ -418,9 +427,7 @@ class _TransferCreateScreenState extends State<TransferCreateScreen> {
                     context: ctx,
                     initialDate: DateTime.now().add(const Duration(days: 30)),
                     firstDate: DateTime.now(),
-                    lastDate: DateTime.now().add(
-                      const Duration(days: 365 * 5),
-                    ),
+                    lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
                   );
                   if (picked != null) {
                     setDialogState(() => selectedExpiryDate = picked);
@@ -469,14 +476,13 @@ class _TransferCreateScreenState extends State<TransferCreateScreen> {
                   return;
                 }
                 if (quantity == null || quantity <= 0) {
-                  setDialogState(
-                    () => dialogError = 'Quantité invalide',
-                  );
+                  setDialogState(() => dialogError = 'Quantité invalide');
                   return;
                 }
                 if (batchNumber.isEmpty) {
                   setDialogState(
-                    () => dialogError = 'Le numéro de lot est obligatoire (RG-CHN-01)',
+                    () => dialogError =
+                        'Le numéro de lot est obligatoire (RG-CHN-01)',
                   );
                   return;
                 }
@@ -488,7 +494,11 @@ class _TransferCreateScreenState extends State<TransferCreateScreen> {
                   return;
                 }
                 final today = DateTime.now();
-                final todayDateOnly = DateTime(today.year, today.month, today.day);
+                final todayDateOnly = DateTime(
+                  today.year,
+                  today.month,
+                  today.day,
+                );
                 if (selectedExpiryDate!.isBefore(todayDateOnly)) {
                   setDialogState(
                     () => dialogError =

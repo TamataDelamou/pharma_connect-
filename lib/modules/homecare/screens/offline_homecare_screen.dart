@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
@@ -22,26 +23,26 @@ class OfflineHomecareScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                const Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '📡 Soins à domicile (Hors-ligne)',
-                        style: PharmaConnectTypography.heading1,
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Accédez à vos interventions même sans connexion',
-                        style: PharmaConnectTypography.body2,
-                      ),
-                    ],
+            // C233 : en-tête adaptable (actions sous le titre sur téléphone).
+            HeaderRow(
+              leading: const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '📡 Soins à domicile (Hors-ligne)',
+                    style: PharmaConnectTypography.heading1,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Accédez à vos interventions même sans connexion',
+                    style: PharmaConnectTypography.body2,
+                  ),
+                ],
+              ),
+              trailing: [
                 const KernelBadge(),
-                const SizedBox(width: 16),
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,

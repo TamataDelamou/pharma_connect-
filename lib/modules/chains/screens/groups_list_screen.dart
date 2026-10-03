@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
@@ -35,26 +36,26 @@ class _GroupsListScreenState extends State<GroupsListScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                const Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '🏥 Multi-officines',
-                        style: PharmaConnectTypography.heading1,
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Gérez vos groupes d\'officines',
-                        style: PharmaConnectTypography.body2,
-                      ),
-                    ],
+            // C233 : en-tête adaptable (actions sous le titre sur téléphone).
+            HeaderRow(
+              leading: const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '🏥 Multi-officines',
+                    style: PharmaConnectTypography.heading1,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Gérez vos groupes d\'officines',
+                    style: PharmaConnectTypography.body2,
+                  ),
+                ],
+              ),
+              trailing: [
                 const KernelBadge(),
-                const SizedBox(width: 16),
                 ElevatedButton.icon(
                   onPressed: () => context.push('/chains/group/new'),
                   icon: const Icon(Icons.add),

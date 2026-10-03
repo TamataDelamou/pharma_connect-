@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
@@ -71,25 +72,30 @@ class _HomecareBookingScreenState extends State<HomecareBookingScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(
-                      Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+              // C233 : en-tête adaptable (actions sous le titre sur téléphone).
+              HeaderRow(
+                leading: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: PharmaConnectColors.textPrimary,
+                      ),
+                      onPressed: () => context.pop(),
+                      padding: EdgeInsets.zero,
                     ),
-                    onPressed: () => context.pop(),
-                    padding: EdgeInsets.zero,
-                  ),
-                  const SizedBox(width: 8),
-                  const Expanded(
-                    child: Text(
-                      'Demander une intervention',
-                      style: PharmaConnectTypography.heading2,
+                    const SizedBox(width: 8),
+                    const Expanded(
+                      child: Text(
+                        'Demander une intervention',
+                        style: PharmaConnectTypography.heading2,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                  ),
-                  const KernelBadge(),
-                ],
+                  ],
+                ),
+                trailing: [const KernelBadge()],
               ),
               const SizedBox(height: 24),
 
@@ -125,83 +131,86 @@ class _HomecareBookingScreenState extends State<HomecareBookingScreen> {
                               )
                             else
                               ...provider.professionals.map((pro) {
-                              final proId = pro['id'] as String;
-                              final proName = _professionalName(pro);
-                              final proSpecialty =
-                                  (pro['specialty'] as String?) ??
-                                  'Non spécifié';
-                              final isSelected =
-                                  _selectedProfessionalId == proId;
-                              return GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    _selectedProfessionalId = proId;
-                                    _selectedDate = null;
-                                    _selectedTime = null;
-                                  });
-                                  provider.loadAvailabilitySlots(proId);
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.all(12),
-                                  margin: const EdgeInsets.only(bottom: 6),
-                                  decoration: BoxDecoration(
-                                    color: isSelected
-                                        ? PharmaConnectColors.accentCyan
-                                              .withValues(alpha: 0.1)
-                                        : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(
+                                final proId = pro['id'] as String;
+                                final proName = _professionalName(pro);
+                                final proSpecialty =
+                                    (pro['specialty'] as String?) ??
+                                    'Non spécifié';
+                                final isSelected =
+                                    _selectedProfessionalId == proId;
+                                return GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _selectedProfessionalId = proId;
+                                      _selectedDate = null;
+                                      _selectedTime = null;
+                                    });
+                                    provider.loadAvailabilitySlots(proId);
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.all(12),
+                                    margin: const EdgeInsets.only(bottom: 6),
+                                    decoration: BoxDecoration(
                                       color: isSelected
                                           ? PharmaConnectColors.accentCyan
-                                          : Colors.white.withValues(
-                                              alpha: 0.06,
-                                            ),
-                                      width: isSelected ? 2 : 1,
+                                                .withValues(alpha: 0.1)
+                                          : Colors.transparent,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: isSelected
+                                            ? PharmaConnectColors.accentCyan
+                                            : Colors.white.withValues(
+                                                alpha: 0.06,
+                                              ),
+                                        width: isSelected ? 2 : 1,
+                                      ),
                                     ),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      CircleAvatar(
-                                        backgroundColor: PharmaConnectColors
-                                            .accentGreen
-                                            .withValues(alpha: 0.2),
-                                        child: Text(
-                                          proName.isNotEmpty ? proName[0] : '?',
-                                          style: const TextStyle(
-                                            color:
-                                                PharmaConnectColors.accentGreen,
+                                    child: Row(
+                                      children: [
+                                        CircleAvatar(
+                                          backgroundColor: PharmaConnectColors
+                                              .accentGreen
+                                              .withValues(alpha: 0.2),
+                                          child: Text(
+                                            proName.isNotEmpty
+                                                ? proName[0]
+                                                : '?',
+                                            style: const TextStyle(
+                                              color: PharmaConnectColors
+                                                  .accentGreen,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              proName,
-                                              style:
-                                                  PharmaConnectTypography.body1,
-                                            ),
-                                            Text(
-                                              proSpecialty,
-                                              style:
-                                                  PharmaConnectTypography.body2,
-                                            ),
-                                          ],
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                proName,
+                                                style: PharmaConnectTypography
+                                                    .body1,
+                                              ),
+                                              Text(
+                                                proSpecialty,
+                                                style: PharmaConnectTypography
+                                                    .body2,
+                                              ),
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                      if (isSelected)
-                                        const Icon(
-                                          Icons.check_circle,
-                                          color: PharmaConnectColors.accentCyan,
-                                        ),
-                                    ],
+                                        if (isSelected)
+                                          const Icon(
+                                            Icons.check_circle,
+                                            color:
+                                                PharmaConnectColors.accentCyan,
+                                          ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              );
-                            }),
+                                );
+                              }),
                           ],
                         ),
                       ),
