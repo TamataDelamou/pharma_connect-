@@ -8,6 +8,7 @@ import '../modules/alerts/screens/alert_center_screen.dart';
 import '../modules/alerts/screens/alert_detail_screen.dart';
 import '../modules/alerts/screens/alert_preferences_screen.dart';
 import '../modules/alerts/screens/alert_threshold_settings_screen.dart';
+import '../modules/auth/screens/complete_profile_screen.dart'; // C228
 import '../modules/auth/screens/license_verification_screen.dart';
 // Auth
 import '../modules/auth/screens/login_screen.dart';
@@ -338,10 +339,20 @@ class AppRouter {
         builder: (context, state, child) => AppShell(child: child),
         routes: [
           // ==================== DASHBOARD ====================
+          // C228 : tant que le nom du profil est vide, l'arrivée sur le
+          // tableau de bord passe d'abord par « Complétez votre profil »
+          // (une fois par connexion : « Plus tard » lève la redirection).
           GoRoute(
             path: '/dashboard',
             name: 'dashboard',
+            redirect: (context, state) => completeProfileRedirect(context),
             builder: (context, state) => const DashboardScreen(),
+          ),
+          // C228 : dans le cadre, hors du menu.
+          GoRoute(
+            path: '/complete-profile',
+            name: 'complete-profile',
+            builder: (context, state) => const CompleteProfileScreen(),
           ),
 
           // ==================== CATALOG ====================

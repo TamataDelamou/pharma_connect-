@@ -54,7 +54,10 @@ class _AppShellState extends State<AppShell> {
       builder: (context, _) {
         final state = router.state;
         final path = state.uri.path;
-        final isDashboard = path == '/dashboard';
+        // Écrans racines : pas de flèche, le retour du système ferme
+        // l'application. C228 : « Complétez votre profil » en fait partie (un
+        // retour vers /dashboard y reviendrait aussitôt).
+        final isDashboard = path == '/dashboard' || path == '/complete-profile';
         return PopScope(
           canPop: isDashboard,
           onPopInvokedWithResult: (didPop, _) {

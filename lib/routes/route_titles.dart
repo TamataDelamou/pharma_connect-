@@ -3,6 +3,7 @@
 /// la section (premier segment de l'adresse), sinon « PharmaConnect ».
 const Map<String, String> routeTitles = {
   '/dashboard': 'Tableau de bord',
+  '/complete-profile': 'Complétez votre profil',
   '/search': 'Recherche',
   '/product/:id': 'Produit',
   '/scan': 'Scanner',

@@ -46,6 +46,21 @@ class ProfileService {
         .single();
   }
 
+  /// C228 : l'utilisateur complète son propre profil (nom, téléphone).
+  /// Seules ces deux colonnes sont envoyées : `profiles_update_own` limite
+  /// l'écriture à sa propre ligne, et le déclencheur C211 refuse tout
+  /// changement de role, pharmacy_id, role_verified_at, role_verified_by.
+  Future<void> updateOwnProfile({
+    required String id,
+    required String fullName,
+    String? phone,
+  }) async {
+    await _client
+        .from('profiles')
+        .update({'full_name': fullName, 'phone': ?phone})
+        .eq('id', id);
+  }
+
   /// Audit Module 5 (ORD, 29/08/2026) : prescription_upload_screen.dart
   /// envoyait un nom de patient en dur ('Jean Dupont') faute d'un moyen
   /// simple de lire le nom réel de l'utilisateur connecté — AuthProvider ne
@@ -85,7 +100,7 @@ class ProfileService {
     try {
       return await _client
           .from('profiles')
-          .select('role, pharmacy_id')
+          .select('role, pharmacy_id, full_name')
           .eq('id', userId)
           .maybeSingle();
     } catch (_) {

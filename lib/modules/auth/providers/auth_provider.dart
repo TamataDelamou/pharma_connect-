@@ -24,6 +24,11 @@ class AuthProvider extends ChangeNotifier {
   String? _pharmacyId;
   bool _isGsgAdmin = false;
   AccountStatus? _accountStatus;
+  // C228 : nom du profil. `_profileLoaded` distingue « nom vide » de « profil
+  // pas encore lu » (hors réseau) : sans lecture, on ne demande rien.
+  String? _fullName;
+  bool _profileLoaded = false;
+  bool _profileCompletionSkipped = false;
   String? _error; // Gestion d'erreur
 
   bool get isLoading => _isLoading;
@@ -46,6 +51,17 @@ class AuthProvider extends ChangeNotifier {
   /// (ex. Approuver/Rejeter/Décaisser en financement, request_detail_screen).
   bool get isGsgAdmin => _isGsgAdmin;
   String? get error => _error;
+
+  String? get fullName => _fullName;
+
+  /// C228 : vrai si l'écran « Complétez votre profil » doit s'afficher :
+  /// compte connecté, profil lu, nom vide, et pas de « Plus tard » pendant
+  /// cette session. « Plus tard » ne vaut que jusqu'à la prochaine connexion.
+  bool get needsProfileCompletion =>
+      _isAuthenticated &&
+      _profileLoaded &&
+      (_fullName == null || _fullName!.trim().isEmpty) &&
+      !_profileCompletionSkipped;
 
   /// C213 / D64 : état du compte lu sur le serveur (null tant qu'il n'a pas
   /// pu être lu, par exemple hors réseau).
@@ -206,6 +222,8 @@ class AuthProvider extends ChangeNotifier {
     String? fullName,
     UserRole? role,
   }) async {
+    // C228 : nouvelle connexion, « Plus tard » ne vaut plus.
+    _profileCompletionSkipped = false;
     try {
       final row = await _profileService.upsertProfile(
         id: userId,
@@ -224,6 +242,8 @@ class AuthProvider extends ChangeNotifier {
           _userRole = UserRole.values.byName(roleStr);
         }
         _pharmacyId = row['pharmacy_id'] as String?;
+        _fullName = row['full_name'] as String?;
+        _profileLoaded = true;
       }
     } catch (_) {
       // Best-effort — voir docstring ci-dessus.
@@ -294,6 +314,8 @@ class AuthProvider extends ChangeNotifier {
         } catch (_) {}
       }
       _pharmacyId = row['pharmacy_id'] as String?;
+      _fullName = row['full_name'] as String?;
+      _profileLoaded = true;
     }
     await _loadAdminStatus(user.id);
     await _loadAccountStatus();
@@ -303,6 +325,58 @@ class AuthProvider extends ChangeNotifier {
       user.id,
       SupabaseService().auth.currentSession?.accessToken,
     );
+  }
+
+  // === PROFIL À COMPLÉTER (C228) ===
+
+  /// « Plus tard » : l'écran ne revient pas pendant cette session. Il
+  /// reviendra à la prochaine connexion tant que le nom est vide.
+  void skipProfileCompletion() {
+    _profileCompletionSkipped = true;
+    notifyListeners();
+  }
+
+  /// Enregistre le nom (obligatoire) et le téléphone (facultatif, E.164) sur
+  /// le profil de l'utilisateur connecté. Le rôle et les champs de
+  /// vérification ne sont jamais envoyés : le serveur les refuse de toute
+  /// façon (C211).
+  Future<bool> completeProfile({
+    required String fullName,
+    String? phone,
+  }) async {
+    final userId = _userId;
+    final name = fullName.trim();
+    if (userId == null || name.isEmpty) {
+      _error = 'Le nom est obligatoire';
+      notifyListeners();
+      return false;
+    }
+    String? normalizedPhone;
+    if (phone != null && phone.trim().isNotEmpty) {
+      normalizedPhone = Validators.normalizeE164(phone);
+      if (normalizedPhone == null) {
+        _error = 'Numéro de téléphone invalide';
+        notifyListeners();
+        return false;
+      }
+    }
+    _setLoading(true);
+    try {
+      await _profileService.updateOwnProfile(
+        id: userId,
+        fullName: name,
+        phone: normalizedPhone,
+      );
+      _fullName = name;
+      _profileLoaded = true;
+      _error = null;
+      _setLoading(false);
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      _setLoading(false);
+      return false;
+    }
   }
 
   // === DÉCONNEXION ===
@@ -318,6 +392,9 @@ class AuthProvider extends ChangeNotifier {
     _pharmacyId = null;
     _isGsgAdmin = false;
     _accountStatus = null;
+    _fullName = null;
+    _profileLoaded = false;
+    _profileCompletionSkipped = false;
     _isAuthenticated = false;
     _error = null;
     notifyListeners();

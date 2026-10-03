@@ -17,11 +17,7 @@ class AuthService {
 
   /// Vérifie le code OTP reçu par SMS/WhatsApp.
   Future<AuthResponse> verifyPhoneOtp(String phone, String token) async {
-    return _auth.verifyOTP(
-      phone: phone,
-      token: token,
-      type: OtpType.sms,
-    );
+    return _auth.verifyOTP(phone: phone, token: token, type: OtpType.sms);
   }
 
   // ==================== EMAIL ====================
@@ -41,10 +37,6 @@ class AuthService {
 
   /// Vérifie le code OTP reçu par email.
   Future<AuthResponse> verifyEmailOtp(String email, String token) async {
-    return _auth.verifyOTP(
-      email: email,
-      token: token,
-      type: OtpType.email,
-    );
+    return _auth.verifyOTP(email: email, token: token, type: OtpType.email);
   }
 }
