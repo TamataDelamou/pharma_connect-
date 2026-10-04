@@ -35,7 +35,7 @@ class GlassCard extends StatelessWidget {
           duration: const Duration(milliseconds: 150),
           curve: Curves.easeInOut,
           transform: hoverEffect && isInteractive
-              ? (Matrix4.identity()..translateByDouble(0, -2, 0, 0))
+              ? (Matrix4.identity()..translateByDouble(0, -2, 0, 1))
               : Matrix4.identity(),
           decoration: glow
               ? palette.cardGlow(

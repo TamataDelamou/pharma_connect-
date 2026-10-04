@@ -73,7 +73,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
           if (_resendCountdown == 0) _isResendEnabled = true;
         });
       }
-      return _resendCountdown > 0;
+      // Écran quitté : la boucle s'arrête (elle tournait sans fin sinon).
+      return mounted && _resendCountdown > 0;
     });
   }
 
