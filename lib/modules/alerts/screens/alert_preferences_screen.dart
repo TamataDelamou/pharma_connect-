@@ -3,13 +3,12 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../providers/alert_provider.dart';
 import '../models/alert_type.dart';
 import '../models/alert_severity.dart';
 import '../models/alert_preferences.dart';
+import '../../../core/theme/palette.dart';
 
 class AlertPreferencesScreen extends StatefulWidget {
   const AlertPreferencesScreen({super.key});
@@ -50,18 +49,18 @@ class _AlertPreferencesScreenState extends State<AlertPreferencesScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Préférences de notifications',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -71,9 +70,9 @@ class _AlertPreferencesScreenState extends State<AlertPreferencesScreen> {
               trailing: [const KernelBadge()],
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Gérez comment vous recevez les alertes',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
             ),
             const SizedBox(height: 24),
 
@@ -174,9 +173,9 @@ class _AlertPreferencesScreenState extends State<AlertPreferencesScreen> {
                         await provider.updatePreferences(_preferences);
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
+                            SnackBar(
                               content: Text('Préférences enregistrées'),
-                              backgroundColor: PharmaConnectColors.accentGreen,
+                              backgroundColor: context.palette.success,
                             ),
                           );
                           context.pop();
@@ -196,7 +195,7 @@ class _AlertPreferencesScreenState extends State<AlertPreferencesScreen> {
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Text(title, style: PharmaConnectTypography.heading3),
+      child: Text(title, style: context.text.heading3),
     );
   }
 
@@ -206,10 +205,10 @@ class _AlertPreferencesScreenState extends State<AlertPreferencesScreen> {
     required ValueChanged<bool> onChanged,
   }) {
     return SwitchListTile(
-      title: Text(label, style: PharmaConnectTypography.body1),
+      title: Text(label, style: context.text.body1),
       value: value,
       onChanged: onChanged,
-      activeColor: PharmaConnectColors.accentCyan,
+      activeColor: context.palette.primary,
       contentPadding: EdgeInsets.zero,
       dense: true,
     );

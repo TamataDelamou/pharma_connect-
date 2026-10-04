@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../providers/stock_provider.dart';
 import '../widgets/stock_batch_tile.dart';
 import '../widgets/stock_status_chip.dart';
+import '../../../core/theme/palette.dart';
 
 class StockDetailScreen extends StatefulWidget {
   final String stockId;
@@ -44,8 +43,8 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
             children: [
               Text(
                 provider.error ?? 'Produit introuvable',
-                style: PharmaConnectTypography.body2.copyWith(
-                  color: PharmaConnectColors.accentRed,
+                style: context.text.body2.copyWith(
+                  color: context.palette.danger,
                 ),
               ),
               const SizedBox(height: 16),
@@ -69,19 +68,16 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
             Row(
               children: [
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.arrow_back,
-                    color: PharmaConnectColors.textPrimary,
+                    color: context.palette.textPrimary,
                   ),
                   onPressed: () => context.pop(),
                   padding: EdgeInsets.zero,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text(
-                    'Détail du stock',
-                    style: PharmaConnectTypography.heading2,
-                  ),
+                  child: Text('Détail du stock', style: context.text.heading2),
                 ),
                 const KernelBadge(),
               ],
@@ -104,13 +100,14 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                                 width: 56,
                                 height: 56,
                                 decoration: BoxDecoration(
-                                  color: PharmaConnectColors.accentCyan
-                                      .withValues(alpha: 0.1),
+                                  color: context.palette.primary.withValues(
+                                    alpha: 0.1,
+                                  ),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: const Icon(
+                                child: Icon(
                                   Icons.medication,
-                                  color: PharmaConnectColors.accentCyan,
+                                  color: context.palette.primary,
                                   size: 32,
                                 ),
                               ),
@@ -121,17 +118,17 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                                   children: [
                                     Text(
                                       item.product.name,
-                                      style: PharmaConnectTypography.heading3,
+                                      style: context.text.heading3,
                                     ),
                                     Text(
                                       item.product.genericName,
-                                      style: PharmaConnectTypography.body2,
+                                      style: context.text.body2,
                                     ),
                                     Row(
                                       children: [
                                         Text(
                                           '${item.product.dosage} • ${item.product.form}',
-                                          style: PharmaConnectTypography.micro,
+                                          style: context.text.micro,
                                         ),
                                         const SizedBox(width: 12),
                                         StockStatusChip(
@@ -146,7 +143,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                             ],
                           ),
                           const SizedBox(height: 12),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           const SizedBox(height: 12),
                           Row(
                             children: [
@@ -154,13 +151,13 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
+                                    Text(
                                       'Disponible',
-                                      style: PharmaConnectTypography.label,
+                                      style: context.text.label,
                                     ),
                                     Text(
                                       '${item.availableQuantity}',
-                                      style: PharmaConnectTypography.kpiSmall,
+                                      style: context.text.kpiSmall,
                                     ),
                                   ],
                                 ),
@@ -169,17 +166,12 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
-                                      'Réservé',
-                                      style: PharmaConnectTypography.label,
-                                    ),
+                                    Text('Réservé', style: context.text.label),
                                     Text(
                                       '${item.reservedQuantity}',
-                                      style: PharmaConnectTypography.kpiSmall
-                                          .copyWith(
-                                            color:
-                                                PharmaConnectColors.accentCyan,
-                                          ),
+                                      style: context.text.kpiSmall.copyWith(
+                                        color: context.palette.primary,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -188,13 +180,10 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
-                                      'Total',
-                                      style: PharmaConnectTypography.label,
-                                    ),
+                                    Text('Total', style: context.text.label),
                                     Text(
                                       '${item.totalQuantity}',
-                                      style: PharmaConnectTypography.kpiSmall,
+                                      style: context.text.kpiSmall,
                                     ),
                                   ],
                                 ),
@@ -204,15 +193,12 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                           const SizedBox(height: 8),
                           Row(
                             children: [
-                              const Text(
-                                'Seuil bas : ',
-                                style: PharmaConnectTypography.label,
-                              ),
+                              Text('Seuil bas : ', style: context.text.label),
                               Text('${item.thresholdLow}'),
                               const SizedBox(width: 16),
-                              const Text(
+                              Text(
                                 'Seuil critique : ',
-                                style: PharmaConnectTypography.label,
+                                style: context.text.label,
                               ),
                               Text('${item.thresholdCritical}'),
                             ],
@@ -221,7 +207,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                             const SizedBox(height: 4),
                             Text(
                               'Emplacement : ${item.defaultLocation}',
-                              style: PharmaConnectTypography.micro,
+                              style: context.text.micro,
                             ),
                           ],
                         ],
@@ -230,13 +216,10 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                     const SizedBox(height: 24),
 
                     // Lots
-                    const Text('Lots', style: PharmaConnectTypography.heading3),
+                    Text('Lots', style: context.text.heading3),
                     const SizedBox(height: 8),
                     if (item.batches.isEmpty) ...[
-                      const Text(
-                        'Aucun lot enregistré',
-                        style: PharmaConnectTypography.body2,
-                      ),
+                      Text('Aucun lot enregistré', style: context.text.body2),
                     ] else ...[
                       ...item.batches.map(
                         (batch) => StockBatchTile(
@@ -250,16 +233,10 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                     const SizedBox(height: 24),
 
                     // Historique des mouvements
-                    const Text(
-                      'Derniers mouvements',
-                      style: PharmaConnectTypography.heading3,
-                    ),
+                    Text('Derniers mouvements', style: context.text.heading3),
                     const SizedBox(height: 8),
                     if (provider.movements.isEmpty) ...[
-                      const Text(
-                        'Aucun mouvement',
-                        style: PharmaConnectTypography.body2,
-                      ),
+                      Text('Aucun mouvement', style: context.text.body2),
                     ] else ...[
                       ...provider.movements
                           .take(5)
@@ -271,7 +248,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                               ),
                               margin: const EdgeInsets.only(bottom: 4),
                               decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.03),
+                                color: context.palette.surfaceDisabled,
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Row(
@@ -285,25 +262,26 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                                     movement.quantity > 0
                                         ? Icons.arrow_upward
                                         : Icons.arrow_downward,
-                                    color: movement.typeColor,
+                                    color: movement.typeColor.of(
+                                      context.palette,
+                                    ),
                                     size: 16,
                                   ),
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
                                       movement.typeLabel,
-                                      style: PharmaConnectTypography.body2,
+                                      style: context.text.body2,
                                     ),
                                   ),
                                   Text(
                                     '${movement.quantity > 0 ? "+" : ""}${movement.quantity}',
-                                    style: PharmaConnectTypography.body2
-                                        .copyWith(
-                                          fontWeight: FontWeight.w600,
-                                          color: movement.quantity > 0
-                                              ? PharmaConnectColors.accentGreen
-                                              : PharmaConnectColors.accentRed,
-                                        ),
+                                    style: context.text.body2.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      color: movement.quantity > 0
+                                          ? context.palette.success
+                                          : context.palette.danger,
+                                    ),
                                   ),
                                 ],
                               ),

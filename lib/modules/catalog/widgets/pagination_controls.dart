@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/colors.dart';
+import '../../../core/theme/palette.dart';
 
 class PaginationControls extends StatelessWidget {
   final int currentPage;
@@ -27,24 +27,24 @@ class PaginationControls extends StatelessWidget {
               ? () => onPageChanged(currentPage - 1)
               : null,
           color: currentPage > 0
-              ? PharmaConnectColors.textPrimary
-              : PharmaConnectColors.textSecondary,
+              ? context.palette.textPrimary
+              : context.palette.textSecondary,
         ),
-        ..._buildPageNumbers(),
+        ..._buildPageNumbers(context),
         IconButton(
           icon: const Icon(Icons.chevron_right),
           onPressed: currentPage < totalPages - 1
               ? () => onPageChanged(currentPage + 1)
               : null,
           color: currentPage < totalPages - 1
-              ? PharmaConnectColors.textPrimary
-              : PharmaConnectColors.textSecondary,
+              ? context.palette.textPrimary
+              : context.palette.textSecondary,
         ),
       ],
     );
   }
 
-  List<Widget> _buildPageNumbers() {
+  List<Widget> _buildPageNumbers(BuildContext context) {
     final pages = <Widget>[];
 
     // Afficher les pages autour de la page courante
@@ -52,27 +52,27 @@ class PaginationControls extends StatelessWidget {
     int endPage = (currentPage + 2).clamp(0, totalPages - 1);
 
     if (startPage > 0) {
-      pages.add(_buildPageNumber(0));
+      pages.add(_buildPageNumber(context, 0));
       if (startPage > 1) {
         pages.add(const Text('…'));
       }
     }
 
     for (int i = startPage; i <= endPage; i++) {
-      pages.add(_buildPageNumber(i));
+      pages.add(_buildPageNumber(context, i));
     }
 
     if (endPage < totalPages - 1) {
       if (endPage < totalPages - 2) {
         pages.add(const Text('…'));
       }
-      pages.add(_buildPageNumber(totalPages - 1));
+      pages.add(_buildPageNumber(context, totalPages - 1));
     }
 
     return pages;
   }
 
-  Widget _buildPageNumber(int page) {
+  Widget _buildPageNumber(BuildContext context, int page) {
     final isCurrent = page == currentPage;
 
     return GestureDetector(
@@ -82,7 +82,7 @@ class PaginationControls extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
           color: isCurrent
-              ? PharmaConnectColors.accentCyan.withValues(alpha: 0.2)
+              ? context.palette.primary.withValues(alpha: 0.2)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(4),
         ),
@@ -90,8 +90,8 @@ class PaginationControls extends StatelessWidget {
           '${page + 1}',
           style: TextStyle(
             color: isCurrent
-                ? PharmaConnectColors.accentCyan
-                : PharmaConnectColors.textSecondary,
+                ? context.palette.primary
+                : context.palette.textSecondary,
             fontWeight: isCurrent ? FontWeight.w600 : FontWeight.w400,
           ),
         ),

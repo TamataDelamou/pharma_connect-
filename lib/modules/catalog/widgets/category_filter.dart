@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
 import '../models/category.dart';
+import '../../../core/theme/palette.dart';
 
 class CategoryFilter extends StatelessWidget {
   final List<Category> categories;
@@ -21,13 +21,13 @@ class CategoryFilter extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Catégories',
           style: TextStyle(
             fontFamily: 'Inter',
             fontSize: 13,
             fontWeight: FontWeight.w500,
-            color: PharmaConnectColors.textSecondary,
+            color: context.palette.textSecondary,
           ),
         ),
         const SizedBox(height: 8),
@@ -37,6 +37,7 @@ class CategoryFilter extends StatelessWidget {
             children: [
               // Bouton "Tout"
               _buildChip(
+                context,
                 label: 'Tout',
                 selected: selectedCategoryId == null,
                 onSelected: (_) => onClear(),
@@ -46,6 +47,7 @@ class CategoryFilter extends StatelessWidget {
                 return Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: _buildChip(
+                    context,
                     label: '${category.icon} ${category.name}',
                     selected: category.id == selectedCategoryId,
                     onSelected: (_) => onCategorySelected(category.id),
@@ -59,7 +61,8 @@ class CategoryFilter extends StatelessWidget {
     );
   }
 
-  Widget _buildChip({
+  Widget _buildChip(
+    BuildContext context, {
     required String label,
     required bool selected,
     required Function(bool) onSelected,
@@ -68,13 +71,15 @@ class CategoryFilter extends StatelessWidget {
       label: Text(label),
       selected: selected,
       onSelected: onSelected,
-      selectedColor: PharmaConnectColors.accentCyan.withValues(alpha: 0.2),
+      selectedColor: context.palette.primary.withValues(alpha: 0.2),
       backgroundColor: Colors.transparent,
       side: BorderSide(
-        color: selected ? PharmaConnectColors.accentCyan : Colors.white24,
+        color: selected ? context.palette.primary : context.palette.veil(0.24),
       ),
       labelStyle: TextStyle(
-        color: selected ? PharmaConnectColors.accentCyan : Colors.white70,
+        color: selected
+            ? context.palette.primary
+            : context.palette.textSecondary,
         fontSize: 13,
       ),
     );

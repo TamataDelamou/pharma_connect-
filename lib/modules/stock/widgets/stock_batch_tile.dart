@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../models/stock_batch.dart';
+import '../../../core/theme/palette.dart';
 
 class StockBatchTile extends StatelessWidget {
   final StockBatch batch;
@@ -24,14 +23,14 @@ class StockBatchTile extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         margin: const EdgeInsets.only(bottom: 8),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.04),
+          color: context.palette.surfaceMuted,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: batch.isExpired
-                ? PharmaConnectColors.accentRed.withValues(alpha: 0.3)
+                ? context.palette.danger.withValues(alpha: 0.3)
                 : batch.isExpiringSoon
-                ? PharmaConnectColors.accentOrange.withValues(alpha: 0.3)
-                : Colors.white.withValues(alpha: 0.06),
+                ? context.palette.warning.withValues(alpha: 0.3)
+                : context.palette.surface,
             width: 1,
           ),
         ),
@@ -43,7 +42,7 @@ class StockBatchTile extends StatelessWidget {
                 Expanded(
                   child: Text(
                     'Lot #${batch.batchNumber}',
-                    style: PharmaConnectTypography.body1.copyWith(
+                    style: context.text.body1.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -55,17 +54,15 @@ class StockBatchTile extends StatelessWidget {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: PharmaConnectColors.accentRed.withValues(
-                        alpha: 0.15,
-                      ),
+                      color: context.palette.danger.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: const Text(
+                    child: Text(
                       'Périmé',
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w600,
-                        color: PharmaConnectColors.accentRed,
+                        color: context.palette.danger,
                       ),
                     ),
                   ),
@@ -76,17 +73,15 @@ class StockBatchTile extends StatelessWidget {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: PharmaConnectColors.accentOrange.withValues(
-                        alpha: 0.15,
-                      ),
+                      color: context.palette.warning.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: const Text(
+                    child: Text(
                       'Bientôt périmé',
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w600,
-                        color: PharmaConnectColors.accentOrange,
+                        color: context.palette.warning,
                       ),
                     ),
                   ),
@@ -98,12 +93,12 @@ class StockBatchTile extends StatelessWidget {
               children: [
                 Text(
                   'Péremption : ${_formatDate(batch.expiryDate)}',
-                  style: PharmaConnectTypography.body2,
+                  style: context.text.body2,
                 ),
                 const Spacer(),
                 Text(
                   '${batch.quantity} unités',
-                  style: PharmaConnectTypography.body2.copyWith(
+                  style: context.text.body2.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -113,8 +108,8 @@ class StockBatchTile extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 '${batch.quantityReserved} réservés',
-                style: PharmaConnectTypography.micro.copyWith(
-                  color: PharmaConnectColors.accentCyan,
+                style: context.text.micro.copyWith(
+                  color: context.palette.primary,
                 ),
               ),
             ],
@@ -122,13 +117,13 @@ class StockBatchTile extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 'Fournisseur : ${batch.supplierName}',
-                style: PharmaConnectTypography.micro,
+                style: context.text.micro,
               ),
             ],
             if (batch.purchasePriceInt > 0) ...[
               Text(
                 'Prix d\'achat : ${CurrencyFormatter.format(batch.purchasePriceInt)}',
-                style: PharmaConnectTypography.micro,
+                style: context.text.micro,
               ),
             ],
           ],

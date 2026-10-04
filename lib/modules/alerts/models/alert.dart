@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
 import 'alert_type.dart';
 import 'alert_severity.dart';
 import 'alert_status.dart';
+import '../../../core/theme/palette.dart';
 
 class Alert {
   final String id;
@@ -152,16 +152,16 @@ class Alert {
     return 'À l\'instant';
   }
 
-  Color get severityColor {
+  ColorRole get severityColor {
     switch (severity) {
       case AlertSeverity.critical:
-        return PharmaConnectColors.accentRed;
+        return ColorRole.danger;
       case AlertSeverity.warning:
-        return PharmaConnectColors.accentOrange;
+        return ColorRole.warning;
       case AlertSeverity.info:
-        return PharmaConnectColors.accentCyan;
+        return ColorRole.primary;
       case AlertSeverity.success:
-        return PharmaConnectColors.accentGreen;
+        return ColorRole.success;
     }
   }
 

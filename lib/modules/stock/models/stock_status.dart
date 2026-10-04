@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/colors.dart'; // <-- Ajout
+import '../../../core/theme/palette.dart';
 
 enum StockStatus {
   inStock, // En stock
@@ -25,18 +26,18 @@ extension StockStatusExtension on StockStatus {
     }
   }
 
-  Color get color {
+  ColorRole get color {
     switch (this) {
       case StockStatus.inStock:
-        return PharmaConnectColors.accentGreen;
+        return ColorRole.success;
       case StockStatus.lowStock:
-        return PharmaConnectColors.accentOrange;
+        return ColorRole.warning;
       case StockStatus.critical:
-        return PharmaConnectColors.accentAmber;
+        return ColorRole.warningStrong;
       case StockStatus.outOfStock:
-        return PharmaConnectColors.accentRed;
+        return ColorRole.danger;
       case StockStatus.discontinued:
-        return PharmaConnectColors.neutralMuted;
+        return ColorRole.textMuted;
     }
   }
 }

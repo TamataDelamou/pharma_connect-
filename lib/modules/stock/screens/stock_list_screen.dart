@@ -3,8 +3,6 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../../../core/widgets/inputs/glass_input.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -12,6 +10,7 @@ import '../models/stock_status.dart';
 import '../providers/stock_provider.dart';
 import '../services/stock_summary_card.dart';
 import '../widgets/stock_status_chip.dart';
+import '../../../core/theme/palette.dart';
 
 class StockListScreen extends StatefulWidget {
   const StockListScreen({super.key});
@@ -55,22 +54,22 @@ class _StockListScreenState extends State<StockListScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
+                Icon(
                   Icons.local_pharmacy_outlined,
                   size: 64,
-                  color: Colors.white24,
+                  color: context.palette.veil(0.24),
                 ),
                 const SizedBox(height: 16),
-                const Text(
+                Text(
                   'Aucune officine rattachée à votre compte',
-                  style: PharmaConnectTypography.heading2,
+                  style: context.text.heading2,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
-                const Text(
+                Text(
                   'La gestion du stock sera disponible dès que votre '
                   'candidature de licence aura été validée par le back-office.',
-                  style: PharmaConnectTypography.body2,
+                  style: context.text.body2,
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -89,19 +88,19 @@ class _StockListScreenState extends State<StockListScreen> {
             // En-tête
             // C233 : en-tête adaptable (actions sous le titre sur téléphone).
             HeaderRow(
-              leading: const Column(
+              leading: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Gestion des stocks',
-                    style: PharmaConnectTypography.heading1,
+                    style: context.text.heading1,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(height: 4),
                   Text(
                     'Consultez et gérez les niveaux de stock',
-                    style: PharmaConnectTypography.body2,
+                    style: context.text.body2,
                   ),
                 ],
               ),
@@ -112,8 +111,8 @@ class _StockListScreenState extends State<StockListScreen> {
                   icon: const Icon(Icons.history),
                   label: const Text('Historique'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: PharmaConnectColors.accentPurple,
-                    foregroundColor: PharmaConnectColors.textPrimary,
+                    backgroundColor: context.palette.secondary,
+                    foregroundColor: context.palette.textPrimary,
                   ),
                 ),
               ],
@@ -174,25 +173,21 @@ class _StockListScreenState extends State<StockListScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: PharmaConnectColors.accentAmber.withValues(alpha: 0.12),
+        color: context.palette.warningStrong.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: PharmaConnectColors.accentAmber.withValues(alpha: 0.3),
+          color: context.palette.warningStrong.withValues(alpha: 0.3),
         ),
       ),
       child: Row(
         children: [
-          const Icon(
-            Icons.cloud_off,
-            size: 18,
-            color: PharmaConnectColors.accentAmber,
-          ),
+          Icon(Icons.cloud_off, size: 18, color: context.palette.warningStrong),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               provider.error ??
                   'Hors-ligne — données affichées depuis le cache local.',
-              style: PharmaConnectTypography.micro,
+              style: context.text.micro,
             ),
           ),
         ],
@@ -212,9 +207,7 @@ class _StockListScreenState extends State<StockListScreen> {
           children: [
             Text(
               'Erreur : ${provider.error}',
-              style: PharmaConnectTypography.body2.copyWith(
-                color: PharmaConnectColors.accentRed,
-              ),
+              style: context.text.body2.copyWith(color: context.palette.danger),
             ),
             const SizedBox(height: 16),
             ElevatedButton(
@@ -227,21 +220,19 @@ class _StockListScreenState extends State<StockListScreen> {
     }
 
     if (provider.stockItems.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.inventory_outlined, size: 64, color: Colors.white24),
+            Icon(
+              Icons.inventory_outlined,
+              size: 64,
+              color: context.palette.veil(0.24),
+            ),
             SizedBox(height: 16),
-            Text(
-              'Aucun stock disponible',
-              style: PharmaConnectTypography.heading2,
-            ),
+            Text('Aucun stock disponible', style: context.text.heading2),
             SizedBox(height: 8),
-            Text(
-              'Les produits apparaîtront ici',
-              style: PharmaConnectTypography.body2,
-            ),
+            Text('Les produits apparaîtront ici', style: context.text.body2),
           ],
         ),
       );
@@ -263,14 +254,12 @@ class _StockListScreenState extends State<StockListScreen> {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: PharmaConnectColors.accentCyan.withValues(
-                      alpha: 0.1,
-                    ),
+                    color: context.palette.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
                     Icons.medication,
-                    color: item.status.color,
+                    color: item.status.color.of(context.palette),
                     size: 24,
                   ),
                 ),
@@ -282,7 +271,7 @@ class _StockListScreenState extends State<StockListScreen> {
                     children: [
                       Text(
                         item.product.name,
-                        style: PharmaConnectTypography.body1.copyWith(
+                        style: context.text.body1.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                         maxLines: 1,
@@ -290,7 +279,7 @@ class _StockListScreenState extends State<StockListScreen> {
                       ),
                       Text(
                         item.product.genericName,
-                        style: PharmaConnectTypography.body2,
+                        style: context.text.body2,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -299,14 +288,14 @@ class _StockListScreenState extends State<StockListScreen> {
                         children: [
                           Text(
                             'Stock : ${item.availableQuantity}',
-                            style: PharmaConnectTypography.body2.copyWith(
+                            style: context.text.body2.copyWith(
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                           const SizedBox(width: 12),
                           Text(
                             'Réservés : ${item.reservedQuantity}',
-                            style: PharmaConnectTypography.micro,
+                            style: context.text.micro,
                           ),
                         ],
                       ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/stock_status.dart';
+import '../../../core/theme/palette.dart';
 
 class StockStatusChip extends StatelessWidget {
   final StockStatus status;
@@ -16,10 +17,10 @@ class StockStatusChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: status.color.withValues(alpha: 0.15),
+        color: status.color.of(context.palette).withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(6),
         border: Border.all(
-          color: status.color.withValues(alpha: 0.3),
+          color: status.color.of(context.palette).withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -31,7 +32,7 @@ class StockStatusChip extends StatelessWidget {
             height: 6,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: status.color,
+              color: status.color.of(context.palette),
             ),
           ),
           if (showLabel) ...[
@@ -41,7 +42,7 @@ class StockStatusChip extends StatelessWidget {
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
-                color: status.color,
+                color: status.color.of(context.palette),
               ),
             ),
           ],

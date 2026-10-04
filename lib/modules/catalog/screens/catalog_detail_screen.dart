@@ -3,14 +3,13 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
 import '../../../core/theme/spacing.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../../auth/models/user_role.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/catalog_provider.dart';
+import '../../../core/theme/palette.dart';
 
 class CatalogDetailScreen extends StatefulWidget {
   final String productId;
@@ -55,8 +54,8 @@ class _CatalogDetailScreenState extends State<CatalogDetailScreen> {
             children: [
               Text(
                 'Erreur : ${provider.error}',
-                style: PharmaConnectTypography.body2.copyWith(
-                  color: PharmaConnectColors.accentRed,
+                style: context.text.body2.copyWith(
+                  color: context.palette.danger,
                 ),
               ),
               const SizedBox(height: 16),
@@ -89,18 +88,18 @@ class _CatalogDetailScreenState extends State<CatalogDetailScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Détail du produit',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -127,13 +126,14 @@ class _CatalogDetailScreenState extends State<CatalogDetailScreen> {
                                 width: 64,
                                 height: 64,
                                 decoration: BoxDecoration(
-                                  color: PharmaConnectColors.accentCyan
-                                      .withValues(alpha: 0.1),
+                                  color: context.palette.primary.withValues(
+                                    alpha: 0.1,
+                                  ),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: const Icon(
+                                child: Icon(
                                   Icons.medication,
-                                  color: PharmaConnectColors.accentCyan,
+                                  color: context.palette.primary,
                                   size: 36,
                                 ),
                               ),
@@ -144,15 +144,15 @@ class _CatalogDetailScreenState extends State<CatalogDetailScreen> {
                                   children: [
                                     Text(
                                       product.name,
-                                      style: PharmaConnectTypography.heading3,
+                                      style: context.text.heading3,
                                     ),
                                     Text(
                                       product.genericName,
-                                      style: PharmaConnectTypography.body2,
+                                      style: context.text.body2,
                                     ),
                                     Text(
                                       '${product.dosage} • ${product.form}',
-                                      style: PharmaConnectTypography.micro,
+                                      style: context.text.micro,
                                     ),
                                   ],
                                 ),
@@ -160,22 +160,22 @@ class _CatalogDetailScreenState extends State<CatalogDetailScreen> {
                             ],
                           ),
                           const SizedBox(height: 12),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           const SizedBox(height: 12),
                           Row(
                             children: [
                               _buildInfoChip(
                                 product.manufacturer,
                                 Icons.business,
-                                PharmaConnectColors.textSecondary,
+                                context.palette.textSecondary,
                               ),
                               const SizedBox(width: 8),
                               _buildInfoChip(
                                 product.isGeneric ? 'Générique' : 'Princeps',
                                 Icons.local_pharmacy,
                                 product.isGeneric
-                                    ? PharmaConnectColors.accentPurple
-                                    : PharmaConnectColors.accentCyan,
+                                    ? context.palette.secondary
+                                    : context.palette.primary,
                               ),
                               const SizedBox(width: 8),
                               _buildInfoChip(
@@ -184,15 +184,15 @@ class _CatalogDetailScreenState extends State<CatalogDetailScreen> {
                                     : 'Libre',
                                 Icons.description,
                                 product.isPrescriptionRequired
-                                    ? PharmaConnectColors.accentOrange
-                                    : PharmaConnectColors.accentGreen,
+                                    ? context.palette.warning
+                                    : context.palette.success,
                               ),
                               if (product.isControlledSubstance) ...[
                                 const SizedBox(width: 8),
                                 _buildInfoChip(
                                   'Stupéfiant/Psychotrope',
                                   Icons.warning_amber_rounded,
-                                  PharmaConnectColors.accentRed,
+                                  context.palette.danger,
                                 ),
                               ],
                             ],
@@ -201,7 +201,7 @@ class _CatalogDetailScreenState extends State<CatalogDetailScreen> {
                             const SizedBox(height: 12),
                             Text(
                               product.description!,
-                              style: PharmaConnectTypography.body2,
+                              style: context.text.body2,
                             ),
                           ],
                           const SizedBox(height: 16),
@@ -230,8 +230,8 @@ class _CatalogDetailScreenState extends State<CatalogDetailScreen> {
                                     icon: const Icon(Icons.inventory),
                                     label: const Text('Gérer le stock'),
                                     style: OutlinedButton.styleFrom(
-                                      side: const BorderSide(
-                                        color: Colors.white24,
+                                      side: BorderSide(
+                                        color: context.palette.veil(0.24),
                                       ),
                                       padding: const EdgeInsets.symmetric(
                                         vertical: 14,

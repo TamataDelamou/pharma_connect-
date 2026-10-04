@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
+import '../../../core/theme/palette.dart';
 
 enum StockMovementType {
-  purchase,      // Achat fournisseur
-  sale,          // Vente client
-  adjustment,    // Ajustement manuel
-  expiry,        // Péremption
-  breakage,      // Casse
+  purchase, // Achat fournisseur
+  sale, // Vente client
+  adjustment, // Ajustement manuel
+  expiry, // Péremption
+  breakage, // Casse
   supplierReturn, // Retour fournisseur
-  transfer,      // Transfert entre pharmacies
-  reservation,   // Réservation temporaire
+  transfer, // Transfert entre pharmacies
+  reservation, // Réservation temporaire
   unreservation, // Annulation de réservation
 }
 
@@ -91,23 +91,23 @@ class StockMovement {
     }
   }
 
-  Color get typeColor {
+  ColorRole get typeColor {
     switch (type) {
       case StockMovementType.purchase:
       case StockMovementType.transfer:
-        return PharmaConnectColors.accentGreen;
+        return ColorRole.success;
       case StockMovementType.sale:
       case StockMovementType.reservation:
-        return PharmaConnectColors.accentCyan;
+        return ColorRole.primary;
       case StockMovementType.adjustment:
-        return PharmaConnectColors.accentOrange;
+        return ColorRole.warning;
       case StockMovementType.expiry:
       case StockMovementType.breakage:
-        return PharmaConnectColors.accentRed;
+        return ColorRole.danger;
       case StockMovementType.supplierReturn:
-        return PharmaConnectColors.accentPurple;
+        return ColorRole.secondary;
       case StockMovementType.unreservation:
-        return PharmaConnectColors.accentCyan;
+        return ColorRole.primary;
     }
   }
 }

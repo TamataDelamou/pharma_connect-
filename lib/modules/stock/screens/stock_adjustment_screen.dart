@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../../../core/widgets/inputs/glass_input.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../models/stock_adjustment.dart';
 import '../providers/stock_provider.dart';
+import '../../../core/theme/palette.dart';
 
 class StockAdjustmentScreen extends StatefulWidget {
   final String productId;
@@ -52,9 +51,9 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
             Row(
               children: [
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.arrow_back,
-                    color: PharmaConnectColors.textPrimary,
+                    color: context.palette.textPrimary,
                   ),
                   onPressed: () => context.pop(),
                   padding: EdgeInsets.zero,
@@ -63,17 +62,14 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
                 Expanded(
                   child: Text(
                     'Ajustement de stock',
-                    style: PharmaConnectTypography.heading2,
+                    style: context.text.heading2,
                   ),
                 ),
                 const KernelBadge(),
               ],
             ),
             const SizedBox(height: 8),
-            Text(
-              'Produit : ${widget.productName}',
-              style: PharmaConnectTypography.body1,
-            ),
+            Text('Produit : ${widget.productName}', style: context.text.body1),
             const SizedBox(height: 24),
 
             Expanded(
@@ -84,10 +80,7 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
                       child: Column(
                         children: [
                           // Type d'ajustement
-                          const Text(
-                            'Type d\'opération',
-                            style: PharmaConnectTypography.label,
-                          ),
+                          Text('Type d\'opération', style: context.text.label),
                           const SizedBox(height: 8),
                           Row(
                             children: [
@@ -97,7 +90,7 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
                                   selected: _isPositive,
                                   onSelected: (_) =>
                                       setState(() => _isPositive = true),
-                                  selectedColor: PharmaConnectColors.accentGreen
+                                  selectedColor: context.palette.success
                                       .withValues(alpha: 0.2),
                                   backgroundColor: Colors.transparent,
                                 ),
@@ -109,7 +102,7 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
                                   selected: !_isPositive,
                                   onSelected: (_) =>
                                       setState(() => _isPositive = false),
-                                  selectedColor: PharmaConnectColors.accentRed
+                                  selectedColor: context.palette.danger
                                       .withValues(alpha: 0.2),
                                   backgroundColor: Colors.transparent,
                                 ),
@@ -129,34 +122,34 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
                           const SizedBox(height: 16),
 
                           // Raison
-                          const Text(
+                          Text(
                             'Raison de l\'ajustement',
-                            style: PharmaConnectTypography.label,
+                            style: context.text.label,
                           ),
                           const SizedBox(height: 8),
                           DropdownButtonFormField<AdjustmentReason>(
                             value: _selectedReason,
-                            dropdownColor: PharmaConnectColors.primaryDeep,
-                            style: PharmaConnectTypography.body1,
+                            dropdownColor: context.palette.background,
+                            style: context.text.body1,
                             decoration: InputDecoration(
                               filled: true,
-                              fillColor: Colors.white.withValues(alpha: 0.06),
+                              fillColor: context.palette.surface,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: Colors.white24,
+                                borderSide: BorderSide(
+                                  color: context.palette.veil(0.24),
                                 ),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: Colors.white24,
+                                borderSide: BorderSide(
+                                  color: context.palette.veil(0.24),
                                 ),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: PharmaConnectColors.accentCyan,
+                                borderSide: BorderSide(
+                                  color: context.palette.primary,
                                 ),
                               ),
                               contentPadding: const EdgeInsets.symmetric(
@@ -197,9 +190,9 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
                         final quantityText = _quantityController.text.trim();
                         if (quantityText.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
+                            SnackBar(
                               content: Text('Veuillez saisir une quantité'),
-                              backgroundColor: PharmaConnectColors.accentRed,
+                              backgroundColor: context.palette.danger,
                             ),
                           );
                           return;
@@ -208,9 +201,9 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
                         final quantity = int.tryParse(quantityText);
                         if (quantity == null || quantity <= 0) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
+                            SnackBar(
                               content: Text('Quantité invalide'),
-                              backgroundColor: PharmaConnectColors.accentRed,
+                              backgroundColor: context.palette.danger,
                             ),
                           );
                           return;
@@ -233,11 +226,11 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
                         final userId = auth.userId;
                         if (pharmacyId == null || userId == null) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
+                            SnackBar(
                               content: Text(
                                 'Compte non rattaché à une officine vérifiée',
                               ),
-                              backgroundColor: PharmaConnectColors.accentRed,
+                              backgroundColor: context.palette.danger,
                             ),
                           );
                           return;
@@ -249,7 +242,8 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
                           quantity: finalQuantity,
                           reason: _selectedReason,
                           userId: userId,
-                          userName: auth.userEmail ?? auth.userPhone ?? 'Pharmacien',
+                          userName:
+                              auth.userEmail ?? auth.userPhone ?? 'Pharmacien',
                           notes: _notesController.text.trim(),
                         );
 
@@ -263,8 +257,8 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
                                     : 'Ajustement effectué avec succès',
                               ),
                               backgroundColor: provider.isOffline
-                                  ? PharmaConnectColors.accentAmber
-                                  : PharmaConnectColors.accentGreen,
+                                  ? context.palette.warningStrong
+                                  : context.palette.success,
                             ),
                           );
                           context.pop();
@@ -272,9 +266,10 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                provider.error ?? 'Erreur lors de l\'ajustement',
+                                provider.error ??
+                                    'Erreur lors de l\'ajustement',
                               ),
-                              backgroundColor: PharmaConnectColors.accentRed,
+                              backgroundColor: context.palette.danger,
                             ),
                           );
                         }

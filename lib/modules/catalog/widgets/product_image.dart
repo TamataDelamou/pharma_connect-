@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../../../core/theme/colors.dart';
+import '../../../core/theme/palette.dart';
 
 class ProductImage extends StatelessWidget {
   final String? imageUrl;
@@ -24,27 +24,23 @@ class ProductImage extends StatelessWidget {
           width: size,
           height: size,
           fit: BoxFit.cover,
-          placeholder: (context, url) => _buildPlaceholder(),
-          errorWidget: (context, url, error) => _buildPlaceholder(),
+          placeholder: (context, url) => _buildPlaceholder(context),
+          errorWidget: (context, url, error) => _buildPlaceholder(context),
         ),
       );
     }
-    return _buildPlaceholder();
+    return _buildPlaceholder(context);
   }
 
-  Widget _buildPlaceholder() {
+  Widget _buildPlaceholder(BuildContext context) {
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: PharmaConnectColors.accentCyan.withValues(alpha: 0.1),
+        color: context.palette.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: const Icon(
-        Icons.medication,
-        color: PharmaConnectColors.accentCyan,
-        size: 28,
-      ),
+      child: Icon(Icons.medication, color: context.palette.primary, size: 28),
     );
   }
 }
