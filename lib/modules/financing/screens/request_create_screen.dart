@@ -3,8 +3,6 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/tertiary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
@@ -12,6 +10,7 @@ import 'package:pharma_connect/core/widgets/inputs/glass_input.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/financing_provider.dart';
 import '../models/financing_request.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class RequestCreateScreen extends StatefulWidget {
   final String? b2bOrderId;
@@ -75,18 +74,18 @@ class _RequestCreateScreenState extends State<RequestCreateScreen> {
                 leading: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.arrow_back,
-                        color: PharmaConnectColors.textPrimary,
+                        color: context.palette.textPrimary,
                       ),
                       onPressed: () => context.pop(),
                       padding: EdgeInsets.zero,
                     ),
                     const SizedBox(width: 8),
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         '💰 Demander un financement',
-                        style: PharmaConnectTypography.heading2,
+                        style: context.text.heading2,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -225,11 +224,11 @@ class _RequestCreateScreenState extends State<RequestCreateScreen> {
   }
 
   Color _scoreColor(int score) {
-    if (score >= 800) return PharmaConnectColors.accentGreen;
-    if (score >= 700) return PharmaConnectColors.accentCyan;
-    if (score >= 600) return PharmaConnectColors.accentAmber;
-    if (score >= 500) return PharmaConnectColors.accentOrange;
-    return PharmaConnectColors.accentRed;
+    if (score >= 800) return context.palette.success;
+    if (score >= 700) return context.palette.primary;
+    if (score >= 600) return context.palette.warningStrong;
+    if (score >= 500) return context.palette.warning;
+    return context.palette.danger;
   }
 
   Future<void> _submitRequest() async {
@@ -285,16 +284,16 @@ class _RequestCreateScreenState extends State<RequestCreateScreen> {
     if (success && context.mounted) {
       context.pop();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Demande soumise avec succès'),
-          backgroundColor: PharmaConnectColors.accentGreen,
+          backgroundColor: context.palette.success,
         ),
       );
     } else if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(context.read<FinancingProvider>().error ?? 'Erreur'),
-          backgroundColor: PharmaConnectColors.accentRed,
+          backgroundColor: context.palette.danger,
         ),
       );
     }

@@ -3,8 +3,6 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/secondary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
@@ -19,6 +17,7 @@ import '../models/b2b_offer.dart';
 // déjà visible via l'import de b2b_order.dart ci-dessous.
 import '../models/b2b_order.dart';
 import '../models/b2b_negotiation.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class OfferDetailScreen extends StatefulWidget {
   final String offerId;
@@ -63,9 +62,7 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
         body: Center(
           child: Text(
             provider.error ?? 'Offre introuvable',
-            style: PharmaConnectTypography.body2.copyWith(
-              color: PharmaConnectColors.accentRed,
-            ),
+            style: context.text.body2.copyWith(color: context.palette.danger),
           ),
         ),
       );
@@ -94,18 +91,18 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Détail de l\'offre',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -121,10 +118,8 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
                   ),
                   decoration: BoxDecoration(
                     color: offer.isActive
-                        ? PharmaConnectColors.accentGreen.withValues(
-                            alpha: 0.15,
-                          )
-                        : PharmaConnectColors.accentRed.withValues(alpha: 0.15),
+                        ? context.palette.success.withValues(alpha: 0.15)
+                        : context.palette.danger.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
@@ -133,8 +128,8 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: offer.isActive
-                          ? PharmaConnectColors.accentGreen
-                          : PharmaConnectColors.accentRed,
+                          ? context.palette.success
+                          : context.palette.danger,
                     ),
                   ),
                 ),
@@ -152,16 +147,13 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            offer.productName,
-                            style: PharmaConnectTypography.heading3,
-                          ),
+                          Text(offer.productName, style: context.text.heading3),
                           const SizedBox(height: 4),
                           Text(
                             offer.sellerName ?? offer.sellerPharmacyId,
-                            style: PharmaConnectTypography.body2,
+                            style: context.text.body2,
                           ),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           const SizedBox(height: 8),
                           _buildInfoRow(
                             'Prix',
@@ -189,17 +181,14 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
 
                     // Negotiations
                     if (provider.negotiations.isNotEmpty) ...[
-                      const Text(
-                        'Négociations',
-                        style: PharmaConnectTypography.heading3,
-                      ),
+                      Text('Négociations', style: context.text.heading3),
                       const SizedBox(height: 8),
                       ...provider.negotiations.map((neg) {
                         return Container(
                           padding: const EdgeInsets.all(12),
                           margin: const EdgeInsets.only(bottom: 4),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.04),
+                            color: context.palette.surfaceMuted,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
                               color: _negotiationStatusColor(
@@ -215,15 +204,14 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
                                   children: [
                                     Text(
                                       '💰 ${CurrencyFormatter.format(neg.proposedPrice)}',
-                                      style: PharmaConnectTypography.body1
-                                          .copyWith(
-                                            fontWeight: FontWeight.w600,
-                                          ),
+                                      style: context.text.body1.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
                                     if (neg.proposedQuantity != null)
                                       Text(
                                         'Qté: ${neg.proposedQuantity}',
-                                        style: PharmaConnectTypography.micro,
+                                        style: context.text.micro,
                                       ),
                                     Text(
                                       neg.statusLabel,
@@ -241,9 +229,9 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
                                 Row(
                                   children: [
                                     IconButton(
-                                      icon: const Icon(
+                                      icon: Icon(
                                         Icons.check,
-                                        color: PharmaConnectColors.accentGreen,
+                                        color: context.palette.success,
                                       ),
                                       onPressed: () async {
                                         final updated = neg.copyWith(
@@ -256,9 +244,9 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
                                       },
                                     ),
                                     IconButton(
-                                      icon: const Icon(
+                                      icon: Icon(
                                         Icons.close,
-                                        color: PharmaConnectColors.accentRed,
+                                        color: context.palette.danger,
                                       ),
                                       onPressed: () async {
                                         final updated = neg.copyWith(
@@ -271,9 +259,9 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
                                       },
                                     ),
                                     IconButton(
-                                      icon: const Icon(
+                                      icon: Icon(
                                         Icons.swap_horiz,
-                                        color: PharmaConnectColors.accentCyan,
+                                        color: context.palette.primary,
                                       ),
                                       onPressed: () =>
                                           _showCounterOfferDialog(neg),
@@ -362,7 +350,7 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: PharmaConnectColors.textSecondary.withValues(
+                          color: context.palette.textSecondary.withValues(
                             alpha: 0.1,
                           ),
                           borderRadius: BorderRadius.circular(8),
@@ -373,13 +361,13 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
                               offer.status == 'expired'
                                   ? Icons.timer_off
                                   : Icons.block,
-                              color: PharmaConnectColors.textSecondary,
+                              color: context.palette.textSecondary,
                             ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 'Cette offre est ${offer.statusLabel.toLowerCase()}',
-                                style: PharmaConnectTypography.body2,
+                                style: context.text.body2,
                               ),
                             ),
                           ],
@@ -402,11 +390,8 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 120,
-            child: Text(label, style: PharmaConnectTypography.label),
-          ),
-          Expanded(child: Text(value, style: PharmaConnectTypography.body1)),
+          SizedBox(width: 120, child: Text(label, style: context.text.label)),
+          Expanded(child: Text(value, style: context.text.body1)),
         ],
       ),
     );
@@ -419,15 +404,15 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
   Color _negotiationStatusColor(String status) {
     switch (status) {
       case 'pending':
-        return PharmaConnectColors.accentOrange;
+        return context.palette.warning;
       case 'accepted':
-        return PharmaConnectColors.accentGreen;
+        return context.palette.success;
       case 'rejected':
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       case 'countered':
-        return PharmaConnectColors.accentCyan;
+        return context.palette.primary;
       default:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
     }
   }
 
@@ -435,7 +420,7 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
     final quantity = await showDialog<int>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: PharmaConnectColors.primaryDeep,
+        backgroundColor: context.palette.background,
         title: const Text('Commander'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -526,7 +511,7 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: PharmaConnectColors.primaryDeep,
+        backgroundColor: context.palette.background,
         title: const Text('Négocier le prix'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -586,9 +571,9 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
               Navigator.pop(ctx);
               if (success && context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
+                  SnackBar(
                     content: Text('Négociation envoyée'),
-                    backgroundColor: PharmaConnectColors.accentGreen,
+                    backgroundColor: context.palette.success,
                   ),
                 );
                 // Phase 4 (module marketplace) : `provider` référençait une
@@ -600,8 +585,8 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: PharmaConnectColors.accentCyan,
-              foregroundColor: PharmaConnectColors.textOnAccent,
+              backgroundColor: context.palette.primary,
+              foregroundColor: context.palette.onPrimary,
             ),
             child: const Text('Envoyer'),
           ),
@@ -621,7 +606,7 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: PharmaConnectColors.primaryDeep,
+        backgroundColor: context.palette.background,
         title: const Text('Contre-offre'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -670,9 +655,9 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
               Navigator.pop(ctx);
               if (success && context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
+                  SnackBar(
                     content: Text('Contre-offre envoyée'),
-                    backgroundColor: PharmaConnectColors.accentCyan,
+                    backgroundColor: context.palette.primary,
                   ),
                 );
                 // Phase 4 (module marketplace) : même correctif que la
@@ -681,8 +666,8 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: PharmaConnectColors.accentCyan,
-              foregroundColor: PharmaConnectColors.textOnAccent,
+              backgroundColor: context.palette.primary,
+              foregroundColor: context.palette.onPrimary,
             ),
             child: const Text('Envoyer'),
           ),

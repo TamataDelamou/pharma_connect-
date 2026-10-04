@@ -140,8 +140,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                                     Text(
                                       device.deviceId,
                                       style: context.text.micro.copyWith(
-                                        color:
-                                            PharmaConnectColors.textSecondary,
+                                        color: context.palette.textSecondary,
                                       ),
                                     ),
                                   ],

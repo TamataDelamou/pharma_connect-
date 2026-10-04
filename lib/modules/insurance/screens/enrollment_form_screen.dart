@@ -3,12 +3,11 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../providers/insurance_provider.dart';
 import '../models/insurance_enrollment.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 // ASR-3 (audit Module 24, Étape 2/3, 30/08/2026) : écran de création
 // d'adhésion, jusqu'ici totalement absent du module (voir le rapport
@@ -82,18 +81,18 @@ class _EnrollmentFormScreenState extends State<EnrollmentFormScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Nouveau contrat d\'assurance',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -114,16 +113,13 @@ class _EnrollmentFormScreenState extends State<EnrollmentFormScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Rattachement',
-                              style: PharmaConnectTypography.heading3,
-                            ),
+                            Text('Rattachement', style: context.text.heading3),
                             const SizedBox(height: 4),
-                            const Text(
+                            Text(
                               'Identifiants du patient et du plan (aucun '
                               'sélecteur dédié n\'existe encore dans ce '
                               'module — voir le registre).',
-                              style: PharmaConnectTypography.micro,
+                              style: context.text.micro,
                             ),
                             const SizedBox(height: 12),
                             _buildTextField(
@@ -145,9 +141,9 @@ class _EnrollmentFormScreenState extends State<EnrollmentFormScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'Détails du contrat',
-                              style: PharmaConnectTypography.heading3,
+                              style: context.text.heading3,
                             ),
                             const SizedBox(height: 12),
                             _buildTextField(
@@ -202,8 +198,8 @@ class _EnrollmentFormScreenState extends State<EnrollmentFormScreen> {
                       if (provider.error != null) ...[
                         Text(
                           provider.error!,
-                          style: PharmaConnectTypography.body2.copyWith(
-                            color: PharmaConnectColors.accentRed,
+                          style: context.text.body2.copyWith(
+                            color: context.palette.danger,
                           ),
                         ),
                         const SizedBox(height: 12),

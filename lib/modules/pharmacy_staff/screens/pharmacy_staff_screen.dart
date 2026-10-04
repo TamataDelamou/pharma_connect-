@@ -3,11 +3,10 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../models/staff_entry.dart';
 import '../services/pharmacy_staff_service.dart';
+import '../../../core/theme/palette.dart';
 
 /// C209 / D59 : personnel de l'officine.
 ///
@@ -81,7 +80,7 @@ class _PharmacyStaffScreenState extends State<PharmacyStaffScreen> {
       messenger.showSnackBar(
         SnackBar(
           content: Text(successMessage),
-          backgroundColor: PharmaConnectColors.accentGreen,
+          backgroundColor: context.palette.success,
         ),
       );
       await _load();
@@ -89,7 +88,7 @@ class _PharmacyStaffScreenState extends State<PharmacyStaffScreen> {
       messenger.showSnackBar(
         SnackBar(
           content: Text(PharmacyStaffService.describeError(e)),
-          backgroundColor: PharmaConnectColors.accentRed,
+          backgroundColor: context.palette.danger,
         ),
       );
     } finally {
@@ -175,9 +174,9 @@ class _PharmacyStaffScreenState extends State<PharmacyStaffScreen> {
     final result = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: PharmaConnectColors.primaryDeep,
+        backgroundColor: context.palette.background,
         title: Text(title),
-        content: Text(message, style: PharmaConnectTypography.body2),
+        content: Text(message, style: context.text.body2),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -186,8 +185,8 @@ class _PharmacyStaffScreenState extends State<PharmacyStaffScreen> {
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: PharmaConnectColors.accentRed,
-              foregroundColor: PharmaConnectColors.textPrimary,
+              backgroundColor: context.palette.danger,
+              foregroundColor: context.palette.textPrimary,
             ),
             child: Text(actionLabel),
           ),
@@ -215,18 +214,18 @@ class _PharmacyStaffScreenState extends State<PharmacyStaffScreen> {
                 leading: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.arrow_back,
-                        color: PharmaConnectColors.textPrimary,
+                        color: context.palette.textPrimary,
                       ),
                       onPressed: () => context.pop(),
                       padding: EdgeInsets.zero,
                     ),
                     const SizedBox(width: 8),
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         'Personnel de l\'officine',
-                        style: PharmaConnectTypography.heading2,
+                        style: context.text.heading2,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -238,10 +237,10 @@ class _PharmacyStaffScreenState extends State<PharmacyStaffScreen> {
               const SizedBox(height: 8),
               Expanded(
                 child: pharmacyId == null
-                    ? const Center(
+                    ? Center(
                         child: Text(
                           'Aucune officine rattachée à ce compte.',
-                          style: PharmaConnectTypography.body2,
+                          style: context.text.body2,
                           textAlign: TextAlign.center,
                         ),
                       )
@@ -265,7 +264,7 @@ class _PharmacyStaffScreenState extends State<PharmacyStaffScreen> {
           children: [
             Text(
               _error!,
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
@@ -283,11 +282,11 @@ class _PharmacyStaffScreenState extends State<PharmacyStaffScreen> {
       onRefresh: _load,
       child: ListView(
         children: [
-          const Text(
+          Text(
             'Invitez vos employés avec le numéro de téléphone de leur compte '
             '(inscrit comme pharmacien). Ils sont rattachés dès qu\'ils '
             'acceptent l\'invitation dans l\'application.',
-            style: PharmaConnectTypography.body2,
+            style: context.text.body2,
           ),
           const SizedBox(height: 12),
           Align(
@@ -297,29 +296,23 @@ class _PharmacyStaffScreenState extends State<PharmacyStaffScreen> {
               icon: const Icon(Icons.person_add_alt_1),
               label: const Text('Inviter un employé'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: PharmaConnectColors.accentCyan,
-                foregroundColor: PharmaConnectColors.textPrimary,
+                backgroundColor: context.palette.primary,
+                foregroundColor: context.palette.textPrimary,
               ),
             ),
           ),
           const SizedBox(height: 20),
-          Text(
-            'Personnel (${members.length})',
-            style: PharmaConnectTypography.heading3,
-          ),
+          Text('Personnel (${members.length})', style: context.text.heading3),
           const SizedBox(height: 8),
           for (final entry in members) _buildMemberTile(entry),
           const SizedBox(height: 20),
           Text(
             'Invitations en attente (${invitations.length})',
-            style: PharmaConnectTypography.heading3,
+            style: context.text.heading3,
           ),
           const SizedBox(height: 8),
           if (invitations.isEmpty)
-            const Text(
-              'Aucune invitation en attente.',
-              style: PharmaConnectTypography.body2,
-            ),
+            Text('Aucune invitation en attente.', style: context.text.body2),
           for (final entry in invitations) _buildInvitationTile(entry),
         ],
       ),
@@ -331,9 +324,9 @@ class _PharmacyStaffScreenState extends State<PharmacyStaffScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text(
+          Text(
             'La gestion du personnel est réservée au titulaire de l\'officine.',
-            style: PharmaConnectTypography.body2,
+            style: context.text.body2,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
@@ -345,8 +338,8 @@ class _PharmacyStaffScreenState extends State<PharmacyStaffScreen> {
               icon: const Icon(Icons.logout),
               label: const Text('Quitter l\'officine'),
               style: OutlinedButton.styleFrom(
-                foregroundColor: PharmaConnectColors.accentRed,
-                side: const BorderSide(color: PharmaConnectColors.accentRed),
+                foregroundColor: context.palette.danger,
+                side: BorderSide(color: context.palette.danger),
               ),
             ),
         ],
@@ -358,8 +351,8 @@ class _PharmacyStaffScreenState extends State<PharmacyStaffScreen> {
     return _tile(
       icon: entry.isManager ? Icons.verified : Icons.person,
       iconColor: entry.isManager
-          ? PharmaConnectColors.accentGreen
-          : PharmaConnectColors.accentCyan,
+          ? context.palette.success
+          : context.palette.primary,
       title: entry.displayName,
       subtitle: [
         if (entry.isManager) 'Titulaire',
@@ -378,7 +371,7 @@ class _PharmacyStaffScreenState extends State<PharmacyStaffScreen> {
           : TextButton(
               onPressed: () => _remove(entry),
               style: TextButton.styleFrom(
-                foregroundColor: PharmaConnectColors.accentRed,
+                foregroundColor: context.palette.danger,
               ),
               child: const Text('Retirer'),
             ),
@@ -388,7 +381,7 @@ class _PharmacyStaffScreenState extends State<PharmacyStaffScreen> {
   Widget _buildInvitationTile(StaffEntry entry) {
     return _tile(
       icon: Icons.mail_outline,
-      iconColor: PharmaConnectColors.accentOrange,
+      iconColor: context.palette.warning,
       title: entry.displayName,
       subtitle: [
         if (entry.phone != null) entry.phone!,
@@ -418,9 +411,9 @@ class _PharmacyStaffScreenState extends State<PharmacyStaffScreen> {
       padding: const EdgeInsets.all(12),
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.04),
+        color: context.palette.surfaceMuted,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        border: Border.all(color: context.palette.borderSubtle),
       ),
       child: Row(
         children: [
@@ -432,12 +425,12 @@ class _PharmacyStaffScreenState extends State<PharmacyStaffScreen> {
               children: [
                 Text(
                   title,
-                  style: PharmaConnectTypography.body1.copyWith(
+                  style: context.text.body1.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 if (subtitle.isNotEmpty)
-                  Text(subtitle, style: PharmaConnectTypography.micro),
+                  Text(subtitle, style: context.text.micro),
               ],
             ),
           ),
@@ -479,17 +472,17 @@ class _InviteDialogState extends State<_InviteDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: PharmaConnectColors.primaryDeep,
+      backgroundColor: context.palette.background,
       title: const Text('Inviter un employé'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Numéro de téléphone du compte de l\'employé. Il doit s\'être '
             'inscrit comme pharmacien et ne pas être rattaché à une autre '
             'officine.',
-            style: PharmaConnectTypography.body2,
+            style: context.text.body2,
           ),
           const SizedBox(height: 16),
           TextField(
@@ -516,8 +509,8 @@ class _InviteDialogState extends State<_InviteDialog> {
               ? () => Navigator.pop(context, _controller.text.trim())
               : null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: PharmaConnectColors.accentCyan,
-            foregroundColor: PharmaConnectColors.textPrimary,
+            backgroundColor: context.palette.primary,
+            foregroundColor: context.palette.textPrimary,
           ),
           child: const Text('Inviter'),
         ),

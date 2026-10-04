@@ -3,8 +3,6 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/secondary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
@@ -15,6 +13,7 @@ import '../../payments/providers/payment_provider.dart';
 import '../providers/financing_provider.dart';
 import '../models/financing_request.dart';
 import '../models/financing_repayment.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class RequestDetailScreen extends StatefulWidget {
   final String requestId;
@@ -48,9 +47,7 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
         body: Center(
           child: Text(
             provider.error ?? 'Demande introuvable',
-            style: PharmaConnectTypography.body2.copyWith(
-              color: PharmaConnectColors.accentRed,
-            ),
+            style: context.text.body2.copyWith(color: context.palette.danger),
           ),
         ),
       );
@@ -84,18 +81,18 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Détail de la demande',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -140,39 +137,39 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                             'Montant',
                             CurrencyFormatter.format(request.amount),
                           ),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           _buildInfoRow(
                             'Durée',
                             '${request.repaymentPeriodMonths} mois',
                           ),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           _buildInfoRow(
                             'Taux d\'intérêt',
                             '${request.interestRate.toStringAsFixed(1)}%',
                           ),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           if (request.purpose != null)
                             _buildInfoRow('Motif', request.purpose!),
                           if (request.notes != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow('Notes', request.notes!),
                           ],
                           if (request.approvedAt != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow(
                               'Approuvé le',
                               _formatDate(request.approvedAt!),
                             ),
                           ],
                           if (request.disbursedAt != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow(
                               'Décaissé le',
                               _formatDate(request.disbursedAt!),
                             ),
                           ],
                           if (request.completedAt != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow(
                               'Terminé le',
                               _formatDate(request.completedAt!),
@@ -197,9 +194,9 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
 
                     // Repayments schedule
                     if (provider.repayments.isNotEmpty) ...[
-                      const Text(
+                      Text(
                         '📅 Échéancier de remboursement',
-                        style: PharmaConnectTypography.heading3,
+                        style: context.text.heading3,
                       ),
                       const SizedBox(height: 8),
                       ...provider.repayments.map((repayment) {
@@ -237,10 +234,9 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                                   children: [
                                     Text(
                                       'Échéance ${_formatDate(repayment.dueDate)}',
-                                      style: PharmaConnectTypography.body1
-                                          .copyWith(
-                                            fontWeight: FontWeight.w600,
-                                          ),
+                                      style: context.text.body1.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
                                     Text(
                                       '${CurrencyFormatter.format(repayment.amount)} - ${repayment.statusLabel}',
@@ -269,14 +265,14 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                                 ),
                               ],
                               if (repayment.status == 'paid')
-                                const Icon(
+                                Icon(
                                   Icons.check_circle,
-                                  color: PharmaConnectColors.accentGreen,
+                                  color: context.palette.success,
                                 ),
                               if (repayment.isOverdue)
-                                const Icon(
+                                Icon(
                                   Icons.warning_amber,
-                                  color: PharmaConnectColors.accentRed,
+                                  color: context.palette.danger,
                                 ),
                             ],
                           ),
@@ -302,10 +298,9 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                                     );
                                 if (success && context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
+                                    SnackBar(
                                       content: Text('Demande approuvée'),
-                                      backgroundColor:
-                                          PharmaConnectColors.accentGreen,
+                                      backgroundColor: context.palette.success,
                                     ),
                                   );
                                   provider.loadRequest(widget.requestId);
@@ -350,10 +345,9 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                           );
                           if (success && context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
+                              SnackBar(
                                 content: Text('Fonds décaissés'),
-                                backgroundColor:
-                                    PharmaConnectColors.accentGreen,
+                                backgroundColor: context.palette.success,
                               ),
                             );
                             provider.loadRequest(widget.requestId);
@@ -366,28 +360,26 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: PharmaConnectColors.accentGreen.withValues(
-                            alpha: 0.1,
-                          ),
+                          color: context.palette.success.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: PharmaConnectColors.accentGreen.withValues(
+                            color: context.palette.success.withValues(
                               alpha: 0.2,
                             ),
                           ),
                         ),
                         child: Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.check_circle,
-                              color: PharmaConnectColors.accentGreen,
+                              color: context.palette.success,
                             ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 'Demande terminée le ${_formatDate(request.completedAt ?? DateTime.now())}',
                                 style: TextStyle(
-                                  color: PharmaConnectColors.accentGreen,
+                                  color: context.palette.success,
                                 ),
                               ),
                             ),
@@ -400,29 +392,22 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: PharmaConnectColors.accentRed.withValues(
-                            alpha: 0.1,
-                          ),
+                          color: context.palette.danger.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: PharmaConnectColors.accentRed.withValues(
+                            color: context.palette.danger.withValues(
                               alpha: 0.2,
                             ),
                           ),
                         ),
                         child: Row(
                           children: [
-                            const Icon(
-                              Icons.block,
-                              color: PharmaConnectColors.accentRed,
-                            ),
+                            Icon(Icons.block, color: context.palette.danger),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 'Demande rejetée',
-                                style: TextStyle(
-                                  color: PharmaConnectColors.accentRed,
-                                ),
+                                style: TextStyle(color: context.palette.danger),
                               ),
                             ),
                           ],
@@ -434,9 +419,9 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                         request.status == 'completed') ...[
                       const SizedBox(height: 16),
                       // Progress bar
-                      const Text(
+                      Text(
                         'Progression du remboursement',
-                        style: PharmaConnectTypography.label,
+                        style: context.text.label,
                       ),
                       const SizedBox(height: 4),
                       Stack(
@@ -444,7 +429,7 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                           Container(
                             height: 12,
                             decoration: BoxDecoration(
-                              color: Colors.white24,
+                              color: context.palette.veil(0.24),
                               borderRadius: BorderRadius.circular(6),
                             ),
                           ),
@@ -458,7 +443,7 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                             child: Container(
                               height: 12,
                               decoration: BoxDecoration(
-                                color: PharmaConnectColors.accentGreen,
+                                color: context.palette.success,
                                 borderRadius: BorderRadius.circular(6),
                               ),
                             ),
@@ -471,13 +456,13 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                         children: [
                           Text(
                             '${provider.repayments.where((r) => r.status == 'paid').length}/${provider.repayments.length} payés',
-                            style: PharmaConnectTypography.micro,
+                            style: context.text.micro,
                           ),
                           Text(
                             '${((provider.repayments.where((r) => r.status == 'paid').length / (provider.repayments.length > 0 ? provider.repayments.length : 1)) * 100).toStringAsFixed(0)}%',
-                            style: PharmaConnectTypography.micro.copyWith(
+                            style: context.text.micro.copyWith(
                               fontWeight: FontWeight.w600,
-                              color: PharmaConnectColors.accentGreen,
+                              color: context.palette.success,
                             ),
                           ),
                         ],
@@ -553,7 +538,7 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
             content: Text(
               'Paiement échoué : ${paymentProvider.error ?? "erreur inconnue"}',
             ),
-            backgroundColor: PharmaConnectColors.accentRed,
+            backgroundColor: context.palette.danger,
           ),
         );
       }
@@ -569,9 +554,9 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
     if (!context.mounted) return;
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Paiement effectué'),
-          backgroundColor: PharmaConnectColors.accentGreen,
+          backgroundColor: context.palette.success,
         ),
       );
       financingProvider.loadRequest(widget.requestId);
@@ -586,7 +571,7 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
             'Le paiement a été débité mais l\'échéance n\'a pas pu être mise à jour : '
             '${financingProvider.error ?? "erreur inconnue"}. Contactez le support.',
           ),
-          backgroundColor: PharmaConnectColors.accentRed,
+          backgroundColor: context.palette.danger,
         ),
       );
     }
@@ -598,11 +583,8 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 120,
-            child: Text(label, style: PharmaConnectTypography.label),
-          ),
-          Expanded(child: Text(value, style: PharmaConnectTypography.body1)),
+          SizedBox(width: 120, child: Text(label, style: context.text.label)),
+          Expanded(child: Text(value, style: context.text.body1)),
         ],
       ),
     );
@@ -615,34 +597,34 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
   Color _statusColor(String status) {
     switch (status) {
       case 'pending':
-        return PharmaConnectColors.accentOrange;
+        return context.palette.warning;
       case 'approved':
-        return PharmaConnectColors.accentCyan;
+        return context.palette.primary;
       case 'rejected':
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       case 'active':
-        return PharmaConnectColors.accentPurple;
+        return context.palette.secondary;
       case 'completed':
-        return PharmaConnectColors.accentGreen;
+        return context.palette.success;
       case 'defaulted':
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       default:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
     }
   }
 
   Color _repaymentStatusColor(String status) {
     switch (status) {
       case 'pending':
-        return PharmaConnectColors.accentOrange;
+        return context.palette.warning;
       case 'paid':
-        return PharmaConnectColors.accentGreen;
+        return context.palette.success;
       case 'overdue':
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       case 'defaulted':
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       default:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
     }
   }
 }

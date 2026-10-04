@@ -3,13 +3,12 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../providers/badge_provider.dart';
 import '../models/loyalty_badge.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class BadgesGalleryScreen extends StatefulWidget {
   const BadgesGalleryScreen({super.key});
@@ -48,18 +47,18 @@ class _BadgesGalleryScreenState extends State<BadgesGalleryScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       '🏅 Galerie de badges',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -71,7 +70,7 @@ class _BadgesGalleryScreenState extends State<BadgesGalleryScreen> {
             const SizedBox(height: 8),
             Text(
               '${provider.earnedBadges.length} badges débloqués sur ${provider.allBadges.length}',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
             ),
             const SizedBox(height: 16),
 
@@ -98,16 +97,16 @@ class _BadgesGalleryScreenState extends State<BadgesGalleryScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.error_outline,
                             size: 48,
-                            color: PharmaConnectColors.accentRed,
+                            color: context.palette.danger,
                           ),
                           const SizedBox(height: 16),
                           Text(
                             provider.error!,
-                            style: PharmaConnectTypography.body2.copyWith(
-                              color: PharmaConnectColors.accentRed,
+                            style: context.text.body2.copyWith(
+                              color: context.palette.danger,
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -166,8 +165,8 @@ class _BadgesGalleryScreenState extends State<BadgesGalleryScreen> {
                                       ? FontWeight.w600
                                       : FontWeight.w400,
                                   color: isEarned
-                                      ? PharmaConnectColors.textPrimary
-                                      : PharmaConnectColors.textSecondary,
+                                      ? context.palette.textPrimary
+                                      : context.palette.textSecondary,
                                 ),
                                 textAlign: TextAlign.center,
                                 maxLines: 2,
@@ -179,7 +178,7 @@ class _BadgesGalleryScreenState extends State<BadgesGalleryScreen> {
                                   '✅ Débloqué',
                                   style: TextStyle(
                                     fontSize: 10,
-                                    color: PharmaConnectColors.accentGreen,
+                                    color: context.palette.success,
                                   ),
                                 )
                               else if (badge.requirementType != null &&
@@ -188,7 +187,7 @@ class _BadgesGalleryScreenState extends State<BadgesGalleryScreen> {
                                   '${badge.requirementValue} ${badge.requirementLabel}',
                                   style: TextStyle(
                                     fontSize: 9,
-                                    color: PharmaConnectColors.textSecondary,
+                                    color: context.palette.textSecondary,
                                   ),
                                 ),
                             ],
@@ -215,10 +214,12 @@ class _BadgesGalleryScreenState extends State<BadgesGalleryScreen> {
             setState(() => _selectedCategory = value);
           }
         },
-        selectedColor: PharmaConnectColors.accentCyan.withValues(alpha: 0.2),
+        selectedColor: context.palette.primary.withValues(alpha: 0.2),
         backgroundColor: Colors.transparent,
         side: BorderSide(
-          color: isSelected ? PharmaConnectColors.accentCyan : Colors.white24,
+          color: isSelected
+              ? context.palette.primary
+              : context.palette.veil(0.24),
         ),
       ),
     );

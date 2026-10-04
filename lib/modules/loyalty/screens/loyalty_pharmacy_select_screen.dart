@@ -9,6 +9,7 @@ import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/widgets/inputs/glass_input.dart';
 import '../providers/loyalty_provider.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 /// Audit Module 16 (FID, 29/08/2026) : `loyalty_accounts` n'a qu'une
 /// contrainte d'unicité par (patient_id, pharmacy_id) — un patient peut
@@ -78,20 +79,17 @@ class _LoyaltyPharmacySelectScreenState
           children: [
             // C233 : en-tête adaptable (actions sous le titre sur téléphone).
             HeaderRow(
-              leading: const Column(
+              leading: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Programme de fidélité',
-                    style: PharmaConnectTypography.heading1,
+                    style: context.text.heading1,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(height: 4),
-                  Text(
-                    'Choisissez une officine',
-                    style: PharmaConnectTypography.body2,
-                  ),
+                  Text('Choisissez une officine', style: context.text.body2),
                 ],
               ),
               trailing: [const KernelBadge()],
@@ -108,9 +106,9 @@ class _LoyaltyPharmacySelectScreenState
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (provider.myAccounts.isNotEmpty) ...[
-                            const Text(
+                            Text(
                               'Mes programmes',
-                              style: PharmaConnectTypography.heading3,
+                              style: context.text.heading3,
                             ),
                             const SizedBox(height: 8),
                             ...provider.myAccounts.map((account) {
@@ -157,10 +155,9 @@ class _LoyaltyPharmacySelectScreenState
                                             ],
                                           ),
                                         ),
-                                        const Icon(
+                                        Icon(
                                           Icons.chevron_right,
-                                          color:
-                                              PharmaConnectColors.textSecondary,
+                                          color: context.palette.textSecondary,
                                         ),
                                       ],
                                     ),
@@ -170,9 +167,9 @@ class _LoyaltyPharmacySelectScreenState
                             }),
                             const SizedBox(height: 24),
                           ],
-                          const Text(
+                          Text(
                             'Rejoindre une officine',
-                            style: PharmaConnectTypography.heading3,
+                            style: context.text.heading3,
                           ),
                           const SizedBox(height: 8),
                           GlassInput(
@@ -183,11 +180,11 @@ class _LoyaltyPharmacySelectScreenState
                           ),
                           const SizedBox(height: 8),
                           if (filteredPharmacies.isEmpty)
-                            const Padding(
+                            Padding(
                               padding: EdgeInsets.symmetric(vertical: 12),
                               child: Text(
                                 'Aucune officine trouvée',
-                                style: PharmaConnectTypography.body2,
+                                style: context.text.body2,
                               ),
                             )
                           else
@@ -208,9 +205,7 @@ class _LoyaltyPharmacySelectScreenState
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(8),
                                         border: Border.all(
-                                          color: Colors.white.withValues(
-                                            alpha: 0.06,
-                                          ),
+                                          color: context.palette.surface,
                                         ),
                                       ),
                                       child: Row(

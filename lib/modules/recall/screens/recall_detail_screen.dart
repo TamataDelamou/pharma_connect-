@@ -3,7 +3,6 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/buttons/secondary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
@@ -268,8 +267,8 @@ class _RecallDetailScreenState extends State<RecallDetailScreen> {
                                       '${(recall.completionRate * 100).toStringAsFixed(0)}%',
                                       style: context.text.kpiSmall.copyWith(
                                         color: recall.completionRate > 0.8
-                                            ? PharmaConnectColors.accentGreen
-                                            : PharmaConnectColors.accentOrange,
+                                            ? context.palette.success
+                                            : context.palette.warning,
                                       ),
                                     ),
                                   ],

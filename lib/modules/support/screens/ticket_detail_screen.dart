@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/secondary_button.dart';
@@ -183,7 +182,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                                           _formatDate(ticket.slaDueAt!),
                                           style: context.text.body1.copyWith(
                                             color: ticket.isSlaBreached
-                                                ? PharmaConnectColors.accentRed
+                                                ? context.palette.danger
                                                 : null,
                                           ),
                                         ),
@@ -194,13 +193,12 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                                             size: 16,
                                             color: context.palette.danger,
                                           ),
-                                          const Text(
+                                          Text(
                                             ' En retard',
                                             style: TextStyle(
                                               fontSize: 12,
                                               fontWeight: FontWeight.w600,
-                                              color:
-                                                  PharmaConnectColors.accentRed,
+                                              color: context.palette.danger,
                                             ),
                                           ),
                                         ],

@@ -3,12 +3,11 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/utils/currency_formatter.dart';
 import '../providers/insurance_provider.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class EnrollmentDetailScreen extends StatefulWidget {
   final String enrollmentId;
@@ -51,9 +50,7 @@ class _EnrollmentDetailScreenState extends State<EnrollmentDetailScreen> {
         body: Center(
           child: Text(
             provider.error ?? 'Contrat introuvable',
-            style: PharmaConnectTypography.body2.copyWith(
-              color: PharmaConnectColors.accentRed,
-            ),
+            style: context.text.body2.copyWith(color: context.palette.danger),
           ),
         ),
       );
@@ -70,18 +67,18 @@ class _EnrollmentDetailScreenState extends State<EnrollmentDetailScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Contrat d\'assurance',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -101,8 +98,8 @@ class _EnrollmentDetailScreenState extends State<EnrollmentDetailScreen> {
                     GlassCard(
                       glow: enrollment.isActive,
                       glowColor: enrollment.isActive
-                          ? PharmaConnectColors.accentGreen
-                          : PharmaConnectColors.textSecondary,
+                          ? context.palette.success
+                          : context.palette.textSecondary,
                       child: Row(
                         children: [
                           Container(
@@ -110,8 +107,8 @@ class _EnrollmentDetailScreenState extends State<EnrollmentDetailScreen> {
                             height: 40,
                             decoration: BoxDecoration(
                               color: enrollment.isActive
-                                  ? PharmaConnectColors.accentGreen
-                                  : PharmaConnectColors.textSecondary,
+                                  ? context.palette.success
+                                  : context.palette.textSecondary,
                               borderRadius: BorderRadius.circular(2),
                             ),
                           ),
@@ -122,13 +119,13 @@ class _EnrollmentDetailScreenState extends State<EnrollmentDetailScreen> {
                               children: [
                                 Text(
                                   enrollment.planName ?? 'Plan',
-                                  style: PharmaConnectTypography.heading3,
+                                  style: context.text.heading3,
                                 ),
                                 Text(
                                   enrollment.companyName ??
                                       enrollment.companyId ??
                                       '',
-                                  style: PharmaConnectTypography.body2,
+                                  style: context.text.body2,
                                 ),
                               ],
                             ),
@@ -141,8 +138,8 @@ class _EnrollmentDetailScreenState extends State<EnrollmentDetailScreen> {
                             decoration: BoxDecoration(
                               color:
                                   (enrollment.isActive
-                                          ? PharmaConnectColors.accentGreen
-                                          : PharmaConnectColors.textSecondary)
+                                          ? context.palette.success
+                                          : context.palette.textSecondary)
                                       .withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(4),
                             ),
@@ -152,8 +149,8 @@ class _EnrollmentDetailScreenState extends State<EnrollmentDetailScreen> {
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 color: enrollment.isActive
-                                    ? PharmaConnectColors.accentGreen
-                                    : PharmaConnectColors.textSecondary,
+                                    ? context.palette.success
+                                    : context.palette.textSecondary,
                               ),
                             ),
                           ),
@@ -168,41 +165,41 @@ class _EnrollmentDetailScreenState extends State<EnrollmentDetailScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildInfoRow('N° Police', enrollment.policyNumber),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           if (enrollment.memberNumber != null) ...[
                             _buildInfoRow(
                               'N° Adhérent',
                               enrollment.memberNumber!,
                             ),
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                           ],
                           _buildInfoRow(
                             'Date de début',
                             _formatDate(enrollment.startDate),
                           ),
                           if (enrollment.endDate != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow(
                               'Date d\'expiration',
                               _formatDate(enrollment.endDate!),
                             ),
                           ],
                           if (enrollment.coveragePercentage != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow(
                               'Taux de couverture',
                               '${enrollment.coveragePercentage}%',
                             ),
                           ],
                           if (enrollment.annualLimit != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow(
                               'Plafond annuel',
                               CurrencyFormatter.format(enrollment.annualLimit!),
                             ),
                           ],
                           if (enrollment.notes != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow('Notes', enrollment.notes!),
                           ],
                         ],
@@ -215,9 +212,9 @@ class _EnrollmentDetailScreenState extends State<EnrollmentDetailScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Simulation de couverture',
-                            style: PharmaConnectTypography.heading3,
+                            style: context.text.heading3,
                           ),
                           const SizedBox(height: 12),
                           TextField(
@@ -273,7 +270,7 @@ class _EnrollmentDetailScreenState extends State<EnrollmentDetailScreen> {
                           ),
                           if (provider.coverageCalculation != null) ...[
                             const SizedBox(height: 12),
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             const SizedBox(height: 8),
                             _buildInfoRow(
                               'Montant total',
@@ -321,10 +318,8 @@ class _EnrollmentDetailScreenState extends State<EnrollmentDetailScreen> {
                       icon: const Icon(Icons.delete_outline),
                       label: const Text('Supprimer'),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: PharmaConnectColors.accentRed,
-                        side: const BorderSide(
-                          color: PharmaConnectColors.accentRed,
-                        ),
+                        foregroundColor: context.palette.danger,
+                        side: BorderSide(color: context.palette.danger),
                       ),
                     ),
                   ],
@@ -343,11 +338,8 @@ class _EnrollmentDetailScreenState extends State<EnrollmentDetailScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 140,
-            child: Text(label, style: PharmaConnectTypography.label),
-          ),
-          Expanded(child: Text(value, style: PharmaConnectTypography.body1)),
+          SizedBox(width: 140, child: Text(label, style: context.text.label)),
+          Expanded(child: Text(value, style: context.text.body1)),
         ],
       ),
     );
@@ -377,7 +369,7 @@ class _EnrollmentDetailScreenState extends State<EnrollmentDetailScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: PharmaConnectColors.primaryDeep,
+        backgroundColor: context.palette.background,
         title: const Text('Supprimer'),
         content: const Text('Supprimer ce contrat d\'assurance ?'),
         actions: [
@@ -394,8 +386,8 @@ class _EnrollmentDetailScreenState extends State<EnrollmentDetailScreen> {
               if (success && context.mounted) context.pop();
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: PharmaConnectColors.accentRed,
-              foregroundColor: PharmaConnectColors.textPrimary,
+              backgroundColor: context.palette.danger,
+              foregroundColor: context.palette.textPrimary,
             ),
             child: const Text('Supprimer'),
           ),

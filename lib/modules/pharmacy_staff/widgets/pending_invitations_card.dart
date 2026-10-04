@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../models/staff_entry.dart';
 import '../services/pharmacy_staff_service.dart';
+import '../../../core/theme/palette.dart';
 
 /// C209 / D59 : invitations reçues par un pharmacien non rattaché. Affiché en
 /// tête de l'écran de vérification de licence et, depuis C213, dans le
@@ -62,7 +61,7 @@ class _PendingInvitationsCardState extends State<PendingInvitationsCard> {
               'Vous faites partie du personnel de '
               '${invitation.pharmacyName}',
             ),
-            backgroundColor: PharmaConnectColors.accentGreen,
+            backgroundColor: context.palette.success,
           ),
         );
         router.go('/dashboard');
@@ -76,7 +75,7 @@ class _PendingInvitationsCardState extends State<PendingInvitationsCard> {
       messenger.showSnackBar(
         SnackBar(
           content: Text(PharmacyStaffService.describeError(e)),
-          backgroundColor: PharmaConnectColors.accentRed,
+          backgroundColor: context.palette.danger,
         ),
       );
       await _load();
@@ -89,13 +88,13 @@ class _PendingInvitationsCardState extends State<PendingInvitationsCard> {
   Widget build(BuildContext context) {
     if (_isLoading) return const SizedBox.shrink();
     if (_invitations.isEmpty) {
-      return const Padding(
+      return Padding(
         padding: EdgeInsets.only(bottom: 16),
         child: Text(
           'Vous travaillez dans une officine déjà inscrite ? Demandez à son '
           'titulaire de vous inviter avec votre numéro de téléphone : '
           'l\'invitation apparaîtra ici.',
-          style: PharmaConnectTypography.micro,
+          style: context.text.micro,
         ),
       );
     }
@@ -104,19 +103,19 @@ class _PendingInvitationsCardState extends State<PendingInvitationsCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Invitation à rejoindre une officine',
-            style: PharmaConnectTypography.heading3,
+            style: context.text.heading3,
           ),
           const SizedBox(height: 8),
           for (final invitation in _invitations) _buildInvitation(invitation),
           const SizedBox(height: 8),
           // C213 : la carte est aussi affichée dans le bandeau d'état du
           // compte (tableau de bord), sans formulaire en dessous.
-          const Text(
+          Text(
             'Pour inscrire votre propre officine, utilisez plutôt le '
             'formulaire d\'inscription d\'officine.',
-            style: PharmaConnectTypography.micro,
+            style: context.text.micro,
           ),
         ],
       ),
@@ -129,10 +128,10 @@ class _PendingInvitationsCardState extends State<PendingInvitationsCard> {
       padding: const EdgeInsets.all(12),
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: PharmaConnectColors.accentCyan.withValues(alpha: 0.08),
+        color: context.palette.primary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: PharmaConnectColors.accentCyan.withValues(alpha: 0.4),
+          color: context.palette.primary.withValues(alpha: 0.4),
         ),
       ),
       child: Column(
@@ -140,19 +139,14 @@ class _PendingInvitationsCardState extends State<PendingInvitationsCard> {
         children: [
           Text(
             invitation.pharmacyName,
-            style: PharmaConnectTypography.body1.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+            style: context.text.body1.copyWith(fontWeight: FontWeight.w600),
           ),
           if (invitation.pharmacyAddress != null)
-            Text(
-              invitation.pharmacyAddress!,
-              style: PharmaConnectTypography.micro,
-            ),
+            Text(invitation.pharmacyAddress!, style: context.text.micro),
           if (invitation.invitedByName != null)
             Text(
               'Invitation de ${invitation.invitedByName}',
-              style: PharmaConnectTypography.micro,
+              style: context.text.micro,
             ),
           const SizedBox(height: 8),
           if (busy)
@@ -170,8 +164,8 @@ class _PendingInvitationsCardState extends State<PendingInvitationsCard> {
                       ? () => _respond(invitation, true)
                       : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: PharmaConnectColors.accentGreen,
-                    foregroundColor: PharmaConnectColors.textPrimary,
+                    backgroundColor: context.palette.success,
+                    foregroundColor: context.palette.textPrimary,
                   ),
                   child: const Text('Accepter'),
                 ),

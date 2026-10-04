@@ -3,8 +3,6 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/secondary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
@@ -12,6 +10,7 @@ import 'package:pharma_connect/core/utils/currency_formatter.dart';
 import 'package:pharma_connect/modules/auth/providers/auth_provider.dart';
 import '../providers/marketplace_provider.dart';
 import '../models/b2b_order.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class OrderDetailScreen extends StatefulWidget {
   final String orderId;
@@ -45,9 +44,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         body: Center(
           child: Text(
             provider.error ?? 'Commande introuvable',
-            style: PharmaConnectTypography.body2.copyWith(
-              color: PharmaConnectColors.accentRed,
-            ),
+            style: context.text.body2.copyWith(color: context.palette.danger),
           ),
         ),
       );
@@ -74,18 +71,18 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Détail de la commande',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -130,36 +127,36 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                             'Acheteur',
                             order.buyerName ?? order.buyerPharmacyId,
                           ),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           _buildInfoRow(
                             'Vendeur',
                             order.sellerName ?? order.sellerPharmacyId,
                           ),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           _buildInfoRow('Date', _formatDate(order.createdAt)),
                           if (order.submittedAt != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow(
                               'Soumise le',
                               _formatDate(order.submittedAt!),
                             ),
                           ],
                           if (order.confirmedAt != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow(
                               'Confirmée le',
                               _formatDate(order.confirmedAt!),
                             ),
                           ],
                           if (order.deliveredAt != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow(
                               'Livrée le',
                               _formatDate(order.deliveredAt!),
                             ),
                           ],
                           if (order.notes != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow('Notes', order.notes!),
                           ],
                         ],
@@ -169,27 +166,24 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 
                     // Items
                     if (order.items != null && order.items!.isNotEmpty) ...[
-                      const Text(
-                        'Articles',
-                        style: PharmaConnectTypography.heading3,
-                      ),
+                      Text('Articles', style: context.text.heading3),
                       const SizedBox(height: 8),
                       ...order.items!.map((item) {
                         return Container(
                           padding: const EdgeInsets.all(12),
                           margin: const EdgeInsets.only(bottom: 4),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.04),
+                            color: context.palette.surfaceMuted,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.06),
+                              color: context.palette.borderSubtle,
                             ),
                           ),
                           child: Row(
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.medication,
-                                color: PharmaConnectColors.accentCyan,
+                                color: context.palette.primary,
                                 size: 16,
                               ),
                               const SizedBox(width: 8),
@@ -199,14 +193,13 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                   children: [
                                     Text(
                                       item.productName,
-                                      style: PharmaConnectTypography.body2
-                                          .copyWith(
-                                            fontWeight: FontWeight.w500,
-                                          ),
+                                      style: context.text.body2.copyWith(
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
                                     Text(
                                       '${item.quantity} x ${CurrencyFormatter.format(item.unitPrice)}',
-                                      style: PharmaConnectTypography.micro,
+                                      style: context.text.micro,
                                     ),
                                   ],
                                 ),
@@ -215,14 +208,14 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                 CurrencyFormatter.format(item.totalPrice),
                                 style: TextStyle(
                                   fontWeight: FontWeight.w600,
-                                  color: PharmaConnectColors.accentCyan,
+                                  color: context.palette.primary,
                                 ),
                               ),
                             ],
                           ),
                         );
                       }),
-                      const Divider(color: Colors.white12),
+                      Divider(color: context.palette.veil(0.12)),
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8),
                         child: Row(
@@ -237,7 +230,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w700,
-                                color: PharmaConnectColors.accentCyan,
+                                color: context.palette.primary,
                               ),
                             ),
                           ],
@@ -260,10 +253,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                     .updateOrderStatus(order.id, 'submitted');
                                 if (success && context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
+                                    SnackBar(
                                       content: Text('Commande soumise'),
-                                      backgroundColor:
-                                          PharmaConnectColors.accentGreen,
+                                      backgroundColor: context.palette.success,
                                     ),
                                   );
                                   provider.loadOrder(order.id);
@@ -306,10 +298,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                     .updateOrderStatus(order.id, 'confirmed');
                                 if (success && context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
+                                    SnackBar(
                                       content: Text('Commande confirmée'),
-                                      backgroundColor:
-                                          PharmaConnectColors.accentGreen,
+                                      backgroundColor: context.palette.success,
                                     ),
                                   );
                                   provider.loadOrder(order.id);
@@ -351,9 +342,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                           );
                           if (success && context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
+                              SnackBar(
                                 content: Text('Commande expédiée'),
-                                backgroundColor: PharmaConnectColors.accentCyan,
+                                backgroundColor: context.palette.primary,
                               ),
                             );
                             provider.loadOrder(order.id);
@@ -373,10 +364,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                           );
                           if (success && context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
+                              SnackBar(
                                 content: Text('Commande reçue'),
-                                backgroundColor:
-                                    PharmaConnectColors.accentGreen,
+                                backgroundColor: context.palette.success,
                               ),
                             );
                             provider.loadOrder(order.id);
@@ -389,28 +379,26 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: PharmaConnectColors.accentGreen.withValues(
-                            alpha: 0.1,
-                          ),
+                          color: context.palette.success.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: PharmaConnectColors.accentGreen.withValues(
+                            color: context.palette.success.withValues(
                               alpha: 0.2,
                             ),
                           ),
                         ),
                         child: Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.check_circle,
-                              color: PharmaConnectColors.accentGreen,
+                              color: context.palette.success,
                             ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 'Commande livrée le ${_formatDate(order.deliveredAt ?? DateTime.now())}',
                                 style: TextStyle(
-                                  color: PharmaConnectColors.accentGreen,
+                                  color: context.palette.success,
                                 ),
                               ),
                             ),
@@ -423,29 +411,22 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: PharmaConnectColors.accentRed.withValues(
-                            alpha: 0.1,
-                          ),
+                          color: context.palette.danger.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: PharmaConnectColors.accentRed.withValues(
+                            color: context.palette.danger.withValues(
                               alpha: 0.2,
                             ),
                           ),
                         ),
                         child: Row(
                           children: [
-                            const Icon(
-                              Icons.block,
-                              color: PharmaConnectColors.accentRed,
-                            ),
+                            Icon(Icons.block, color: context.palette.danger),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 'Commande annulée',
-                                style: TextStyle(
-                                  color: PharmaConnectColors.accentRed,
-                                ),
+                                style: TextStyle(color: context.palette.danger),
                               ),
                             ),
                           ],
@@ -468,11 +449,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 100,
-            child: Text(label, style: PharmaConnectTypography.label),
-          ),
-          Expanded(child: Text(value, style: PharmaConnectTypography.body1)),
+          SizedBox(width: 100, child: Text(label, style: context.text.label)),
+          Expanded(child: Text(value, style: context.text.body1)),
         ],
       ),
     );
@@ -485,19 +463,19 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   Color _statusColor(String status) {
     switch (status) {
       case 'draft':
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
       case 'submitted':
-        return PharmaConnectColors.accentCyan;
+        return context.palette.primary;
       case 'confirmed':
-        return PharmaConnectColors.accentGreen;
+        return context.palette.success;
       case 'shipped':
-        return PharmaConnectColors.accentPurple;
+        return context.palette.secondary;
       case 'delivered':
-        return PharmaConnectColors.accentGreen;
+        return context.palette.success;
       case 'cancelled':
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       default:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
     }
   }
 }

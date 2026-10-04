@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../models/insurance_enrollment.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class EnrollmentCard extends StatelessWidget {
   final InsuranceEnrollment enrollment;
@@ -26,15 +25,15 @@ class EnrollmentCard extends StatelessWidget {
             height: 40,
             decoration: BoxDecoration(
               color: enrollment.isActive
-                  ? PharmaConnectColors.accentGreen.withValues(alpha: 0.15)
-                  : PharmaConnectColors.textSecondary.withValues(alpha: 0.1),
+                  ? context.palette.success.withValues(alpha: 0.15)
+                  : context.palette.textSecondary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
               Icons.assignment_ind,
               color: enrollment.isActive
-                  ? PharmaConnectColors.accentGreen
-                  : PharmaConnectColors.textSecondary,
+                  ? context.palette.success
+                  : context.palette.textSecondary,
             ),
           ),
           const SizedBox(width: 12),
@@ -44,7 +43,7 @@ class EnrollmentCard extends StatelessWidget {
               children: [
                 Text(
                   enrollment.planName ?? 'Plan',
-                  style: PharmaConnectTypography.body1.copyWith(
+                  style: context.text.body1.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                   maxLines: 1,
@@ -52,7 +51,7 @@ class EnrollmentCard extends StatelessWidget {
                 ),
                 Text(
                   enrollment.companyName ?? enrollment.companyId ?? '',
-                  style: PharmaConnectTypography.body2,
+                  style: context.text.body2,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -67,8 +66,8 @@ class EnrollmentCard extends StatelessWidget {
                       decoration: BoxDecoration(
                         color:
                             (enrollment.isActive
-                                    ? PharmaConnectColors.accentGreen
-                                    : PharmaConnectColors.textSecondary)
+                                    ? context.palette.success
+                                    : context.palette.textSecondary)
                                 .withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(4),
                       ),
@@ -78,22 +77,22 @@ class EnrollmentCard extends StatelessWidget {
                           fontSize: 10,
                           fontWeight: FontWeight.w500,
                           color: enrollment.isActive
-                              ? PharmaConnectColors.accentGreen
-                              : PharmaConnectColors.textSecondary,
+                              ? context.palette.success
+                              : context.palette.textSecondary,
                         ),
                       ),
                     ),
                     const SizedBox(width: 8),
                     Text(
                       'N° ${enrollment.policyNumber}',
-                      style: PharmaConnectTypography.micro,
+                      style: context.text.micro,
                     ),
                   ],
                 ),
               ],
             ),
           ),
-          const Icon(Icons.chevron_right, color: Colors.white24),
+          Icon(Icons.chevron_right, color: context.palette.veil(0.24)),
         ],
       ),
     );

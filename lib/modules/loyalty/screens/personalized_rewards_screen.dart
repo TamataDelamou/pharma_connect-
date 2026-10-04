@@ -4,12 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
 import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../providers/personalized_reward_provider.dart';
 import '../models/personalized_reward.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class PersonalizedRewardsScreen extends StatefulWidget {
   const PersonalizedRewardsScreen({super.key});
@@ -47,18 +47,18 @@ class _PersonalizedRewardsScreenState extends State<PersonalizedRewardsScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       '🎁 Récompenses personnalisées',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -75,12 +75,11 @@ class _PersonalizedRewardsScreenState extends State<PersonalizedRewardsScreen> {
                           if (userId != null) {
                             await provider.generateRewards(userId);
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
+                              SnackBar(
                                 content: Text(
                                   'Nouvelles récompenses générées !',
                                 ),
-                                backgroundColor:
-                                    PharmaConnectColors.accentGreen,
+                                backgroundColor: context.palette.success,
                               ),
                             );
                           }
@@ -96,8 +95,8 @@ class _PersonalizedRewardsScreenState extends State<PersonalizedRewardsScreen> {
                     provider.isGenerating ? 'Génération...' : 'Générer',
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: PharmaConnectColors.accentPurple,
-                    foregroundColor: PharmaConnectColors.textPrimary,
+                    backgroundColor: context.palette.secondary,
+                    foregroundColor: context.palette.textPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -108,7 +107,7 @@ class _PersonalizedRewardsScreenState extends State<PersonalizedRewardsScreen> {
             const SizedBox(height: 8),
             Text(
               'Offres adaptées à vos habitudes de santé',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
             ),
             const SizedBox(height: 24),
 
@@ -120,16 +119,16 @@ class _PersonalizedRewardsScreenState extends State<PersonalizedRewardsScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.error_outline,
                             size: 48,
-                            color: PharmaConnectColors.accentRed,
+                            color: context.palette.danger,
                           ),
                           const SizedBox(height: 16),
                           Text(
                             provider.error!,
-                            style: PharmaConnectTypography.body2.copyWith(
-                              color: PharmaConnectColors.accentRed,
+                            style: context.text.body2.copyWith(
+                              color: context.palette.danger,
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -148,24 +147,24 @@ class _PersonalizedRewardsScreenState extends State<PersonalizedRewardsScreen> {
                       ),
                     )
                   : provider.activeRewards.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
                             Icons.card_giftcard_outlined,
                             size: 64,
-                            color: Colors.white24,
+                            color: context.palette.veil(0.24),
                           ),
                           SizedBox(height: 16),
                           Text(
                             'Aucune récompense disponible',
-                            style: PharmaConnectTypography.heading3,
+                            style: context.text.heading3,
                           ),
                           SizedBox(height: 8),
                           Text(
                             'Générez des récompenses en restant actif',
-                            style: PharmaConnectTypography.body2,
+                            style: context.text.body2,
                             textAlign: TextAlign.center,
                           ),
                         ],
@@ -201,16 +200,14 @@ class _PersonalizedRewardsScreenState extends State<PersonalizedRewardsScreen> {
                                         children: [
                                           Text(
                                             reward.title,
-                                            style: PharmaConnectTypography.body1
-                                                .copyWith(
-                                                  fontWeight: FontWeight.w600,
-                                                ),
+                                            style: context.text.body1.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                           ),
                                           if (reward.description != null)
                                             Text(
                                               reward.description!,
-                                              style:
-                                                  PharmaConnectTypography.body2,
+                                              style: context.text.body2,
                                             ),
                                           if (reward.discountPercentage != null)
                                             Text(
@@ -243,7 +240,7 @@ class _PersonalizedRewardsScreenState extends State<PersonalizedRewardsScreen> {
                                     if (reward.expiresAt != null)
                                       Text(
                                         'Expire le ${_formatDate(reward.expiresAt!)}',
-                                        style: PharmaConnectTypography.micro,
+                                        style: context.text.micro,
                                       ),
                                     PrimaryButton(
                                       label: 'Utiliser',

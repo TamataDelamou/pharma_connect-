@@ -3,10 +3,9 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../providers/badge_provider.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class LeaderboardScreen extends StatefulWidget {
   final String pharmacyId;
@@ -79,18 +78,18 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       '🏆 Classement',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -108,9 +107,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                 Tab(text: 'Cette semaine'),
                 Tab(text: 'Ce mois'),
               ],
-              labelColor: PharmaConnectColors.accentCyan,
-              unselectedLabelColor: PharmaConnectColors.textSecondary,
-              indicatorColor: PharmaConnectColors.accentCyan,
+              labelColor: context.palette.primary,
+              unselectedLabelColor: context.palette.textSecondary,
+              indicatorColor: context.palette.primary,
               indicatorWeight: 3,
               dividerColor: Colors.transparent,
             ),
@@ -120,10 +119,10 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
               child: provider.isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : provider.leaderboard.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Text(
                         'Aucun classement disponible',
-                        style: PharmaConnectTypography.body2,
+                        style: context.text.body2,
                       ),
                     )
                   : ListView.builder(
@@ -141,25 +140,25 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                           margin: const EdgeInsets.only(bottom: 4),
                           decoration: BoxDecoration(
                             color: isFirst
-                                ? PharmaConnectColors.accentAmber.withValues(
+                                ? context.palette.warningStrong.withValues(
                                     alpha: 0.1,
                                   )
                                 : isSecond
-                                ? PharmaConnectColors.textSecondary.withValues(
+                                ? context.palette.textSecondary.withValues(
                                     alpha: 0.06,
                                   )
                                 : isThird
-                                ? PharmaConnectColors.accentOrange.withValues(
+                                ? context.palette.warning.withValues(
                                     alpha: 0.06,
                                   )
                                 : Colors.transparent,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
                               color: isFirst
-                                  ? PharmaConnectColors.accentAmber.withValues(
+                                  ? context.palette.warningStrong.withValues(
                                       alpha: 0.2,
                                     )
-                                  : Colors.white.withValues(alpha: 0.06),
+                                  : context.palette.surface,
                             ),
                           ),
                           child: Row(
@@ -175,16 +174,16 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                               const SizedBox(width: 12),
                               CircleAvatar(
                                 radius: 18,
-                                backgroundColor: PharmaConnectColors.accentCyan
+                                backgroundColor: context.palette.primary
                                     .withValues(alpha: 0.1),
                                 child: Text(
                                   (entry['patients']?['full_name']
                                           as String?)?[0] ??
                                       '?',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
-                                    color: PharmaConnectColors.accentCyan,
+                                    color: context.palette.primary,
                                   ),
                                 ),
                               ),
@@ -204,8 +203,8 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                                 style: TextStyle(
                                   fontWeight: FontWeight.w600,
                                   color: isFirst
-                                      ? PharmaConnectColors.accentAmber
-                                      : PharmaConnectColors.textPrimary,
+                                      ? context.palette.warningStrong
+                                      : context.palette.textPrimary,
                                 ),
                               ),
                             ],

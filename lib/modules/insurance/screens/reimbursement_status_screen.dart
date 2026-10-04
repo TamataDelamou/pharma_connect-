@@ -3,12 +3,11 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/utils/currency_formatter.dart';
 import '../providers/insurance_provider.dart';
 import '../models/reimbursement_tracking.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class ReimbursementStatusScreen extends StatefulWidget {
   final String claimId;
@@ -60,18 +59,18 @@ class _ReimbursementStatusScreenState extends State<ReimbursementStatusScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       '💰 Suivi du remboursement',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -90,10 +89,10 @@ class _ReimbursementStatusScreenState extends State<ReimbursementStatusScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.error_outline,
                             size: 48,
-                            color: PharmaConnectColors.accentRed,
+                            color: context.palette.danger,
                           ),
                           const SizedBox(height: 16),
                           Text(error),
@@ -106,10 +105,10 @@ class _ReimbursementStatusScreenState extends State<ReimbursementStatusScreen> {
                       ),
                     )
                   : tracking == null
-                  ? const Center(
+                  ? Center(
                       child: Text(
                         'Aucune information de remboursement disponible',
-                        style: PharmaConnectTypography.body2,
+                        style: context.text.body2,
                       ),
                     )
                   : SingleChildScrollView(
@@ -125,27 +124,27 @@ class _ReimbursementStatusScreenState extends State<ReimbursementStatusScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
+                                Text(
                                   'Détails des montants',
-                                  style: PharmaConnectTypography.heading3,
+                                  style: context.text.heading3,
                                 ),
                                 const SizedBox(height: 12),
                                 _buildAmountRow(
                                   'Montant soumis',
                                   tracking.submittedAmount ?? 0,
-                                  PharmaConnectColors.textSecondary,
+                                  context.palette.textSecondary,
                                 ),
-                                const Divider(color: Colors.white12),
+                                Divider(color: context.palette.veil(0.12)),
                                 _buildAmountRow(
                                   'Montant approuvé',
                                   tracking.approvedAmount ?? 0,
-                                  PharmaConnectColors.accentCyan,
+                                  context.palette.primary,
                                 ),
-                                const Divider(color: Colors.white12),
+                                Divider(color: context.palette.veil(0.12)),
                                 _buildAmountRow(
                                   'Remboursé',
                                   tracking.reimbursedAmount ?? 0,
-                                  PharmaConnectColors.accentGreen,
+                                  context.palette.success,
                                 ),
                               ],
                             ),
@@ -156,20 +155,21 @@ class _ReimbursementStatusScreenState extends State<ReimbursementStatusScreen> {
                             Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: PharmaConnectColors.accentRed.withValues(
+                                color: context.palette.danger.withValues(
                                   alpha: 0.1,
                                 ),
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(
-                                  color: PharmaConnectColors.accentRed
-                                      .withValues(alpha: 0.2),
+                                  color: context.palette.danger.withValues(
+                                    alpha: 0.2,
+                                  ),
                                 ),
                               ),
                               child: Row(
                                 children: [
-                                  const Icon(
+                                  Icon(
                                     Icons.info_outline,
-                                    color: PharmaConnectColors.accentRed,
+                                    color: context.palette.danger,
                                   ),
                                   const SizedBox(width: 8),
                                   Expanded(
@@ -177,7 +177,7 @@ class _ReimbursementStatusScreenState extends State<ReimbursementStatusScreen> {
                                       tracking.rejectionReason ??
                                           'Demande rejetée',
                                       style: TextStyle(
-                                        color: PharmaConnectColors.accentRed,
+                                        color: context.palette.danger,
                                       ),
                                     ),
                                   ),
@@ -210,10 +210,7 @@ class _ReimbursementStatusScreenState extends State<ReimbursementStatusScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'État du remboursement',
-            style: PharmaConnectTypography.heading3,
-          ),
+          Text('État du remboursement', style: context.text.heading3),
           const SizedBox(height: 16),
           ...steps.asMap().entries.map((entry) {
             final index = entry.key;
@@ -229,10 +226,10 @@ class _ReimbursementStatusScreenState extends State<ReimbursementStatusScreen> {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: isCompleted
-                        ? PharmaConnectColors.accentGreen
+                        ? context.palette.success
                         : isCurrent
-                        ? PharmaConnectColors.accentCyan
-                        : Colors.white24,
+                        ? context.palette.primary
+                        : context.palette.veil(0.24),
                   ),
                   child: Center(
                     child: Text(
@@ -240,8 +237,8 @@ class _ReimbursementStatusScreenState extends State<ReimbursementStatusScreen> {
                       style: TextStyle(
                         fontSize: isCompleted ? 16 : 14,
                         color: isCompleted || isCurrent
-                            ? PharmaConnectColors.textPrimary
-                            : PharmaConnectColors.textSecondary,
+                            ? context.palette.textPrimary
+                            : context.palette.textSecondary,
                       ),
                     ),
                   ),
@@ -258,14 +255,14 @@ class _ReimbursementStatusScreenState extends State<ReimbursementStatusScreen> {
                               ? FontWeight.w600
                               : FontWeight.w400,
                           color: isCompleted || isCurrent
-                              ? PharmaConnectColors.textPrimary
-                              : PharmaConnectColors.textSecondary,
+                              ? context.palette.textPrimary
+                              : context.palette.textSecondary,
                         ),
                       ),
                       if (isCurrent && tracking.updatedAt != null)
                         Text(
                           'Mis à jour le ${_formatDate(tracking.updatedAt!)}',
-                          style: PharmaConnectTypography.micro,
+                          style: context.text.micro,
                         ),
                     ],
                   ),
@@ -283,7 +280,7 @@ class _ReimbursementStatusScreenState extends State<ReimbursementStatusScreen> {
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          Text(label, style: PharmaConnectTypography.body2),
+          Text(label, style: context.text.body2),
           const Spacer(),
           Text(
             CurrencyFormatter.format(amount),
