@@ -4,6 +4,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
 import '../providers/search_provider.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/palette.dart';
 
 class BarcodeScannerScreen extends StatefulWidget {
@@ -28,7 +29,17 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Fond noir et textes clairs dans les deux thèmes, caméra active ou
+    // refusée : l'écran utilise la palette sombre.
+    return Theme(
+      data: PharmaConnectAppTheme.dark(),
+      child: Builder(builder: _buildScanner),
+    );
+  }
+
+  Widget _buildScanner(BuildContext context) {
     return Scaffold(
+      backgroundColor: PharmaConnectFixedColors.cameraBackdrop,
       body: Stack(
         children: [
           // Scanner
@@ -43,7 +54,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
           ),
 
           // Overlay
-          _buildOverlay(),
+          _buildOverlay(context),
 
           // Loading
           if (_isLoading) ...[
@@ -61,7 +72,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
     );
   }
 
-  Widget _buildOverlay() {
+  Widget _buildOverlay(BuildContext context) {
     return Column(
       children: [
         // En-tête
@@ -120,7 +131,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
                     'Positionnez le code-barres dans le cadre',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: context.palette.onPrimary,
+                      color: PharmaConnectFixedColors.onCamera,
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),

@@ -447,6 +447,7 @@ class PharmaConnectFixedColors {
 
   /// Texte posé sur l'image de la caméra (lecteur de code-barres) : clair
   /// dans les deux thèmes.
+  static const Color cameraBackdrop = Color(0xFF000000);
   static const Color onCamera = Color(0xFFFFFFFF);
   static const Color onCameraMuted = Color(0xB3FFFFFF);
 
@@ -454,4 +455,8 @@ class PharmaConnectFixedColors {
   static const Color tierSilver = Color(0xFFC0C0C0);
   static const Color tierGold = Color(0xFFFFD700);
   static const Color tierPlatinum = Color(0xFFE5E4E2);
+
+  /// Texte posé sur une pastille de palier : foncé, 4,5:1 au moins sur les
+  /// quatre métaux. Un métal ne sert jamais de couleur de texte.
+  static const Color onTier = Color(0xFF1A1F2B);
 }
