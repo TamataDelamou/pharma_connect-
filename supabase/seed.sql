@@ -79,7 +79,9 @@ select
   ph.id,
   pr.id,
   q.qty,
-  r.reserved,
+  -- C243 : aucune quantité réservée dans le jeu de données. Elle n'est écrite
+  -- que par les fonctions de réservation ; le jeu ne crée aucune réservation.
+  0,
   price.base_price,
   case
     when q.qty = 0 then 'outOfStock'
@@ -116,7 +118,6 @@ join (values
 -- toutes les lignes au lieu d'une fois par ligne — bug constaté au premier
 -- chargement (120 lignes avec la même quantité, donc toutes en 'inStock').
 cross join lateral (select floor(random() * 161)::int as qty where ph.id is not null and pr.id is not null) q
-cross join lateral (select floor(q.qty * random() * 0.15)::int as reserved where ph.id is not null and pr.id is not null) r
 where not exists (select 1 from public.stock_items limit 1);
 
 insert into public.stock_batches (stock_item_id, batch_number, manufacturing_date, expiry_date, quantity, quantity_reserved, purchase_price, received_at, supplier_name)
@@ -126,7 +127,7 @@ select
   (now() - (floor(random() * 365) + 30) * interval '1 day')::date,
   (now() + (floor(random() * 700) + 15) * interval '1 day')::date,
   si.total_quantity,
-  si.reserved_quantity,
+  0,
   floor(si.unit_price * 0.65)::int,
   now() - (floor(random() * 60) * interval '1 day'),
   (array['Laborex Guinée', 'Ubipharm Guinée', 'Sodipharm', 'Cofguipharm'])[floor(random() * 4 + 1)::int]
