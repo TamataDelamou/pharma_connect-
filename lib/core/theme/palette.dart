@@ -445,6 +445,11 @@ class PharmaConnectFixedColors {
   static const Color whatsapp = Color(0xFF25D366);
   static const Color onWhatsapp = Color(0xFFFFFFFF);
 
+  /// Texte posé sur l'image de la caméra (lecteur de code-barres) : clair
+  /// dans les deux thèmes.
+  static const Color onCamera = Color(0xFFFFFFFF);
+  static const Color onCameraMuted = Color(0xB3FFFFFF);
+
   static const Color tierBronze = Color(0xFFCD7F32);
   static const Color tierSilver = Color(0xFFC0C0C0);
   static const Color tierGold = Color(0xFFFFD700);

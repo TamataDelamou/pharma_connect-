@@ -166,7 +166,7 @@ class _PendingInvitationsCardState extends State<PendingInvitationsCard> {
                       : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: context.palette.success,
-                    foregroundColor: context.palette.textPrimary,
+                    foregroundColor: context.palette.onPrimary,
                   ),
                   child: const Text('Accepter'),
                 ),

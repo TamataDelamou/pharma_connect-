@@ -97,7 +97,7 @@ class WalletBalanceCard extends StatelessWidget {
                   onPressed: onHistory,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: context.palette.secondary,
-                    foregroundColor: context.palette.textPrimary,
+                    foregroundColor: context.palette.onPrimary,
                     padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
                   child: const Text('Historique'),

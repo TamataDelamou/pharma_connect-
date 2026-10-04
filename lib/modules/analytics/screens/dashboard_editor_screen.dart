@@ -114,7 +114,7 @@ class _DashboardEditorScreenState extends State<DashboardEditorScreen> {
                         label: const Text('Enregistrer'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: context.palette.success,
-                          foregroundColor: context.palette.textPrimary,
+                          foregroundColor: context.palette.onPrimary,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),

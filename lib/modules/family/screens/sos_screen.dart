@@ -121,7 +121,7 @@ class _SOSScreenState extends State<SOSScreen>
                                 Text(
                                   'APPUYEZ EN CAS D\'URGENCE',
                                   style: TextStyle(
-                                    color: context.palette.textPrimary,
+                                    color: context.palette.onDanger,
                                     fontSize: 14,
                                     fontWeight: FontWeight.w700,
                                   ),

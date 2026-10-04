@@ -431,7 +431,7 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: context.palette.success,
-              foregroundColor: context.palette.textPrimary,
+              foregroundColor: context.palette.onPrimary,
             ),
             child: const Text('Ouvrir'),
           ),
@@ -503,7 +503,7 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: context.palette.warning,
-              foregroundColor: context.palette.textPrimary,
+              foregroundColor: context.palette.onPrimary,
             ),
             child: const Text('Fermer'),
           ),

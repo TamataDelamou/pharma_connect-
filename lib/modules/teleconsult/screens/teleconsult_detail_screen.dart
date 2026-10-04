@@ -106,7 +106,7 @@ class _TeleconsultDetailScreenState extends State<TeleconsultDetailScreen> {
                     label: const Text('Rejoindre'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: context.palette.success,
-                      foregroundColor: context.palette.textPrimary,
+                      foregroundColor: context.palette.onPrimary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -443,7 +443,7 @@ class _TeleconsultDetailScreenState extends State<TeleconsultDetailScreen> {
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: context.palette.danger,
-              foregroundColor: context.palette.textPrimary,
+              foregroundColor: context.palette.onDanger,
             ),
             child: const Text('Supprimer'),
           ),

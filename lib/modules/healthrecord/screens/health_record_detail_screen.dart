@@ -255,7 +255,7 @@ class _HealthRecordDetailScreenState extends State<HealthRecordDetailScreen> {
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: context.palette.danger,
-              foregroundColor: context.palette.textPrimary,
+              foregroundColor: context.palette.onDanger,
             ),
             child: const Text('Supprimer'),
           ),

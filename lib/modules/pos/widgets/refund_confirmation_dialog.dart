@@ -144,7 +144,7 @@ class _RefundConfirmationDialogState extends State<RefundConfirmationDialog> {
               : null,
           style: ElevatedButton.styleFrom(
             backgroundColor: context.palette.warning,
-            foregroundColor: context.palette.textPrimary,
+            foregroundColor: context.palette.onPrimary,
           ),
           child: const Text('Rembourser'),
         ),

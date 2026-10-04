@@ -561,7 +561,7 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: context.palette.success,
-                  foregroundColor: context.palette.textPrimary,
+                  foregroundColor: context.palette.onPrimary,
                 ),
                 child: const Text('Confirmer'),
               ),

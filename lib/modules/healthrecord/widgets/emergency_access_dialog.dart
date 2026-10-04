@@ -145,7 +145,7 @@ class _EmergencyAccessDialogState extends State<_EmergencyAccessDialog> {
           label: const Text('Déclarer l\'urgence'),
           style: ElevatedButton.styleFrom(
             backgroundColor: context.palette.danger,
-            foregroundColor: context.palette.textPrimary,
+            foregroundColor: context.palette.onDanger,
           ),
         ),
       ],

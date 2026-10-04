@@ -187,7 +187,7 @@ class _PharmacyStaffScreenState extends State<PharmacyStaffScreen> {
             onPressed: () => Navigator.pop(ctx, true),
             style: ElevatedButton.styleFrom(
               backgroundColor: context.palette.danger,
-              foregroundColor: context.palette.textPrimary,
+              foregroundColor: context.palette.onDanger,
             ),
             child: Text(actionLabel),
           ),
@@ -298,7 +298,7 @@ class _PharmacyStaffScreenState extends State<PharmacyStaffScreen> {
               label: const Text('Inviter un employé'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: context.palette.primary,
-                foregroundColor: context.palette.textPrimary,
+                foregroundColor: context.palette.onPrimary,
               ),
             ),
           ),
@@ -511,7 +511,7 @@ class _InviteDialogState extends State<_InviteDialog> {
               : null,
           style: ElevatedButton.styleFrom(
             backgroundColor: context.palette.primary,
-            foregroundColor: context.palette.textPrimary,
+            foregroundColor: context.palette.onPrimary,
           ),
           child: const Text('Inviter'),
         ),

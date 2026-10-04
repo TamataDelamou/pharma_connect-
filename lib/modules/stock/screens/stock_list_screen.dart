@@ -112,7 +112,7 @@ class _StockListScreenState extends State<StockListScreen> {
                   label: const Text('Historique'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: context.palette.secondary,
-                    foregroundColor: context.palette.textPrimary,
+                    foregroundColor: context.palette.onPrimary,
                   ),
                 ),
               ],

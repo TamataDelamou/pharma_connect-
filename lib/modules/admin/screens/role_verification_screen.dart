@@ -228,7 +228,7 @@ class _RoleVerificationScreenState extends State<RoleVerificationScreen> {
             onPressed: () => Navigator.pop(ctx, true),
             style: ElevatedButton.styleFrom(
               backgroundColor: context.palette.warning,
-              foregroundColor: context.palette.textPrimary,
+              foregroundColor: context.palette.onPrimary,
             ),
             child: Text(actionLabel),
           ),
@@ -661,7 +661,7 @@ class _AssignRoleDialogState extends State<_AssignRoleDialog> {
                     Navigator.pop(context, (role: _role!, verified: _verified)),
           style: ElevatedButton.styleFrom(
             backgroundColor: context.palette.primary,
-            foregroundColor: context.palette.textPrimary,
+            foregroundColor: context.palette.onPrimary,
           ),
           child: const Text('Attribuer'),
         ),
@@ -774,7 +774,7 @@ class _ReasonDialogState extends State<_ReasonDialog> {
               : null,
           style: ElevatedButton.styleFrom(
             backgroundColor: context.palette.danger,
-            foregroundColor: context.palette.textPrimary,
+            foregroundColor: context.palette.onDanger,
           ),
           child: Text(widget.actionLabel),
         ),

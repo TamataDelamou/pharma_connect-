@@ -73,7 +73,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
                 IconButton(
                   icon: Icon(
                     Icons.arrow_back,
-                    color: context.palette.textPrimary,
+                    color: PharmaConnectFixedColors.onCamera,
                   ),
                   onPressed: () => context.pop(),
                 ),
@@ -82,7 +82,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
                   child: Text(
                     'Scanner un code-barres',
                     style: TextStyle(
-                      color: context.palette.textPrimary,
+                      color: PharmaConnectFixedColors.onCamera,
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
                     ),
@@ -143,7 +143,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
                 children: [
                   Icon(
                     Icons.flash_on,
-                    color: context.palette.textSecondary,
+                    color: PharmaConnectFixedColors.onCameraMuted,
                     size: 20,
                   ),
                   const SizedBox(width: 8),
@@ -151,7 +151,9 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
                     onPressed: () => _controller.toggleTorch(),
                     child: Text(
                       'Activer la lampe',
-                      style: TextStyle(color: context.palette.textSecondary),
+                      style: TextStyle(
+                        color: PharmaConnectFixedColors.onCameraMuted,
+                      ),
                     ),
                   ),
                 ],

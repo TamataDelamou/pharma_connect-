@@ -685,7 +685,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: context.palette.danger,
-              foregroundColor: context.palette.textPrimary,
+              foregroundColor: context.palette.onDanger,
             ),
             child: const Text('Supprimer'),
           ),

@@ -495,7 +495,7 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen>
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: context.palette.success,
-              foregroundColor: context.palette.textPrimary,
+              foregroundColor: context.palette.onPrimary,
             ),
             child: const Text('Oui, confirmer'),
           ),
@@ -549,7 +549,7 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen>
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: context.palette.danger,
-              foregroundColor: context.palette.textPrimary,
+              foregroundColor: context.palette.onDanger,
             ),
             child: const Text('Confirmer l\'annulation'),
           ),

@@ -709,7 +709,7 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
             onPressed: () => Navigator.pop(ctx, 'checked'),
             style: ElevatedButton.styleFrom(
               backgroundColor: context.palette.success,
-              foregroundColor: context.palette.textPrimary,
+              foregroundColor: context.palette.onPrimary,
             ),
             child: const Text('Ordonnance vue'),
           ),
