@@ -8,6 +8,7 @@ import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/buttons/tertiary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../../../core/widgets/inputs/glass_input.dart';
+import '../../../core/widgets/layout/responsive.dart';
 import '../providers/auth_provider.dart';
 import '../models/user_role.dart';
 
@@ -27,6 +28,17 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   final _otpController = TextEditingController();
   bool _isResendEnabled = true;
   int _resendCountdown = _resendDelaySeconds;
+
+  // C230 : erreur affichée sous le champ (un bandeau en bas d'écran passait
+  // inaperçu), et heure de la dernière demande, pour reconnaître le bon
+  // e-mail : chaque nouvelle demande annule le code précédent.
+  String? _codeError;
+  DateTime _requestedAt = DateTime.now();
+
+  String get _requestedAtLabel {
+    String two(int v) => v.toString().padLeft(2, '0');
+    return '${two(_requestedAt.hour)}:${two(_requestedAt.minute)}';
+  }
 
   late String _identifier;
   late String _method;
@@ -79,6 +91,11 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     }
     if (!mounted) return;
     if (sent) {
+      setState(() {
+        _requestedAt = DateTime.now();
+        _codeError = null;
+        _otpController.clear();
+      });
       _startCountdown();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Un nouveau code a été envoyé.')),
@@ -115,11 +132,16 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     return Scaffold(
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+          // C230 : marges réduites sur téléphone (la carte ne gardait que
+          // 248 px de large à 360 px).
+          padding: EdgeInsets.symmetric(
+            horizontal: isCompactWidth(context) ? 12 : 24,
+            vertical: isCompactWidth(context) ? 16 : 32,
+          ),
           child: SizedBox(
             width: 420,
             child: GlassCard(
-              padding: const EdgeInsets.all(32),
+              padding: EdgeInsets.all(isCompactWidth(context) ? 20 : 32),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -160,8 +182,10 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
-                  const Text(
-                    'Le code reste valable 1 heure.',
+                  Text(
+                    'Code demandé à $_requestedAtLabel, valable 1 heure. '
+                    'Utilisez le dernier e-mail reçu : il peut mettre une '
+                    'minute à arriver.',
                     style: PharmaConnectTypography.body2,
                   ),
                   const SizedBox(height: 32),
@@ -171,16 +195,27 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     controller: _otpController,
                     prefixIcon: Icons.sms,
                     keyboardType: TextInputType.number,
+                    isError: _codeError != null,
+                    errorText: _codeError,
+                    onChanged: (_) {
+                      if (_codeError != null) setState(() => _codeError = null);
+                    },
                   ),
                   const SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        _isResendEnabled
-                            ? 'Vous n\'avez pas reçu le code ?'
-                            : 'Renvoyer dans $_resendCountdown s',
-                        style: PharmaConnectTypography.body2,
+                      // C230 : texte flexible, la ligne débordait de 47 px
+                      // sur un téléphone de 360 px.
+                      Expanded(
+                        child: Text(
+                          _isResendEnabled
+                              ? 'Vous n\'avez pas reçu le code ?'
+                              : 'Renvoyer dans $_resendCountdown s',
+                          style: PharmaConnectTypography.body2,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                       TertiaryButton(
                         label: 'Renvoyer',
@@ -204,16 +239,13 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                         '',
                       );
                       if (code.length != 6) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
+                        setState(
+                          () => _codeError =
                               'Saisissez les 6 chiffres du code reçu.',
-                            ),
-                            backgroundColor: PharmaConnectColors.accentRed,
-                          ),
                         );
                         return;
                       }
+                      setState(() => _codeError = null);
                       bool success;
                       // Déterminer le type de vérification selon la méthode
                       if (_method == 'phoneSms' || _method == 'phoneWhatsapp') {
@@ -240,12 +272,12 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                               ? '/license-verification'
                               : '/dashboard',
                         );
-                      } else if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Code invalide ou expiré.'),
-                            backgroundColor: PharmaConnectColors.accentRed,
-                          ),
+                      } else if (mounted) {
+                        setState(
+                          () => _codeError =
+                              'Code refusé. Saisissez le code du dernier '
+                              'e-mail reçu (demande de $_requestedAtLabel). '
+                              'Un code plus ancien ne fonctionne plus.',
                         );
                       }
                     },

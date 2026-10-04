@@ -246,12 +246,12 @@ otp_expiry = 3600
 # Code à 6 chiffres ({{ .Token }}) saisi dans otp_verification_screen.dart (A31).
 # Connexion d'un compte existant (signInWithOtp).
 [auth.email.template.magic_link]
-subject = "Votre code de connexion PharmaConnect"
+subject = "{{ .Token }} : votre code de connexion PharmaConnect"
 content_path = "./supabase/templates/magic_link.html"
 
 # Inscription d'un nouveau compte, quand la confirmation de l'adresse est exigée.
 [auth.email.template.confirmation]
-subject = "Votre code d'inscription PharmaConnect"
+subject = "{{ .Token }} : votre code d'inscription PharmaConnect"
 content_path = "./supabase/templates/confirmation.html"
 
 # Uncomment to customize email template
