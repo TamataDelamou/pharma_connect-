@@ -69,7 +69,7 @@ class _POSInventoryScreenState extends State<POSInventoryScreen> {
                   icon: const Icon(Icons.file_download),
                   label: const Text('Exporter'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: context.palette.secondary,
+                    backgroundColor: context.palette.primary,
                     foregroundColor: context.palette.onPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),

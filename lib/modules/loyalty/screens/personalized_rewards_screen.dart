@@ -95,7 +95,7 @@ class _PersonalizedRewardsScreenState extends State<PersonalizedRewardsScreen> {
                     provider.isGenerating ? 'Génération...' : 'Générer',
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: context.palette.secondary,
+                    backgroundColor: context.palette.primary,
                     foregroundColor: context.palette.onPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),

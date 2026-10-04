@@ -105,7 +105,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                     icon: const Icon(Icons.local_shipping),
                     label: const Text('Transfert'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: context.palette.secondary,
+                      backgroundColor: context.palette.primary,
                       foregroundColor: context.palette.onPrimary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),

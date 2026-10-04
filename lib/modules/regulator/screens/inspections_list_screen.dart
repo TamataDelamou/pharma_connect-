@@ -69,7 +69,7 @@ class _InspectionsListScreenState extends State<InspectionsListScreen> {
                   icon: const Icon(Icons.add),
                   label: const Text('Planifier'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: context.palette.secondary,
+                    backgroundColor: context.palette.primary,
                     foregroundColor: context.palette.onPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
