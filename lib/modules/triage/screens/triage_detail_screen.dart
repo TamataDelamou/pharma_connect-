@@ -3,8 +3,6 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/secondary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
@@ -14,6 +12,7 @@ import '../models/triage_status.dart';
 import '../models/triage_patient.dart';
 import '../models/triage_assessment.dart';
 import '../../healthrecord/widgets/emergency_access_dialog.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 // Audit Module 17 (TRI, 30/08/2026), correctifs de compilation (bugs 2-4) :
 // ce fichier utilisait `SupabaseService()` (lignes ~56, ~605),
@@ -76,9 +75,7 @@ class _TriageDetailScreenState extends State<TriageDetailScreen> {
         body: Center(
           child: Text(
             provider.error ?? 'Patient introuvable',
-            style: PharmaConnectTypography.body2.copyWith(
-              color: PharmaConnectColors.accentRed,
-            ),
+            style: context.text.body2.copyWith(color: context.palette.danger),
           ),
         ),
       );
@@ -95,18 +92,18 @@ class _TriageDetailScreenState extends State<TriageDetailScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Dossier de triage',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -127,10 +124,8 @@ class _TriageDetailScreenState extends State<TriageDetailScreen> {
                     icon: const Icon(Icons.emergency),
                     label: const Text('Dossier de santé (urgence)'),
                     style: OutlinedButton.styleFrom(
-                      side: const BorderSide(
-                        color: PharmaConnectColors.accentRed,
-                      ),
-                      foregroundColor: PharmaConnectColors.accentRed,
+                      side: BorderSide(color: context.palette.danger),
+                      foregroundColor: context.palette.danger,
                     ),
                   ),
                 ],
@@ -145,10 +140,8 @@ class _TriageDetailScreenState extends State<TriageDetailScreen> {
                     icon: const Icon(Icons.psychology),
                     label: const Text('Analyse IA'),
                     style: OutlinedButton.styleFrom(
-                      side: const BorderSide(
-                        color: PharmaConnectColors.accentCyan,
-                      ),
-                      foregroundColor: PharmaConnectColors.accentCyan,
+                      side: BorderSide(color: context.palette.primary),
+                      foregroundColor: context.palette.primary,
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -157,8 +150,8 @@ class _TriageDetailScreenState extends State<TriageDetailScreen> {
                     icon: const Icon(Icons.assessment),
                     label: const Text('Évaluer'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: PharmaConnectColors.accentCyan,
-                      foregroundColor: PharmaConnectColors.textOnAccent,
+                      backgroundColor: context.palette.primary,
+                      foregroundColor: context.palette.onPrimary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -204,11 +197,11 @@ class _TriageDetailScreenState extends State<TriageDetailScreen> {
                                 ),
                                 Text(
                                   'Statut : ${patient.status.label}',
-                                  style: PharmaConnectTypography.body2,
+                                  style: context.text.body2,
                                 ),
                                 Text(
                                   'Arrivé : ${_formatDate(patient.arrivalTime)}',
-                                  style: PharmaConnectTypography.micro,
+                                  style: context.text.micro,
                                 ),
                               ],
                             ),
@@ -246,36 +239,36 @@ class _TriageDetailScreenState extends State<TriageDetailScreen> {
                             'Patient',
                             patient.patientName ?? patient.patientId,
                           ),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           _buildInfoRow('Motif', patient.chiefComplaint),
                           if (patient.symptoms != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow('Symptômes', patient.symptoms!),
                           ],
                           if (patient.vitalSigns.isNotEmpty) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildVitalSigns(patient.vitalSigns),
                           ],
                           if (patient.assignedDepartment != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow(
                               'Service',
                               patient.assignedDepartment!,
                             ),
                           ],
                           if (patient.assignedDoctorId != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow(
                               'Médecin',
                               patient.doctorName ?? patient.assignedDoctorId!,
                             ),
                           ],
                           if (patient.notes != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow('Notes', patient.notes!),
                           ],
                           if (patient.triageResult != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow('Résultat', patient.triageResult!),
                           ],
                         ],
@@ -285,20 +278,17 @@ class _TriageDetailScreenState extends State<TriageDetailScreen> {
 
                     // Assessments
                     if (provider.assessments.isNotEmpty) ...[
-                      const Text(
-                        'Évaluations',
-                        style: PharmaConnectTypography.heading3,
-                      ),
+                      Text('Évaluations', style: context.text.heading3),
                       const SizedBox(height: 8),
                       ...provider.assessments.map((assessment) {
                         return Container(
                           padding: const EdgeInsets.all(12),
                           margin: const EdgeInsets.only(bottom: 4),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.04),
+                            color: context.palette.surfaceMuted,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.06),
+                              color: context.palette.borderSubtle,
                             ),
                           ),
                           child: Column(
@@ -306,7 +296,7 @@ class _TriageDetailScreenState extends State<TriageDetailScreen> {
                             children: [
                               Text(
                                 'Évaluation du ${_formatDate(assessment.assessmentTime)}',
-                                style: PharmaConnectTypography.body1.copyWith(
+                                style: context.text.body1.copyWith(
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -339,9 +329,9 @@ class _TriageDetailScreenState extends State<TriageDetailScreen> {
                           );
                           if (success && context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
+                              SnackBar(
                                 content: Text('Évaluation commencée'),
-                                backgroundColor: PharmaConnectColors.accentCyan,
+                                backgroundColor: context.palette.primary,
                               ),
                             );
                             provider.loadPatient(patient.id);
@@ -386,10 +376,9 @@ class _TriageDetailScreenState extends State<TriageDetailScreen> {
                           );
                           if (success && context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
+                              SnackBar(
                                 content: Text('Patient sorti'),
-                                backgroundColor:
-                                    PharmaConnectColors.accentGreen,
+                                backgroundColor: context.palette.success,
                               ),
                             );
                             provider.loadPatient(patient.id);
@@ -403,27 +392,25 @@ class _TriageDetailScreenState extends State<TriageDetailScreen> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: PharmaConnectColors.accentGreen.withValues(
-                            alpha: 0.1,
-                          ),
+                          color: context.palette.success.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: PharmaConnectColors.accentGreen.withValues(
+                            color: context.palette.success.withValues(
                               alpha: 0.2,
                             ),
                           ),
                         ),
                         child: Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.check_circle,
-                              color: PharmaConnectColors.accentGreen,
+                              color: context.palette.success,
                             ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 'Patient ${patient.status == TriageStatus.discharged ? 'sorti' : 'transféré'} le ${_formatDate(patient.dischargedAt ?? DateTime.now())}',
-                                style: PharmaConnectTypography.body1,
+                                style: context.text.body1,
                               ),
                             ),
                           ],
@@ -445,10 +432,8 @@ class _TriageDetailScreenState extends State<TriageDetailScreen> {
                         icon: const Icon(Icons.delete_outline),
                         label: const Text('Supprimer'),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: PharmaConnectColors.accentRed,
-                          side: const BorderSide(
-                            color: PharmaConnectColors.accentRed,
-                          ),
+                          foregroundColor: context.palette.danger,
+                          side: BorderSide(color: context.palette.danger),
                         ),
                       ),
                     ],
@@ -468,11 +453,8 @@ class _TriageDetailScreenState extends State<TriageDetailScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 120,
-            child: Text(label, style: PharmaConnectTypography.label),
-          ),
-          Expanded(child: Text(value, style: PharmaConnectTypography.body1)),
+          SizedBox(width: 120, child: Text(label, style: context.text.label)),
+          Expanded(child: Text(value, style: context.text.body1)),
         ],
       ),
     );
@@ -488,16 +470,10 @@ class _TriageDetailScreenState extends State<TriageDetailScreen> {
             children: [
               SizedBox(
                 width: 120,
-                child: Text(
-                  _formatVitalName(key),
-                  style: PharmaConnectTypography.label,
-                ),
+                child: Text(_formatVitalName(key), style: context.text.label),
               ),
               Expanded(
-                child: Text(
-                  value.toString(),
-                  style: PharmaConnectTypography.body1,
-                ),
+                child: Text(value.toString(), style: context.text.body1),
               ),
             ],
           ),
@@ -552,17 +528,17 @@ class _TriageDetailScreenState extends State<TriageDetailScreen> {
   Color _priorityColor(int level) {
     switch (level) {
       case 1:
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       case 2:
-        return PharmaConnectColors.accentOrange;
+        return context.palette.warning;
       case 3:
-        return PharmaConnectColors.accentAmber;
+        return context.palette.warningStrong;
       case 4:
-        return PharmaConnectColors.accentCyan;
+        return context.palette.primary;
       case 5:
-        return PharmaConnectColors.accentGreen;
+        return context.palette.success;
       default:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
     }
   }
 
@@ -597,7 +573,7 @@ class _TriageDetailScreenState extends State<TriageDetailScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: PharmaConnectColors.primaryDeep,
+        backgroundColor: context.palette.background,
         title: const Text('Évaluation du patient'),
         content: SingleChildScrollView(
           child: Column(
@@ -706,8 +682,8 @@ class _TriageDetailScreenState extends State<TriageDetailScreen> {
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: PharmaConnectColors.accentCyan,
-              foregroundColor: PharmaConnectColors.textOnAccent,
+              backgroundColor: context.palette.primary,
+              foregroundColor: context.palette.onPrimary,
             ),
             child: const Text('Enregistrer'),
           ),
@@ -752,7 +728,7 @@ class _TriageDetailScreenState extends State<TriageDetailScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: PharmaConnectColors.primaryDeep,
+        backgroundColor: context.palette.background,
         title: const Text('Assigner le patient'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -820,7 +796,7 @@ class _TriageDetailScreenState extends State<TriageDetailScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: PharmaConnectColors.primaryDeep,
+        backgroundColor: context.palette.background,
         title: const Text('Supprimer'),
         content: const Text('Supprimer ce dossier de triage ?'),
         actions: [
@@ -837,8 +813,8 @@ class _TriageDetailScreenState extends State<TriageDetailScreen> {
               if (success && context.mounted) context.pop();
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: PharmaConnectColors.accentRed,
-              foregroundColor: PharmaConnectColors.textPrimary,
+              backgroundColor: context.palette.danger,
+              foregroundColor: context.palette.textPrimary,
             ),
             child: const Text('Supprimer'),
           ),

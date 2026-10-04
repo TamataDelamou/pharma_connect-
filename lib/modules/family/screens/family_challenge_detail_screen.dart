@@ -3,13 +3,12 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/secondary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../providers/family_challenge_provider.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class FamilyChallengeDetailScreen extends StatefulWidget {
   final String challengeId;
@@ -53,9 +52,7 @@ class _FamilyChallengeDetailScreenState
         body: Center(
           child: Text(
             provider.error ?? 'Défi introuvable',
-            style: PharmaConnectTypography.body2.copyWith(
-              color: PharmaConnectColors.accentRed,
-            ),
+            style: context.text.body2.copyWith(color: context.palette.danger),
           ),
         ),
       );
@@ -75,18 +72,18 @@ class _FamilyChallengeDetailScreenState
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Détail du défi',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -102,12 +99,8 @@ class _FamilyChallengeDetailScreenState
                   ),
                   decoration: BoxDecoration(
                     color: challenge.isCompleted
-                        ? PharmaConnectColors.accentGreen.withValues(
-                            alpha: 0.15,
-                          )
-                        : PharmaConnectColors.accentCyan.withValues(
-                            alpha: 0.15,
-                          ),
+                        ? context.palette.success.withValues(alpha: 0.15)
+                        : context.palette.primary.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
@@ -116,8 +109,8 @@ class _FamilyChallengeDetailScreenState
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: challenge.isCompleted
-                          ? PharmaConnectColors.accentGreen
-                          : PharmaConnectColors.accentCyan,
+                          ? context.palette.success
+                          : context.palette.primary,
                     ),
                   ),
                 ),
@@ -147,11 +140,11 @@ class _FamilyChallengeDetailScreenState
                                   children: [
                                     Text(
                                       'Défi ${challenge.typeLabel}',
-                                      style: PharmaConnectTypography.heading3,
+                                      style: context.text.heading3,
                                     ),
                                     Text(
                                       'Cible: ${challenge.targetValue}',
-                                      style: PharmaConnectTypography.body2,
+                                      style: context.text.body2,
                                     ),
                                   ],
                                 ),
@@ -165,7 +158,7 @@ class _FamilyChallengeDetailScreenState
                               Container(
                                 height: 16,
                                 decoration: BoxDecoration(
-                                  color: Colors.white24,
+                                  color: context.palette.veil(0.24),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                               ),
@@ -175,8 +168,8 @@ class _FamilyChallengeDetailScreenState
                                   height: 16,
                                   decoration: BoxDecoration(
                                     color: challenge.isCompleted
-                                        ? PharmaConnectColors.accentGreen
-                                        : PharmaConnectColors.accentCyan,
+                                        ? context.palette.success
+                                        : context.palette.primary,
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                 ),
@@ -189,15 +182,15 @@ class _FamilyChallengeDetailScreenState
                             children: [
                               Text(
                                 'Progression: ${challenge.progress}/${challenge.targetValue}',
-                                style: PharmaConnectTypography.micro,
+                                style: context.text.micro,
                               ),
                               Text(
                                 '${(challenge.progressPercentage * 100).toStringAsFixed(0)}%',
                                 style: TextStyle(
                                   fontWeight: FontWeight.w600,
                                   color: challenge.isCompleted
-                                      ? PharmaConnectColors.accentGreen
-                                      : PharmaConnectColors.accentCyan,
+                                      ? context.palette.success
+                                      : context.palette.primary,
                                 ),
                               ),
                             ],
@@ -209,34 +202,31 @@ class _FamilyChallengeDetailScreenState
 
                     // Contributions
                     if (provider.contributions.isNotEmpty) ...[
-                      const Text(
-                        'Contributions',
-                        style: PharmaConnectTypography.heading3,
-                      ),
+                      Text('Contributions', style: context.text.heading3),
                       const SizedBox(height: 8),
                       ...provider.contributions.map((contribution) {
                         return Container(
                           padding: const EdgeInsets.all(12),
                           margin: const EdgeInsets.only(bottom: 4),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.04),
+                            color: context.palette.surfaceMuted,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.06),
+                              color: context.palette.borderSubtle,
                             ),
                           ),
                           child: Row(
                             children: [
                               CircleAvatar(
                                 radius: 14,
-                                backgroundColor: PharmaConnectColors.accentCyan
+                                backgroundColor: context.palette.primary
                                     .withValues(alpha: 0.1),
                                 child: Text(
                                   contribution.patientName?[0] ?? '?',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
-                                    color: PharmaConnectColors.accentCyan,
+                                    color: context.palette.primary,
                                   ),
                                 ),
                               ),
@@ -245,14 +235,14 @@ class _FamilyChallengeDetailScreenState
                                 child: Text(
                                   contribution.patientName ??
                                       contribution.patientId,
-                                  style: PharmaConnectTypography.body2,
+                                  style: context.text.body2,
                                 ),
                               ),
                               Text(
                                 '+${contribution.contributionValue}',
                                 style: TextStyle(
                                   fontWeight: FontWeight.w600,
-                                  color: PharmaConnectColors.accentGreen,
+                                  color: context.palette.success,
                                 ),
                               ),
                             ],
@@ -294,10 +284,9 @@ class _FamilyChallengeDetailScreenState
                                 _contributionController.clear();
                                 if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
+                                    SnackBar(
                                       content: Text('Contribution ajoutée !'),
-                                      backgroundColor:
-                                          PharmaConnectColors.accentGreen,
+                                      backgroundColor: context.palette.success,
                                     ),
                                   );
                                   provider.loadChallenge(widget.challengeId);

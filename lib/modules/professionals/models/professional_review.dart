@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart' show Color;
-import 'package:pharma_connect/core/theme/colors.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class ProfessionalReview extends Equatable {
   final String id;
@@ -199,18 +199,18 @@ class ProfessionalReview extends Equatable {
   // du Module 19/INF. Corrigé avec les tokens PharmaConnectColors (KER-DES-03)
   // plutôt qu'un import Color brut, pour ne pas réintroduire la régression
   // déjà documentée et gardée par check_no_hardcoded_color.sh.
-  Color get statusColor {
+  ColorRole get statusColor {
     switch (status) {
       case 'pending':
-        return PharmaConnectColors.accentOrange;
+        return ColorRole.warning;
       case 'approved':
-        return PharmaConnectColors.accentGreen;
+        return ColorRole.success;
       case 'rejected':
-        return PharmaConnectColors.accentRed;
+        return ColorRole.danger;
       case 'flagged':
-        return PharmaConnectColors.accentRed;
+        return ColorRole.danger;
       default:
-        return PharmaConnectColors.neutralMuted;
+        return ColorRole.textMuted;
     }
   }
 }

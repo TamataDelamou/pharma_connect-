@@ -3,12 +3,11 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import '../providers/health_goal_provider.dart';
 import '../widgets/health_goal_card.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class HealthGoalsScreen extends StatefulWidget {
   const HealthGoalsScreen({super.key});
@@ -78,19 +77,19 @@ class _HealthGoalsScreenState extends State<HealthGoalsScreen>
           children: [
             // C233 : en-tête adaptable (actions sous le titre sur téléphone).
             HeaderRow(
-              leading: const Column(
+              leading: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     '🎯 Objectifs santé',
-                    style: PharmaConnectTypography.heading1,
+                    style: context.text.heading1,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(height: 4),
                   Text(
                     'Atteignez vos objectifs personnels',
-                    style: PharmaConnectTypography.body2,
+                    style: context.text.body2,
                   ),
                 ],
               ),
@@ -101,8 +100,8 @@ class _HealthGoalsScreenState extends State<HealthGoalsScreen>
                   icon: const Icon(Icons.add),
                   label: const Text('Nouvel objectif'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: PharmaConnectColors.accentCyan,
-                    foregroundColor: PharmaConnectColors.textOnAccent,
+                    backgroundColor: context.palette.primary,
+                    foregroundColor: context.palette.onPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -118,9 +117,9 @@ class _HealthGoalsScreenState extends State<HealthGoalsScreen>
                 Tab(text: 'Tous'),
                 Tab(text: 'Actifs'),
               ],
-              labelColor: PharmaConnectColors.accentCyan,
-              unselectedLabelColor: PharmaConnectColors.textSecondary,
-              indicatorColor: PharmaConnectColors.accentCyan,
+              labelColor: context.palette.primary,
+              unselectedLabelColor: context.palette.textSecondary,
+              indicatorColor: context.palette.primary,
               indicatorWeight: 3,
               dividerColor: Colors.transparent,
             ),
@@ -143,18 +142,12 @@ class _HealthGoalsScreenState extends State<HealthGoalsScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 48,
-              color: PharmaConnectColors.accentRed,
-            ),
+            Icon(Icons.error_outline, size: 48, color: context.palette.danger),
             const SizedBox(height: 16),
             Text(
               provider.error!,
               textAlign: TextAlign.center,
-              style: PharmaConnectTypography.body2.copyWith(
-                color: PharmaConnectColors.accentRed,
-              ),
+              style: context.text.body2.copyWith(color: context.palette.danger),
             ),
             const SizedBox(height: 16),
             PrimaryButton(
@@ -171,17 +164,21 @@ class _HealthGoalsScreenState extends State<HealthGoalsScreen>
     }
 
     if (provider.goals.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.flag_outlined, size: 64, color: Colors.white24),
+            Icon(
+              Icons.flag_outlined,
+              size: 64,
+              color: context.palette.veil(0.24),
+            ),
             SizedBox(height: 16),
-            Text('Aucun objectif', style: PharmaConnectTypography.heading3),
+            Text('Aucun objectif', style: context.text.heading3),
             SizedBox(height: 8),
             Text(
               'Créez votre premier objectif santé',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
               textAlign: TextAlign.center,
             ),
           ],

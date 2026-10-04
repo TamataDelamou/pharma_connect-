@@ -3,14 +3,13 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/tertiary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/widgets/inputs/glass_input.dart';
 import '../models/health_record.dart';
 import '../providers/health_record_provider.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 // Simple helper to generate temp id
 String _tempId() => 'temp_${DateTime.now().millisecondsSinceEpoch}';
@@ -111,9 +110,9 @@ class _HealthRecordEditScreenState extends State<HealthRecordEditScreen> {
               Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
@@ -124,7 +123,7 @@ class _HealthRecordEditScreenState extends State<HealthRecordEditScreen> {
                       widget.recordId == null
                           ? 'Nouveau dossier'
                           : 'Modifier le dossier',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                     ),
                   ),
                   const KernelBadge(),
@@ -353,7 +352,7 @@ class _HealthRecordEditScreenState extends State<HealthRecordEditScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: PharmaConnectTypography.heading3),
+        Text(title, style: context.text.heading3),
         const SizedBox(height: 8),
         ...list.asMap().entries.map((entry) {
           final index = entry.key;
@@ -362,9 +361,9 @@ class _HealthRecordEditScreenState extends State<HealthRecordEditScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             margin: const EdgeInsets.only(bottom: 4),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.04),
+              color: context.palette.surfaceMuted,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+              border: Border.all(color: context.palette.borderSubtle),
             ),
             child: Row(
               children: [
@@ -398,10 +397,7 @@ class _HealthRecordEditScreenState extends State<HealthRecordEditScreen> {
             ),
             const SizedBox(width: 8),
             IconButton(
-              icon: const Icon(
-                Icons.add_circle,
-                color: PharmaConnectColors.accentCyan,
-              ),
+              icon: Icon(Icons.add_circle, color: context.palette.primary),
               onPressed: onAdd,
               iconSize: 32,
             ),
@@ -453,7 +449,7 @@ class _HealthRecordEditScreenState extends State<HealthRecordEditScreen> {
             context.read<HealthRecordProvider>().error ??
                 'Erreur lors de l\'enregistrement',
           ),
-          backgroundColor: PharmaConnectColors.accentRed,
+          backgroundColor: context.palette.danger,
         ),
       );
     }

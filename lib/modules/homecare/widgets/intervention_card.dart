@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../models/intervention.dart';
 import '../models/homecare_status.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class InterventionCard extends StatelessWidget {
   final Intervention intervention;
@@ -26,7 +25,10 @@ class InterventionCard extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: _statusColor(intervention.status).withValues(alpha: 0.15),
+              color: _statusColor(
+                context,
+                intervention.status,
+              ).withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Center(
@@ -43,24 +45,28 @@ class InterventionCard extends StatelessWidget {
               children: [
                 Text(
                   intervention.patientName ?? intervention.patientId,
-                  style: PharmaConnectTypography.body1.copyWith(
+                  style: context.text.body1.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   intervention.professionalName ?? intervention.professionalId,
-                  style: PharmaConnectTypography.body2,
+                  style: context.text.body2,
                 ),
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    const Icon(Icons.home, size: 14, color: Colors.white54),
+                    Icon(
+                      Icons.home,
+                      size: 14,
+                      color: context.palette.textSecondary,
+                    ),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
                         intervention.address,
-                        style: PharmaConnectTypography.micro,
+                        style: context.text.micro,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -73,6 +79,7 @@ class InterventionCard extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: _statusColor(
+                          context,
                           intervention.status,
                         ).withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(4),
@@ -82,7 +89,7 @@ class InterventionCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w500,
-                          color: _statusColor(intervention.status),
+                          color: _statusColor(context, intervention.status),
                         ),
                       ),
                     ),
@@ -91,26 +98,26 @@ class InterventionCard extends StatelessWidget {
               ],
             ),
           ),
-          const Icon(Icons.chevron_right, color: Colors.white24),
+          Icon(Icons.chevron_right, color: context.palette.veil(0.24)),
         ],
       ),
     );
   }
 
-  Color _statusColor(HomecareStatus status) {
+  Color _statusColor(BuildContext context, HomecareStatus status) {
     switch (status) {
       case HomecareStatus.pending:
-        return PharmaConnectColors.accentOrange;
+        return context.palette.warning;
       case HomecareStatus.confirmed:
-        return PharmaConnectColors.accentGreen;
+        return context.palette.success;
       case HomecareStatus.inProgress:
-        return PharmaConnectColors.accentCyan;
+        return context.palette.primary;
       case HomecareStatus.completed:
-        return PharmaConnectColors.accentPurple;
+        return context.palette.secondary;
       case HomecareStatus.cancelled:
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       case HomecareStatus.missed:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
     }
   }
 }

@@ -3,11 +3,10 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import '../services/sos_service.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class SOSScreen extends StatefulWidget {
   const SOSScreen({super.key});
@@ -53,18 +52,18 @@ class _SOSScreenState extends State<SOSScreen>
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       '🚨 Alerte SOS',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -98,7 +97,7 @@ class _SOSScreenState extends State<SOSScreen>
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.red.withValues(
+                                color: context.palette.danger.withValues(
                                   alpha: 0.4 + 0.3 * _pulseController.value,
                                 ),
                                 blurRadius: 30 + 20 * _pulseController.value,
@@ -106,7 +105,7 @@ class _SOSScreenState extends State<SOSScreen>
                               ),
                             ],
                           ),
-                          child: const Center(
+                          child: Center(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -115,7 +114,7 @@ class _SOSScreenState extends State<SOSScreen>
                                 Text(
                                   'APPUYEZ EN CAS D\'URGENCE',
                                   style: TextStyle(
-                                    color: Colors.white,
+                                    color: context.palette.textPrimary,
                                     fontSize: 14,
                                     fontWeight: FontWeight.w700,
                                   ),
@@ -133,7 +132,7 @@ class _SOSScreenState extends State<SOSScreen>
                   Text(
                     'En appuyant, vous enverrez une alerte\nà vos proches.',
                     textAlign: TextAlign.center,
-                    style: PharmaConnectTypography.body2,
+                    style: context.text.body2,
                   ),
 
                   const SizedBox(height: 16),
@@ -182,15 +181,15 @@ class _SOSScreenState extends State<SOSScreen>
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.04),
+          color: context.palette.surfaceMuted,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+          border: Border.all(color: context.palette.borderSubtle),
         ),
         child: Column(
           children: [
             Text(icon, style: const TextStyle(fontSize: 32)),
             const SizedBox(height: 4),
-            Text(label, style: PharmaConnectTypography.micro),
+            Text(label, style: context.text.micro),
           ],
         ),
       ),
@@ -200,7 +199,7 @@ class _SOSScreenState extends State<SOSScreen>
   void _showSOSOptions(BuildContext context, String? userId) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: PharmaConnectColors.primaryDeep,
+      backgroundColor: context.palette.background,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -209,37 +208,31 @@ class _SOSScreenState extends State<SOSScreen>
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(
+              leading: Icon(
                 Icons.medical_services,
-                color: PharmaConnectColors.accentRed,
+                color: context.palette.danger,
               ),
               title: const Text('Urgence médicale'),
               subtitle: const Text('Problème de santé urgent'),
               onTap: () => _sendSOS('medical_emergency', userId),
             ),
             ListTile(
-              leading: const Icon(
-                Icons.car_crash,
-                color: PharmaConnectColors.accentOrange,
-              ),
+              leading: Icon(Icons.car_crash, color: context.palette.warning),
               title: const Text('Accident'),
               subtitle: const Text('Accident de la route ou autre'),
               onTap: () => _sendSOS('accident', userId),
             ),
             ListTile(
-              leading: const Icon(
+              leading: Icon(
                 Icons.warning_amber,
-                color: PharmaConnectColors.accentAmber,
+                color: context.palette.warningStrong,
               ),
               title: const Text('Panique'),
               subtitle: const Text('Situation de danger'),
               onTap: () => _sendSOS('panic', userId),
             ),
             ListTile(
-              leading: const Icon(
-                Icons.location_on,
-                color: PharmaConnectColors.accentCyan,
-              ),
+              leading: Icon(Icons.location_on, color: context.palette.primary),
               title: const Text('Partager ma position'),
               subtitle: const Text('Envoyer ma localisation'),
               onTap: () => _sendLocationSOS(context, userId),
@@ -288,9 +281,9 @@ class _SOSScreenState extends State<SOSScreen>
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Alerte envoyée à vos proches'),
-          backgroundColor: PharmaConnectColors.accentGreen,
+          backgroundColor: context.palette.success,
         ),
       );
     } catch (e) {

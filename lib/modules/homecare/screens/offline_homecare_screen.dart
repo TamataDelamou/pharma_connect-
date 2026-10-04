@@ -3,12 +3,11 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../providers/offline_homecare_provider.dart';
 import '../widgets/intervention_card.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class OfflineHomecareScreen extends StatelessWidget {
   const OfflineHomecareScreen({super.key});
@@ -25,19 +24,19 @@ class OfflineHomecareScreen extends StatelessWidget {
           children: [
             // C233 : en-tête adaptable (actions sous le titre sur téléphone).
             HeaderRow(
-              leading: const Column(
+              leading: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     '📡 Soins à domicile (Hors-ligne)',
-                    style: PharmaConnectTypography.heading1,
+                    style: context.text.heading1,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(height: 4),
                   Text(
                     'Accédez à vos interventions même sans connexion',
-                    style: PharmaConnectTypography.body2,
+                    style: context.text.body2,
                   ),
                 ],
               ),
@@ -50,21 +49,13 @@ class OfflineHomecareScreen extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: provider.isOffline
-                        ? PharmaConnectColors.accentOrange.withValues(
-                            alpha: 0.15,
-                          )
-                        : PharmaConnectColors.accentGreen.withValues(
-                            alpha: 0.15,
-                          ),
+                        ? context.palette.warning.withValues(alpha: 0.15)
+                        : context.palette.success.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(4),
                     border: Border.all(
                       color: provider.isOffline
-                          ? PharmaConnectColors.accentOrange.withValues(
-                              alpha: 0.3,
-                            )
-                          : PharmaConnectColors.accentGreen.withValues(
-                              alpha: 0.3,
-                            ),
+                          ? context.palette.warning.withValues(alpha: 0.3)
+                          : context.palette.success.withValues(alpha: 0.3),
                     ),
                   ),
                   child: Text(
@@ -73,18 +64,15 @@ class OfflineHomecareScreen extends StatelessWidget {
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: provider.isOffline
-                          ? PharmaConnectColors.accentOrange
-                          : PharmaConnectColors.accentGreen,
+                          ? context.palette.warning
+                          : context.palette.success,
                     ),
                   ),
                 ),
                 if (provider.isOffline) ...[
                   const SizedBox(width: 8),
                   IconButton(
-                    icon: const Icon(
-                      Icons.sync,
-                      color: PharmaConnectColors.accentCyan,
-                    ),
+                    icon: Icon(Icons.sync, color: context.palette.primary),
                     onPressed: provider.isSyncing
                         ? null
                         : () => provider.syncOfflineData(),
@@ -116,16 +104,16 @@ class OfflineHomecareScreen extends StatelessWidget {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.error_outline,
                             size: 48,
-                            color: PharmaConnectColors.accentRed,
+                            color: context.palette.danger,
                           ),
                           const SizedBox(height: 16),
                           Text(
                             provider.error!,
-                            style: PharmaConnectTypography.body2.copyWith(
-                              color: PharmaConnectColors.accentRed,
+                            style: context.text.body2.copyWith(
+                              color: context.palette.danger,
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -144,24 +132,24 @@ class OfflineHomecareScreen extends StatelessWidget {
                       ),
                     )
                   : provider.interventions.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
                             Icons.home_repair_service_outlined,
                             size: 64,
-                            color: Colors.white24,
+                            color: context.palette.veil(0.24),
                           ),
                           SizedBox(height: 16),
                           Text(
                             'Aucune intervention disponible hors-ligne',
-                            style: PharmaConnectTypography.heading3,
+                            style: context.text.heading3,
                           ),
                           SizedBox(height: 8),
                           Text(
                             'Les interventions seront disponibles hors-ligne après la première synchronisation.',
-                            style: PharmaConnectTypography.body2,
+                            style: context.text.body2,
                             textAlign: TextAlign.center,
                           ),
                         ],

@@ -4,8 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/tertiary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
@@ -13,6 +11,7 @@ import 'package:pharma_connect/core/widgets/inputs/glass_input.dart';
 import '../providers/family_provider.dart';
 import '../models/family_link.dart';
 import '../models/family_link_status.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class FamilyNewScreen extends StatefulWidget {
   const FamilyNewScreen({super.key});
@@ -57,18 +56,18 @@ class _FamilyNewScreenState extends State<FamilyNewScreen> {
                 leading: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.arrow_back,
-                        color: PharmaConnectColors.textPrimary,
+                        color: context.palette.textPrimary,
                       ),
                       onPressed: () => context.pop(),
                       padding: EdgeInsets.zero,
                     ),
                     const SizedBox(width: 8),
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         'Ajouter un lien familial',
-                        style: PharmaConnectTypography.heading2,
+                        style: context.text.heading2,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -118,10 +117,7 @@ class _FamilyNewScreenState extends State<FamilyNewScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Permissions',
-                              style: PharmaConnectTypography.heading3,
-                            ),
+                            Text('Permissions', style: context.text.heading3),
                             const SizedBox(height: 8),
                             CheckboxListTile(
                               value: _canViewRecords,
@@ -233,16 +229,16 @@ class _FamilyNewScreenState extends State<FamilyNewScreen> {
     if (success && context.mounted) {
       context.pop();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Invitation envoyée !'),
-          backgroundColor: PharmaConnectColors.accentGreen,
+          backgroundColor: context.palette.success,
         ),
       );
     } else if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(context.read<FamilyProvider>().error ?? 'Erreur'),
-          backgroundColor: PharmaConnectColors.accentRed,
+          backgroundColor: context.palette.danger,
         ),
       );
     }

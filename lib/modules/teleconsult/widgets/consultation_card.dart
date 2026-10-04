@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../models/consultation.dart';
 import '../models/consultation_status.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class ConsultationCard extends StatelessWidget {
   final Consultation consultation;
@@ -27,7 +26,10 @@ class ConsultationCard extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: _statusColor(consultation.status).withValues(alpha: 0.15),
+              color: _statusColor(
+                context,
+                consultation.status,
+              ).withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Center(
@@ -45,23 +47,27 @@ class ConsultationCard extends StatelessWidget {
               children: [
                 Text(
                   consultation.patientName ?? consultation.patientId,
-                  style: PharmaConnectTypography.body1.copyWith(
+                  style: context.text.body1.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   consultation.professionalName ?? consultation.professionalId,
-                  style: PharmaConnectTypography.body2,
+                  style: context.text.body2,
                 ),
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    const Icon(Icons.schedule, size: 14, color: Colors.white54),
+                    Icon(
+                      Icons.schedule,
+                      size: 14,
+                      color: context.palette.textSecondary,
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       _formatDate(consultation.scheduledAt),
-                      style: PharmaConnectTypography.micro,
+                      style: context.text.micro,
                     ),
                     const SizedBox(width: 12),
                     Container(
@@ -71,6 +77,7 @@ class ConsultationCard extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: _statusColor(
+                          context,
                           consultation.status,
                         ).withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(4),
@@ -80,7 +87,7 @@ class ConsultationCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w500,
-                          color: _statusColor(consultation.status),
+                          color: _statusColor(context, consultation.status),
                         ),
                       ),
                     ),
@@ -89,24 +96,24 @@ class ConsultationCard extends StatelessWidget {
               ],
             ),
           ),
-          const Icon(Icons.chevron_right, color: Colors.white24),
+          Icon(Icons.chevron_right, color: context.palette.veil(0.24)),
         ],
       ),
     );
   }
 
-  Color _statusColor(ConsultationStatus status) {
+  Color _statusColor(BuildContext context, ConsultationStatus status) {
     switch (status) {
       case ConsultationStatus.pending:
-        return PharmaConnectColors.accentOrange;
+        return context.palette.warning;
       case ConsultationStatus.confirmed:
-        return PharmaConnectColors.accentGreen;
+        return context.palette.success;
       case ConsultationStatus.completed:
-        return PharmaConnectColors.accentCyan;
+        return context.palette.primary;
       case ConsultationStatus.cancelled:
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       case ConsultationStatus.missed:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
     }
   }
 

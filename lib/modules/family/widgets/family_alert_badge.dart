@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class FamilyAlertBadge extends StatelessWidget {
   final int count;
@@ -13,9 +13,9 @@ class FamilyAlertBadge extends StatelessWidget {
       clipBehavior: Clip.none,
       children: [
         IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.notifications_outlined,
-            color: PharmaConnectColors.textPrimary,
+            color: context.palette.textPrimary,
           ),
           onPressed: onTap,
         ),
@@ -26,17 +26,17 @@ class FamilyAlertBadge extends StatelessWidget {
             child: Container(
               width: 18,
               height: 18,
-              decoration: const BoxDecoration(
-                color: PharmaConnectColors.accentRed,
+              decoration: BoxDecoration(
+                color: context.palette.danger,
                 shape: BoxShape.circle,
               ),
               child: Center(
                 child: Text(
                   count > 9 ? '9+' : count.toString(),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
-                    color: PharmaConnectColors.textPrimary,
+                    color: context.palette.textPrimary,
                   ),
                 ),
               ),

@@ -3,12 +3,11 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../providers/preventive_alert_provider.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class PreventiveAlertsScreen extends StatelessWidget {
   const PreventiveAlertsScreen({super.key});
@@ -28,18 +27,18 @@ class PreventiveAlertsScreen extends StatelessWidget {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       '🔔 Alertes préventives',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -58,7 +57,7 @@ class PreventiveAlertsScreen extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               'Recevez des rappels personnalisés pour votre santé',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
             ),
             const SizedBox(height: 24),
 
@@ -70,17 +69,17 @@ class PreventiveAlertsScreen extends StatelessWidget {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.error_outline,
                             size: 48,
-                            color: PharmaConnectColors.accentRed,
+                            color: context.palette.danger,
                           ),
                           const SizedBox(height: 16),
                           Text(
                             provider.error!,
                             textAlign: TextAlign.center,
-                            style: PharmaConnectTypography.body2.copyWith(
-                              color: PharmaConnectColors.accentRed,
+                            style: context.text.body2.copyWith(
+                              color: context.palette.danger,
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -99,24 +98,24 @@ class PreventiveAlertsScreen extends StatelessWidget {
                       ),
                     )
                   : provider.alerts.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
                             Icons.notifications_off_outlined,
                             size: 64,
-                            color: Colors.white24,
+                            color: context.palette.veil(0.24),
                           ),
                           SizedBox(height: 16),
                           Text(
                             'Aucune alerte configurée',
-                            style: PharmaConnectTypography.heading3,
+                            style: context.text.heading3,
                           ),
                           SizedBox(height: 8),
                           Text(
                             'Créez des alertes pour recevoir des rappels personnalisés',
-                            style: PharmaConnectTypography.body2,
+                            style: context.text.body2,
                             textAlign: TextAlign.center,
                           ),
                         ],
@@ -137,8 +136,8 @@ class PreventiveAlertsScreen extends StatelessWidget {
                                   height: 40,
                                   decoration: BoxDecoration(
                                     color: alert.isActive
-                                        ? PharmaConnectColors.accentCyan
-                                        : PharmaConnectColors.textSecondary,
+                                        ? context.palette.primary
+                                        : context.palette.textSecondary,
                                     borderRadius: BorderRadius.circular(2),
                                   ),
                                 ),
@@ -152,10 +151,9 @@ class PreventiveAlertsScreen extends StatelessWidget {
                                         children: [
                                           Text(
                                             alert.typeLabel,
-                                            style: PharmaConnectTypography.body1
-                                                .copyWith(
-                                                  fontWeight: FontWeight.w600,
-                                                ),
+                                            style: context.text.body1.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                           ),
                                           const Spacer(),
                                           Switch(
@@ -167,34 +165,34 @@ class PreventiveAlertsScreen extends StatelessWidget {
                                               );
                                             },
                                             activeColor:
-                                                PharmaConnectColors.accentCyan,
+                                                context.palette.primary,
                                           ),
                                         ],
                                       ),
                                       Text(
                                         alert.previewMessage,
-                                        style: PharmaConnectTypography.body2,
+                                        style: context.text.body2,
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                       Text(
                                         'Dernier déclenchement: ${alert.lastTriggered != null ? _formatDate(alert.lastTriggered!) : 'Jamais'}',
-                                        style: PharmaConnectTypography.micro,
+                                        style: context.text.micro,
                                       ),
                                     ],
                                   ),
                                 ),
                                 IconButton(
-                                  icon: const Icon(
+                                  icon: Icon(
                                     Icons.delete_outline,
-                                    color: PharmaConnectColors.accentRed,
+                                    color: context.palette.danger,
                                   ),
                                   onPressed: () async {
                                     final confirm = await showDialog<bool>(
                                       context: context,
                                       builder: (ctx) => AlertDialog(
                                         backgroundColor:
-                                            PharmaConnectColors.primaryDeep,
+                                            context.palette.background,
                                         title: const Text(
                                           'Supprimer l\'alerte',
                                         ),
@@ -212,7 +210,7 @@ class PreventiveAlertsScreen extends StatelessWidget {
                                                 Navigator.pop(ctx, true),
                                             style: TextButton.styleFrom(
                                               foregroundColor:
-                                                  PharmaConnectColors.accentRed,
+                                                  context.palette.danger,
                                             ),
                                             child: const Text('Supprimer'),
                                           ),

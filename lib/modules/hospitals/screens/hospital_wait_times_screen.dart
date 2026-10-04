@@ -3,12 +3,11 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../services/wait_time_service.dart';
 import '../models/hospital_wait_time.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 // Audit Module 23 (HOP), Étape 3 (30/08/2026), HOP-2 : l'import ci-dessus
 // pointait vers `colors.dart.dart` (double extension, fichier inexistant),
@@ -61,18 +60,18 @@ class _HospitalWaitTimesScreenState extends State<HospitalWaitTimesScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       '🕐 Temps d\'attente en temps réel',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -82,9 +81,9 @@ class _HospitalWaitTimesScreenState extends State<HospitalWaitTimesScreen> {
               trailing: [
                 const KernelBadge(),
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.refresh,
-                    color: PharmaConnectColors.textSecondary,
+                    color: context.palette.textSecondary,
                   ),
                   onPressed: _loadData,
                 ),
@@ -93,7 +92,7 @@ class _HospitalWaitTimesScreenState extends State<HospitalWaitTimesScreen> {
             const SizedBox(height: 8),
             Text(
               'Mise à jour en temps réel • Dernière mise à jour : ${_lastUpdated()}',
-              style: PharmaConnectTypography.micro,
+              style: context.text.micro,
             ),
             const SizedBox(height: 24),
 
@@ -105,10 +104,10 @@ class _HospitalWaitTimesScreenState extends State<HospitalWaitTimesScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.error_outline,
                             size: 48,
-                            color: PharmaConnectColors.accentRed,
+                            color: context.palette.danger,
                           ),
                           const SizedBox(height: 16),
                           Text(_error!),
@@ -122,10 +121,10 @@ class _HospitalWaitTimesScreenState extends State<HospitalWaitTimesScreen> {
                       ),
                     )
                   : _waitTimes.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Text(
                         'Aucune information de temps d\'attente disponible',
-                        style: PharmaConnectTypography.body2,
+                        style: context.text.body2,
                       ),
                     )
                   : ListView.builder(
@@ -145,16 +144,17 @@ class _HospitalWaitTimesScreenState extends State<HospitalWaitTimesScreen> {
                                     children: [
                                       Text(
                                         wt.department,
-                                        style: PharmaConnectTypography.body1
-                                            .copyWith(
-                                              fontWeight: FontWeight.w600,
-                                            ),
+                                        style: context.text.body1.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
                                         wt.waitTimeLabel,
                                         style: TextStyle(
-                                          color: wt.waitTimeColor,
+                                          color: wt.waitTimeColor.of(
+                                            context.palette,
+                                          ),
                                           fontWeight: FontWeight.w500,
                                         ),
                                       ),
@@ -167,16 +167,18 @@ class _HospitalWaitTimesScreenState extends State<HospitalWaitTimesScreen> {
                                     vertical: 6,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: wt.waitTimeColor.withValues(
-                                      alpha: 0.15,
-                                    ),
+                                    color: wt.waitTimeColor
+                                        .of(context.palette)
+                                        .withValues(alpha: 0.15),
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: Text(
                                     '${wt.patientsInQueue} patient${wt.patientsInQueue > 1 ? 's' : ''} en file',
                                     style: TextStyle(
                                       fontSize: 12,
-                                      color: wt.waitTimeColor,
+                                      color: wt.waitTimeColor.of(
+                                        context.palette,
+                                      ),
                                     ),
                                   ),
                                 ),

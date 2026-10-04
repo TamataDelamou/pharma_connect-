@@ -3,14 +3,13 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../models/family_activity.dart';
 import '../providers/family_challenge_provider.dart';
 import '../widgets/family_activity_tile.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class FamilyJournalScreen extends StatefulWidget {
   final String familyLinkId;
@@ -65,18 +64,18 @@ class _FamilyJournalScreenState extends State<FamilyJournalScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       '📖 Journal familial',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -94,10 +93,8 @@ class _FamilyJournalScreenState extends State<FamilyJournalScreen> {
                 children: [
                   DropdownButton<String>(
                     value: _selectedActivityType,
-                    dropdownColor: PharmaConnectColors.primaryDeep,
-                    style: const TextStyle(
-                      color: PharmaConnectColors.textPrimary,
-                    ),
+                    dropdownColor: context.palette.background,
+                    style: TextStyle(color: context.palette.textPrimary),
                     items: _activityTypes.map((type) {
                       return DropdownMenuItem<String>(
                         value: type['value'],
@@ -144,16 +141,16 @@ class _FamilyJournalScreenState extends State<FamilyJournalScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.error_outline,
                             size: 48,
-                            color: PharmaConnectColors.accentRed,
+                            color: context.palette.danger,
                           ),
                           const SizedBox(height: 16),
                           Text(
                             provider.error!,
-                            style: PharmaConnectTypography.body2.copyWith(
-                              color: PharmaConnectColors.accentRed,
+                            style: context.text.body2.copyWith(
+                              color: context.palette.danger,
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -169,10 +166,10 @@ class _FamilyJournalScreenState extends State<FamilyJournalScreen> {
                       ),
                     )
                   : provider.activities.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Text(
                         'Aucune activité partagée',
-                        style: PharmaConnectTypography.body2,
+                        style: context.text.body2,
                       ),
                     )
                   : ListView.builder(
@@ -221,9 +218,9 @@ class _FamilyJournalScreenState extends State<FamilyJournalScreen> {
     if (success && context.mounted) {
       _noteController.clear();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Activité partagée !'),
-          backgroundColor: PharmaConnectColors.accentGreen,
+          backgroundColor: context.palette.success,
         ),
       );
       context.read<FamilyChallengeProvider>().loadActivities(

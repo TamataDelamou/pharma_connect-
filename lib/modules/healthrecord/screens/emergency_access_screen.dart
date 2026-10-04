@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../models/emergency_access.dart';
 import '../services/emergency_access_service.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 /// C219 / D63 : accès d'urgence au dossier de santé.
 /// Pour le patient : qui a ouvert son dossier en urgence, quand, pourquoi, et
@@ -112,27 +111,24 @@ class _EmergencyAccessScreenState extends State<EmergencyAccessScreen> {
             Row(
               children: [
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.arrow_back,
-                    color: PharmaConnectColors.textPrimary,
+                    color: context.palette.textPrimary,
                   ),
                   onPressed: () => context.pop(),
                   padding: EdgeInsets.zero,
                 ),
                 const SizedBox(width: 8),
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Accès d\'urgence',
-                        style: PharmaConnectTypography.heading2,
-                      ),
+                      Text('Accès d\'urgence', style: context.text.heading2),
                       SizedBox(height: 4),
                       Text(
                         'Ouvertures du dossier de santé en urgence, '
                         'tracées et limitées à 24 heures',
-                        style: PharmaConnectTypography.body2,
+                        style: context.text.body2,
                       ),
                     ],
                   ),
@@ -164,9 +160,7 @@ class _EmergencyAccessScreenState extends State<EmergencyAccessScreen> {
             Text(
               _error!,
               textAlign: TextAlign.center,
-              style: PharmaConnectTypography.body2.copyWith(
-                color: PharmaConnectColors.accentRed,
-              ),
+              style: context.text.body2.copyWith(color: context.palette.danger),
             ),
             const SizedBox(height: 12),
             TextButton(onPressed: _load, child: const Text('Réessayer')),
@@ -175,11 +169,8 @@ class _EmergencyAccessScreenState extends State<EmergencyAccessScreen> {
       );
     }
     if (_items.isEmpty) {
-      return const Center(
-        child: Text(
-          'Aucun accès d\'urgence.',
-          style: PharmaConnectTypography.body2,
-        ),
+      return Center(
+        child: Text('Aucun accès d\'urgence.', style: context.text.body2),
       );
     }
     final userId = SupabaseService().currentUser?.id;
@@ -201,19 +192,17 @@ class _EmergencyAccessScreenState extends State<EmergencyAccessScreen> {
                   Icon(
                     access.isActive ? Icons.lock_open : Icons.lock_outline,
                     color: access.isActive
-                        ? PharmaConnectColors.accentRed
-                        : PharmaConnectColors.textSecondary,
+                        ? context.palette.danger
+                        : context.palette.textSecondary,
                   ),
                   const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(who, style: PharmaConnectTypography.subtitle1),
-                  ),
+                  Expanded(child: Text(who, style: context.text.subtitle1)),
                   Text(
                     access.isActive ? 'En cours' : 'Terminé',
-                    style: PharmaConnectTypography.label.copyWith(
+                    style: context.text.label.copyWith(
                       color: access.isActive
-                          ? PharmaConnectColors.accentRed
-                          : PharmaConnectColors.textSecondary,
+                          ? context.palette.danger
+                          : context.palette.textSecondary,
                     ),
                   ),
                 ],
@@ -222,16 +211,13 @@ class _EmergencyAccessScreenState extends State<EmergencyAccessScreen> {
               if (access.hospitalName != null)
                 Text(
                   'Hôpital : ${access.hospitalName}',
-                  style: PharmaConnectTypography.body2,
+                  style: context.text.body2,
                 ),
-              Text(
-                'Motif : ${access.reason}',
-                style: PharmaConnectTypography.body2,
-              ),
+              Text('Motif : ${access.reason}', style: context.text.body2),
               Text(
                 'Ouvert le ${_formatDate(access.grantedAt)} — '
                 '${access.endedAt != null ? 'terminé le ${_formatDate(access.endedAt!)}' : 'échéance le ${_formatDate(access.expiresAt)}'}',
-                style: PharmaConnectTypography.micro,
+                style: context.text.micro,
               ),
               if (access.isActive) ...[
                 const SizedBox(height: 8),
@@ -242,10 +228,8 @@ class _EmergencyAccessScreenState extends State<EmergencyAccessScreen> {
                     icon: const Icon(Icons.block),
                     label: const Text('Mettre fin'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: PharmaConnectColors.accentRed,
-                      side: const BorderSide(
-                        color: PharmaConnectColors.accentRed,
-                      ),
+                      foregroundColor: context.palette.danger,
+                      side: BorderSide(color: context.palette.danger),
                     ),
                   ),
                 ),

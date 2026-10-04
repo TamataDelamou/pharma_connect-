@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/inputs/glass_input.dart';
 import '../providers/professionals_provider.dart';
 import '../widgets/professional_card.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class ProfessionalsListScreen extends StatefulWidget {
   final bool isSelectMode;
@@ -65,27 +64,27 @@ class _ProfessionalsListScreenState extends State<ProfessionalsListScreen> {
               children: [
                 if (widget.isSelectMode) ...[
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
                 ],
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'Professionnels de santé',
-                        style: PharmaConnectTypography.heading1,
+                        style: context.text.heading1,
                       ),
                       SizedBox(height: 4),
                       Text(
                         'Trouvez un professionnel pour vos soins',
-                        style: PharmaConnectTypography.body2,
+                        style: context.text.body2,
                       ),
                     ],
                   ),
@@ -122,10 +121,8 @@ class _ProfessionalsListScreenState extends State<ProfessionalsListScreen> {
                     DropdownButton<String>(
                       value: _selectedSpecialty,
                       hint: const Text('Spécialité'),
-                      dropdownColor: PharmaConnectColors.primaryDeep,
-                      style: const TextStyle(
-                        color: PharmaConnectColors.textPrimary,
-                      ),
+                      dropdownColor: context.palette.background,
+                      style: TextStyle(color: context.palette.textPrimary),
                       items: [
                         const DropdownMenuItem<String>(
                           value: null,
@@ -153,14 +150,14 @@ class _ProfessionalsListScreenState extends State<ProfessionalsListScreen> {
                       setState(() => _showOnlyVerified = selected);
                       _loadProfessionals();
                     },
-                    selectedColor: PharmaConnectColors.accentGreen.withValues(
+                    selectedColor: context.palette.success.withValues(
                       alpha: 0.2,
                     ),
                     backgroundColor: Colors.transparent,
                     side: BorderSide(
                       color: _showOnlyVerified
-                          ? PharmaConnectColors.accentGreen
-                          : Colors.white24,
+                          ? context.palette.success
+                          : context.palette.veil(0.24),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -172,14 +169,14 @@ class _ProfessionalsListScreenState extends State<ProfessionalsListScreen> {
                       setState(() => _showOnlyAvailable = selected);
                       _loadProfessionals();
                     },
-                    selectedColor: PharmaConnectColors.accentCyan.withValues(
+                    selectedColor: context.palette.primary.withValues(
                       alpha: 0.2,
                     ),
                     backgroundColor: Colors.transparent,
                     side: BorderSide(
                       color: _showOnlyAvailable
-                          ? PharmaConnectColors.accentCyan
-                          : Colors.white24,
+                          ? context.palette.primary
+                          : context.palette.veil(0.24),
                     ),
                   ),
                 ],
@@ -204,18 +201,12 @@ class _ProfessionalsListScreenState extends State<ProfessionalsListScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 48,
-              color: PharmaConnectColors.accentRed,
-            ),
+            Icon(Icons.error_outline, size: 48, color: context.palette.danger),
             const SizedBox(height: 16),
             Text(
               provider.error!,
               textAlign: TextAlign.center,
-              style: PharmaConnectTypography.body2.copyWith(
-                color: PharmaConnectColors.accentRed,
-              ),
+              style: context.text.body2.copyWith(color: context.palette.danger),
             ),
             const SizedBox(height: 16),
             PrimaryButton(
@@ -232,24 +223,21 @@ class _ProfessionalsListScreenState extends State<ProfessionalsListScreen> {
     }
 
     if (provider.professionals.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               Icons.health_and_safety_outlined,
               size: 64,
-              color: Colors.white24,
+              color: context.palette.veil(0.24),
             ),
             SizedBox(height: 16),
-            Text(
-              'Aucun professionnel trouvé',
-              style: PharmaConnectTypography.heading3,
-            ),
+            Text('Aucun professionnel trouvé', style: context.text.heading3),
             SizedBox(height: 8),
             Text(
               'Ajustez vos filtres ou recherchez autre chose',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
               textAlign: TextAlign.center,
             ),
           ],

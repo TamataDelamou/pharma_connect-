@@ -3,12 +3,11 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/utils/currency_formatter.dart';
 import '../providers/professionals_provider.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class ProfessionalDetailScreen extends StatefulWidget {
   final String professionalId;
@@ -45,9 +44,7 @@ class _ProfessionalDetailScreenState extends State<ProfessionalDetailScreen> {
         body: Center(
           child: Text(
             provider.error ?? 'Professionnel introuvable',
-            style: PharmaConnectTypography.body2.copyWith(
-              color: PharmaConnectColors.accentRed,
-            ),
+            style: context.text.body2.copyWith(color: context.palette.danger),
           ),
         ),
       );
@@ -64,18 +61,18 @@ class _ProfessionalDetailScreenState extends State<ProfessionalDetailScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Profil professionnel',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -91,30 +88,26 @@ class _ProfessionalDetailScreenState extends State<ProfessionalDetailScreen> {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: PharmaConnectColors.accentGreen.withValues(
-                        alpha: 0.15,
-                      ),
+                      color: context.palette.success.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(4),
                       border: Border.all(
-                        color: PharmaConnectColors.accentGreen.withValues(
-                          alpha: 0.3,
-                        ),
+                        color: context.palette.success.withValues(alpha: 0.3),
                       ),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
                           Icons.verified,
                           size: 14,
-                          color: PharmaConnectColors.accentGreen,
+                          color: context.palette.success,
                         ),
                         SizedBox(width: 4),
                         Text(
                           'Vérifié',
                           style: TextStyle(
                             fontSize: 12,
-                            color: PharmaConnectColors.accentGreen,
+                            color: context.palette.success,
                           ),
                         ),
                       ],
@@ -135,14 +128,15 @@ class _ProfessionalDetailScreenState extends State<ProfessionalDetailScreen> {
                         children: [
                           CircleAvatar(
                             radius: 40,
-                            backgroundColor: PharmaConnectColors.accentCyan
-                                .withValues(alpha: 0.1),
+                            backgroundColor: context.palette.primary.withValues(
+                              alpha: 0.1,
+                            ),
                             child: Text(
                               professional.fullName?.substring(0, 1) ?? 'P',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 28,
                                 fontWeight: FontWeight.w700,
-                                color: PharmaConnectColors.accentCyan,
+                                color: context.palette.primary,
                               ),
                             ),
                           ),
@@ -153,11 +147,11 @@ class _ProfessionalDetailScreenState extends State<ProfessionalDetailScreen> {
                               children: [
                                 Text(
                                   professional.fullName ?? professional.id,
-                                  style: PharmaConnectTypography.heading3,
+                                  style: context.text.heading3,
                                 ),
                                 Text(
                                   professional.specialty,
-                                  style: PharmaConnectTypography.body1,
+                                  style: context.text.body1,
                                 ),
                                 const SizedBox(height: 4),
                                 Row(
@@ -170,19 +164,18 @@ class _ProfessionalDetailScreenState extends State<ProfessionalDetailScreen> {
                                           vertical: 2,
                                         ),
                                         decoration: BoxDecoration(
-                                          color: PharmaConnectColors.accentGreen
+                                          color: context.palette.success
                                               .withValues(alpha: 0.15),
                                           borderRadius: BorderRadius.circular(
                                             4,
                                           ),
                                         ),
-                                        child: const Text(
+                                        child: Text(
                                           'Accepte de nouveaux patients',
                                           style: TextStyle(
                                             fontSize: 10,
                                             fontWeight: FontWeight.w500,
-                                            color:
-                                                PharmaConnectColors.accentGreen,
+                                            color: context.palette.success,
                                           ),
                                         ),
                                       ),
@@ -191,7 +184,7 @@ class _ProfessionalDetailScreenState extends State<ProfessionalDetailScreen> {
                                     if (professional.yearsOfExperience != null)
                                       Text(
                                         '${professional.yearsOfExperience} ans d\'expérience',
-                                        style: PharmaConnectTypography.micro,
+                                        style: context.text.micro,
                                       ),
                                   ],
                                 ),
@@ -208,22 +201,19 @@ class _ProfessionalDetailScreenState extends State<ProfessionalDetailScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Informations',
-                            style: PharmaConnectTypography.heading3,
-                          ),
+                          Text('Informations', style: context.text.heading3),
                           const SizedBox(height: 12),
                           if (professional.bio != null) ...[
                             _buildInfoRow('Bio', professional.bio!),
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                           ],
                           if (professional.phone != null) ...[
                             _buildInfoRow('Téléphone', professional.phone!),
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                           ],
                           if (professional.email != null) ...[
                             _buildInfoRow('Email', professional.email!),
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                           ],
                           if (professional.consultationFee != null) ...[
                             _buildInfoRow(
@@ -232,7 +222,7 @@ class _ProfessionalDetailScreenState extends State<ProfessionalDetailScreen> {
                                 professional.consultationFee!,
                               ),
                             ),
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                           ],
                           if (professional.homeVisitFee != null) ...[
                             _buildInfoRow(
@@ -241,21 +231,21 @@ class _ProfessionalDetailScreenState extends State<ProfessionalDetailScreen> {
                                 professional.homeVisitFee!,
                               ),
                             ),
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                           ],
                           if (professional.licenseNumber != null) ...[
                             _buildInfoRow(
                               'N° Licence',
                               professional.licenseNumber!,
                             ),
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                           ],
                           if (professional.licenseExpiryDate != null) ...[
                             _buildInfoRow(
                               'Expiration licence',
                               _formatDate(professional.licenseExpiryDate!),
                             ),
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                           ],
                           if (professional.languagesSpoken.isNotEmpty) ...[
                             _buildInfoRow(
@@ -266,8 +256,8 @@ class _ProfessionalDetailScreenState extends State<ProfessionalDetailScreen> {
                           const SizedBox(height: 8),
                           Text(
                             'Membre depuis ${_formatDate(professional.createdAt)}',
-                            style: PharmaConnectTypography.micro.copyWith(
-                              color: PharmaConnectColors.textSecondary,
+                            style: context.text.micro.copyWith(
+                              color: context.palette.textSecondary,
                             ),
                           ),
                         ],
@@ -277,10 +267,7 @@ class _ProfessionalDetailScreenState extends State<ProfessionalDetailScreen> {
 
                     // Availability
                     if (provider.availabilitySlots.isNotEmpty) ...[
-                      const Text(
-                        'Disponibilités',
-                        style: PharmaConnectTypography.heading3,
-                      ),
+                      Text('Disponibilités', style: context.text.heading3),
                       const SizedBox(height: 8),
                       GlassCard(
                         padding: const EdgeInsets.all(12),
@@ -295,18 +282,20 @@ class _ProfessionalDetailScreenState extends State<ProfessionalDetailScreen> {
                               ),
                               decoration: BoxDecoration(
                                 color: slot.isBreak
-                                    ? PharmaConnectColors.textSecondary
-                                          .withValues(alpha: 0.1)
-                                    : PharmaConnectColors.accentCyan.withValues(
+                                    ? context.palette.textSecondary.withValues(
+                                        alpha: 0.1,
+                                      )
+                                    : context.palette.primary.withValues(
                                         alpha: 0.1,
                                       ),
                                 borderRadius: BorderRadius.circular(6),
                                 border: Border.all(
                                   color: slot.isBreak
-                                      ? PharmaConnectColors.textSecondary
+                                      ? context.palette.textSecondary
                                             .withValues(alpha: 0.2)
-                                      : PharmaConnectColors.accentCyan
-                                            .withValues(alpha: 0.2),
+                                      : context.palette.primary.withValues(
+                                          alpha: 0.2,
+                                        ),
                                 ),
                               ),
                               child: Row(
@@ -322,8 +311,8 @@ class _ProfessionalDetailScreenState extends State<ProfessionalDetailScreen> {
                                     style: TextStyle(
                                       fontSize: 12,
                                       color: slot.isBreak
-                                          ? PharmaConnectColors.textSecondary
-                                          : PharmaConnectColors.textPrimary,
+                                          ? context.palette.textSecondary
+                                          : context.palette.textPrimary,
                                     ),
                                   ),
                                 ],
@@ -379,7 +368,9 @@ class _ProfessionalDetailScreenState extends State<ProfessionalDetailScreen> {
                             icon: const Icon(Icons.phone),
                             label: const Text('Contacter'),
                             style: OutlinedButton.styleFrom(
-                              side: const BorderSide(color: Colors.white24),
+                              side: BorderSide(
+                                color: context.palette.veil(0.24),
+                              ),
                             ),
                           ),
                         ),
@@ -401,11 +392,8 @@ class _ProfessionalDetailScreenState extends State<ProfessionalDetailScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 120,
-            child: Text(label, style: PharmaConnectTypography.label),
-          ),
-          Expanded(child: Text(value, style: PharmaConnectTypography.body1)),
+          SizedBox(width: 120, child: Text(label, style: context.text.label)),
+          Expanded(child: Text(value, style: context.text.body1)),
         ],
       ),
     );
