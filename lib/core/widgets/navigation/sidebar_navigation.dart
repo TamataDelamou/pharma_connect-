@@ -106,7 +106,10 @@ class _SidebarNavigationState extends State<SidebarNavigation>
                 ),
                 child: Row(
                   children: [
+                    // C245 : menu déplié, le nom prend toute la place restante
+                    // (« PHARM… » à 360 px : il n'en avait que le tiers).
                     Flexible(
+                      flex: widget.expanded ? 0 : 1,
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
                         child: Text(
@@ -120,7 +123,7 @@ class _SidebarNavigationState extends State<SidebarNavigation>
                     ),
                     if (widget.expanded) ...[
                       const SizedBox(width: 8),
-                      Flexible(
+                      Expanded(
                         child: Text(
                           'PHARMACONNECT',
                           style: TextStyle(
@@ -134,7 +137,7 @@ class _SidebarNavigationState extends State<SidebarNavigation>
                         ),
                       ),
                     ],
-                    const Spacer(),
+                    if (!widget.expanded) const Spacer(),
                     if (widget.onToggleExpand != null) ...[
                       IconButton(
                         icon: Icon(

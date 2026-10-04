@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../core/pilot/pilot_config.dart';
 import '../core/widgets/navigation/sidebar_navigation.dart';
 import '../modules/auth/models/user_role.dart';
 
@@ -96,9 +97,12 @@ List<SidebarNavigationItem> appMenuFor(
   UserRole? role, {
   bool isGsgAdmin = false,
 }) {
-  final items = role == UserRole.patient
-      ? appMenuItems.where((item) => item.route != '/stock').toList()
-      : List<SidebarNavigationItem>.of(appMenuItems);
+  // C239 : « Livraisons » masqué pendant le pilote (retrait à l'officine
+  // seulement).
+  bool visible(SidebarNavigationItem item) =>
+      (PilotConfig.reservationDelivery || item.route != '/deliveries') &&
+      (role != UserRole.patient || item.route != '/stock');
+  final items = appMenuItems.where(visible).toList();
   if (role == UserRole.pharmacien) items.addAll(pharmacyMenuItems);
   if (isGsgAdmin) items.add(adminMenuItem);
   return items;
