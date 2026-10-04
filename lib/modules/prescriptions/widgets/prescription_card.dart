@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/spacing.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../models/prescription.dart';
+import '../../../core/pilot/pilot_config.dart';
 import '../../../core/theme/palette.dart';
 
 class PrescriptionCard extends StatelessWidget {
@@ -103,7 +104,9 @@ class PrescriptionCard extends StatelessWidget {
             ),
           ),
           // Indicateur de confiance OCR
-          if (prescription.ocrConfidenceScore != null) ...[
+          // C239 : masqué pour le pilote (`PilotConfig.aiPrescriptionOcr`).
+          if (PilotConfig.aiPrescriptionOcr &&
+              prescription.ocrConfidenceScore != null) ...[
             Column(
               children: [
                 Text(

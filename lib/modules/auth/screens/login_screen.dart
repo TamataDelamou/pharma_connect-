@@ -81,14 +81,19 @@ class _LoginScreenState extends State<LoginScreen> {
                   Text('Connexion', style: context.text.heading2),
                   const SizedBox(height: 8),
                   Text(
-                    'Choisissez votre identifiant et le mode de réception',
+                    PilotConfig.authEmailOnly
+                        ? PilotConfig.authEmailOnlySubtitle
+                        : 'Choisissez votre identifiant et le mode de réception',
                     style: context.text.body2,
                   ),
                   const SizedBox(height: 32),
 
                   // ===== CHOIX DE LA MÉTHODE =====
-                  _buildMethodChoiceChips(),
-                  const SizedBox(height: 24),
+                  // C239 : un seul mode, pas de puce de choix.
+                  if (!PilotConfig.authEmailOnly) ...[
+                    _buildMethodChoiceChips(),
+                    const SizedBox(height: 24),
+                  ],
 
                   // ===== CHAMP IDENTIFIANT =====
                   _isPhoneMethod

@@ -405,6 +405,9 @@ class AppRouter {
           GoRoute(
             path: '/prescriptions/preview',
             name: 'prescriptions-preview',
+            // C239 : lecture automatique masquée pour le pilote.
+            redirect: (context, state) =>
+                PilotConfig.aiPrescriptionOcr ? null : '/prescriptions',
             builder: (context, state) => const PrescriptionPreviewScreen(),
           ),
           GoRoute(
@@ -1184,12 +1187,17 @@ class AppRouter {
           GoRoute(
             path: '/support/bot/history',
             name: 'support-bot-history',
+            // C239 : assistant simulé masqué pour le pilote.
+            redirect: (context, state) =>
+                PilotConfig.aiSupportBot ? null : '/support',
             builder: (context, state) => const BotHistoryScreen(),
           ),
           // C158 : route manquante vers ChatBotScreen, ecran jusqu'ici orphelin.
           GoRoute(
             path: '/support/chat',
             name: 'support-chat',
+            redirect: (context, state) =>
+                PilotConfig.aiSupportBot ? null : '/support',
             builder: (context, state) => const ChatBotScreen(),
           ),
           // Base de connaissances (fonctionnalite cahier absente jusqu'ici).
@@ -1517,6 +1525,8 @@ class AppRouter {
           GoRoute(
             path: '/iot',
             name: 'iot',
+            // C239 : objets connectés masqués pour le pilote (4 routes).
+            redirect: (context, state) => PilotConfig.iot ? null : '/dashboard',
             builder: (context, state) => const IotDashboardScreen(),
           ),
           // Audit Module 18 (HOM, 30/08/2026), balayage C69 : `/iot/device/:id`
@@ -1525,11 +1535,13 @@ class AppRouter {
           GoRoute(
             path: '/iot/device/new',
             name: 'iot-device-new',
+            redirect: (context, state) => PilotConfig.iot ? null : '/dashboard',
             builder: (context, state) => const DeviceCreateScreen(),
           ),
           GoRoute(
             path: '/iot/device/:id',
             name: 'iot-device-detail',
+            redirect: (context, state) => PilotConfig.iot ? null : '/dashboard',
             builder: (context, state) {
               final id = state.pathParameters['id']!;
               return DeviceDetailScreen(deviceId: id);
@@ -1538,6 +1550,7 @@ class AppRouter {
           GoRoute(
             path: '/iot/device/edit/:id',
             name: 'iot-device-edit',
+            redirect: (context, state) => PilotConfig.iot ? null : '/dashboard',
             builder: (context, state) {
               final id = state.pathParameters['id']!;
               return DeviceCreateScreen(deviceId: id);

@@ -89,16 +89,21 @@ void main() {
   final shots = <_Shot>[
     const _Shot('01_login', '/login'),
     const _Shot('02_register', '/register'),
+    // Étapes affichées pendant le pilote : récapitulatif, paiement,
+    // confirmation. La confirmation demande une réservation créée sur le
+    // serveur : elle n'est pas capturable hors ligne.
     _Shot(
-      '03_reservations_checkout_paiement',
+      '03a_reservations_checkout_recapitulatif',
       '/reservations/checkout',
       prepare: (auth) => auth.setRole(UserRole.patient),
-      // Récapitulatif → créneau → livraison → paiement.
+    ),
+    _Shot(
+      '03b_reservations_checkout_paiement',
+      '/reservations/checkout',
+      prepare: (auth) => auth.setRole(UserRole.patient),
       act: (tester) async {
-        for (var i = 0; i < 3; i++) {
-          await tester.tap(find.text('Continuer'));
-          await _settle(tester);
-        }
+        await tester.tap(find.text('Continuer'));
+        await _settle(tester);
       },
     ),
     _Shot(
@@ -111,6 +116,19 @@ void main() {
     _Shot(
       '05_dashboard_patient',
       '/dashboard',
+      prepare: (auth) => auth.setRole(UserRole.patient),
+    ),
+    // Écran « IA » masqué : l'adresse de l'assistant renvoie à /support, où
+    // le bouton « Chat support » n'apparaît plus.
+    _Shot(
+      '06_support_chat_masque',
+      '/support/chat',
+      prepare: (auth) => auth.setRole(UserRole.patient),
+    ),
+    // Dépôt d'ordonnance sans lecture automatique.
+    _Shot(
+      '07_prescriptions_upload',
+      '/prescriptions/upload',
       prepare: (auth) => auth.setRole(UserRole.patient),
     ),
   ];

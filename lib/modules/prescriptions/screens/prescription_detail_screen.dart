@@ -3,6 +3,7 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
+import '../../../core/pilot/pilot_config.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/buttons/tertiary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
@@ -253,7 +254,9 @@ class _PrescriptionDetailScreenState extends State<PrescriptionDetailScreen> {
                               ),
                             ],
                           ),
-                          if (prescription.ocrConfidenceScore != null) ...[
+                          // C239 : score masqué pour le pilote.
+                          if (PilotConfig.aiPrescriptionOcr &&
+                              prescription.ocrConfidenceScore != null) ...[
                             const SizedBox(height: 8),
                             Row(
                               children: [
