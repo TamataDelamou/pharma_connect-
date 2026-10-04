@@ -3,9 +3,9 @@
 -- de la quantité réservée.
 -- Chaque cas affiche « CAS n OK : … » ou « CAS n ECHEC : … ».
 --
--- Le jeu de données local (seed, chargé après les migrations) porte des
--- quantités réservées sans réservation : le fichier rejoue la remise sur ce
--- jeu, avant et après.
+-- Le jeu de données local ne porte plus de quantité réservée (C243) : le
+-- fichier pose lui-même des boîtes fantômes, puis rejoue la remise, avant
+-- et après.
 --
 -- Exécution : docker exec -i supabase_db_pharma_connect psql -U postgres -d postgres < supabase/sql_tests/c243_reserved_reconcile.sql
 -- Une seule transaction, terminée par rollback : aucune donnée ne reste.
@@ -71,15 +71,27 @@ create function pg_temp.sale(p_qty int, p_price int) returns text language sql a
       'quantity', p_qty, 'unit_price', p_price, 'total_price', p_qty * p_price))::text)
 $$;
 
--- Aspirine à Kaloum : un seul lot du jeu de données. Une boîte « réservée »
--- sans réservation y est garantie (le jeu de données tire ses valeurs au
--- hasard).
+-- Le jeu de données ne porte plus de quantité réservée : les boîtes fantômes
+-- sont posées ici, comme elles l'étaient en production (quantité réservée
+-- sans réservation, sur le lot et sur l'article). Aspirine à Kaloum : 15
+-- boîtes dont 1 « réservée » ; Paracétamol à Kaloum : 20 boîtes, laissé sans
+-- fantôme ; partout ailleurs, 1 à 5 boîtes « réservées » par lot non vide.
 update public.products set regulatory_class = 'libre', is_prescription_required = false where id in (:'ASPI', :'PARA');
-update public.stock_batches b set quantity_reserved = greatest(b.quantity_reserved, 1)
+update public.stock_batches b
+  set quantity = case si.product_id when :'ASPI'::uuid then 15 else 20 end
   from public.stock_items si
-  where si.id = b.stock_item_id and si.pharmacy_id = :'KALOUM' and si.product_id = :'ASPI';
-update public.stock_items si set reserved_quantity = (select sum(b.quantity_reserved) from public.stock_batches b where b.stock_item_id = si.id)
-  where si.pharmacy_id = :'KALOUM' and si.product_id = :'ASPI';
+  where si.id = b.stock_item_id and si.pharmacy_id = :'KALOUM' and si.product_id in (:'ASPI', :'PARA');
+update public.stock_batches b
+  set quantity_reserved = case
+    when si.pharmacy_id = :'KALOUM' and si.product_id = :'PARA' then 0
+    when si.pharmacy_id = :'KALOUM' and si.product_id = :'ASPI' then 1
+    else least(b.quantity, 1 + b.quantity % 5) end
+  from public.stock_items si
+  where si.id = b.stock_item_id;
+update public.stock_items si
+  set total_quantity = (select coalesce(sum(b.quantity), 0) from public.stock_batches b where b.stock_item_id = si.id),
+      reserved_quantity = (select coalesce(sum(b.quantity_reserved), 0) from public.stock_batches b where b.stock_item_id = si.id),
+      status = case when si.pharmacy_id = :'KALOUM' and si.product_id in (:'ASPI', :'PARA') then 'inStock' else si.status end;
 
 -- Une vraie réservation, pour vérifier que ses boîtes restent retenues.
 select pg_temp.as_user(:'P1'); set local role authenticated;
