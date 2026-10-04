@@ -6,22 +6,19 @@
 
 ---
 
-## 0. À lire avant tout : le parcours n'est pas jouable aujourd'hui
+## 0. À lire avant tout : ce qui a été corrigé, ce qui reste
 
-En préparant ce guide, j'ai relu le code de chaque écran du parcours. **Trois manques bloquent le parcours sur un téléphone.** Les fonctions du serveur existent et sont testées ; ce sont les chemins dans l'application qui manquent.
+En préparant ce guide, j'ai relu le code de chaque écran du parcours. Trois manques bloquaient le parcours sur un téléphone.
 
-| # | Manque | Conséquence | Registre |
-|---|---|---|---|
-| 1 | Sur la fiche d'un produit, le bouton « Réserver ce produit » ne fait rien. Rien dans l'application n'ajoute un produit au panier de réservation, et aucun lien ne mène au panier. | **Un patient ne peut pas réserver.** | C245 |
-| 2 | Aucun menu ni bouton ne mène à l'administration (`/admin`), à la caisse (`/cash`) ni à la file des réservations de l'officine (`/pharmacy/queue`). Sur un téléphone, on ne peut pas saisir une adresse. | **L'administrateur ne peut pas valider l'officine ; le pharmacien ne peut ni ouvrir sa caisse, ni voir la file, ni faire un retrait.** | C245 |
-| 3 | Aucun écran ne crée le premier stock d'une officine : ni l'article, ni le lot, ni le prix de vente. L'écran « Réception » de la traçabilité écrit dans une autre table et n'alimente pas le stock vendable. | **L'officine de test n'aura rien à vendre ni à réserver.** | C246 |
+| # | Manque constaté | État |
+|---|---|---|
+| 1 | Un patient ne pouvait pas réserver : le bouton « Réserver ce produit » ne faisait rien, rien ne remplissait le panier, aucun lien ne menait au panier. | **Corrigé par C245** : toucher une officine disponible sur la fiche produit ajoute le produit au panier et ouvre le panier ; « Panier » est dans le menu. |
+| 2 | Aucun menu ne menait à l'administration, à la caisse, à la file des réservations ni à l'historique des ventes. | **Corrigé par C245** : « File des réservations », « Ouverture de caisse » et « Historique des ventes » dans le menu du pharmacien vérifié ; « Administration » dans le menu de l'administrateur. |
+| 3 | Aucun écran ne crée le premier stock d'une officine (article, lot, prix de vente). | **Non corrigé** (C246). Pour ce parcours : requête de mise en stock exécutée par Achille (section 4). |
 
-**Ce que je propose** (détail à la fin, section 11) :
+C245 a été vérifié par captures à 360 px, avec des données d'exemple. **Il n'a pas été joué sur un vrai téléphone : c'est l'objet de ce parcours.**
 
-- manques 1 et 2 : une correction de l'application avant de jouer le parcours (C245) ; il n'existe pas d'autre moyen ;
-- manque 3 : pour ce parcours, une requête de mise en stock exécutée par Achille (section 4) ; pour le pilote, un vrai écran de réception (C246).
-
-**Les étapes ci-dessous décrivent le parcours tel qu'il se jouera une fois C245 livré.** Les noms exacts des nouveaux boutons seront ajustés dans ce guide à ce moment-là ; ils sont marqués « (après C245) ».
+**Le parcours ne peut commencer qu'après la fusion de C245 et la construction de l'APK.**
 
 ---
 
@@ -31,9 +28,9 @@ En préparant ce guide, j'ai relu le code de chaque écran du parcours. **Trois 
 |---|---|
 | Téléphone A | l'officine : compte administrateur d'abord, puis compte pharmacien |
 | Téléphone B | le patient |
-| Adresse « admin » | `votre.adresse+admin@gmail.com` |
-| Adresse « pharmacien » | `votre.adresse+pharmacien@gmail.com` |
-| Adresse « patient » | `votre.adresse+patient@gmail.com` |
+| Adresse « admin » | `delamoutamata+admin@gmail.com` |
+| Adresse « pharmacien » | `delamoutamata+pharmacien@gmail.com` |
+| Adresse « patient » | `delamoutamata+patient@gmail.com` |
 
 Les trois adresses arrivent dans la même boîte Gmail. Chaque connexion envoie un **code par e-mail** : c'est le code du **dernier** e-mail reçu qui compte, un code plus ancien est refusé.
 
@@ -47,7 +44,7 @@ Les trois adresses arrivent dans la même boîte Gmail. Chaque connexion envoie 
 
 **L'application installée parle directement à la production** : l'adresse de la base est écrite dans l'application, il n'existe pas de version « d'essai ». Tout ce que vous faites est réel.
 
-1. Je construis le fichier d'installation (APK) à partir de `main`, après C245, et je vous donne son nom et le numéro du commit. Le fichier est signé avec une clé d'essai : il s'installe à la main, il ne vient pas du Play Store.
+1. Je construis le fichier d'installation (APK) à partir de `main`, une fois C245 fusionné, et je vous donne son nom et le numéro du commit. Le fichier est signé avec une clé d'essai : il s'installe à la main, il ne vient pas du Play Store.
 2. Copiez le fichier sur chaque téléphone (câble USB, ou Google Drive puis « Télécharger »).
 3. Sur le téléphone, ouvrez le fichier. Android demande d'autoriser l'installation depuis cette source : acceptez, puis « Installer ».
 4. Si Play Protect affiche un avertissement : « Installer quand même ».
@@ -72,22 +69,22 @@ Aucun compte ne peut se nommer administrateur lui-même : c'est voulu. Le premie
 
 **Vous devez voir :** le tableau de bord d'un patient. Si l'application demande de compléter le profil, remplissez-le.
 
-**Contrôle de ma part :** le compte existe, son adresse est confirmée, et la table des administrateurs est vide.
+**Contrôle de ma part :** le compte existe et son adresse est confirmée. La table des administrateurs est vide (vérifié le 04/10/2026).
 
 ### 2.2 La requête, à exécuter par Achille
 
-Dans Supabase : projet PharmaConnect → « SQL Editor » → nouvelle requête. Collez ceci **après avoir remplacé l'adresse à la ligne 3** par votre adresse « admin » exacte, puis « Run ».
+Dans Supabase : projet PharmaConnect → « SQL Editor » → nouvelle requête. Collez ceci tel quel (rien à modifier), puis « Run ».
 
 ```sql
 do $$
 declare
-  v_email constant text := 'votre.adresse+admin@gmail.com';  -- la seule ligne à modifier
+  v_email constant text := 'delamoutamata+admin@gmail.com';
   v_user_id uuid;
   v_confirmed timestamptz;
   v_count integer;
 begin
-  if v_email not like '%+admin@gmail.com' then
-    raise exception 'ARRET : % n''est pas l''adresse attendue (elle doit finir par +admin@gmail.com). Rien n''est ecrit.', v_email;
+  if v_email <> 'delamoutamata+admin@gmail.com' then
+    raise exception 'ARRET : % n''est pas l''adresse attendue (delamoutamata+admin@gmail.com). Rien n''est ecrit.', v_email;
   end if;
 
   if exists (select 1 from public.admin_users) then
@@ -114,7 +111,7 @@ end;
 $$;
 ```
 
-Ce que fait la requête : elle ajoute **une seule ligne**, dans la table des administrateurs. Elle s'arrête sans rien écrire si l'adresse ne finit pas par `+admin@gmail.com`, si le compte n'existe pas ou n'est pas confirmé, ou si un administrateur existe déjà.
+Ce que fait la requête : elle ajoute **une seule ligne**, dans la table des administrateurs. Elle s'arrête sans rien écrire si l'adresse n'est pas `delamoutamata+admin@gmail.com`, si le compte n'existe pas ou n'est pas confirmé, ou si un administrateur existe déjà.
 
 **Vous devez voir :** « Success. No rows returned ». Un message commençant par « ARRET » veut dire que rien n'a été écrit : envoyez-moi le message.
 
@@ -132,7 +129,7 @@ join auth.users u on u.id = a.user_id;
 
 Déconnectez-vous puis reconnectez-vous avec le compte « admin » (le droit est lu à la connexion).
 
-**Vous devez voir (après C245) :** une entrée « Administration » dans le menu ☰.
+**Vous devez voir :** une entrée « Administration » en bas du menu ☰.
 
 **Contrôle de ma part :** une seule ligne d'administrateur, liée au bon compte.
 
@@ -156,6 +153,7 @@ Remplissez :
 | Nom de l'officine | `TEST Officine Lot 3` |
 | Numéro de licence | `TEST-LIC-0001` |
 | Nom du titulaire | `TEST Pharmacien` |
+| Téléphone | indicatif du pays, puis votre numéro (champ obligatoire) |
 | Adresse de l'officine | `TEST — adresse fictive, Conakry` |
 
 Puis « Soumettre la vérification ».
@@ -167,7 +165,7 @@ Puis « Soumettre la vérification ».
 ### 3.3 Validation par l'administrateur (téléphone A)
 
 1. Déconnectez le pharmacien, connectez le compte « admin ».
-2. Menu ☰ → « Administration » (après C245) → « Officines » → filtre « en attente ».
+2. Menu ☰ → « Administration » → « Pharmacies » → filtre « en attente ». Une officine de démonstration (« Pharmacie Kipé Santé ») est aussi en attente : **n'y touchez pas.**
 3. Sur « TEST Officine Lot 3 » : « Vérifier la licence », puis « Approuver ».
 
 **Vous devez voir :** l'officine passe à l'état « active ».
@@ -180,7 +178,7 @@ Puis « Soumettre la vérification ».
 
 Déconnectez l'admin, reconnectez le pharmacien.
 
-**Vous devez voir :** plus de bandeau d'attente ; le menu « Stock & Lots » ; sur le tableau de bord, les actions « Caisse » et « Personnel » ; et (après C245) « File des réservations » et « Ouverture de caisse » dans le menu.
+**Vous devez voir :** plus de bandeau d'attente ; le menu « Stock & Lots » ; sur le tableau de bord, les actions « Caisse » et « Personnel » ; et « File des réservations » et « Ouverture de caisse » dans le menu.
 
 ---
 
@@ -237,7 +235,7 @@ end;
 $$;
 ```
 
-Ce que fait la requête : 2 lignes d'articles et 2 lignes de lots (10 boîtes chacun), rien d'autre. Les deux produits sont ceux du catalogue de démonstration (Paracétamol et Aspirine) ; **je vérifierai en lecture seule, avant de vous la confier, que ces deux identifiants existent bien en production et sont sans ordonnance**, et j'ajusterai la requête sinon.
+Ce que fait la requête : 2 lignes d'articles et 2 lignes de lots (10 boîtes chacun), rien d'autre. Les deux produits sont ceux du catalogue de démonstration (Paracétamol et Aspirine). Vérifié en production en lecture seule le 04/10/2026 : Paracétamol 500mg et Aspirine 500mg existent sous ces identifiants, sans ordonnance, classement « libre ».
 
 **Vous devez voir (téléphone A, compte pharmacien) :** menu « Stock & Lots » → deux articles, 10 boîtes chacun, 0 réservée.
 
@@ -249,7 +247,7 @@ Ce que fait la requête : 2 lignes d'articles et 2 lignes de lots (10 boîtes ch
 
 Sans caisse ouverte, le serveur refuse tout retrait (« ouvrez votre caisse »).
 
-1. Menu ☰ → « Ouverture de caisse » (après C245).
+1. Menu ☰ → « Ouverture de caisse ».
 2. **Vous devez voir :** « Aucune caisse ouverte — Ouvrez une session pour commencer ».
 3. « Ouvrir la caisse » → fond de caisse : `0` → « Ouvrir ».
 
@@ -267,7 +265,7 @@ Sans caisse ouverte, le serveur refuse tout retrait (« ouvrez votre caisse »).
 
 « S'inscrire ». Nom complet : `TEST Patient`. « Je suis un(e) : » **Patient**. Adresse « patient ». Code reçu par e-mail.
 
-Un compte patient existe déjà en production. Si l'adresse « patient » est déjà la sienne, utilisez « Se connecter » au lieu de « S'inscrire ».
+Deux comptes existent déjà en production, aucun avec une adresse en `delamoutamata+…` (vérifié le 04/10/2026) : les trois comptes du parcours sont donc à créer.
 
 ### 6.2 Recherche
 
@@ -277,7 +275,7 @@ Menu ☰ → « Recherche » → saisir `Paracétamol` → ouvrir la fiche du pr
 
 ### 6.3 Réservation n° 1 (elle servira au retrait par scan)
 
-1. Sur la ligne « TEST Officine Lot 3 » : « Réserver » (après C245), quantité `2`.
+1. Touchez la ligne « TEST Officine Lot 3 ». Le panier s'ouvre, avec « À retirer chez TEST Officine Lot 3 » et 1 boîte. Appuyez sur « + » pour passer à `2`.
 2. Panier → « Passer la commande ».
 3. Récapitulatif : **vous devez voir** « Prix indicatif, le prix du jour s'applique au retrait », le total 3 000 GNF, et le paiement au retrait à l'officine. Aucune étape « Livraison » ni « Créneau ».
 4. « Confirmer la commande ».
@@ -302,7 +300,7 @@ Menu ☰ → « Réservations ». **Vous devez voir** les deux réservations à 
 
 ### 7.1 La file
 
-Menu ☰ → « File des réservations » (après C245).
+Menu ☰ → « File des réservations ».
 
 **Vous devez voir :** les deux réservations de « TEST Patient », avec les boutons « Prête », « Retrait » et « Annuler ». Le code de retrait n'est **pas** affiché à l'officine.
 
@@ -433,13 +431,9 @@ Tous ces contrôles sont des lectures. Aucune écriture de ma part en production
 
 ---
 
-## 11. Ce qu'il faut décider avant de jouer le parcours
+## 11. Avant de jouer le parcours
 
-1. **C245 — rendre le parcours atteignable dans l'application** (obligatoire) :
-   - fiche produit : « Réserver » sur une officine ajoute le produit au panier de réservation pour cette officine et ouvre le panier ;
-   - menu du pharmacien vérifié : « File des réservations » et « Ouverture de caisse » ;
-   - menu de l'administrateur GSG : « Administration ».
-   Aucun changement côté serveur. Captures à 360 px, puis construction de l'APK.
-2. **Mise en stock de l'officine TEST par requête** (section 4), pour ce parcours.
-3. **C246 — réception de stock dans l'application** (création d'un article, d'un lot et du prix de vente par le personnel, par une fonction du serveur) : nécessaire avant le pilote, pas avant ce parcours.
-4. **La requête du premier administrateur** (section 2.2), à exécuter par Achille.
+1. **C245** fusionné sur `main`, puis APK construit et remis à Achille avec le numéro du commit.
+2. **Requête du premier administrateur** (section 2.2) : exécutée par Achille, après création du compte « admin ».
+3. **Requête de mise en stock** (section 4) : autorisée pour ce parcours seulement, exécutée par Achille pendant le parcours, après validation de l'officine TEST.
+4. **C246 — import initial et réception de stock** : à cadrer, nécessaire avant le pilote, pas avant ce parcours.

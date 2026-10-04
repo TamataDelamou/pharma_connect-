@@ -38,6 +38,14 @@ class SearchProvider extends ChangeNotifier {
   AvailabilityResult? get selectedProductAvailability =>
       _selectedProductAvailability;
 
+  /// Pose une disponibilité sans appel au serveur (tests et captures
+  /// d'écran).
+  @visibleForTesting
+  set selectedProductAvailabilityForTesting(AvailabilityResult? value) {
+    _selectedProductAvailability = value;
+    notifyListeners();
+  }
+
   bool get hasResults => _results.isNotEmpty;
   bool get hasFilters => _filters.hasFilters;
   int get filterCount => _filters.filterCount;

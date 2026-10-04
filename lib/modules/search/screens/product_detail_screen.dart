@@ -4,8 +4,10 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
 import '../../../core/theme/spacing.dart';
-import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
+import '../../reservations/models/reservation_item.dart';
+import '../../reservations/providers/reservation_provider.dart';
+import '../models/availability_result.dart';
 import '../providers/search_provider.dart';
 import '../widgets/pharmacy_list_tile.dart';
 import '../../../core/theme/palette.dart';
@@ -26,6 +28,80 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<SearchProvider>().loadProductAvailability(widget.productId);
     });
+  }
+
+  /// C245 : ajoute le produit au panier de réservation pour l'officine
+  /// touchée, puis ouvre le panier. Un panier ne porte que sur une officine :
+  /// en changer vide le panier, après confirmation.
+  Future<void> _reserve(
+    AvailabilityResult availability,
+    PharmacyStock stock,
+  ) async {
+    final product = availability.product;
+    final reservations = context.read<ReservationProvider>();
+    final pharmacy = stock.pharmacy;
+
+    if (product.regulatoryClass == 'stupefiant' ||
+        product.regulatoryClass == 'psychotrope') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '${product.name} ne peut pas être réservé : présentez-vous à '
+            'l\'officine avec votre ordonnance.',
+          ),
+        ),
+      );
+      return;
+    }
+
+    if (reservations.hasItemsInCart &&
+        reservations.selectedPharmacyId != null &&
+        reservations.selectedPharmacyId != pharmacy.id) {
+      final replace = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Changer d\'officine ?'),
+          content: Text(
+            'Votre panier contient des produits de '
+            '« ${reservations.selectedPharmacyName ?? 'une autre officine'} ». '
+            'Une réservation ne porte que sur une officine : le panier sera '
+            'vidé pour réserver chez « ${pharmacy.name} ».',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Garder mon panier'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Vider et réserver ici'),
+            ),
+          ],
+        ),
+      );
+      if (replace != true || !mounted) return;
+      reservations.clearCart();
+    }
+
+    reservations.setPharmacyInfo(
+      id: pharmacy.id,
+      name: pharmacy.name,
+      address: pharmacy.address,
+      phone: pharmacy.phone,
+    );
+    reservations.addToCart(
+      ReservationItem(
+        productId: product.id,
+        productName: product.name,
+        genericName: product.genericName,
+        dosage: product.dosage,
+        pricePerUnit: stock.price,
+        quantity: 1,
+        prescriptionRequired: product.isPrescriptionRequired,
+      ),
+    );
+    if (!mounted) return;
+    context.push('/cart');
   }
 
   @override
@@ -121,14 +197,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 const SizedBox(height: 12),
                                 Divider(color: context.palette.veil(0.12)),
                                 const SizedBox(height: 12),
-                                Row(
+                                // C245 : puces sur plusieurs lignes à 360 px.
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
                                   children: [
                                     _buildInfoChip(
                                       availability.product.manufacturer,
                                       Icons.business,
                                       context.palette.textSecondary,
                                     ),
-                                    const SizedBox(width: 8),
                                     _buildInfoChip(
                                       availability.product.isGeneric
                                           ? 'Générique'
@@ -138,7 +216,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                           ? context.palette.secondary
                                           : context.palette.primary,
                                     ),
-                                    const SizedBox(width: 8),
                                     _buildInfoChip(
                                       availability
                                               .product
@@ -193,21 +270,19 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               child: PharmacyListTile(
                                 stock: stock,
                                 onTap: stock.isAvailable
-                                    ? () {
-                                        // TODO: Naviguer vers la réservation
-                                      }
+                                    ? () => _reserve(availability, stock)
                                     : null,
                               ),
                             );
                           }),
                           if (availability.hasAvailableStock) ...[
                             const SizedBox(height: 16),
-                            PrimaryButton(
-                              label: 'Réserver ce produit',
-                              icon: Icons.shopping_cart,
-                              onPressed: () {
-                                // TODO: Naviguer vers la réservation
-                              },
+                            // C245 : la réservation se fait dans une officine
+                            // précise ; chaque officine disponible se touche.
+                            Text(
+                              'Touchez une officine disponible pour réserver '
+                              'ce produit chez elle.',
+                              style: context.text.body2,
                             ),
                           ],
                         ],
