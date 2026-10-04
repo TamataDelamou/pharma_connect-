@@ -20,7 +20,7 @@ class ActivityTimeline extends StatelessWidget {
   }
 
   Widget _buildTimelineItem(BuildContext context, ActivityItem item) {
-    final color = context.palette.resolve(item.color);
+    final color = context.palette.resolve(item.color.of(context.palette));
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(

@@ -89,7 +89,7 @@ class _SidebarNavigationState extends State<SidebarNavigation>
             boxShadow: [
               BoxShadow(
                 color: context.palette.isDark
-                    ? Colors.black.withValues(alpha: 0.3)
+                    ? context.palette.shadow
                     : context.palette.shadow,
                 blurRadius: 20,
                 offset: const Offset(0, 0),

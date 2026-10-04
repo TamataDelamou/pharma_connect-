@@ -186,7 +186,9 @@ class PharmacyListTile extends StatelessWidget {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: stock.stockColor.withValues(alpha: 0.15),
+                      color: stock.stockColor
+                          .of(context.palette)
+                          .withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
@@ -194,7 +196,7 @@ class PharmacyListTile extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w500,
-                        color: stock.stockColor,
+                        color: stock.stockColor.of(context.palette),
                       ),
                     ),
                   ),

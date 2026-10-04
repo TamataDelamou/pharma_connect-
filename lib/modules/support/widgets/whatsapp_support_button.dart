@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import '../services/whatsapp_support_service.dart';
 
 class WhatsAppSupportButton extends StatelessWidget {

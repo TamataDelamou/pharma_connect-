@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
 import 'package:pharma_connect/core/theme/typography.dart';
 import '../models/family_activity.dart';
 

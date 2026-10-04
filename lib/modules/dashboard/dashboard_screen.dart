@@ -184,7 +184,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             children: [
               Icon(
                 stat.icon,
-                color: context.palette.resolve(stat.color),
+                color: context.palette.resolve(stat.color.of(context.palette)),
                 size: 28,
               ),
               const SizedBox(width: 12),
@@ -213,7 +213,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 child: Text(
                   stat.change,
                   style: context.text.body2.copyWith(
-                    color: context.palette.resolve(stat.color),
+                    color: context.palette.resolve(
+                      stat.color.of(context.palette),
+                    ),
                     fontWeight: FontWeight.w600,
                   ),
                   overflow: TextOverflow.ellipsis,

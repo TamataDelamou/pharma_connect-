@@ -411,3 +411,50 @@ extension PharmaConnectThemeContext on BuildContext {
   /// Styles de texte avec la couleur du thème courant.
   PharmaConnectTextStyles get text => PharmaConnectTextStyles(palette);
 }
+
+/// Rôle de couleur pour le code qui n'a pas de `BuildContext` (modèles,
+/// énumérations, services) : il nomme le rôle, l'écran le traduit en couleur
+/// du thème courant par `role.of(context.palette)`.
+enum ColorRole {
+  background,
+  surface,
+  surfaceMuted,
+  surfaceRaised,
+  border,
+  textPrimary,
+  textSecondary,
+  textMuted,
+  primary,
+  onPrimary,
+  secondary,
+  success,
+  warning,
+  warningStrong,
+  danger,
+  onDanger,
+  info,
+  overlay,
+  shadow;
+
+  Color of(PharmaConnectPalette p) => switch (this) {
+    ColorRole.background => p.background,
+    ColorRole.surface => p.surface,
+    ColorRole.surfaceMuted => p.surfaceMuted,
+    ColorRole.surfaceRaised => p.surfaceRaised,
+    ColorRole.border => p.border,
+    ColorRole.textPrimary => p.textPrimary,
+    ColorRole.textSecondary => p.textSecondary,
+    ColorRole.textMuted => p.textMuted,
+    ColorRole.primary => p.primary,
+    ColorRole.onPrimary => p.onPrimary,
+    ColorRole.secondary => p.secondary,
+    ColorRole.success => p.success,
+    ColorRole.warning => p.warning,
+    ColorRole.warningStrong => p.warningStrong,
+    ColorRole.danger => p.danger,
+    ColorRole.onDanger => p.onDanger,
+    ColorRole.info => p.info,
+    ColorRole.overlay => p.overlay,
+    ColorRole.shadow => p.shadow,
+  };
+}

@@ -196,7 +196,7 @@ class _KernelConnectionIndicatorState extends State<KernelConnectionIndicator>
                     ),
                     border: Border.all(
                       color: context.palette
-                          .resolve(service.statusColor)
+                          .resolve(service.statusColor.of(context.palette))
                           .withValues(alpha: 0.2),
                       width: 1,
                     ),
@@ -214,7 +214,9 @@ class _KernelConnectionIndicatorState extends State<KernelConnectionIndicator>
                             fontFamily: 'Inter',
                             fontSize: 11,
                             fontWeight: FontWeight.w500,
-                            color: context.palette.resolve(service.statusColor),
+                            color: context.palette.resolve(
+                              service.statusColor.of(context.palette),
+                            ),
                           ),
                         ),
                       ),
@@ -224,7 +226,9 @@ class _KernelConnectionIndicatorState extends State<KernelConnectionIndicator>
                         height: 6,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: context.palette.resolve(service.statusColor),
+                          color: context.palette.resolve(
+                            service.statusColor.of(context.palette),
+                          ),
                         ),
                       ),
                     ],

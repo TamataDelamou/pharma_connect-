@@ -204,21 +204,21 @@ class RoleBasedDashboard extends StatelessWidget {
           value: '12',
           change: '+3',
           icon: Icons.description,
-          color: context.palette.primary,
+          color: ColorRole.primary,
         ),
         StatCardData(
           title: 'Réservations',
           value: '5',
           change: '2 en attente',
           icon: Icons.shopping_cart,
-          color: context.palette.success,
+          color: ColorRole.success,
         ),
         StatCardData(
           title: 'Traitements',
           value: '3',
           change: '2 actifs',
           icon: Icons.medication,
-          color: context.palette.secondary,
+          color: ColorRole.secondary,
         ),
       ];
     }
@@ -238,14 +238,14 @@ class RoleBasedDashboard extends StatelessWidget {
           subtitle: 'Patient : Jean Dupont',
           time: DateTime.now(),
           icon: Icons.description,
-          color: context.palette.primary,
+          color: ColorRole.primary,
         ),
         ActivityItem(
           title: 'Stock faible : Paracétamol',
           subtitle: 'Seuil critique atteint',
           time: DateTime.now().subtract(const Duration(minutes: 10)),
           icon: Icons.warning,
-          color: context.palette.warning,
+          color: ColorRole.warning,
         ),
         ...all,
       ];
@@ -254,7 +254,7 @@ class RoleBasedDashboard extends StatelessWidget {
   }
 
   Widget _buildStatCard(BuildContext context, StatCardData stat) {
-    final color = context.palette.resolve(stat.color);
+    final color = context.palette.resolve(stat.color.of(context.palette));
     return GlassCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

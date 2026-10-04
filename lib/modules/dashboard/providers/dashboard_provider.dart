@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
 import '../models/dashboard_data.dart';
+import '../../../core/theme/palette.dart';
 
 class DashboardProvider extends ChangeNotifier {
   DashboardData? _data;
@@ -23,27 +23,27 @@ class DashboardProvider extends ChangeNotifier {
 
   DashboardData _generateData() {
     return DashboardData(
-      stats: const [
+      stats: [
         StatCardData(
           title: 'Pharmacies actives',
           value: '1,284',
           change: '+12%',
           icon: Icons.local_pharmacy,
-          color: PharmaConnectColors.accentCyan,
+          color: ColorRole.primary,
         ),
         StatCardData(
           title: 'Disponibilité des médicaments essentiels',
           value: '94%',
           change: '+3%',
           icon: Icons.check_circle,
-          color: PharmaConnectColors.accentGreen,
+          color: ColorRole.success,
         ),
         StatCardData(
           title: 'Alertes de stock',
           value: '23',
           change: '⚠️ 5 critiques',
           icon: Icons.notifications_active,
-          color: PharmaConnectColors.accentOrange,
+          color: ColorRole.warning,
         ),
       ],
       actions: const [
@@ -51,20 +51,20 @@ class DashboardProvider extends ChangeNotifier {
           label: 'Rechercher',
           icon: Icons.search,
           route: '/search',
-          color: PharmaConnectColors.accentCyan,
+          color: ColorRole.primary,
         ),
         QuickAction(
           label: 'Ordonnance',
           icon: Icons.description,
           route: '/prescriptions',
-          color: PharmaConnectColors.accentPurple,
+          color: ColorRole.secondary,
         ),
         // C231 : `/reservations` n'existe pas ; la liste est /reservations/history.
         QuickAction(
           label: 'Réservation',
           icon: Icons.shopping_cart,
           route: '/reservations/history',
-          color: PharmaConnectColors.accentGreen,
+          color: ColorRole.success,
         ),
         // C231 : action « Stats » retirée, `/stats` n'existe pas.
         // C201 / C209 : vente au comptoir sur le stock réel, personnel de
@@ -73,13 +73,13 @@ class DashboardProvider extends ChangeNotifier {
           label: 'Caisse',
           icon: Icons.point_of_sale,
           route: '/pos',
-          color: PharmaConnectColors.accentGreen,
+          color: ColorRole.success,
         ),
         QuickAction(
           label: 'Personnel',
           icon: Icons.groups,
           route: '/pharmacy/staff',
-          color: PharmaConnectColors.accentCyan,
+          color: ColorRole.primary,
         ),
       ],
       activities: [
@@ -88,21 +88,21 @@ class DashboardProvider extends ChangeNotifier {
           subtitle: 'Par Dr. Martin',
           time: DateTime.now().subtract(const Duration(minutes: 5)),
           icon: Icons.check_circle,
-          color: PharmaConnectColors.accentGreen,
+          color: ColorRole.success,
         ),
         ActivityItem(
           title: 'Réservation #5678 retirée',
           subtitle: 'Patient : Jean Dupont',
           time: DateTime.now().subtract(const Duration(minutes: 20)),
           icon: Icons.shopping_cart,
-          color: PharmaConnectColors.accentCyan,
+          color: ColorRole.primary,
         ),
         ActivityItem(
           title: 'Alerte stock faible',
           subtitle: 'Paracétamol 500mg - Rupture imminente',
           time: DateTime.now().subtract(const Duration(hours: 1)),
           icon: Icons.warning,
-          color: PharmaConnectColors.accentOrange,
+          color: ColorRole.warning,
         ),
       ],
       alerts: [

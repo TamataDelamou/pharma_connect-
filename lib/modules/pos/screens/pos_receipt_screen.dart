@@ -3,8 +3,6 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/secondary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
@@ -12,6 +10,7 @@ import 'package:pharma_connect/core/utils/currency_formatter.dart';
 import '../models/pos_sale.dart';
 import '../providers/pos_provider.dart';
 import '../widgets/refund_confirmation_dialog.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class POSReceiptScreen extends StatefulWidget {
   final String? saleId;
@@ -47,9 +46,7 @@ class _POSReceiptScreenState extends State<POSReceiptScreen> {
         body: Center(
           child: Text(
             provider.error ?? 'Vente introuvable',
-            style: PharmaConnectTypography.body2.copyWith(
-              color: PharmaConnectColors.accentRed,
-            ),
+            style: context.text.body2.copyWith(color: context.palette.danger),
           ),
         ),
       );
@@ -66,18 +63,18 @@ class _POSReceiptScreenState extends State<POSReceiptScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       '🧾 Reçu de vente',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -101,25 +98,25 @@ class _POSReceiptScreenState extends State<POSReceiptScreen> {
                           Center(
                             child: Column(
                               children: [
-                                const Text(
+                                Text(
                                   'PHARMACONNECT',
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w700,
-                                    color: PharmaConnectColors.accentCyan,
+                                    color: context.palette.primary,
                                   ),
                                 ),
                                 Text(
                                   'Reçu #${sale.saleNumber}',
                                   style: TextStyle(
                                     fontSize: 14,
-                                    color: PharmaConnectColors.textSecondary,
+                                    color: context.palette.textSecondary,
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           const SizedBox(height: 8),
                           _buildInfoRow('Date', _formatDate(sale.createdAt)),
                           _buildInfoRow(
@@ -130,7 +127,7 @@ class _POSReceiptScreenState extends State<POSReceiptScreen> {
                             _buildInfoRow('Patient', sale.patientName!),
                           if (sale.paymentMethod != null)
                             _buildInfoRow('Paiement', sale.paymentLabel),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           const SizedBox(height: 8),
 
                           // Items
@@ -146,26 +143,26 @@ class _POSReceiptScreenState extends State<POSReceiptScreen> {
                                       flex: 2,
                                       child: Text(
                                         item.productName,
-                                        style: PharmaConnectTypography.body2,
+                                        style: context.text.body2,
                                       ),
                                     ),
                                     Text(
                                       '${item.quantity} x ${CurrencyFormatter.format(item.unitPrice)}',
-                                      style: PharmaConnectTypography.micro,
+                                      style: context.text.micro,
                                     ),
                                     const SizedBox(width: 8),
                                     Text(
                                       CurrencyFormatter.format(item.totalPrice),
                                       style: TextStyle(
                                         fontWeight: FontWeight.w600,
-                                        color: PharmaConnectColors.accentCyan,
+                                        color: context.palette.primary,
                                       ),
                                     ),
                                   ],
                                 ),
                               );
                             }),
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                           ],
 
                           // Totals
@@ -174,10 +171,10 @@ class _POSReceiptScreenState extends State<POSReceiptScreen> {
                             _buildTotalRow(
                               'Remise',
                               -sale.discountAmount,
-                              color: PharmaConnectColors.accentPurple,
+                              color: context.palette.secondary,
                             ),
                           _buildTotalRow('TVA', sale.taxAmount),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           _buildTotalRow(
                             'À payer',
                             sale.finalAmount,
@@ -190,7 +187,7 @@ class _POSReceiptScreenState extends State<POSReceiptScreen> {
                               'Merci de votre visite !',
                               style: TextStyle(
                                 fontStyle: FontStyle.italic,
-                                color: PharmaConnectColors.textSecondary,
+                                color: context.palette.textSecondary,
                               ),
                             ),
                           ),
@@ -212,10 +209,9 @@ class _POSReceiptScreenState extends State<POSReceiptScreen> {
                               final success = await provider.printReceipt();
                               if (success && context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
+                                  SnackBar(
                                     content: Text('Reçu imprimé avec succès'),
-                                    backgroundColor:
-                                        PharmaConnectColors.accentGreen,
+                                    backgroundColor: context.palette.success,
                                   ),
                                 );
                               } else if (context.mounted &&
@@ -223,8 +219,7 @@ class _POSReceiptScreenState extends State<POSReceiptScreen> {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text(provider.error!),
-                                    backgroundColor:
-                                        PharmaConnectColors.accentRed,
+                                    backgroundColor: context.palette.danger,
                                   ),
                                 );
                               }
@@ -266,11 +261,8 @@ class _POSReceiptScreenState extends State<POSReceiptScreen> {
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         children: [
-          SizedBox(
-            width: 80,
-            child: Text(label, style: PharmaConnectTypography.micro),
-          ),
-          Expanded(child: Text(value, style: PharmaConnectTypography.body2)),
+          SizedBox(width: 80, child: Text(label, style: context.text.micro)),
+          Expanded(child: Text(value, style: context.text.body2)),
         ],
       ),
     );
@@ -289,10 +281,8 @@ class _POSReceiptScreenState extends State<POSReceiptScreen> {
           Text(
             label,
             style: isTotal
-                ? PharmaConnectTypography.body1.copyWith(
-                    fontWeight: FontWeight.w600,
-                  )
-                : PharmaConnectTypography.body2,
+                ? context.text.body1.copyWith(fontWeight: FontWeight.w600)
+                : context.text.body2,
           ),
           const Spacer(),
           Text(
@@ -301,7 +291,9 @@ class _POSReceiptScreenState extends State<POSReceiptScreen> {
               fontWeight: isTotal ? FontWeight.w700 : FontWeight.w400,
               color:
                   color ??
-                  (isTotal ? PharmaConnectColors.accentCyan : Colors.white),
+                  (isTotal
+                      ? context.palette.primary
+                      : context.palette.textPrimary),
             ),
           ),
         ],
@@ -337,8 +329,8 @@ class _POSReceiptScreenState extends State<POSReceiptScreen> {
               : provider.error ?? 'Remboursement refusé',
         ),
         backgroundColor: success
-            ? PharmaConnectColors.accentGreen
-            : PharmaConnectColors.accentRed,
+            ? context.palette.success
+            : context.palette.danger,
       ),
     );
     if (success) context.pop();
