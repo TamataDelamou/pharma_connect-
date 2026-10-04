@@ -57,6 +57,14 @@ class AuthProvider extends ChangeNotifier {
   /// autorité), seulement pour savoir quelles actions proposer à l'écran
   /// (ex. Approuver/Rejeter/Décaisser en financement, request_detail_screen).
   bool get isGsgAdmin => _isGsgAdmin;
+
+  /// Pose le statut d'administrateur GSG sans appel au serveur (tests et
+  /// captures d'écran).
+  @visibleForTesting
+  set isGsgAdminForTesting(bool value) {
+    _isGsgAdmin = value;
+    notifyListeners();
+  }
   String? get error => _error;
 
   String? get fullName => _fullName;

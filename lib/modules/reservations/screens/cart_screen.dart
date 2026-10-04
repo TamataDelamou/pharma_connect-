@@ -62,6 +62,30 @@ class CartScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
+            // C245 : l'officine dans laquelle le panier sera réservé.
+            if (provider.hasItemsInCart &&
+                provider.selectedPharmacyName != null) ...[
+              Row(
+                children: [
+                  Icon(
+                    Icons.local_pharmacy,
+                    size: 18,
+                    color: context.palette.primary,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'À retirer chez ${provider.selectedPharmacyName}',
+                      style: context.text.body1.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+            ],
+
             // Contenu
             Expanded(
               child: provider.hasItemsInCart
@@ -116,31 +140,22 @@ class CartScreen extends StatelessWidget {
             if (provider.hasItemsInCart) ...[
               Divider(color: context.palette.veil(0.12)),
               const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Total du panier', style: context.text.label),
-                        Text(
-                          CurrencyFormatter.format(provider.cartTotal),
-                          style: context.text.kpiSmall.copyWith(
-                            color: context.palette.primary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  PrimaryButton(
-                    label: 'Passer la commande',
-                    icon: Icons.arrow_forward,
-                    onPressed: () {
-                      context.push('/reservations/checkout');
-                    },
-                  ),
-                ],
+              // C245 : bouton sous le total, sur toute la largeur. Dans une
+              // ligne, sa largeur infinie cassait l'affichage du panier rempli.
+              Text('Total du panier', style: context.text.label),
+              Text(
+                CurrencyFormatter.format(provider.cartTotal),
+                style: context.text.kpiSmall.copyWith(
+                  color: context.palette.primary,
+                ),
+              ),
+              const SizedBox(height: 12),
+              PrimaryButton(
+                label: 'Passer la commande',
+                icon: Icons.arrow_forward,
+                onPressed: () {
+                  context.push('/reservations/checkout');
+                },
               ),
               const SizedBox(height: 8),
             ],

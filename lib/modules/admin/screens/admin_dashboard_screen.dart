@@ -115,44 +115,49 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               // Accès rapides
               Text('Accès rapides', style: context.text.heading3),
               const SizedBox(height: 12),
-              Row(
-                children: [
-                  _buildQuickAction(
-                    icon: Icons.people,
-                    label: 'Utilisateurs',
-                    color: context.palette.primary,
-                    onTap: () => context.push('/admin/users'),
-                  ),
-                  const SizedBox(width: 12),
-                  _buildQuickAction(
-                    icon: Icons.local_pharmacy,
-                    label: 'Pharmacies',
-                    color: context.palette.success,
-                    onTap: () => context.push('/admin/pharmacies'),
-                  ),
-                  const SizedBox(width: 12),
-                  _buildQuickAction(
-                    icon: Icons.verified_user,
-                    label: 'Vérifications',
-                    color: context.palette.warningStrong,
-                    onTap: () => context.push('/admin/verifications'),
-                  ),
-                  const SizedBox(width: 12),
-                  _buildQuickAction(
-                    icon: Icons.history,
-                    label: 'Audit',
-                    color: context.palette.secondary,
-                    onTap: () => context.push('/admin/audit'),
-                  ),
-                  const SizedBox(width: 12),
-                  _buildQuickAction(
-                    icon: Icons.settings,
-                    label: 'Configuration',
-                    color: context.palette.warning,
-                    onTap: () => context.push('/admin/config'),
-                  ),
-                ],
-              ),
+              // C245 : sur téléphone, une ligne par accès ; cinq cartes côte à
+              // côte coupaient les libellés lettre par lettre.
+              if (isCompactWidth(context))
+                _buildCompactActions(context)
+              else
+                Row(
+                  children: [
+                    _buildQuickAction(
+                      icon: Icons.people,
+                      label: 'Utilisateurs',
+                      color: context.palette.primary,
+                      onTap: () => context.push('/admin/users'),
+                    ),
+                    const SizedBox(width: 12),
+                    _buildQuickAction(
+                      icon: Icons.local_pharmacy,
+                      label: 'Pharmacies',
+                      color: context.palette.success,
+                      onTap: () => context.push('/admin/pharmacies'),
+                    ),
+                    const SizedBox(width: 12),
+                    _buildQuickAction(
+                      icon: Icons.verified_user,
+                      label: 'Vérifications',
+                      color: context.palette.warningStrong,
+                      onTap: () => context.push('/admin/verifications'),
+                    ),
+                    const SizedBox(width: 12),
+                    _buildQuickAction(
+                      icon: Icons.history,
+                      label: 'Audit',
+                      color: context.palette.secondary,
+                      onTap: () => context.push('/admin/audit'),
+                    ),
+                    const SizedBox(width: 12),
+                    _buildQuickAction(
+                      icon: Icons.settings,
+                      label: 'Configuration',
+                      color: context.palette.warning,
+                      onTap: () => context.push('/admin/config'),
+                    ),
+                  ],
+                ),
               const SizedBox(height: 32),
 
               // Dernières actions audit
@@ -269,6 +274,33 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               ),
             ),
             Text(subValue, style: context.text.micro),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCompactActions(BuildContext context) {
+    final actions = [
+      (Icons.local_pharmacy, 'Pharmacies', '/admin/pharmacies'),
+      (Icons.verified_user, 'Vérifications', '/admin/verifications'),
+      (Icons.people, 'Utilisateurs', '/admin/users'),
+      (Icons.history, 'Audit', '/admin/audit'),
+      (Icons.settings, 'Configuration', '/admin/config'),
+    ];
+    return GlassCard(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Material(
+        type: MaterialType.transparency,
+        child: Column(
+          children: [
+            for (final (icon, label, route) in actions)
+              ListTile(
+                leading: Icon(icon, color: context.palette.primary),
+                title: Text(label, style: context.text.body1),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.push(route),
+              ),
           ],
         ),
       ),

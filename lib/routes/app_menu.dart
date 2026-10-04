@@ -32,6 +32,12 @@ const List<SidebarNavigationItem> appMenuItems = [
     icon: Icons.description,
     route: '/prescriptions',
   ),
+  // C245 : le panier de réservation n'avait aucun lien d'accès.
+  SidebarNavigationItem(
+    label: 'Panier',
+    icon: Icons.shopping_basket,
+    route: '/cart',
+  ),
   // C231 : `/reservations` n'existe pas ; la liste est /reservations/history.
   SidebarNavigationItem(
     label: 'Réservations',
@@ -53,9 +59,47 @@ const List<SidebarNavigationItem> appMenuItems = [
   // C231 : « Paramètres » masqué, `/settings` n'existe pas encore (C227).
 ];
 
+/// C245 : écrans de l'officine, réservés au pharmacien vérifié (titulaire ou
+/// personnel rattaché). Sans ces entrées, la file des réservations, la caisse
+/// et l'historique des ventes étaient inatteignables sur téléphone.
+const List<SidebarNavigationItem> pharmacyMenuItems = [
+  SidebarNavigationItem(
+    label: 'File des réservations',
+    icon: Icons.assignment_turned_in,
+    route: '/pharmacy/queue',
+  ),
+  SidebarNavigationItem(
+    label: 'Ouverture de caisse',
+    icon: Icons.point_of_sale,
+    route: '/cash',
+  ),
+  SidebarNavigationItem(
+    label: 'Historique des ventes',
+    icon: Icons.receipt_long,
+    route: '/pos/history',
+  ),
+];
+
+/// C245 : administration GSG (validation des officines, des rôles et des
+/// professionnels), réservée aux comptes inscrits dans `admin_users`.
+const SidebarNavigationItem adminMenuItem = SidebarNavigationItem(
+  label: 'Administration',
+  icon: Icons.admin_panel_settings,
+  route: '/admin',
+);
+
 /// C213 / D64 : menus selon le rôle effectif. Un compte dont le rôle n'est
 /// pas vérifié (ou un patient) n'a pas le menu « Stock & Lots ».
-List<SidebarNavigationItem> appMenuFor(UserRole? role) {
-  if (role != UserRole.patient) return appMenuItems;
-  return appMenuItems.where((item) => item.route != '/stock').toList();
+/// C245 : le pharmacien vérifié a en plus les écrans de l'officine ;
+/// l'administrateur GSG a « Administration », quel que soit son rôle.
+List<SidebarNavigationItem> appMenuFor(
+  UserRole? role, {
+  bool isGsgAdmin = false,
+}) {
+  final items = role == UserRole.patient
+      ? appMenuItems.where((item) => item.route != '/stock').toList()
+      : List<SidebarNavigationItem>.of(appMenuItems);
+  if (role == UserRole.pharmacien) items.addAll(pharmacyMenuItems);
+  if (isGsgAdmin) items.add(adminMenuItem);
+  return items;
 }

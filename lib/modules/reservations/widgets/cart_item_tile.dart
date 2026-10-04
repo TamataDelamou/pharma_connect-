@@ -30,106 +30,113 @@ class CartItemTile extends StatelessWidget {
               : context.palette.surface,
         ),
       ),
-      child: Row(
+      // C245 : deux lignes (produit, puis quantité et total) : sur une seule,
+      // le nom du produit disparaissait à 360 px.
+      child: Column(
         children: [
-          // Icône
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: context.palette.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(
-              Icons.medication,
-              color: context.palette.primary,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 12),
-          // Infos
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.productName,
-                  style: context.text.body1.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  '${item.dosage} • ${CurrencyFormatter.format(item.pricePerUnit)}',
-                  style: context.text.body2,
-                ),
-                if (item.isSubstitution) ...[
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: context.palette.secondary.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      'Générique',
-                      style: TextStyle(
-                        fontSize: 9,
-                        fontWeight: FontWeight.w500,
-                        color: context.palette.secondary,
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          // Quantité
           Row(
             children: [
-              IconButton(
-                icon: const Icon(Icons.remove, size: 16),
-                onPressed: () => onQuantityChanged(item.quantity - 1),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
+              // Icône
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: context.palette.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.medication,
+                  color: context.palette.primary,
+                  size: 20,
+                ),
               ),
-              SizedBox(
-                width: 30,
-                child: Text(
-                  '${item.quantity}',
-                  style: context.text.body1.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                  textAlign: TextAlign.center,
+              const SizedBox(width: 12),
+              // Infos
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.productName,
+                      style: context.text.body1.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      '${item.dosage} • ${CurrencyFormatter.format(item.pricePerUnit)}',
+                      style: context.text.body2,
+                    ),
+                    if (item.isSubstitution) ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: context.palette.secondary.withValues(
+                            alpha: 0.15,
+                          ),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          'Générique',
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w500,
+                            color: context.palette.secondary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.add, size: 16),
-                onPressed: () => onQuantityChanged(item.quantity + 1),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
+                icon: const Icon(Icons.close, size: 18),
+                tooltip: 'Retirer du panier',
+                onPressed: onRemove,
               ),
             ],
           ),
-          const SizedBox(width: 8),
-          // Prix total
-          Column(
+          const SizedBox(height: 8),
+          Row(
             children: [
+              // Quantité
+              Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.remove, size: 16),
+                    onPressed: () => onQuantityChanged(item.quantity - 1),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                  SizedBox(
+                    width: 30,
+                    child: Text(
+                      '${item.quantity}',
+                      style: context.text.body1.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.add, size: 16),
+                    onPressed: () => onQuantityChanged(item.quantity + 1),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
+              ),
+              const Spacer(),
               Text(
                 CurrencyFormatter.format(item.totalPrice),
                 style: context.text.body1.copyWith(
                   fontWeight: FontWeight.w700,
                   color: context.palette.primary,
                 ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.close, size: 16),
-                onPressed: onRemove,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
               ),
             ],
           ),

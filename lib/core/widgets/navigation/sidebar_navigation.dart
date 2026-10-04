@@ -295,7 +295,10 @@ class _SidebarItemState extends State<_SidebarItem> {
           ),
           child: Row(
             children: [
+              // C245 : menu déplié, l'icône garde sa taille et le libellé prend
+              // toute la place restante (il n'en avait que la moitié).
               Flexible(
+                flex: widget.expanded ? 0 : 1,
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Icon(

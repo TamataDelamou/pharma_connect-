@@ -128,140 +128,158 @@ class _POSSalesHistoryScreenState extends State<POSSalesHistoryScreen> {
   Widget _buildFilters(POSProvider provider) {
     return GlassCard(
       padding: const EdgeInsets.all(12),
-      child: Row(
+      // C245 : deux lignes (dates, puis statut) : sur une seule, les filtres
+      // débordaient à 360 px.
+      child: Column(
         children: [
-          // Start date
-          Expanded(
-            child: GestureDetector(
-              onTap: () async {
-                final date = await showDatePicker(
-                  context: context,
-                  initialDate: _startDate ?? DateTime.now(),
-                  firstDate: DateTime.now().subtract(const Duration(days: 365)),
-                  lastDate: DateTime.now(),
-                  builder: (context, child) {
-                    return Theme(
-                      data: ThemeData.dark().copyWith(
-                        colorScheme: ColorScheme.dark(
-                          primary: context.palette.primary,
-                        ),
+          Row(
+            children: [
+              // Start date
+              Expanded(
+                child: GestureDetector(
+                  onTap: () async {
+                    final date = await showDatePicker(
+                      context: context,
+                      initialDate: _startDate ?? DateTime.now(),
+                      firstDate: DateTime.now().subtract(
+                        const Duration(days: 365),
                       ),
-                      child: child!,
+                      lastDate: DateTime.now(),
+                      builder: (context, child) {
+                        return Theme(
+                          data: ThemeData.dark().copyWith(
+                            colorScheme: ColorScheme.dark(
+                              primary: context.palette.primary,
+                            ),
+                          ),
+                          child: child!,
+                        );
+                      },
                     );
+                    if (date != null) {
+                      setState(() => _startDate = date);
+                      _loadSales();
+                    }
                   },
-                );
-                if (date != null) {
-                  setState(() => _startDate = date);
-                  _loadSales();
-                }
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 10,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: context.palette.veil(0.24)),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.calendar_today, size: 16),
+                        const SizedBox(width: 8),
+                        Text(
+                          _startDate != null
+                              ? '${_startDate!.day}/${_startDate!.month}/${_startDate!.year}'
+                              : 'Début',
+                          style: context.text.body2,
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-                decoration: BoxDecoration(
-                  border: Border.all(color: context.palette.veil(0.24)),
-                  borderRadius: BorderRadius.circular(8),
+              ),
+              const SizedBox(width: 8),
+              // End date
+              Expanded(
+                child: GestureDetector(
+                  onTap: () async {
+                    final date = await showDatePicker(
+                      context: context,
+                      initialDate: _endDate ?? DateTime.now(),
+                      firstDate: DateTime.now().subtract(
+                        const Duration(days: 365),
+                      ),
+                      lastDate: DateTime.now(),
+                      builder: (context, child) {
+                        return Theme(
+                          data: ThemeData.dark().copyWith(
+                            colorScheme: ColorScheme.dark(
+                              primary: context.palette.primary,
+                            ),
+                          ),
+                          child: child!,
+                        );
+                      },
+                    );
+                    if (date != null) {
+                      setState(() => _endDate = date);
+                      _loadSales();
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: context.palette.veil(0.24)),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.calendar_today, size: 16),
+                        const SizedBox(width: 8),
+                        Text(
+                          _endDate != null
+                              ? '${_endDate!.day}/${_endDate!.month}/${_endDate!.year}'
+                              : 'Fin',
+                          style: context.text.body2,
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.calendar_today, size: 16),
-                    const SizedBox(width: 8),
-                    Text(
-                      _startDate != null
-                          ? '${_startDate!.day}/${_startDate!.month}/${_startDate!.year}'
-                          : 'Début',
-                      style: context.text.body2,
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              // Status filter
+              Expanded(
+                child: DropdownButtonFormField<String>(
+                  value: _selectedStatus,
+                  isExpanded: true,
+                  hint: const Text('Statut'),
+                  items: const [
+                    DropdownMenuItem(value: null, child: Text('Tous')),
+                    DropdownMenuItem(
+                      value: 'completed',
+                      child: Text('✅ Terminées'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'refunded',
+                      child: Text('🔄 Remboursées'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'cancelled',
+                      child: Text('❌ Annulées'),
                     ),
                   ],
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          // End date
-          Expanded(
-            child: GestureDetector(
-              onTap: () async {
-                final date = await showDatePicker(
-                  context: context,
-                  initialDate: _endDate ?? DateTime.now(),
-                  firstDate: DateTime.now().subtract(const Duration(days: 365)),
-                  lastDate: DateTime.now(),
-                  builder: (context, child) {
-                    return Theme(
-                      data: ThemeData.dark().copyWith(
-                        colorScheme: ColorScheme.dark(
-                          primary: context.palette.primary,
-                        ),
-                      ),
-                      child: child!,
-                    );
+                  onChanged: (value) {
+                    setState(() => _selectedStatus = value);
+                    _loadSales();
                   },
-                );
-                if (date != null) {
-                  setState(() => _endDate = date);
-                  _loadSales();
-                }
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 10,
-                ),
-                decoration: BoxDecoration(
-                  border: Border.all(color: context.palette.veil(0.24)),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.calendar_today, size: 16),
-                    const SizedBox(width: 8),
-                    Text(
-                      _endDate != null
-                          ? '${_endDate!.day}/${_endDate!.month}/${_endDate!.year}'
-                          : 'Fin',
-                      style: context.text.body2,
-                    ),
-                  ],
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 8),
+                  ),
                 ),
               ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          // Status filter
-          Expanded(
-            child: DropdownButtonFormField<String>(
-              value: _selectedStatus,
-              hint: const Text('Statut'),
-              items: const [
-                DropdownMenuItem(value: null, child: Text('Tous')),
-                DropdownMenuItem(
-                  value: 'completed',
-                  child: Text('✅ Terminées'),
-                ),
-                DropdownMenuItem(
-                  value: 'refunded',
-                  child: Text('🔄 Remboursées'),
-                ),
-                DropdownMenuItem(value: 'cancelled', child: Text('❌ Annulées')),
-              ],
-              onChanged: (value) {
-                setState(() => _selectedStatus = value);
-                _loadSales();
-              },
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 8),
+              const SizedBox(width: 8),
+              // Refresh
+              IconButton(
+                icon: Icon(Icons.refresh, color: context.palette.textSecondary),
+                onPressed: _loadSales,
               ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          // Refresh
-          IconButton(
-            icon: Icon(Icons.refresh, color: context.palette.textSecondary),
-            onPressed: _loadSales,
+            ],
           ),
         ],
       ),
@@ -315,7 +333,7 @@ class _POSSalesHistoryScreenState extends State<POSSalesHistoryScreen> {
           Expanded(
             child: Column(
               children: [
-                Text('Remboursements', style: context.text.micro),
+                Text('Remboursées', style: context.text.micro),
                 Text(
                   '${provider.sales.where((s) => s.status == 'refunded').length}',
                   style: TextStyle(

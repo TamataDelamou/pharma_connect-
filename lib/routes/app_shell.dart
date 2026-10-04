@@ -85,7 +85,10 @@ class _AppShellState extends State<AppShell> {
   }) {
     final role = context.watch<AuthProvider>().effectiveRole;
     return SidebarNavigation(
-      items: appMenuFor(role),
+      items: appMenuFor(
+        role,
+        isGsgAdmin: context.watch<AuthProvider>().isGsgAdmin,
+      ),
       currentRoute: path,
       expanded: expanded,
       onToggleExpand: onToggleExpand,
