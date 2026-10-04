@@ -4,8 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../../../core/widgets/inputs/glass_input.dart';
@@ -13,6 +11,7 @@ import '../../auth/providers/auth_provider.dart';
 import '../../auth/models/user_role.dart';
 import '../providers/traceability_provider.dart';
 import '../widgets/verification_result_card.dart';
+import '../../../core/theme/palette.dart';
 
 class VerificationScreen extends StatefulWidget {
   const VerificationScreen({super.key});
@@ -47,18 +46,18 @@ class _VerificationScreenState extends State<VerificationScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Vérifier un produit',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -68,9 +67,9 @@ class _VerificationScreenState extends State<VerificationScreen> {
               trailing: [const KernelBadge()],
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Scannez le code-barres ou saisissez le numéro de série',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
             ),
             const SizedBox(height: 24),
 
@@ -84,22 +83,22 @@ class _VerificationScreenState extends State<VerificationScreen> {
                       padding: const EdgeInsets.all(24),
                       child: Column(
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.qr_code_scanner,
                             size: 64,
-                            color: PharmaConnectColors.accentCyan,
+                            color: context.palette.primary,
                           ),
                           const SizedBox(height: 8),
                           Text(
                             'Toucher pour scanner',
-                            style: PharmaConnectTypography.body1.copyWith(
+                            style: context.text.body1.copyWith(
                               fontWeight: FontWeight.w600,
-                              color: PharmaConnectColors.accentCyan,
+                              color: context.palette.primary,
                             ),
                           ),
-                          const Text(
+                          Text(
                             'Scannez le code-barres ou le QR code du produit',
-                            style: PharmaConnectTypography.body2,
+                            style: context.text.body2,
                           ),
                         ],
                       ),
@@ -107,17 +106,21 @@ class _VerificationScreenState extends State<VerificationScreen> {
                     const SizedBox(height: 16),
 
                     // Ou saisie manuelle
-                    const Row(
+                    Row(
                       children: [
-                        Expanded(child: Divider(color: Colors.white24)),
+                        Expanded(
+                          child: Divider(color: context.palette.veil(0.24)),
+                        ),
                         Padding(
                           padding: EdgeInsets.symmetric(horizontal: 16),
                           child: Text(
                             'ou saisissez manuellement',
-                            style: PharmaConnectTypography.micro,
+                            style: context.text.micro,
                           ),
                         ),
-                        Expanded(child: Divider(color: Colors.white24)),
+                        Expanded(
+                          child: Divider(color: context.palette.veil(0.24)),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 16),
@@ -143,11 +146,11 @@ class _VerificationScreenState extends State<VerificationScreen> {
                       onPressed: () async {
                         if (_serialController.text.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
+                            SnackBar(
                               content: Text(
                                 'Veuillez saisir un numéro de série',
                               ),
-                              backgroundColor: PharmaConnectColors.accentRed,
+                              backgroundColor: context.palette.danger,
                             ),
                           );
                           return;
@@ -183,20 +186,18 @@ class _VerificationScreenState extends State<VerificationScreen> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: PharmaConnectColors.accentRed.withValues(
-                            alpha: 0.1,
-                          ),
+                          color: context.palette.danger.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: PharmaConnectColors.accentRed.withValues(
+                            color: context.palette.danger.withValues(
                               alpha: 0.2,
                             ),
                           ),
                         ),
                         child: Text(
                           provider.error!,
-                          style: PharmaConnectTypography.body2.copyWith(
-                            color: PharmaConnectColors.accentRed,
+                          style: context.text.body2.copyWith(
+                            color: context.palette.danger,
                           ),
                         ),
                       ),
@@ -295,10 +296,7 @@ class _BarcodeScannerPageState extends State<_BarcodeScannerPage> {
               width: 250,
               height: 250,
               decoration: BoxDecoration(
-                border: Border.all(
-                  color: PharmaConnectColors.accentCyan,
-                  width: 3,
-                ),
+                border: Border.all(color: context.palette.primary, width: 3),
                 borderRadius: BorderRadius.circular(16),
               ),
             ),

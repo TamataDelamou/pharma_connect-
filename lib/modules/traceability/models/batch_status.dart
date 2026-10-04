@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/colors.dart'; // <-- Ajout
+import '../../../core/theme/palette.dart';
 
 enum BatchStatus {
   manufactured,
@@ -60,26 +61,26 @@ extension BatchStatusExtension on BatchStatus {
     }
   }
 
-  Color get color {
+  ColorRole get color {
     switch (this) {
       case BatchStatus.manufactured:
-        return PharmaConnectColors.accentPurple;
+        return ColorRole.secondary;
       case BatchStatus.inTransit:
-        return PharmaConnectColors.accentCyan;
+        return ColorRole.primary;
       case BatchStatus.atDistributor:
-        return PharmaConnectColors.accentGreen;
+        return ColorRole.success;
       case BatchStatus.atPharmacy:
-        return PharmaConnectColors.accentOrange;
+        return ColorRole.warning;
       case BatchStatus.sold:
-        return PharmaConnectColors.neutralMuted;
+        return ColorRole.textMuted;
       case BatchStatus.dispensed:
-        return PharmaConnectColors.accentGreen;
+        return ColorRole.success;
       case BatchStatus.returned:
-        return PharmaConnectColors.textSecondary;
+        return ColorRole.textSecondary;
       case BatchStatus.recalled:
-        return PharmaConnectColors.accentRed;
+        return ColorRole.danger;
       case BatchStatus.destroyed:
-        return PharmaConnectColors.neutralDark;
+        return ColorRole.textMuted;
     }
   }
 }

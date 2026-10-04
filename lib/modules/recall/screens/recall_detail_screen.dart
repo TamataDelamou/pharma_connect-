@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
 import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/buttons/secondary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
@@ -12,6 +11,7 @@ import '../models/recall_status.dart';
 import '../providers/recall_provider.dart';
 import '../widgets/recall_status_chip.dart';
 import '../widgets/affected_batch_tile.dart';
+import '../../../core/theme/palette.dart';
 
 class RecallDetailScreen extends StatefulWidget {
   final String recallId;
@@ -52,18 +52,18 @@ class _RecallDetailScreenState extends State<RecallDetailScreen> {
                 leading: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.arrow_back,
-                        color: PharmaConnectColors.textPrimary,
+                        color: context.palette.textPrimary,
                       ),
                       onPressed: () => context.pop(),
                       padding: EdgeInsets.zero,
                     ),
                     const SizedBox(width: 8),
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         'Détail du rappel',
-                        style: PharmaConnectTypography.heading2,
+                        style: context.text.heading2,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -73,12 +73,9 @@ class _RecallDetailScreenState extends State<RecallDetailScreen> {
                 trailing: [const KernelBadge()],
               ),
               const SizedBox(height: 24),
-              const Expanded(
+              Expanded(
                 child: Center(
-                  child: Text(
-                    'Rappel introuvable',
-                    style: PharmaConnectTypography.body2,
-                  ),
+                  child: Text('Rappel introuvable', style: context.text.body2),
                 ),
               ),
             ],
@@ -96,19 +93,16 @@ class _RecallDetailScreenState extends State<RecallDetailScreen> {
             Row(
               children: [
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.arrow_back,
-                    color: PharmaConnectColors.textPrimary,
+                    color: context.palette.textPrimary,
                   ),
                   onPressed: () => context.pop(),
                   padding: EdgeInsets.zero,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text(
-                    'Détail du rappel',
-                    style: PharmaConnectTypography.heading2,
-                  ),
+                  child: Text('Détail du rappel', style: context.text.heading2),
                 ),
                 const KernelBadge(),
               ],
@@ -138,11 +132,11 @@ class _RecallDetailScreenState extends State<RecallDetailScreen> {
                                   children: [
                                     Text(
                                       recall.title,
-                                      style: PharmaConnectTypography.heading3,
+                                      style: context.text.heading3,
                                     ),
                                     Text(
                                       'Réf: ${recall.referenceNumber}',
-                                      style: PharmaConnectTypography.body2,
+                                      style: context.text.body2,
                                     ),
                                   ],
                                 ),
@@ -151,7 +145,7 @@ class _RecallDetailScreenState extends State<RecallDetailScreen> {
                             ],
                           ),
                           const SizedBox(height: 12),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           const SizedBox(height: 12),
                           Row(
                             children: [
@@ -159,14 +153,13 @@ class _RecallDetailScreenState extends State<RecallDetailScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
-                                      'Gravité',
-                                      style: PharmaConnectTypography.label,
-                                    ),
+                                    Text('Gravité', style: context.text.label),
                                     Text(
                                       recall.severityLabel,
                                       style: TextStyle(
-                                        color: recall.severityColor,
+                                        color: recall.severityColor.of(
+                                          context.palette,
+                                        ),
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -177,10 +170,7 @@ class _RecallDetailScreenState extends State<RecallDetailScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
-                                      'Émis par',
-                                      style: PharmaConnectTypography.label,
-                                    ),
+                                    Text('Émis par', style: context.text.label),
                                     Text(recall.issuedBy),
                                   ],
                                 ),
@@ -189,9 +179,9 @@ class _RecallDetailScreenState extends State<RecallDetailScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
+                                    Text(
                                       'Date d\'émission',
-                                      style: PharmaConnectTypography.label,
+                                      style: context.text.label,
                                     ),
                                     Text(_formatDate(recall.issuedAt)),
                                   ],
@@ -201,25 +191,22 @@ class _RecallDetailScreenState extends State<RecallDetailScreen> {
                           ),
                           if (recall.reason != null) ...[
                             const SizedBox(height: 8),
-                            const Text(
-                              'Motif',
-                              style: PharmaConnectTypography.label,
-                            ),
+                            Text('Motif', style: context.text.label),
                             Text(recall.reason!),
                           ],
                           if (recall.correctiveAction != null) ...[
                             const SizedBox(height: 8),
-                            const Text(
+                            Text(
                               'Action corrective',
-                              style: PharmaConnectTypography.label,
+                              style: context.text.label,
                             ),
                             Text(recall.correctiveAction!),
                           ],
                           if (recall.distributionInstructions != null) ...[
                             const SizedBox(height: 8),
-                            const Text(
+                            Text(
                               'Instructions de distribution',
-                              style: PharmaConnectTypography.label,
+                              style: context.text.label,
                             ),
                             Text(recall.distributionInstructions!),
                           ],
@@ -229,16 +216,10 @@ class _RecallDetailScreenState extends State<RecallDetailScreen> {
                     const SizedBox(height: 16),
 
                     // Lots affectés
-                    const Text(
-                      'Lots affectés',
-                      style: PharmaConnectTypography.heading3,
-                    ),
+                    Text('Lots affectés', style: context.text.heading3),
                     const SizedBox(height: 8),
                     if (recall.affectedBatches.isEmpty) ...[
-                      const Text(
-                        'Aucun lot affecté',
-                        style: PharmaConnectTypography.body2,
-                      ),
+                      Text('Aucun lot affecté', style: context.text.body2),
                     ] else ...[
                       ...recall.affectedBatches.map(
                         (batch) => Padding(
@@ -271,10 +252,7 @@ class _RecallDetailScreenState extends State<RecallDetailScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Suivi du rappel',
-                            style: PharmaConnectTypography.heading3,
-                          ),
+                          Text('Suivi du rappel', style: context.text.heading3),
                           const SizedBox(height: 8),
                           Row(
                             children: [
@@ -282,20 +260,17 @@ class _RecallDetailScreenState extends State<RecallDetailScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
+                                    Text(
                                       'Progression',
-                                      style: PharmaConnectTypography.label,
+                                      style: context.text.label,
                                     ),
                                     Text(
                                       '${(recall.completionRate * 100).toStringAsFixed(0)}%',
-                                      style: PharmaConnectTypography.kpiSmall
-                                          .copyWith(
-                                            color: recall.completionRate > 0.8
-                                                ? PharmaConnectColors
-                                                      .accentGreen
-                                                : PharmaConnectColors
-                                                      .accentOrange,
-                                          ),
+                                      style: context.text.kpiSmall.copyWith(
+                                        color: recall.completionRate > 0.8
+                                            ? PharmaConnectColors.accentGreen
+                                            : PharmaConnectColors.accentOrange,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -304,9 +279,9 @@ class _RecallDetailScreenState extends State<RecallDetailScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
+                                    Text(
                                       'Retournés',
-                                      style: PharmaConnectTypography.label,
+                                      style: context.text.label,
                                     ),
                                     Text('${recall.unitsReturned ?? 0} unités'),
                                   ],
@@ -316,10 +291,7 @@ class _RecallDetailScreenState extends State<RecallDetailScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
-                                      'Détruits',
-                                      style: PharmaConnectTypography.label,
-                                    ),
+                                    Text('Détruits', style: context.text.label),
                                     Text(
                                       '${recall.unitsDestroyed ?? 0} unités',
                                     ),
@@ -330,9 +302,9 @@ class _RecallDetailScreenState extends State<RecallDetailScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
+                                    Text(
                                       'Non récupérés',
-                                      style: PharmaConnectTypography.label,
+                                      style: context.text.label,
                                     ),
                                     Text(
                                       '${recall.unitsUnrecovered ?? 0} unités',
@@ -346,11 +318,9 @@ class _RecallDetailScreenState extends State<RecallDetailScreen> {
                           LinearProgressIndicator(
                             value: recall.completionRate,
                             color: recall.completionRate > 0.8
-                                ? PharmaConnectColors.accentGreen
-                                : PharmaConnectColors.accentOrange,
-                            backgroundColor: Colors.white.withValues(
-                              alpha: 0.1,
-                            ),
+                                ? context.palette.success
+                                : context.palette.warning,
+                            backgroundColor: context.palette.border,
                           ),
                         ],
                       ),
@@ -377,12 +347,11 @@ class _RecallDetailScreenState extends State<RecallDetailScreen> {
                                 );
                                 if (success && context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
+                                    SnackBar(
                                       content: Text(
                                         'Rappel publié avec succès',
                                       ),
-                                      backgroundColor:
-                                          PharmaConnectColors.accentGreen,
+                                      backgroundColor: context.palette.success,
                                     ),
                                   );
                                 }
@@ -416,10 +385,9 @@ class _RecallDetailScreenState extends State<RecallDetailScreen> {
                                 );
                                 if (success && context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
+                                    SnackBar(
                                       content: Text('Rappel terminé'),
-                                      backgroundColor:
-                                          PharmaConnectColors.accentGreen,
+                                      backgroundColor: context.palette.success,
                                     ),
                                   );
                                 }
@@ -444,10 +412,7 @@ class _RecallDetailScreenState extends State<RecallDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Checklist de conformité',
-            style: PharmaConnectTypography.heading3,
-          ),
+          Text('Checklist de conformité', style: context.text.heading3),
           const SizedBox(height: 8),
           _buildCheckItem('📤 Notification envoyée', recall.issuedAt != null),
           _buildCheckItem('📦 Lots retournés', (recall.unitsReturned ?? 0) > 0),
@@ -461,23 +426,20 @@ class _RecallDetailScreenState extends State<RecallDetailScreen> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: PharmaConnectColors.accentGreen.withValues(alpha: 0.1),
+                color: context.palette.success.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: PharmaConnectColors.accentGreen.withValues(alpha: 0.2),
+                  color: context.palette.success.withValues(alpha: 0.2),
                 ),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(
-                    Icons.check_circle,
-                    color: PharmaConnectColors.accentGreen,
-                  ),
+                  Icon(Icons.check_circle, color: context.palette.success),
                   SizedBox(width: 8),
                   Text(
                     'Tous les éléments sont conformes',
                     style: TextStyle(
-                      color: PharmaConnectColors.accentGreen,
+                      color: context.palette.success,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -498,8 +460,8 @@ class _RecallDetailScreenState extends State<RecallDetailScreen> {
           Icon(
             isChecked ? Icons.check_circle : Icons.circle_outlined,
             color: isChecked
-                ? PharmaConnectColors.accentGreen
-                : PharmaConnectColors.textSecondary,
+                ? context.palette.success
+                : context.palette.textSecondary,
             size: 18,
           ),
           const SizedBox(width: 8),
@@ -508,8 +470,8 @@ class _RecallDetailScreenState extends State<RecallDetailScreen> {
               label,
               style: TextStyle(
                 color: isChecked
-                    ? PharmaConnectColors.textPrimary
-                    : PharmaConnectColors.textSecondary,
+                    ? context.palette.textPrimary
+                    : context.palette.textSecondary,
                 decoration: isChecked ? TextDecoration.lineThrough : null,
               ),
             ),
@@ -524,21 +486,19 @@ class _RecallDetailScreenState extends State<RecallDetailScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: PharmaConnectColors.primaryDeep,
+        backgroundColor: context.palette.background,
         title: const Text('Annuler le rappel'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
+            Text(
               'Êtes-vous sûr de vouloir annuler ce rappel ?',
-              style: PharmaConnectTypography.body1,
+              style: context.text.body1,
             ),
             const SizedBox(height: 8),
             Text(
               'Cette action est irréversible.',
-              style: PharmaConnectTypography.body2.copyWith(
-                color: PharmaConnectColors.accentRed,
-              ),
+              style: context.text.body2.copyWith(color: context.palette.danger),
             ),
           ],
         ),
@@ -556,16 +516,16 @@ class _RecallDetailScreenState extends State<RecallDetailScreen> {
               );
               if (success && context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
+                  SnackBar(
                     content: Text('Rappel annulé'),
-                    backgroundColor: PharmaConnectColors.accentRed,
+                    backgroundColor: context.palette.danger,
                   ),
                 );
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: PharmaConnectColors.accentRed,
-              foregroundColor: PharmaConnectColors.textPrimary,
+              backgroundColor: context.palette.danger,
+              foregroundColor: context.palette.textPrimary,
             ),
             child: const Text('Confirmer l\'annulation'),
           ),

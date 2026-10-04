@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../../../core/widgets/inputs/glass_input.dart';
 import '../models/equipment_type.dart';
 import '../providers/coldchain_provider.dart';
+import '../../../core/theme/palette.dart';
 
 class EquipmentAddScreen extends StatefulWidget {
   const EquipmentAddScreen({super.key});
@@ -47,9 +46,9 @@ class _EquipmentAddScreenState extends State<EquipmentAddScreen> {
             Row(
               children: [
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.arrow_back,
-                    color: PharmaConnectColors.textPrimary,
+                    color: context.palette.textPrimary,
                   ),
                   onPressed: () => context.pop(),
                   padding: EdgeInsets.zero,
@@ -58,7 +57,7 @@ class _EquipmentAddScreenState extends State<EquipmentAddScreen> {
                 Expanded(
                   child: Text(
                     'Ajouter un équipement',
-                    style: PharmaConnectTypography.heading2,
+                    style: context.text.heading2,
                   ),
                 ),
               ],
@@ -71,34 +70,31 @@ class _EquipmentAddScreenState extends State<EquipmentAddScreen> {
                     GlassCard(
                       child: Column(
                         children: [
-                          Text(
-                            'Type d\'équipement',
-                            style: PharmaConnectTypography.label,
-                          ),
+                          Text('Type d\'équipement', style: context.text.label),
                           const SizedBox(height: 8),
                           DropdownButtonFormField<EquipmentType>(
                             value: _selectedType,
-                            dropdownColor: PharmaConnectColors.primaryDeep,
-                            style: PharmaConnectTypography.body1,
+                            dropdownColor: context.palette.background,
+                            style: context.text.body1,
                             decoration: InputDecoration(
                               filled: true,
-                              fillColor: Colors.white.withValues(alpha: 0.06),
+                              fillColor: context.palette.surface,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: Colors.white24,
+                                borderSide: BorderSide(
+                                  color: context.palette.veil(0.24),
                                 ),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: Colors.white24,
+                                borderSide: BorderSide(
+                                  color: context.palette.veil(0.24),
                                 ),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: PharmaConnectColors.accentCyan,
+                                borderSide: BorderSide(
+                                  color: context.palette.primary,
                                 ),
                               ),
                               contentPadding: const EdgeInsets.symmetric(
@@ -173,9 +169,11 @@ class _EquipmentAddScreenState extends State<EquipmentAddScreen> {
                             model.isEmpty ||
                             manufacturer.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Veuillez remplir tous les champs requis'),
-                              backgroundColor: PharmaConnectColors.accentRed,
+                            SnackBar(
+                              content: Text(
+                                'Veuillez remplir tous les champs requis',
+                              ),
+                              backgroundColor: context.palette.danger,
                             ),
                           );
                           return;
@@ -198,17 +196,19 @@ class _EquipmentAddScreenState extends State<EquipmentAddScreen> {
 
                         if (created != null) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
+                            SnackBar(
                               content: Text('Équipement ajouté avec succès'),
-                              backgroundColor: PharmaConnectColors.accentGreen,
+                              backgroundColor: context.palette.success,
                             ),
                           );
                           context.pop();
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Erreur lors de l\'ajout de l\'équipement'),
-                              backgroundColor: PharmaConnectColors.accentRed,
+                            SnackBar(
+                              content: Text(
+                                'Erreur lors de l\'ajout de l\'équipement',
+                              ),
+                              backgroundColor: context.palette.danger,
                             ),
                           );
                         }

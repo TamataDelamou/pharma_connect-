@@ -3,12 +3,11 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/inputs/glass_input.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/traceability_provider.dart';
+import '../../../core/theme/palette.dart';
 
 /// Audit Module 12 (TRC), arbitrage D20 (29/08/2026) : écran manquant au
 /// cahier — RG-TRC-02 (« signalement d'un produit suspect ») n'avait ni
@@ -66,18 +65,18 @@ class _ReportScreenState extends State<ReportScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Signaler un produit suspect',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -87,11 +86,11 @@ class _ReportScreenState extends State<ReportScreen> {
               trailing: [const KernelBadge()],
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Décrivez ce qui vous semble anormal. L\'officine concernée '
               'et l\'administrateur GSG sont alertés immédiatement '
               '(RG-TRC-02).',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
             ),
             const SizedBox(height: 24),
             Expanded(
@@ -125,16 +124,13 @@ class _ReportScreenState extends State<ReportScreen> {
           prefixIcon: Icons.edit_note,
         ),
         const SizedBox(height: 8),
-        const Text(
-          'Ce qui vous semble suspect',
-          style: PharmaConnectTypography.label,
-        ),
+        Text('Ce qui vous semble suspect', style: context.text.label),
         CheckboxListTile(
           value: _aspectSuspect,
           onChanged: (v) => setState(() => _aspectSuspect = v ?? false),
-          title: const Text(
+          title: Text(
             'Aspect du produit (couleur, texture, odeur…)',
-            style: PharmaConnectTypography.body2,
+            style: context.text.body2,
           ),
           controlAffinity: ListTileControlAffinity.leading,
           contentPadding: EdgeInsets.zero,
@@ -142,9 +138,9 @@ class _ReportScreenState extends State<ReportScreen> {
         CheckboxListTile(
           value: _packagingSuspect,
           onChanged: (v) => setState(() => _packagingSuspect = v ?? false),
-          title: const Text(
+          title: Text(
             'Emballage (sceau, étiquette, orthographe…)',
-            style: PharmaConnectTypography.body2,
+            style: context.text.body2,
           ),
           controlAffinity: ListTileControlAffinity.leading,
           contentPadding: EdgeInsets.zero,
@@ -152,9 +148,9 @@ class _ReportScreenState extends State<ReportScreen> {
         CheckboxListTile(
           value: _unexpectedEffect,
           onChanged: (v) => setState(() => _unexpectedEffect = v ?? false),
-          title: const Text(
+          title: Text(
             'Effet inattendu après la prise',
-            style: PharmaConnectTypography.body2,
+            style: context.text.body2,
           ),
           controlAffinity: ListTileControlAffinity.leading,
           contentPadding: EdgeInsets.zero,
@@ -169,9 +165,7 @@ class _ReportScreenState extends State<ReportScreen> {
           const SizedBox(height: 12),
           Text(
             provider.error!,
-            style: PharmaConnectTypography.body2.copyWith(
-              color: PharmaConnectColors.accentRed,
-            ),
+            style: context.text.body2.copyWith(color: context.palette.danger),
           ),
         ],
       ],
@@ -183,21 +177,14 @@ class _ReportScreenState extends State<ReportScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 32),
-        const Icon(
-          Icons.check_circle,
-          color: PharmaConnectColors.accentGreen,
-          size: 64,
-        ),
+        Icon(Icons.check_circle, color: context.palette.success, size: 64),
         const SizedBox(height: 16),
-        const Text(
-          'Signalement envoyé',
-          style: PharmaConnectTypography.heading3,
-        ),
+        Text('Signalement envoyé', style: context.text.heading3),
         const SizedBox(height: 8),
-        const Text(
+        Text(
           'L\'officine concernée (si identifiée) et l\'administrateur GSG '
           'ont été alertés. Merci pour votre vigilance.',
-          style: PharmaConnectTypography.body2,
+          style: context.text.body2,
         ),
         const SizedBox(height: 16),
         PrimaryButton(label: 'Retour', onPressed: () => context.pop()),
@@ -211,9 +198,9 @@ class _ReportScreenState extends State<ReportScreen> {
   ) async {
     if (_descriptionController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Veuillez décrire ce qui vous semble suspect'),
-          backgroundColor: PharmaConnectColors.accentRed,
+          backgroundColor: context.palette.danger,
         ),
       );
       return;
@@ -240,7 +227,7 @@ class _ReportScreenState extends State<ReportScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(provider.error ?? 'Échec de l\'envoi du signalement'),
-          backgroundColor: PharmaConnectColors.accentRed,
+          backgroundColor: context.palette.danger,
         ),
       );
     }

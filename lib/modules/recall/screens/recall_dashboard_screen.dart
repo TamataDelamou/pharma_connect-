@@ -4,13 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../models/recall_status.dart';
 import '../providers/recall_provider.dart';
 import '../widgets/recall_card.dart';
 import '../widgets/recall_filter_chips.dart';
+import '../../../core/theme/palette.dart';
 
 class RecallDashboardScreen extends StatefulWidget {
   const RecallDashboardScreen({super.key});
@@ -44,19 +43,19 @@ class _RecallDashboardScreenState extends State<RecallDashboardScreen> {
               // En-tête
               // C233 : en-tête adaptable (actions sous le titre sur téléphone).
               HeaderRow(
-                leading: const Column(
+                leading: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'Rappels de lots',
-                      style: PharmaConnectTypography.heading1,
+                      style: context.text.heading1,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                     SizedBox(height: 4),
                     Text(
                       'Gérez les rappels de produits et suivez leur exécution',
-                      style: PharmaConnectTypography.body2,
+                      style: context.text.body2,
                     ),
                   ],
                 ),
@@ -67,8 +66,8 @@ class _RecallDashboardScreenState extends State<RecallDashboardScreen> {
                     icon: const Icon(Icons.add),
                     label: const Text('Nouveau rappel'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: PharmaConnectColors.accentCyan,
-                      foregroundColor: PharmaConnectColors.textOnAccent,
+                      backgroundColor: context.palette.primary,
+                      foregroundColor: context.palette.onPrimary,
                     ),
                   ),
                 ],
@@ -84,7 +83,7 @@ class _RecallDashboardScreenState extends State<RecallDashboardScreen> {
                       value:
                           provider.statistics['totalRecalls']?.toString() ??
                           '0',
-                      color: PharmaConnectColors.accentCyan,
+                      color: context.palette.primary,
                     ),
                     const SizedBox(width: 12),
                     _buildStatCard(
@@ -92,7 +91,7 @@ class _RecallDashboardScreenState extends State<RecallDashboardScreen> {
                       value:
                           provider.statistics['activeRecalls']?.toString() ??
                           '0',
-                      color: PharmaConnectColors.accentOrange,
+                      color: context.palette.warning,
                     ),
                     const SizedBox(width: 12),
                     _buildStatCard(
@@ -101,14 +100,14 @@ class _RecallDashboardScreenState extends State<RecallDashboardScreen> {
                           provider.statistics['bySeverity']?['classI']
                               ?.toString() ??
                           '0',
-                      color: PharmaConnectColors.accentRed,
+                      color: context.palette.danger,
                     ),
                     const SizedBox(width: 12),
                     _buildStatCard(
                       label: 'Taux de rappel',
                       value:
                           '${((provider.statistics['averageCompletionRate'] ?? 0) * 100).toStringAsFixed(0)}%',
-                      color: PharmaConnectColors.accentGreen,
+                      color: context.palette.success,
                     ),
                   ],
                 ),
@@ -127,24 +126,24 @@ class _RecallDashboardScreenState extends State<RecallDashboardScreen> {
               provider.isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : provider.recalls.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
                             Icons.warning_amber_outlined,
                             size: 64,
-                            color: Colors.white24,
+                            color: context.palette.veil(0.24),
                           ),
                           SizedBox(height: 16),
                           Text(
                             'Aucun rappel en cours',
-                            style: PharmaConnectTypography.heading2,
+                            style: context.text.heading2,
                           ),
                           SizedBox(height: 8),
                           Text(
                             'Créez un nouveau rappel pour gérer un lot défectueux',
-                            style: PharmaConnectTypography.body2,
+                            style: context.text.body2,
                           ),
                         ],
                       ),
@@ -186,14 +185,14 @@ class _RecallDashboardScreenState extends State<RecallDashboardScreen> {
           children: [
             Text(
               value,
-              style: PharmaConnectTypography.kpiMedium.copyWith(
+              style: context.text.kpiMedium.copyWith(
                 color: color,
                 fontSize: 20,
               ),
             ),
             Text(
               label,
-              style: PharmaConnectTypography.micro,
+              style: context.text.micro,
               overflow: TextOverflow.ellipsis,
             ),
           ],
@@ -219,10 +218,7 @@ class _RecallDashboardScreenState extends State<RecallDashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Statut des rappels',
-                  style: PharmaConnectTypography.heading3,
-                ),
+                Text('Statut des rappels', style: context.text.heading3),
                 const SizedBox(height: 8),
                 SizedBox(
                   height: 100,
@@ -231,35 +227,35 @@ class _RecallDashboardScreenState extends State<RecallDashboardScreen> {
                       sections: [
                         PieChartSectionData(
                           value: activeRecalls.toDouble(),
-                          color: PharmaConnectColors.accentOrange,
+                          color: context.palette.warning,
                           title: 'Actifs',
                           radius: 30,
-                          titleStyle: const TextStyle(
+                          titleStyle: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
-                            color: Colors.white,
+                            color: context.palette.onPrimary,
                           ),
                         ),
                         PieChartSectionData(
                           value: completedRecalls.toDouble(),
-                          color: PharmaConnectColors.accentGreen,
+                          color: context.palette.success,
                           title: 'Terminés',
                           radius: 30,
-                          titleStyle: const TextStyle(
+                          titleStyle: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
-                            color: Colors.white,
+                            color: context.palette.onPrimary,
                           ),
                         ),
                         PieChartSectionData(
                           value: draftRecalls.toDouble(),
-                          color: PharmaConnectColors.accentPurple,
+                          color: context.palette.secondary,
                           title: 'Brouillons',
                           radius: 30,
-                          titleStyle: const TextStyle(
+                          titleStyle: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
-                            color: Colors.white,
+                            color: context.palette.onPrimary,
                           ),
                         ),
                       ],
@@ -278,10 +274,7 @@ class _RecallDashboardScreenState extends State<RecallDashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Taux de récupération',
-                  style: PharmaConnectTypography.heading3,
-                ),
+                Text('Taux de récupération', style: context.text.heading3),
                 const SizedBox(height: 8),
                 SizedBox(
                   height: 100,
@@ -310,7 +303,7 @@ class _RecallDashboardScreenState extends State<RecallDashboardScreen> {
                                               0) *
                                           100)
                                       .toDouble(),
-                              color: PharmaConnectColors.accentCyan,
+                              color: context.palette.primary,
                               width: 20,
                               borderRadius: BorderRadius.circular(4),
                             ),

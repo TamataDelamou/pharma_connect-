@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/typography.dart';
 import '../models/temperature_record.dart';
+import '../../../core/theme/palette.dart';
 
 class TemperatureRecordTile extends StatelessWidget {
   final TemperatureRecord record;
@@ -12,14 +12,14 @@ class TemperatureRecordTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.03),
+        color: context.palette.surfaceDisabled,
         borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
         children: [
           Icon(
             record.isAlert ? Icons.error_outline : Icons.check_circle,
-            color: record.statusColor,
+            color: record.statusColor.of(context.palette),
             size: 16,
           ),
           const SizedBox(width: 8),
@@ -29,25 +29,27 @@ class TemperatureRecordTile extends StatelessWidget {
               children: [
                 Text(
                   '${record.temperature.toStringAsFixed(1)}°C',
-                  style: PharmaConnectTypography.body1.copyWith(
+                  style: context.text.body1.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 Text(
                   _formatDateTime(record.timestamp),
-                  style: PharmaConnectTypography.micro,
+                  style: context.text.micro,
                 ),
               ],
             ),
           ),
           if (record.recordedBy != null) ...[
-            Text(record.recordedBy!, style: PharmaConnectTypography.micro),
+            Text(record.recordedBy!, style: context.text.micro),
             const SizedBox(width: 8),
           ],
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
-              color: record.statusColor.withValues(alpha: 0.15),
+              color: record.statusColor
+                  .of(context.palette)
+                  .withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -55,7 +57,7 @@ class TemperatureRecordTile extends StatelessWidget {
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w600,
-                color: record.statusColor,
+                color: record.statusColor.of(context.palette),
               ),
             ),
           ),

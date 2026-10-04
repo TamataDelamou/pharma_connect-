@@ -3,14 +3,13 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../../auth/models/user_role.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/traceability_provider.dart';
 import '../widgets/batch_status_chip.dart';
 import '../widgets/scan_fab.dart';
+import '../../../core/theme/palette.dart';
 
 class TraceabilityDashboardScreen extends StatefulWidget {
   const TraceabilityDashboardScreen({super.key});
@@ -67,19 +66,19 @@ class _TraceabilityDashboardScreenState
             // En-tête
             // C233 : en-tête adaptable (actions sous le titre sur téléphone).
             HeaderRow(
-              leading: const Column(
+              leading: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Traçabilité',
-                    style: PharmaConnectTypography.heading1,
+                    style: context.text.heading1,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(height: 4),
                   Text(
                     'Suivez et vérifiez l\'authenticité des produits',
-                    style: PharmaConnectTypography.body2,
+                    style: context.text.body2,
                   ),
                 ],
               ),
@@ -90,10 +89,8 @@ class _TraceabilityDashboardScreenState
                   icon: const Icon(Icons.report_outlined),
                   label: const Text('Signaler'),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: PharmaConnectColors.accentRed,
-                    side: const BorderSide(
-                      color: PharmaConnectColors.accentRed,
-                    ),
+                    foregroundColor: context.palette.danger,
+                    side: BorderSide(color: context.palette.danger),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -110,8 +107,8 @@ class _TraceabilityDashboardScreenState
                   icon: const Icon(Icons.qr_code_scanner),
                   label: const Text('Vérifier un produit'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: PharmaConnectColors.accentCyan,
-                    foregroundColor: PharmaConnectColors.textOnAccent,
+                    backgroundColor: context.palette.primary,
+                    foregroundColor: context.palette.onPrimary,
                   ),
                 ),
               ],
@@ -130,7 +127,7 @@ class _TraceabilityDashboardScreenState
                     label: 'Total lots',
                     value:
                         provider.statistics['totalBatches']?.toString() ?? '0',
-                    color: PharmaConnectColors.accentCyan,
+                    color: context.palette.primary,
                     icon: Icons.inventory_2,
                   ),
                   const SizedBox(width: 12),
@@ -138,7 +135,7 @@ class _TraceabilityDashboardScreenState
                     label: 'Actifs',
                     value:
                         provider.statistics['activeBatches']?.toString() ?? '0',
-                    color: PharmaConnectColors.accentGreen,
+                    color: context.palette.success,
                     icon: Icons.check_circle,
                   ),
                   const SizedBox(width: 12),
@@ -147,7 +144,7 @@ class _TraceabilityDashboardScreenState
                     value:
                         provider.statistics['recalledBatches']?.toString() ??
                         '0',
-                    color: PharmaConnectColors.accentRed,
+                    color: context.palette.danger,
                     icon: Icons.warning,
                   ),
                   const SizedBox(width: 12),
@@ -155,7 +152,7 @@ class _TraceabilityDashboardScreenState
                     label: 'Authentifiés',
                     value:
                         provider.statistics['authenticated']?.toString() ?? '0',
-                    color: PharmaConnectColors.accentPurple,
+                    color: context.palette.secondary,
                     icon: Icons.verified,
                   ),
                 ],
@@ -163,27 +160,24 @@ class _TraceabilityDashboardScreenState
               const SizedBox(height: 24),
 
               // Liste des lots
-              const Text(
-                'Lots tracés',
-                style: PharmaConnectTypography.heading3,
-              ),
+              Text('Lots tracés', style: context.text.heading3),
               const SizedBox(height: 8),
 
               Expanded(
                 child: provider.batches.isEmpty
-                    ? const Center(
+                    ? Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(
                               Icons.inventory_2_outlined,
                               size: 64,
-                              color: Colors.white24,
+                              color: context.palette.veil(0.24),
                             ),
                             SizedBox(height: 16),
                             Text(
                               'Aucun lot enregistré',
-                              style: PharmaConnectTypography.body2,
+                              style: context.text.body2,
                             ),
                           ],
                         ),
@@ -205,7 +199,9 @@ class _TraceabilityDashboardScreenState
                                     width: 4,
                                     height: 40,
                                     decoration: BoxDecoration(
-                                      color: batch.statusColor,
+                                      color: batch.statusColor.of(
+                                        context.palette,
+                                      ),
                                       borderRadius: BorderRadius.circular(2),
                                     ),
                                   ),
@@ -217,21 +213,19 @@ class _TraceabilityDashboardScreenState
                                       children: [
                                         Text(
                                           batch.productName,
-                                          style: PharmaConnectTypography.body1
-                                              .copyWith(
-                                                fontWeight: FontWeight.w600,
-                                              ),
+                                          style: context.text.body1.copyWith(
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                         ),
                                         Text(
                                           'Lot: ${batch.batchNumber} • SN: ${batch.serialNumber}',
-                                          style: PharmaConnectTypography.body2,
+                                          style: context.text.body2,
                                         ),
                                         if (batch.isRecalled) ...[
-                                          const Text(
+                                          Text(
                                             '⚠️ RAPPEL',
                                             style: TextStyle(
-                                              color:
-                                                  PharmaConnectColors.accentRed,
+                                              color: context.palette.danger,
                                               fontSize: 10,
                                               fontWeight: FontWeight.w700,
                                             ),
@@ -262,36 +256,33 @@ class _TraceabilityDashboardScreenState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
+            Icon(
               Icons.verified_outlined,
               size: 72,
-              color: PharmaConnectColors.accentCyan,
+              color: context.palette.primary,
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'Vérifiez l\'authenticité d\'un produit en scannant son '
               'code-barres, ou signalez un produit qui vous semble suspect.',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
             GlassCard(
               onTap: () => context.push('/traceability/verify'),
               padding: const EdgeInsets.all(16),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(
-                    Icons.qr_code_scanner,
-                    color: PharmaConnectColors.accentCyan,
-                  ),
+                  Icon(Icons.qr_code_scanner, color: context.palette.primary),
                   SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       'Vérifier un produit',
-                      style: PharmaConnectTypography.body1,
+                      style: context.text.body1,
                     ),
                   ),
-                  Icon(Icons.chevron_right, color: Colors.white38),
+                  Icon(Icons.chevron_right, color: context.palette.textMuted),
                 ],
               ),
             ),
@@ -299,20 +290,17 @@ class _TraceabilityDashboardScreenState
             GlassCard(
               onTap: () => context.push('/traceability/report'),
               padding: const EdgeInsets.all(16),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(
-                    Icons.report_outlined,
-                    color: PharmaConnectColors.accentRed,
-                  ),
+                  Icon(Icons.report_outlined, color: context.palette.danger),
                   SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       'Signaler un produit suspect',
-                      style: PharmaConnectTypography.body1,
+                      style: context.text.body1,
                     ),
                   ),
-                  Icon(Icons.chevron_right, color: Colors.white38),
+                  Icon(Icons.chevron_right, color: context.palette.textMuted),
                 ],
               ),
             ),
@@ -348,14 +336,14 @@ class _TraceabilityDashboardScreenState
                 children: [
                   Text(
                     value,
-                    style: PharmaConnectTypography.kpiMedium.copyWith(
+                    style: context.text.kpiMedium.copyWith(
                       color: color,
                       fontSize: 20,
                     ),
                   ),
                   Text(
                     label,
-                    style: PharmaConnectTypography.micro,
+                    style: context.text.micro,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],

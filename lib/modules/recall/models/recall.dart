@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
 import 'recall_severity.dart';
 import 'recall_status.dart';
 import 'recall_affected_batch.dart';
+import '../../../core/theme/palette.dart';
 
 class Recall {
   final String id;
@@ -175,16 +175,16 @@ class Recall {
     }
   }
 
-  Color get statusColor {
+  ColorRole get statusColor {
     switch (status) {
       case RecallStatus.draft:
-        return PharmaConnectColors.neutralMuted;
+        return ColorRole.textMuted;
       case RecallStatus.inProgress:
-        return PharmaConnectColors.accentOrange;
+        return ColorRole.warning;
       case RecallStatus.completed:
-        return PharmaConnectColors.accentGreen;
+        return ColorRole.success;
       case RecallStatus.cancelled:
-        return PharmaConnectColors.accentRed;
+        return ColorRole.danger;
     }
   }
 
@@ -199,14 +199,14 @@ class Recall {
     }
   }
 
-  Color get severityColor {
+  ColorRole get severityColor {
     switch (severity) {
       case RecallSeverity.classI:
-        return PharmaConnectColors.accentRed;
+        return ColorRole.danger;
       case RecallSeverity.classII:
-        return PharmaConnectColors.accentOrange;
+        return ColorRole.warning;
       case RecallSeverity.classIII:
-        return PharmaConnectColors.accentAmber;
+        return ColorRole.warningStrong;
     }
   }
 

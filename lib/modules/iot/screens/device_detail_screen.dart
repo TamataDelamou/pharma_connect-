@@ -4,13 +4,13 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
 import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/secondary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/iot_provider.dart';
 import '../models/iot_device.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class DeviceDetailScreen extends StatefulWidget {
   final String deviceId;
@@ -44,9 +44,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
         body: Center(
           child: Text(
             provider.error ?? 'Appareil introuvable',
-            style: PharmaConnectTypography.body2.copyWith(
-              color: PharmaConnectColors.accentRed,
-            ),
+            style: context.text.body2.copyWith(color: context.palette.danger),
           ),
         ),
       );
@@ -68,18 +66,18 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Détail de l\'appareil',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -133,26 +131,25 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                                   children: [
                                     Text(
                                       device.name,
-                                      style: PharmaConnectTypography.heading3,
+                                      style: context.text.heading3,
                                     ),
                                     Text(
                                       device.typeLabel,
-                                      style: PharmaConnectTypography.body2,
+                                      style: context.text.body2,
                                     ),
                                     Text(
                                       device.deviceId,
-                                      style: PharmaConnectTypography.micro
-                                          .copyWith(
-                                            color: PharmaConnectColors
-                                                .textSecondary,
-                                          ),
+                                      style: context.text.micro.copyWith(
+                                        color:
+                                            PharmaConnectColors.textSecondary,
+                                      ),
                                     ),
                                   ],
                                 ),
                               ),
                             ],
                           ),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           const SizedBox(height: 8),
                           _buildInfoRow(
                             'Modèle',
@@ -181,9 +178,9 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
 
                     // Temperature readings
                     if (provider.readings.isNotEmpty) ...[
-                      const Text(
+                      Text(
                         '🌡️ Dernières lectures',
-                        style: PharmaConnectTypography.heading3,
+                        style: context.text.heading3,
                       ),
                       const SizedBox(height: 8),
                       ...provider.readings.take(5).map((reading) {
@@ -195,21 +192,25 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                           margin: const EdgeInsets.only(bottom: 4),
                           decoration: BoxDecoration(
                             color: isNormal
-                                ? Colors.white.withValues(alpha: 0.04)
+                                ? context.palette.surfaceMuted
                                 : (isHigh
-                                      ? PharmaConnectColors.accentRed
-                                            .withValues(alpha: 0.1)
-                                      : PharmaConnectColors.accentCyan
-                                            .withValues(alpha: 0.1)),
+                                      ? context.palette.danger.withValues(
+                                          alpha: 0.1,
+                                        )
+                                      : context.palette.primary.withValues(
+                                          alpha: 0.1,
+                                        )),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
                               color: isNormal
-                                  ? Colors.white.withValues(alpha: 0.06)
+                                  ? context.palette.surface
                                   : (isHigh
-                                        ? PharmaConnectColors.accentRed
-                                              .withValues(alpha: 0.2)
-                                        : PharmaConnectColors.accentCyan
-                                              .withValues(alpha: 0.2)),
+                                        ? context.palette.danger.withValues(
+                                            alpha: 0.2,
+                                          )
+                                        : context.palette.primary.withValues(
+                                            alpha: 0.2,
+                                          )),
                             ),
                           ),
                           child: Row(
@@ -221,10 +222,10 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                                           ? Icons.ac_unit
                                           : Icons.check_circle),
                                 color: isNormal
-                                    ? PharmaConnectColors.accentGreen
+                                    ? context.palette.success
                                     : (isHigh
-                                          ? PharmaConnectColors.accentRed
-                                          : PharmaConnectColors.accentCyan),
+                                          ? context.palette.danger
+                                          : context.palette.primary),
                                 size: 16,
                               ),
                               const SizedBox(width: 8),
@@ -237,7 +238,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                                       style: TextStyle(
                                         fontWeight: FontWeight.w600,
                                         color: isNormal
-                                            ? PharmaConnectColors.textPrimary
+                                            ? context.palette.textPrimary
                                             : (isHigh
                                                   ? PharmaConnectColors
                                                         .accentRed
@@ -247,18 +248,18 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                                     ),
                                     Text(
                                       _formatDate(reading.timestamp),
-                                      style: PharmaConnectTypography.micro,
+                                      style: context.text.micro,
                                     ),
                                   ],
                                 ),
                               ),
                               if (reading.isAlert)
-                                const Text(
+                                Text(
                                   '⚠️ Alerte',
                                   style: TextStyle(
                                     fontSize: 10,
                                     fontWeight: FontWeight.w600,
-                                    color: PharmaConnectColors.accentRed,
+                                    color: context.palette.danger,
                                   ),
                                 ),
                             ],
@@ -271,10 +272,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
 
                     // Alerts
                     if (provider.alerts.isNotEmpty) ...[
-                      const Text(
-                        '🚨 Alertes récentes',
-                        style: PharmaConnectTypography.heading3,
-                      ),
+                      Text('🚨 Alertes récentes', style: context.text.heading3),
                       const SizedBox(height: 8),
                       ...provider.alerts
                           .where((a) => a.status != 'resolved')
@@ -284,20 +282,21 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                               padding: const EdgeInsets.all(12),
                               margin: const EdgeInsets.only(bottom: 4),
                               decoration: BoxDecoration(
-                                color: PharmaConnectColors.accentRed.withValues(
+                                color: context.palette.danger.withValues(
                                   alpha: 0.06,
                                 ),
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(
-                                  color: PharmaConnectColors.accentRed
-                                      .withValues(alpha: 0.2),
+                                  color: context.palette.danger.withValues(
+                                    alpha: 0.2,
+                                  ),
                                 ),
                               ),
                               child: Row(
                                 children: [
-                                  const Icon(
+                                  Icon(
                                     Icons.warning_amber,
-                                    color: PharmaConnectColors.accentRed,
+                                    color: context.palette.danger,
                                   ),
                                   const SizedBox(width: 8),
                                   Expanded(
@@ -307,18 +306,17 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                                       children: [
                                         Text(
                                           alert.typeLabel,
-                                          style: PharmaConnectTypography.body1
-                                              .copyWith(
-                                                fontWeight: FontWeight.w600,
-                                              ),
+                                          style: context.text.body1.copyWith(
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                         ),
                                         Text(
                                           alert.message,
-                                          style: PharmaConnectTypography.body2,
+                                          style: context.text.body2,
                                         ),
                                         Text(
                                           _formatDate(alert.createdAt),
-                                          style: PharmaConnectTypography.micro,
+                                          style: context.text.micro,
                                         ),
                                       ],
                                     ),
@@ -359,11 +357,11 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                                       ],
                                     ),
                                   if (alert.status == 'acknowledged')
-                                    const Text(
+                                    Text(
                                       'Accusée',
                                       style: TextStyle(
                                         fontSize: 10,
-                                        color: PharmaConnectColors.accentCyan,
+                                        color: context.palette.primary,
                                       ),
                                     ),
                                 ],
@@ -386,10 +384,9 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                                 await provider.simulateReading(device.id);
                                 if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
+                                    SnackBar(
                                       content: Text('Lecture simulée ajoutée'),
-                                      backgroundColor:
-                                          PharmaConnectColors.accentGreen,
+                                      backgroundColor: context.palette.success,
                                     ),
                                   );
                                   provider.loadDevice(widget.deviceId);
@@ -446,10 +443,8 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                               icon: const Icon(Icons.delete_outline),
                               label: const Text('Supprimer'),
                               style: OutlinedButton.styleFrom(
-                                foregroundColor: PharmaConnectColors.accentRed,
-                                side: const BorderSide(
-                                  color: PharmaConnectColors.accentRed,
-                                ),
+                                foregroundColor: context.palette.danger,
+                                side: BorderSide(color: context.palette.danger),
                               ),
                             ),
                           ),
@@ -472,11 +467,8 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 100,
-            child: Text(label, style: PharmaConnectTypography.label),
-          ),
-          Expanded(child: Text(value, style: PharmaConnectTypography.body1)),
+          SizedBox(width: 100, child: Text(label, style: context.text.label)),
+          Expanded(child: Text(value, style: context.text.body1)),
         ],
       ),
     );
@@ -489,15 +481,15 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
   Color _statusColor(String status) {
     switch (status) {
       case 'active':
-        return PharmaConnectColors.accentGreen;
+        return context.palette.success;
       case 'inactive':
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
       case 'maintenance':
-        return PharmaConnectColors.accentOrange;
+        return context.palette.warning;
       case 'offline':
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       default:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
     }
   }
 
@@ -528,7 +520,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Statut mis à jour : ${updated.statusLabel}'),
-          backgroundColor: PharmaConnectColors.accentGreen,
+          backgroundColor: context.palette.success,
         ),
       );
       context.read<IotProvider>().loadDevice(widget.deviceId);
@@ -539,7 +531,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: PharmaConnectColors.primaryDeep,
+        backgroundColor: context.palette.background,
         title: const Text('Supprimer l\'appareil'),
         content: const Text(
           'Cette action supprimera définitivement l\'appareil et toutes ses données.',
@@ -558,16 +550,16 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
               if (success && context.mounted) {
                 context.pop();
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
+                  SnackBar(
                     content: Text('Appareil supprimé'),
-                    backgroundColor: PharmaConnectColors.accentRed,
+                    backgroundColor: context.palette.danger,
                   ),
                 );
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: PharmaConnectColors.accentRed,
-              foregroundColor: PharmaConnectColors.textPrimary,
+              backgroundColor: context.palette.danger,
+              foregroundColor: context.palette.textPrimary,
             ),
             child: const Text('Supprimer'),
           ),

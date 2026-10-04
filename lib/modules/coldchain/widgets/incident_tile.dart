@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../models/cold_incident.dart';
+import '../../../core/theme/palette.dart';
 
 class IncidentTile extends StatelessWidget {
   final ColdIncident incident;
@@ -15,10 +14,14 @@ class IncidentTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: incident.severityColor.withValues(alpha: 0.08),
+        color: incident.severityColor
+            .of(context.palette)
+            .withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: incident.severityColor.withValues(alpha: 0.2),
+          color: incident.severityColor
+              .of(context.palette)
+              .withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -32,7 +35,7 @@ class IncidentTile extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
-                  color: incident.severityColor,
+                  color: incident.severityColor.of(context.palette),
                 ),
               ),
               const SizedBox(width: 8),
@@ -43,17 +46,15 @@ class IncidentTile extends StatelessWidget {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: PharmaConnectColors.accentGreen.withValues(
-                      alpha: 0.15,
-                    ),
+                    color: context.palette.success.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(4),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Résolu',
                     style: TextStyle(
                       fontSize: 9,
                       fontWeight: FontWeight.w600,
-                      color: PharmaConnectColors.accentGreen,
+                      color: context.palette.success,
                     ),
                   ),
                 ),
@@ -64,17 +65,15 @@ class IncidentTile extends StatelessWidget {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: PharmaConnectColors.accentOrange.withValues(
-                      alpha: 0.15,
-                    ),
+                    color: context.palette.warning.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(4),
                   ),
-                  child: const Text(
+                  child: Text(
                     'En cours',
                     style: TextStyle(
                       fontSize: 9,
                       fontWeight: FontWeight.w600,
-                      color: PharmaConnectColors.accentOrange,
+                      color: context.palette.warning,
                     ),
                   ),
                 ),
@@ -84,20 +83,18 @@ class IncidentTile extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             '${incident.productName} (Lot: ${incident.batchNumber})',
-            style: PharmaConnectTypography.body1.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+            style: context.text.body1.copyWith(fontWeight: FontWeight.w600),
           ),
           Text(
             '${incident.temperatureRecorded}°C - Plage: ${incident.minTemperature}°C à ${incident.maxTemperature}°C',
-            style: PharmaConnectTypography.body2,
+            style: context.text.body2,
           ),
           Text(
             _formatDateTime(incident.occurredAt) +
                 (incident.isResolved
                     ? ' • Résolu en ${incident.duration}'
                     : ''),
-            style: PharmaConnectTypography.micro,
+            style: context.text.micro,
           ),
           if (!incident.isResolved && onResolve != null) ...[
             const SizedBox(height: 8),

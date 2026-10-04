@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
 import 'record_type.dart';
+import '../../../core/theme/palette.dart';
 
 class TemperatureRecord {
   final String id;
@@ -94,13 +94,13 @@ class TemperatureRecord {
     return '✅ Conforme';
   }
 
-  Color get statusColor {
+  ColorRole get statusColor {
     if (minTemperature == null && maxTemperature == null) {
-      return PharmaConnectColors.neutralMuted;
+      return ColorRole.textMuted;
     }
     if (temperature < minTemperature! || temperature > maxTemperature!) {
-      return PharmaConnectColors.accentRed;
+      return ColorRole.danger;
     }
-    return PharmaConnectColors.accentGreen;
+    return ColorRole.success;
   }
 }

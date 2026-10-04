@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../models/recall.dart';
 import 'recall_status_chip.dart';
+import '../../../core/theme/palette.dart';
 
 class RecallCard extends StatelessWidget {
   final Recall recall;
@@ -22,7 +22,7 @@ class RecallCard extends StatelessWidget {
             width: 4,
             height: 50,
             decoration: BoxDecoration(
-              color: recall.severityColor,
+              color: recall.severityColor.of(context.palette),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -32,13 +32,10 @@ class RecallCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  recall.referenceNumber,
-                  style: PharmaConnectTypography.body2,
-                ),
+                Text(recall.referenceNumber, style: context.text.body2),
                 Text(
                   recall.title,
-                  style: PharmaConnectTypography.body1.copyWith(
+                  style: context.text.body1.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                   maxLines: 2,
@@ -49,12 +46,12 @@ class RecallCard extends StatelessWidget {
                   children: [
                     Text(
                       '${recall.affectedBatches.length} lots affectés',
-                      style: PharmaConnectTypography.micro,
+                      style: context.text.micro,
                     ),
                     const SizedBox(width: 12),
                     Text(
                       '${recall.totalAffectedUnits ?? 0} unités',
-                      style: PharmaConnectTypography.micro,
+                      style: context.text.micro,
                     ),
                     const SizedBox(width: 12),
                     Container(
@@ -63,7 +60,9 @@ class RecallCard extends StatelessWidget {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: recall.severityColor.withValues(alpha: 0.15),
+                        color: recall.severityColor
+                            .of(context.palette)
+                            .withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -71,7 +70,7 @@ class RecallCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 9,
                           fontWeight: FontWeight.w600,
-                          color: recall.severityColor,
+                          color: recall.severityColor.of(context.palette),
                         ),
                       ),
                     ),
