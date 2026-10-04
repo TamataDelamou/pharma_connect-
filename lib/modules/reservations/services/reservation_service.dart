@@ -122,15 +122,18 @@ class ReservationService {
   }
 
   /// Retrait à l'officine : la réservation devient une vente au comptoir en
-  /// espèces, au prix du jour. Rend l'identifiant de la vente.
+  /// espèces, au prix du jour. Le serveur refuse sans le code de retrait du
+  /// patient. Rend l'identifiant de la vente.
   Future<String> pickUp(
     String id, {
+    required String pickupCode,
     bool prescriptionChecked = false,
     bool allowPartial = false,
     String? partialReason,
   }) {
     return _rpc<String>('reservation_pickup', {
       'p_reservation_id': id,
+      'p_pickup_code': pickupCode,
       'p_prescription_checked': prescriptionChecked,
       'p_allow_partial': allowPartial,
       'p_partial_reason': partialReason,
@@ -196,6 +199,7 @@ class ReservationService {
       'meme produit': 'même produit',
       'designer': 'désigner',
       'non renseigne': 'non renseigné',
+      'non attribue, reessayez': 'non attribué, réessayez',
       'ne peut plus etre remis': 'ne peut plus être remis',
       'ne peut etre remis': 'ne peut être remis',
       'lot rappele ou perime': 'lot rappelé ou périmé',

@@ -11,12 +11,15 @@ import '../../auth/providers/auth_provider.dart';
 import '../models/pickup_line.dart';
 import '../providers/reservation_provider.dart';
 import '../widgets/reservation_status_card.dart';
+import 'pickup_code_scanner_screen.dart';
 
 /// C243 : retrait d'une réservation à l'officine. La réservation devient une
 /// vente au comptoir en espèces, au prix du jour imposé par le serveur ;
 /// l'écart avec le prix indicatif de la réservation est affiché avant
 /// l'encaissement. Un produit dont le lot a été rappelé ou est périmé, sans
 /// remplaçant, ne peut être remis : retrait partiel motivé, ou annulation.
+/// Le code de retrait du patient (saisi ou lu sur son QR) est exigé par le
+/// serveur ; il n'est pas affiché ici.
 class ReservationPickupScreen extends StatefulWidget {
   final String reservationId;
 
@@ -29,6 +32,7 @@ class ReservationPickupScreen extends StatefulWidget {
 
 class _ReservationPickupScreenState extends State<ReservationPickupScreen> {
   final _partialReasonController = TextEditingController();
+  final _codeController = TextEditingController();
   bool _prescriptionChecked = false;
   bool _partial = false;
   bool _isSubmitting = false;
@@ -44,7 +48,19 @@ class _ReservationPickupScreenState extends State<ReservationPickupScreen> {
   @override
   void dispose() {
     _partialReasonController.dispose();
+    _codeController.dispose();
     super.dispose();
+  }
+
+  /// Code saisi, sans espaces : le serveur ignore la casse.
+  String get _code => _codeController.text.replaceAll(RegExp(r'\s'), '');
+
+  Future<void> _scanCode() async {
+    final scanned = await Navigator.of(context).push<String>(
+      MaterialPageRoute(builder: (_) => const PickupCodeScannerScreen()),
+    );
+    if (!mounted || scanned == null) return;
+    setState(() => _codeController.text = scanned.toUpperCase());
   }
 
   Future<void> _pickUp() async {
@@ -52,6 +68,7 @@ class _ReservationPickupScreenState extends State<ReservationPickupScreen> {
     setState(() => _isSubmitting = true);
     final saleId = await provider.pickUp(
       widget.reservationId,
+      pickupCode: _code,
       prescriptionChecked: _prescriptionChecked,
       allowPartial: _partial,
       partialReason: _partial ? _partialReasonController.text.trim() : null,
@@ -103,9 +120,13 @@ class _ReservationPickupScreenState extends State<ReservationPickupScreen> {
     final currentTotal = served.fold(0, (sum, l) => sum + l.currentTotal);
     final gap = currentTotal - reservedTotal;
     final needsPrescription = served.any((l) => l.prescriptionRequired);
+    // Un produit ne peut plus être remis et le retrait partiel n'est pas
+    // choisi : aucun montant à encaisser tant que le choix n'est pas fait.
+    final choicePending = unavailable.isNotEmpty && !_partial;
     final canSubmit =
         !_isSubmitting &&
         served.isNotEmpty &&
+        _code.length >= 6 &&
         (unavailable.isEmpty ||
             (_partial && _partialReasonController.text.trim().length >= 3));
 
@@ -163,18 +184,37 @@ class _ReservationPickupScreenState extends State<ReservationPickupScreen> {
                                   reservation.patientName,
                                   style: context.text.heading3,
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Code de retrait : '
-                                  '${reservation.qrCodeToken ?? '—'}',
-                                  style: context.text.body2,
-                                ),
-                                if (reservation.pickupDeadline != null)
+                                if (reservation.pickupDeadline != null) ...[
+                                  const SizedBox(height: 4),
                                   Text(
                                     'À retirer avant le '
                                     '${formatReservationDateTime(reservation.pickupDeadline!)}',
                                     style: context.text.micro,
                                   ),
+                                ],
+                                const SizedBox(height: 12),
+                                TextField(
+                                  controller: _codeController,
+                                  onChanged: (_) => setState(() {}),
+                                  textCapitalization:
+                                      TextCapitalization.characters,
+                                  autocorrect: false,
+                                  decoration: InputDecoration(
+                                    labelText: 'Code de retrait du patient',
+                                    border: const OutlineInputBorder(),
+                                    suffixIcon: IconButton(
+                                      icon: const Icon(Icons.qr_code_scanner),
+                                      tooltip: 'Scanner le QR du patient',
+                                      onPressed: _scanCode,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Saisissez le code à 6 caractères du patient, '
+                                  'ou scannez son QR.',
+                                  style: context.text.micro,
+                                ),
                               ],
                             ),
                           ),
@@ -205,9 +245,20 @@ class _ReservationPickupScreenState extends State<ReservationPickupScreen> {
                                 const SizedBox(height: 4),
                                 _totalRow(
                                   'À encaisser en espèces',
-                                  CurrencyFormatter.format(currentTotal),
+                                  choicePending
+                                      ? '—'
+                                      : CurrencyFormatter.format(currentTotal),
                                   strong: true,
                                 ),
+                                if (choicePending)
+                                  Text(
+                                    'Choisissez le retrait partiel ou annulez '
+                                    'la réservation : le montant sera calculé '
+                                    'sur les produits remis.',
+                                    style: context.text.micro.copyWith(
+                                      color: context.palette.danger,
+                                    ),
+                                  ),
                               ],
                             ),
                           ),

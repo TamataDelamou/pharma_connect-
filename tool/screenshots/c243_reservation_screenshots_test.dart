@@ -106,7 +106,7 @@ Reservation _reservation(
     pickedUpAt: status == ReservationStatus.pickedUp ? now : null,
     status: status,
     totalPrice: items.fold(0, (sum, i) => sum + i.totalPrice),
-    qrCodeToken: 'qr_4f9a2c7b1d3e',
+    qrCodeToken: 'K7M4QX',
     cancelledBy: cancelledBy,
     cancelReason: cancelReason,
   );
@@ -272,6 +272,8 @@ void main() {
           ],
         );
         await _settle(tester);
+        await tester.enterText(find.byType(TextField).first, 'K7M4QX');
+        await _settle(tester);
       },
     ),
     // Officine : retrait avec un lot rappelé sans remplaçant.
@@ -305,6 +307,19 @@ void main() {
             ),
           ],
         );
+        await _settle(tester);
+        // Retrait partiel choisi et motivé : le montant exclut le produit
+        // non remis.
+        await tester.enterText(find.byType(TextField).first, 'K7M4QX');
+        await tester.ensureVisible(find.byType(SwitchListTile));
+        await tester.tap(find.byType(SwitchListTile));
+        await _settle(tester);
+        await tester.enterText(
+          find.byType(TextField).last,
+          'Lot rappelé, patient informé',
+        );
+        await _settle(tester);
+        await tester.ensureVisible(find.text('À encaisser en espèces'));
         await _settle(tester);
       },
     ),

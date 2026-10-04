@@ -18,6 +18,8 @@
 --     réservables ;
 --   - retrait partiel autorisé quand un lot rappelé ou périmé n'a pas de
 --     remplaçant, motif enregistré ;
+--   - code de retrait exigé au retrait : 6 caractères sans 0/O ni 1/I,
+--     unique parmi les réservations actives de l'officine ;
 --   - vente au comptoir à lot désigné : ne prend plus une boîte retenue ;
 --   - statut « confirmed » non utilisé pendant le pilote
 --     (pending → ready → pickedUp).
@@ -274,6 +276,53 @@ comment on function public.reservation_expire_overdue(uuid) is
 revoke all on function public.reservation_expire_overdue(uuid) from public, anon, authenticated;
 
 -- ============================================================
+-- Code de retrait
+-- ============================================================
+
+-- Un même code ne désigne qu'une réservation active par officine.
+create unique index if not exists idx_reservations_active_pickup_code
+  on public.reservations(pharmacy_id, upper(qr_code_token))
+  where status in ('pending', 'confirmed', 'ready');
+
+-- Code court de 6 caractères, sans caractères ambigus (ni 0/O, ni 1/I),
+-- unique parmi les réservations actives de l'officine.
+create or replace function public.reservation_new_pickup_code(p_pharmacy_id uuid)
+returns text
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_alphabet constant text := '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+  v_bytes bytea;
+  v_code text;
+  v_try integer;
+begin
+  for v_try in 1..20 loop
+    -- Octets 0 à 5 d'un uuid aléatoire : 32 valeurs équiprobables chacun.
+    v_bytes := uuid_send(gen_random_uuid());
+    v_code := '';
+    for i in 0..5 loop
+      v_code := v_code || substr(v_alphabet, (get_byte(v_bytes, i) % 32) + 1, 1);
+    end loop;
+    if not exists (
+      select 1 from public.reservations r
+        where r.pharmacy_id = p_pharmacy_id and upper(r.qr_code_token) = v_code
+          and r.status in ('pending', 'confirmed', 'ready')
+    ) then
+      return v_code;
+    end if;
+  end loop;
+  raise exception 'RES: code de retrait non attribue, reessayez' using errcode = 'P0001';
+end;
+$$;
+
+comment on function public.reservation_new_pickup_code(uuid) is
+  'C243 : code de retrait de 6 caractères (alphabet sans 0, O, 1, I), unique parmi les réservations actives de l''officine. Interne : appelée par reservation_create.';
+
+revoke all on function public.reservation_new_pickup_code(uuid) from public, anon, authenticated;
+
+-- ============================================================
 -- Réserver
 -- ============================================================
 
@@ -370,7 +419,7 @@ begin
     v_email,
     p_pharmacy_id, v_pharmacy.name, v_pharmacy.address, v_pharmacy.phone,
     now(), now() + interval '24 hours', 'pending', 0,
-    'qr_' || substr(replace(gen_random_uuid()::text, '-', ''), 1, 12),
+    public.reservation_new_pickup_code(p_pharmacy_id),
     nullif(btrim(p_notes), ''),
     v_pending + 1, 5 + v_pending * 3
   )
@@ -672,6 +721,7 @@ grant execute on function public.reservation_pickup_preview(uuid) to authenticat
 
 create or replace function public.reservation_pickup(
   p_reservation_id uuid,
+  p_pickup_code text,
   p_prescription_checked boolean default false,
   p_allow_partial boolean default false,
   p_partial_reason text default null
@@ -694,7 +744,7 @@ declare
   v_partial_reason text := nullif(btrim(p_partial_reason), '');
 begin
   -- Verrou sur la réservation : deux retraits simultanés se sérialisent.
-  select id, patient_id, pharmacy_id, status, pickup_deadline into v_res
+  select id, patient_id, pharmacy_id, status, pickup_deadline, qr_code_token into v_res
     from public.reservations where id = p_reservation_id for update;
   if not found then
     raise exception 'RES: reservation % introuvable', p_reservation_id using errcode = 'P0002';
@@ -708,6 +758,12 @@ begin
   end if;
   if v_res.pickup_deadline < now() then
     raise exception 'RES: reservation expiree (delai de retrait depasse)' using errcode = '22023';
+  end if;
+  -- Code de retrait du patient, saisi ou lu sur son QR : espaces et casse
+  -- ignorés. Sans le bon code, rien n'est remis.
+  if v_res.qr_code_token is null
+     or upper(regexp_replace(coalesce(p_pickup_code, ''), '\s', '', 'g')) <> upper(v_res.qr_code_token) then
+    raise exception 'RES: code de retrait incorrect' using errcode = '22023';
   end if;
 
   for v_item in
@@ -794,11 +850,11 @@ begin
 end;
 $$;
 
-comment on function public.reservation_pickup(uuid, boolean, boolean, text) is
-  'C243 : retrait à l''officine : la réservation devient une vente au comptoir en espèces (pos_create_sale) sur les lots retenus, au prix du jour, dans une seule transaction ; retenue levée et stock sorti une seule fois. Lot rappelé ou périmé : autre lot cherché ; sans remplaçant, refus ou retrait partiel motivé. Réservée au personnel de l''officine ; caisse ouverte exigée (D62).';
+comment on function public.reservation_pickup(uuid, text, boolean, boolean, text) is
+  'C243 : retrait à l''officine : la réservation devient une vente au comptoir en espèces (pos_create_sale) sur les lots retenus, au prix du jour, dans une seule transaction ; retenue levée et stock sorti une seule fois. Lot rappelé ou périmé : autre lot cherché ; sans remplaçant, refus ou retrait partiel motivé. Code de retrait du patient exigé. Réservée au personnel de l''officine ; caisse ouverte exigée (D62).';
 
-revoke all on function public.reservation_pickup(uuid, boolean, boolean, text) from public, anon;
-grant execute on function public.reservation_pickup(uuid, boolean, boolean, text) to authenticated;
+revoke all on function public.reservation_pickup(uuid, text, boolean, boolean, text) from public, anon;
+grant execute on function public.reservation_pickup(uuid, text, boolean, boolean, text) to authenticated;
 
 -- ============================================================
 -- Vente au comptoir : un lot désigné n'est vendable que hors boîtes retenues

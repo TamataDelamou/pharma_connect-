@@ -128,6 +128,11 @@ class ReservationConfirmationScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 8),
+                      // C243 : code de retrait, exigé par l'officine.
+                      Text(
+                        reservation.qrCodeToken ?? '—',
+                        style: context.text.heading3.copyWith(letterSpacing: 4),
+                      ),
                       Text(
                         'Présentez ce QR code en pharmacie',
                         style: context.text.micro,

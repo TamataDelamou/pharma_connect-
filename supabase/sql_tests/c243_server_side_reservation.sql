@@ -121,6 +121,7 @@ $$;
 
 create function pg_temp.rid(p_case text) returns uuid language sql as $$ select id from t_out where c = p_case $$;
 create function pg_temp.msg(p_case text) returns text language sql as $$ select coalesce(msg, '') from t_out where c = p_case $$;
+create function pg_temp.code(p_case text) returns text language sql as $$ select qr_code_token from public.reservations where id = pg_temp.rid(p_case) $$;
 create function pg_temp.qty(p_batch text) returns int language sql as $$ select quantity from public.stock_batches where id = p_batch::uuid $$;
 create function pg_temp.held(p_batch text) returns int language sql as $$ select quantity_reserved from public.stock_batches where id = p_batch::uuid $$;
 create function pg_temp.status(p_case text) returns text language sql as $$ select status from public.reservations where id = pg_temp.rid(p_case) $$;
@@ -150,7 +151,7 @@ select pg_temp.expect('1', 'OK',
   and :dispo1 = 3
   and (select status = 'pending' and patient_id = :'P1'::uuid and total_price = 6000 and patient_name = 'Patient Un'
               and pickup_deadline between now() + interval '23 hours 59 minutes' and now() + interval '24 hours 1 minute'
-              and qr_code_token like 'qr_%'
+              and qr_code_token ~ '^[2-9A-HJ-NP-Z]{6}$'
          from public.reservations where id = pg_temp.rid('1'))
   and (select price_per_unit = 1500 and quantity = 4 from public.reservation_items where reservation_id = pg_temp.rid('1'))
   and (select reserved_quantity from public.stock_items where pharmacy_id = :'KALOUM' and product_id = :'PARA') = 4
@@ -288,17 +289,35 @@ select pg_temp.expect('10c', 'OK', pg_temp.status('1') = 'ready'
 
 -- ==================== 6. Retrait : la réservation devient une vente ====================
 select pg_temp.as_user(:'B'); set local role authenticated;
-select pg_temp.try('11a', format('select public.reservation_pickup(%L)', pg_temp.rid('1')));
+select pg_temp.try('11a', format('select public.reservation_pickup(%L, %L)', pg_temp.rid('1'), pg_temp.code('1')));
 reset role;
 select pg_temp.expect('11a', '22023', pg_temp.msg('11a') like '%ouvrez votre caisse%' and pg_temp.status('1') = 'ready'
   and pg_temp.held(:'L1') = 3 and pg_temp.held(:'L2') = 1 and pg_temp.qty(:'L1') = 3,
   '; retrait sans caisse ouverte : refus, reservation et boites retenues intactes');
 select pg_temp.as_user(:'P1'); set local role authenticated;
-select pg_temp.try('11b', format('select public.reservation_pickup(%L)', pg_temp.rid('1')));
+select pg_temp.try('11b', format('select public.reservation_pickup(%L, %L)', pg_temp.rid('1'), pg_temp.code('1')));
 select pg_temp.try('11c', format('select reservation_item_id from public.reservation_pickup_preview(%L) limit 1', pg_temp.rid('1')));
 reset role;
 select pg_temp.expect('11b', '42501', true, '; retrait par le patient : refuse');
 select pg_temp.expect('11c', '42501', true, '; apercu du retrait par le patient : refuse');
+
+-- Code de retrait exigé : sans le bon code, rien n'est remis.
+select pg_temp.as_user(:'A'); set local role authenticated;
+select pg_temp.try('11d', format('select public.reservation_pickup(%L, %L)', pg_temp.rid('1'), '000000'));
+select pg_temp.try('11e', format('select public.reservation_pickup(%L, %L)', pg_temp.rid('1'), pg_temp.code('4')));
+select pg_temp.try('11f', format('select public.reservation_pickup(%L, null)', pg_temp.rid('1')));
+select pg_temp.try('11g', format('select public.reservation_pickup(%L, %L)', pg_temp.rid('1'), ''));
+reset role;
+select pg_temp.try('11u', format('update public.reservations set qr_code_token = %L where id = %L returning null::uuid', lower(pg_temp.code('1')), pg_temp.rid('4')));
+select pg_temp.expect('11d', '22023', pg_temp.msg('11d') like '%code de retrait incorrect%' and pg_temp.status('1') = 'ready'
+  and pg_temp.held(:'L1') = 3 and pg_temp.held(:'L2') = 1 and pg_temp.qty(:'L1') = 3,
+  '; retrait avec un code faux : refus, reservation, boites retenues et stock intacts');
+select pg_temp.expect('11e', '22023', pg_temp.msg('11e') like '%code de retrait incorrect%' and pg_temp.status('1') = 'ready' and pg_temp.status('4') = 'pending',
+  '; retrait avec le code d''une autre reservation active de la meme officine : refus, les deux reservations intactes');
+select pg_temp.expect('11f', '22023', pg_temp.msg('11f') like '%code de retrait incorrect%', '; retrait sans code : refus');
+select pg_temp.expect('11g', '22023', pg_temp.msg('11g') like '%code de retrait incorrect%', '; retrait avec un code vide : refus');
+select pg_temp.expect('11u', '23505', pg_temp.code('1') <> pg_temp.code('4'),
+  '; un meme code sur deux reservations actives de l''officine : refuse par la base (casse ignoree)');
 
 -- Le prix a changé depuis la réservation : prix du jour au retrait.
 update public.stock_items set unit_price = 1600 where pharmacy_id = :'KALOUM' and product_id = :'PARA';
@@ -307,7 +326,7 @@ select (select count(*) from public.pos_sales where pharmacy_id = :'KALOUM') as 
 select pg_temp.as_user(:'A'); set local role authenticated;
 select reserved_unit_price as prix_reserve, current_unit_price as prix_jour, unavailable_quantity as indispo
   from public.reservation_pickup_preview(pg_temp.rid('1')) \gset
-select pg_temp.try('12', format('select public.reservation_pickup(%L)', pg_temp.rid('1')));
+select pg_temp.try('12', format('select public.reservation_pickup(%L, %L)', pg_temp.rid('1'), pg_temp.code('1')));
 reset role;
 select pg_temp.verdict('12-apercu', :prix_reserve = 1500 and :prix_jour = 1600 and :indispo = 0,
   'apercu du retrait : prix indicatif ' || :prix_reserve || ', prix du jour ' || :prix_jour || ', rien d''indisponible');
@@ -327,7 +346,7 @@ select pg_temp.expect('12', 'OK',
   '; retrait : une vente en especes de 6 400 (prix du jour 1 600 x 4), un ticket, un encaissement en caisse ; stock sorti une seule fois (L1 0, L2 0), retenue a zero ; prix indicatif de la ligne conserve (1 500)');
 
 select pg_temp.as_user(:'A'); set local role authenticated;
-select pg_temp.try('13', format('select public.reservation_pickup(%L)', pg_temp.rid('1')));
+select pg_temp.try('13', format('select public.reservation_pickup(%L, %L)', pg_temp.rid('1'), pg_temp.code('1')));
 select pg_temp.try('13b', format('select public.reservation_cancel(%L, ''Test'')', pg_temp.rid('1')));
 reset role;
 select pg_temp.expect('13', '22023', true, '; second retrait de la meme reservation : refus');
@@ -368,7 +387,7 @@ select pg_temp.expect('15c', 'OK', pg_temp.status('6a') = 'cancelled' and pg_tem
 -- 6b dépasse son échéance ; 6d reste dans les délais.
 update public.reservations set pickup_deadline = now() - interval '1 minute' where id = pg_temp.rid('6b');
 select pg_temp.as_user(:'A'); set local role authenticated;
-select pg_temp.try('16a', format('select public.reservation_pickup(%L)', pg_temp.rid('6b')));
+select pg_temp.try('16a', format('select public.reservation_pickup(%L, %L)', pg_temp.rid('6b'), pg_temp.code('6b')));
 select pg_temp.try('16b', format('select public.reservation_mark_ready(%L)', pg_temp.rid('6b')));
 select pg_temp.try('16c', 'select null::uuid from (select public.reservation_expire_overdue()) x');
 reset role;
@@ -387,6 +406,16 @@ select pg_temp.verdict('17', :expirees = 1 and pg_temp.status('6b') = 'expired' 
   and pg_temp.held(:'I1') = 1
   and (select expired_at is not null from public.reservations where id = pg_temp.rid('6b')),
   'expiration a l''usage par l''officine : ' || :expirees || ' reservation expiree, sa boite liberee (retenue I1 2 -> 1) ; la reservation dans les delais est intacte');
+
+-- Le code d'une réservation expirée n'ouvre plus rien.
+select pg_temp.as_user(:'A'); set local role authenticated;
+select pg_temp.try('17b', format('select public.reservation_pickup(%L, %L)', pg_temp.rid('6b'), pg_temp.code('6b')));
+select pg_temp.try('17c', format('select public.reservation_pickup(%L, %L)', pg_temp.rid('6d'), pg_temp.code('6b')));
+reset role;
+select pg_temp.expect('17b', '22023', pg_temp.msg('17b') like '%ne peut pas etre retiree (statut expired)%' and pg_temp.held(:'I1') = 1,
+  '; reservation expiree, avec son propre code : refus, rien de vendu');
+select pg_temp.expect('17c', '22023', pg_temp.msg('17c') like '%code de retrait incorrect%' and pg_temp.status('6d') = 'pending' and pg_temp.held(:'I1') = 1,
+  '; code d''une reservation expiree presente sur une autre reservation : refus');
 
 -- La tâche planifiée appelle la même fonction, sans utilisateur connecté.
 update public.reservations set pickup_deadline = now() - interval '1 minute' where id = pg_temp.rid('6d');
@@ -421,9 +450,9 @@ reset role;
 select pg_temp.as_user(:'A'); set local role authenticated;
 select count(*) as alertes_officine from public.reservation_unavailable_items(:'KALOUM') where reservation_id = pg_temp.rid('19b') \gset
 select unavailable_quantity as indispo2 from public.reservation_pickup_preview(pg_temp.rid('19b')) \gset
-select pg_temp.try('20a', format('select public.reservation_pickup(%L)', pg_temp.rid('19b')));
-select pg_temp.try('20b', format('select public.reservation_pickup(%L, false, true, null)', pg_temp.rid('19b')));
-select pg_temp.try('20c', format('select public.reservation_pickup(%L, false, true, ''Lot rappele'')', pg_temp.rid('19b')));
+select pg_temp.try('20a', format('select public.reservation_pickup(%L, %L)', pg_temp.rid('19b'), pg_temp.code('19b')));
+select pg_temp.try('20b', format('select public.reservation_pickup(%L, %L, false, true, null)', pg_temp.rid('19b'), pg_temp.code('19b')));
+select pg_temp.try('20c', format('select public.reservation_pickup(%L, %L, false, true, ''Lot rappele'')', pg_temp.rid('19b'), pg_temp.code('19b')));
 reset role;
 select pg_temp.verdict('20', :alertes_patient = 1 and :alertes_officine = 1 and :indispo2 = 2,
   'lot rappele apres la reservation : signale au patient (' || :alertes_patient || ' ligne) et a l''officine (' || :alertes_officine || ' ligne) ; apercu : ' || :indispo2 || ' boites sans remplacant');
@@ -441,7 +470,9 @@ insert into public.stock_batches (id, stock_item_id, batch_number, manufacturing
   from public.stock_items si where si.pharmacy_id = :'KALOUM' and si.product_id = :'DOLI';
 select pg_temp.as_user(:'A'); set local role authenticated;
 select unavailable_quantity as indispo3 from public.reservation_pickup_preview(pg_temp.rid('19b')) \gset
-select pg_temp.try('21', format('select public.reservation_pickup(%L)', pg_temp.rid('19b')));
+-- Code saisi en minuscules avec une espace : accepté.
+select pg_temp.try('21', format('select public.reservation_pickup(%L, %L)', pg_temp.rid('19b'),
+  lower(substr(pg_temp.code('19b'), 1, 3)) || ' ' || lower(substr(pg_temp.code('19b'), 4))));
 reset role;
 select pg_temp.expect('21', 'OK',
   :indispo3 = 0 and pg_temp.status('19b') = 'pickedUp'
@@ -463,7 +494,7 @@ insert into public.recalls (id, reference_number, title, description, severity, 
 insert into public.recall_affected_batches (recall_id, batch_number, product_id, product_name, status)
   values ('c2430000-0000-0000-0000-0000000000c2', 'C243-D1', :'DOLI', 'Doliprane', 'pending');
 select pg_temp.as_user(:'A'); set local role authenticated;
-select pg_temp.try('23', format('select public.reservation_pickup(%L, true, true, ''Lot rappele, patient informe'')', pg_temp.rid('22')));
+select pg_temp.try('23', format('select public.reservation_pickup(%L, %L, true, true, ''Lot rappele, patient informe'')', pg_temp.rid('22'), pg_temp.code('22')));
 reset role;
 select pg_temp.expect('23', 'OK',
   pg_temp.status('22') = 'pickedUp' and pg_temp.held(:'D1') = 0 and pg_temp.qty(:'D1') = 2
@@ -474,16 +505,23 @@ select pg_temp.expect('23', 'OK',
   and (select final_amount from public.pos_sales where id = pg_temp.rid('23')) = 2000
   and (select total_price from public.reservations where id = pg_temp.rid('22')) = 2000,
   '; retrait partiel motive : la ligne du lot rappele est retiree (motif garde), l''autre est vendue (2 000), ordonnance verifiee tracee');
+select pg_temp.verdict('23-montant',
+  (select s.total_amount = 2000 and s.final_amount = 2000 and s.discount_amount = 0 from public.pos_sales s where s.id = pg_temp.rid('23'))
+  and (select sum(total_price) = 2000 and count(*) filter (where product_id = :'DOLI'::uuid) = 0 from public.pos_sale_items where sale_id = pg_temp.rid('23'))
+  and (select amount from public.cash_movements where reference_id = pg_temp.rid('23')::text) = 2000
+  and (select sum(quantity * price_per_unit) from public.reservation_items where reservation_id = pg_temp.rid('22')) = 4400,
+  'retrait partiel : le serveur calcule la vente sur la seule ligne remise (2 000 encaisses en caisse, pas les 4 400 reserves) ; aucune ligne de vente pour le produit non remis');
 
 -- ==================== 10. Droits et réglages ====================
 select pg_temp.verdict('24',
   not has_function_privilege('anon', 'public.reservation_create(uuid, jsonb, text)', 'execute')
   and has_function_privilege('authenticated', 'public.reservation_create(uuid, jsonb, text)', 'execute')
-  and not has_function_privilege('anon', 'public.reservation_pickup(uuid, boolean, boolean, text)', 'execute')
+  and not has_function_privilege('anon', 'public.reservation_pickup(uuid, text, boolean, boolean, text)', 'execute')
   and not has_function_privilege('anon', 'public.reservation_cancel(uuid, text)', 'execute')
   and not has_function_privilege('authenticated', 'public.reservation_hold_stock(uuid, uuid, uuid, integer)', 'execute')
   and not has_function_privilege('authenticated', 'public.reservation_release_holds(uuid, uuid, uuid, text)', 'execute')
-  and not has_function_privilege('authenticated', 'public.reservation_expire_overdue(uuid)', 'execute'),
+  and not has_function_privilege('authenticated', 'public.reservation_expire_overdue(uuid)', 'execute')
+  and not has_function_privilege('authenticated', 'public.reservation_new_pickup_code(uuid)', 'execute'),
   'fonctions de reservation fermees a anon ; retenue, liberation et expiration internes fermees aux clients');
 
 select pg_temp.verdict('25',

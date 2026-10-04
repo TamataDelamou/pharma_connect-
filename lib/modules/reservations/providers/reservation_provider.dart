@@ -301,6 +301,7 @@ class ReservationProvider extends ChangeNotifier {
   /// Rend l'identifiant de la vente, ou `null` en cas de refus ([error]).
   Future<String?> pickUp(
     String id, {
+    required String pickupCode,
     bool prescriptionChecked = false,
     bool allowPartial = false,
     String? partialReason,
@@ -309,6 +310,7 @@ class ReservationProvider extends ChangeNotifier {
     try {
       final saleId = await _service.pickUp(
         id,
+        pickupCode: pickupCode,
         prescriptionChecked: prescriptionChecked,
         allowPartial: allowPartial,
         partialReason: partialReason,
