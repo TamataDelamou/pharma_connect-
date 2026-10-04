@@ -8,6 +8,7 @@
 //   - contraste.txt : textes et icônes dont le contraste mesuré avec le fond
 //     est inférieur à 3:1 ;
 //   - a_verifier/ : capture pleine taille de chaque écran signalé ;
+//   - pleine_taille/ : capture pleine taille de quelques écrans de référence ;
 //   - routes.txt : routes capturées et routes à paramètre non capturées.
 //
 // Les écrans sont montés hors ligne, avec les routes réelles : données vides
@@ -39,6 +40,9 @@ const _columns = 6;
 const _rows = 2;
 const _gap = 16.0;
 const _labelHeight = 44.0;
+
+/// Écrans dont la capture pleine taille est toujours écrite (pleine_taille/).
+const _fullSizeRoutes = {'/scan', '/healthrecord', '/stock', '/payments'};
 
 Future<void> _loadFont(String family, List<String> paths) async {
   final loader = FontLoader(family);
@@ -118,6 +122,7 @@ void main() {
     if (dir.existsSync()) dir.deleteSync(recursive: true);
     dir.createSync(recursive: true);
     Directory('$_outputDir/a_verifier').createSync();
+    Directory('$_outputDir/pleine_taille').createSync();
   });
 
   testWidgets(
@@ -261,6 +266,15 @@ void main() {
             final name = route.replaceAll('/', '_');
             File(
               '$_outputDir/a_verifier/$name.png',
+            ).writeAsBytesSync(png!.buffer.asUint8List());
+          });
+        }
+        if (_fullSizeRoutes.contains(route)) {
+          await tester.runAsync(() async {
+            final png = await image.toByteData(format: ui.ImageByteFormat.png);
+            final name = route.replaceAll('/', '_');
+            File(
+              '$_outputDir/pleine_taille/$name.png',
             ).writeAsBytesSync(png!.buffer.asUint8List());
           });
         }
