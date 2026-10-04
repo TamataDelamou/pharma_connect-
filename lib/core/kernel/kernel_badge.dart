@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../theme/colors.dart';
 import '../theme/spacing.dart';
 import '../theme/typography.dart';
+import '../theme/palette.dart';
 
 class KernelBadge extends StatelessWidget {
   final bool showIcon;
@@ -28,15 +28,15 @@ class KernelBadge extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: compact ? 6 : 10, vertical: 4),
       decoration: BoxDecoration(
-        color: PharmaConnectColors.accentPurple.withValues(alpha: 0.15),
+        color: context.palette.secondary.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(PharmaConnectSpacing.radiusSm),
         border: Border.all(
-          color: PharmaConnectColors.accentPurple.withValues(alpha: 0.3),
+          color: context.palette.secondary.withValues(alpha: 0.3),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: PharmaConnectColors.accentPurple.withValues(alpha: 0.15),
+            color: context.palette.secondary.withValues(alpha: 0.15),
             blurRadius: 12,
             spreadRadius: 0,
           ),
@@ -50,13 +50,13 @@ class KernelBadge extends StatelessWidget {
             if (showLabel) const SizedBox(width: 4),
           ],
           if (showLabel) ...[
-            const Text(
+            Text(
               'Kernel',
               style: TextStyle(
                 fontFamily: 'Inter',
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
-                color: PharmaConnectColors.accentPurple,
+                color: context.palette.secondary,
                 letterSpacing: 0.5,
               ),
             ),

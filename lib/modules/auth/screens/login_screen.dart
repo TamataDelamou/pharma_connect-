@@ -3,14 +3,13 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/buttons/tertiary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../../../core/widgets/inputs/glass_input.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/phone_input_field.dart';
+import '../../../core/theme/palette.dart';
 
 enum LoginMethod { emailCode, emailMagic, phoneWhatsapp, phoneSms }
 
@@ -52,13 +51,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // En-tête
-                  const Row(
+                  Row(
                     children: [
                       Text(
                         '◈',
                         style: TextStyle(
                           fontSize: 28,
-                          color: PharmaConnectColors.accentCyan,
+                          color: context.palette.primary,
                         ),
                       ),
                       SizedBox(width: 8),
@@ -69,7 +68,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             fontFamily: 'Inter',
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
-                            color: PharmaConnectColors.textPrimary,
+                            color: context.palette.textPrimary,
                             letterSpacing: 0.5,
                           ),
                         ),
@@ -78,14 +77,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     ],
                   ),
                   const SizedBox(height: 24),
-                  const Text(
-                    'Connexion',
-                    style: PharmaConnectTypography.heading2,
-                  ),
+                  Text('Connexion', style: context.text.heading2),
                   const SizedBox(height: 8),
-                  const Text(
+                  Text(
                     'Choisissez votre identifiant et le mode de réception',
-                    style: PharmaConnectTypography.body2,
+                    style: context.text.body2,
                   ),
                   const SizedBox(height: 32),
 
@@ -132,10 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     alignment: WrapAlignment.center,
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
-                      const Text(
-                        'Pas encore de compte ?',
-                        style: PharmaConnectTypography.body2,
-                      ),
+                      Text('Pas encore de compte ?', style: context.text.body2),
                       TertiaryButton(
                         label: 'S\'inscrire',
                         onPressed: () => context.go('/register'),
@@ -145,7 +138,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 8),
 
                   // ===== FOOTER KERNEL =====
-                  const Divider(color: Colors.white12, height: 24),
+                  Divider(color: context.palette.veil(0.12), height: 24),
                   Wrap(
                     alignment: WrapAlignment.center,
                     crossAxisAlignment: WrapCrossAlignment.center,
@@ -154,10 +147,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(width: 4),
                       Text(
                         'Authentification sécurisée via GSG Kernel',
-                        style: PharmaConnectTypography.micro.copyWith(
-                          color: PharmaConnectColors.textSecondary.withValues(
-                            alpha: 0.6,
-                          ),
+                        style: context.text.micro.copyWith(
+                          color: context.palette.textFaded(0.6),
                         ),
                       ),
                     ],
@@ -191,12 +182,12 @@ class _LoginScreenState extends State<LoginScreen> {
       onSelected: (selected) {
         if (selected) setState(() => _selectedMethod = method);
       },
-      selectedColor: PharmaConnectColors.accentCyan.withValues(alpha: 0.2),
+      selectedColor: context.palette.primary.withValues(alpha: 0.2),
       backgroundColor: Colors.transparent,
       side: BorderSide(
         color: _selectedMethod == method
-            ? PharmaConnectColors.accentCyan
-            : Colors.white24,
+            ? context.palette.primary
+            : context.palette.veil(0.24),
       ),
     );
   }
@@ -266,25 +257,21 @@ class _LoginScreenState extends State<LoginScreen> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: PharmaConnectColors.accentCyan.withValues(alpha: 0.06),
+        color: context.palette.primary.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: PharmaConnectColors.accentCyan.withValues(alpha: 0.15),
+          color: context.palette.primary.withValues(alpha: 0.15),
         ),
       ),
       child: Row(
         children: [
-          const Icon(
-            Icons.info_outline,
-            color: PharmaConnectColors.accentCyan,
-            size: 16,
-          ),
+          Icon(Icons.info_outline, color: context.palette.primary, size: 16),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               message,
-              style: PharmaConnectTypography.micro.copyWith(
-                color: PharmaConnectColors.textSecondary,
+              style: context.text.micro.copyWith(
+                color: context.palette.textSecondary,
               ),
             ),
           ),
@@ -336,9 +323,9 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Erreur lors de l\'envoi. Vérifiez votre identifiant.'),
-          backgroundColor: PharmaConnectColors.accentRed,
+          backgroundColor: context.palette.danger,
         ),
       );
     }

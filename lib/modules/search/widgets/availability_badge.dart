@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
+import '../../../core/theme/palette.dart';
 
 class AvailabilityBadge extends StatelessWidget {
   final bool isAvailable;
@@ -17,13 +17,13 @@ class AvailabilityBadge extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: isAvailable
-            ? PharmaConnectColors.accentGreen.withValues(alpha: 0.15)
-            : PharmaConnectColors.accentRed.withValues(alpha: 0.15),
+            ? context.palette.success.withValues(alpha: 0.15)
+            : context.palette.danger.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(6),
         border: Border.all(
           color: isAvailable
-              ? PharmaConnectColors.accentGreen.withValues(alpha: 0.3)
-              : PharmaConnectColors.accentRed.withValues(alpha: 0.3),
+              ? context.palette.success.withValues(alpha: 0.3)
+              : context.palette.danger.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -36,8 +36,8 @@ class AvailabilityBadge extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: isAvailable
-                  ? PharmaConnectColors.accentGreen
-                  : PharmaConnectColors.accentRed,
+                  ? context.palette.success
+                  : context.palette.danger,
             ),
           ),
           const SizedBox(width: 6),
@@ -51,8 +51,8 @@ class AvailabilityBadge extends StatelessWidget {
               fontSize: 11,
               fontWeight: FontWeight.w600,
               color: isAvailable
-                  ? PharmaConnectColors.accentGreen
-                  : PharmaConnectColors.accentRed,
+                  ? context.palette.success
+                  : context.palette.danger,
             ),
           ),
         ],

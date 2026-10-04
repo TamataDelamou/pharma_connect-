@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
 import '../../../core/theme/spacing.dart';
-import '../../../core/theme/typography.dart';
 import '../models/dashboard_data.dart';
+import '../../../core/theme/palette.dart';
 
 class AlertCenter extends StatelessWidget {
   final List<AlertItem> alerts;
@@ -14,15 +13,15 @@ class AlertCenter extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Alertes', style: PharmaConnectTypography.heading3),
+        Text('Alertes', style: context.text.heading3),
         const SizedBox(height: 16),
-        ...alerts.map((alert) => _buildAlertItem(alert)),
+        ...alerts.map((alert) => _buildAlertItem(context, alert)),
       ],
     );
   }
 
-  Widget _buildAlertItem(AlertItem alert) {
-    final color = _getSeverityColor(alert.severity);
+  Widget _buildAlertItem(BuildContext context, AlertItem alert) {
+    final color = _getSeverityColor(context.palette, alert.severity);
     final icon = _getSeverityIcon(alert.severity);
 
     return Container(
@@ -40,8 +39,8 @@ class AlertCenter extends StatelessWidget {
           Expanded(
             child: Text(
               alert.message,
-              style: PharmaConnectTypography.body2.copyWith(
-                color: PharmaConnectColors.textPrimary,
+              style: context.text.body2.copyWith(
+                color: context.palette.textPrimary,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -51,16 +50,16 @@ class AlertCenter extends StatelessWidget {
     );
   }
 
-  Color _getSeverityColor(AlertSeverity severity) {
+  Color _getSeverityColor(PharmaConnectPalette p, AlertSeverity severity) {
     switch (severity) {
       case AlertSeverity.info:
-        return PharmaConnectColors.accentCyan;
+        return p.info;
       case AlertSeverity.warning:
-        return PharmaConnectColors.accentOrange;
+        return p.warning;
       case AlertSeverity.danger:
-        return PharmaConnectColors.accentRed;
+        return p.danger;
       case AlertSeverity.success:
-        return PharmaConnectColors.accentGreen;
+        return p.success;
     }
   }
 

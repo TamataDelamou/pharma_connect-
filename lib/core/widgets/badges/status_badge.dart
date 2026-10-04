@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../theme/colors.dart';
 import '../../theme/spacing.dart';
+import '../../theme/palette.dart';
 
 enum StatusBadgeType {
   success, // Vert
@@ -26,13 +26,14 @@ class StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = _getColor();
-    final glow = _getGlow();
+    final palette = context.palette;
+    final color = _getColor(palette);
+    final glow = _getGlow(palette, color);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
+        color: palette.tint(color),
         borderRadius: BorderRadius.circular(PharmaConnectSpacing.radiusSm),
         border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
         boxShadow: glow,
@@ -61,26 +62,26 @@ class StatusBadge extends StatelessWidget {
     );
   }
 
-  Color _getColor() {
+  Color _getColor(PharmaConnectPalette p) {
     switch (status) {
       case StatusBadgeType.success:
-        return PharmaConnectColors.accentGreen;
+        return p.success;
       case StatusBadgeType.warning:
-        return PharmaConnectColors.accentOrange;
+        return p.warning;
       case StatusBadgeType.danger:
-        return PharmaConnectColors.accentRed;
+        return p.danger;
       case StatusBadgeType.info:
-        return PharmaConnectColors.accentCyan;
+        return p.info;
       case StatusBadgeType.kernel:
-        return PharmaConnectColors.accentPurple;
+        return p.secondary;
       case StatusBadgeType.neutral:
-        return PharmaConnectColors.textSecondary;
+        return p.textSecondary;
     }
   }
 
-  List<BoxShadow>? _getGlow() {
-    if (!showGlow) return null;
-    final color = _getColor();
+  List<BoxShadow>? _getGlow(PharmaConnectPalette p, Color color) {
+    // Halo réservé au thème sombre : sur fond clair, il salit le badge.
+    if (!showGlow || !p.isDark) return null;
     return [
       BoxShadow(
         color: color.withValues(alpha: 0.2),

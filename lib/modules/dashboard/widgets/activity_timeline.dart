@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/typography.dart';
 import '../models/dashboard_data.dart';
+import '../../../core/theme/palette.dart';
 
 class ActivityTimeline extends StatelessWidget {
   final List<ActivityItem> activities;
@@ -12,14 +12,15 @@ class ActivityTimeline extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Activité récente', style: PharmaConnectTypography.heading3),
+        Text('Activité récente', style: context.text.heading3),
         const SizedBox(height: 16),
-        ...activities.map((item) => _buildTimelineItem(item)),
+        ...activities.map((item) => _buildTimelineItem(context, item)),
       ],
     );
   }
 
-  Widget _buildTimelineItem(ActivityItem item) {
+  Widget _buildTimelineItem(BuildContext context, ActivityItem item) {
+    final color = context.palette.resolve(item.color);
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -30,14 +31,11 @@ class ActivityTimeline extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: item.color.withValues(alpha: 0.15),
+              color: color.withValues(alpha: 0.15),
               shape: BoxShape.circle,
-              border: Border.all(
-                color: item.color.withValues(alpha: 0.3),
-                width: 1,
-              ),
+              border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
             ),
-            child: Icon(item.icon, color: item.color, size: 18),
+            child: Icon(item.icon, color: color, size: 18),
           ),
           const SizedBox(width: 12),
           // Contenu
@@ -47,13 +45,13 @@ class ActivityTimeline extends StatelessWidget {
               children: [
                 Text(
                   item.title,
-                  style: PharmaConnectTypography.body1.copyWith(
+                  style: context.text.body1.copyWith(
                     fontWeight: FontWeight.w500,
                   ),
                 ),
                 Text(
                   '${item.subtitle} • ${item.timeAgo}',
-                  style: PharmaConnectTypography.body2,
+                  style: context.text.body2,
                 ),
               ],
             ),

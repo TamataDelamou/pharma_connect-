@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../theme/typography.dart';
+import '../../theme/palette.dart';
 
 /// C233 : vrai en largeur téléphone (même seuil que l'échelle de texte).
 bool isCompactWidth(BuildContext context) =>
@@ -19,13 +20,13 @@ EdgeInsets screenPadding(BuildContext context, {double wide = 32}) =>
 /// presque plus de place au titre à 360 px.
 class ResponsiveHeader extends StatelessWidget {
   final String title;
-  final TextStyle style;
+  final TextStyle? style;
   final List<Widget> actions;
 
   const ResponsiveHeader({
     super.key,
     required this.title,
-    this.style = PharmaConnectTypography.heading2,
+    this.style,
     this.actions = const [],
   });
 
@@ -33,7 +34,7 @@ class ResponsiveHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final titleText = Text(
       title,
-      style: style,
+      style: style ?? context.text.heading2,
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
     );

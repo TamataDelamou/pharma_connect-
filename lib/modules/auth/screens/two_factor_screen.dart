@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../../../core/widgets/inputs/glass_input.dart';
 import '../providers/auth_provider.dart';
+import '../../../core/theme/palette.dart';
 
 class TwoFactorScreen extends StatefulWidget {
   final String userId;
@@ -73,13 +72,13 @@ class _TwoFactorScreenState extends State<TwoFactorScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(
+                  Row(
                     children: [
                       Text(
                         '◈',
                         style: TextStyle(
                           fontSize: 28,
-                          color: PharmaConnectColors.accentCyan,
+                          color: context.palette.primary,
                         ),
                       ),
                       SizedBox(width: 8),
@@ -90,7 +89,7 @@ class _TwoFactorScreenState extends State<TwoFactorScreen> {
                             fontFamily: 'Inter',
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
-                            color: PharmaConnectColors.textPrimary,
+                            color: context.palette.textPrimary,
                             letterSpacing: 0.5,
                           ),
                         ),
@@ -99,14 +98,14 @@ class _TwoFactorScreenState extends State<TwoFactorScreen> {
                     ],
                   ),
                   const SizedBox(height: 24),
-                  const Text(
+                  Text(
                     'Authentification à deux facteurs',
-                    style: PharmaConnectTypography.heading2,
+                    style: context.text.heading2,
                   ),
                   const SizedBox(height: 8),
-                  const Text(
+                  Text(
                     'Un code de sécurité a été envoyé sur votre téléphone',
-                    style: PharmaConnectTypography.body2,
+                    style: context.text.body2,
                   ),
                   const SizedBox(height: 32),
                   GlassInput(
@@ -124,7 +123,7 @@ class _TwoFactorScreenState extends State<TwoFactorScreen> {
                         _isResendEnabled
                             ? 'Vous n\'avez pas reçu le code ?'
                             : 'Renvoyer dans $_resendCountdown s',
-                        style: PharmaConnectTypography.body2,
+                        style: context.text.body2,
                       ),
                       TextButton(
                         onPressed: _isResendEnabled
@@ -144,9 +143,9 @@ class _TwoFactorScreenState extends State<TwoFactorScreen> {
                     onPressed: () async {
                       if (_codeController.text.length != 6) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
+                          SnackBar(
                             content: Text('Code invalide'),
-                            backgroundColor: PharmaConnectColors.accentRed,
+                            backgroundColor: context.palette.danger,
                           ),
                         );
                         return;
@@ -167,13 +166,13 @@ class _TwoFactorScreenState extends State<TwoFactorScreen> {
                       // toute façon invoqué par aucun flux actuel (voir le
                       // correctif du redirect dans app_router.dart).
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
+                        SnackBar(
                           content: Text(
                             'Authentification à deux facteurs temporairement '
                             'indisponible (fournisseur SMS/email non '
                             'configuré). Contactez le support.',
                           ),
-                          backgroundColor: PharmaConnectColors.accentOrange,
+                          backgroundColor: context.palette.warning,
                         ),
                       );
                     },

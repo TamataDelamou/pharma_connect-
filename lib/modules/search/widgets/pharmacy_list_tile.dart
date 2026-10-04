@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
 import '../../../core/theme/spacing.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../models/availability_result.dart';
+import '../../../core/theme/palette.dart';
 
 class PharmacyListTile extends StatelessWidget {
   final PharmacyStock stock;
@@ -22,12 +21,12 @@ class PharmacyListTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.04),
+          color: context.palette.surfaceMuted,
           borderRadius: BorderRadius.circular(PharmaConnectSpacing.radiusMd),
           border: Border.all(
             color: isAvailable
-                ? PharmaConnectColors.accentGreen.withValues(alpha: 0.2)
-                : Colors.white.withValues(alpha: 0.06),
+                ? context.palette.success.withValues(alpha: 0.2)
+                : context.palette.surface,
           ),
         ),
         child: Row(
@@ -38,8 +37,8 @@ class PharmacyListTile extends StatelessWidget {
               height: 40,
               decoration: BoxDecoration(
                 color: isAvailable
-                    ? PharmaConnectColors.accentGreen
-                    : Colors.grey,
+                    ? context.palette.success
+                    : context.palette.textMuted,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -51,7 +50,7 @@ class PharmacyListTile extends StatelessWidget {
                 children: [
                   Text(
                     pharmacy.name,
-                    style: PharmaConnectTypography.body1.copyWith(
+                    style: context.text.body1.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                     maxLines: 1,
@@ -59,7 +58,7 @@ class PharmacyListTile extends StatelessWidget {
                   ),
                   Text(
                     pharmacy.address,
-                    style: PharmaConnectTypography.body2,
+                    style: context.text.body2,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -70,32 +69,32 @@ class PharmacyListTile extends StatelessWidget {
                         Container(
                           width: 6,
                           height: 6,
-                          decoration: const BoxDecoration(
+                          decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: PharmaConnectColors.accentGreen,
+                            color: context.palette.success,
                           ),
                         ),
                         const SizedBox(width: 4),
                         Text(
                           'Ouvert',
-                          style: PharmaConnectTypography.micro.copyWith(
-                            color: PharmaConnectColors.accentGreen,
+                          style: context.text.micro.copyWith(
+                            color: context.palette.success,
                           ),
                         ),
                       ] else ...[
                         Container(
                           width: 6,
                           height: 6,
-                          decoration: const BoxDecoration(
+                          decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: PharmaConnectColors.accentRed,
+                            color: context.palette.danger,
                           ),
                         ),
                         const SizedBox(width: 4),
                         Text(
                           'Fermé',
-                          style: PharmaConnectTypography.micro.copyWith(
-                            color: PharmaConnectColors.accentRed,
+                          style: context.text.micro.copyWith(
+                            color: context.palette.danger,
                           ),
                         ),
                       ],
@@ -107,17 +106,17 @@ class PharmacyListTile extends StatelessWidget {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: PharmaConnectColors.accentCyan.withValues(
+                            color: context.palette.primary.withValues(
                               alpha: 0.15,
                             ),
                             borderRadius: BorderRadius.circular(4),
                           ),
-                          child: const Text(
+                          child: Text(
                             '24h/24',
                             style: TextStyle(
                               fontSize: 9,
                               fontWeight: FontWeight.w600,
-                              color: PharmaConnectColors.accentCyan,
+                              color: context.palette.primary,
                             ),
                           ),
                         ),
@@ -130,16 +129,17 @@ class PharmacyListTile extends StatelessWidget {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: PharmaConnectColors.accentOrange
-                                .withValues(alpha: 0.15),
+                            color: context.palette.warning.withValues(
+                              alpha: 0.15,
+                            ),
                             borderRadius: BorderRadius.circular(4),
                           ),
-                          child: const Text(
+                          child: Text(
                             'Garde',
                             style: TextStyle(
                               fontSize: 9,
                               fontWeight: FontWeight.w600,
-                              color: PharmaConnectColors.accentOrange,
+                              color: context.palette.warning,
                             ),
                           ),
                         ),
@@ -148,7 +148,7 @@ class PharmacyListTile extends StatelessWidget {
                         const SizedBox(width: 8),
                         Text(
                           pharmacy.distanceFormatted,
-                          style: PharmaConnectTypography.micro,
+                          style: context.text.micro,
                         ),
                       ],
                     ],
@@ -164,9 +164,9 @@ class PharmacyListTile extends StatelessWidget {
                 if (isAvailable) ...[
                   Text(
                     CurrencyFormatter.format(stock.price),
-                    style: PharmaConnectTypography.body1.copyWith(
+                    style: context.text.body1.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: PharmaConnectColors.accentCyan,
+                      color: context.palette.primary,
                     ),
                   ),
                   // RG-REC-02 (audit Module 2, 29/08/2026) : « le prix
@@ -175,8 +175,8 @@ class PharmacyListTile extends StatelessWidget {
                   // — le prix apparaissait comme définitif.
                   Text(
                     'Prix indicatif',
-                    style: PharmaConnectTypography.micro.copyWith(
-                      color: PharmaConnectColors.textSecondary,
+                    style: context.text.micro.copyWith(
+                      color: context.palette.textSecondary,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -205,17 +205,15 @@ class PharmacyListTile extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: PharmaConnectColors.accentRed.withValues(
-                        alpha: 0.15,
-                      ),
+                      color: context.palette.danger.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: const Text(
+                    child: Text(
                       'Rupture',
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: PharmaConnectColors.accentRed,
+                        color: context.palette.danger,
                       ),
                     ),
                   ),

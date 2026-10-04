@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../../../shared/models/product.dart';
+import '../../../core/theme/palette.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -30,12 +29,12 @@ class ProductCard extends StatelessWidget {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: PharmaConnectColors.accentCyan.withValues(alpha: 0.1),
+              color: context.palette.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.medication,
-              color: PharmaConnectColors.accentCyan,
+              color: context.palette.primary,
               size: 28,
             ),
           ),
@@ -43,9 +42,7 @@ class ProductCard extends StatelessWidget {
           // Nom
           Text(
             product.name,
-            style: PharmaConnectTypography.body1.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+            style: context.text.body1.copyWith(fontWeight: FontWeight.w600),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
@@ -53,7 +50,7 @@ class ProductCard extends StatelessWidget {
           // DCI
           Text(
             product.genericName,
-            style: PharmaConnectTypography.body2,
+            style: context.text.body2,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -61,7 +58,7 @@ class ProductCard extends StatelessWidget {
           // Dosage + forme
           Text(
             '${product.dosage} • ${product.form}',
-            style: PharmaConnectTypography.micro,
+            style: context.text.micro,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -72,11 +69,11 @@ class ProductCard extends StatelessWidget {
             runSpacing: 4,
             children: [
               if (product.isGeneric)
-                _buildBadge('Générique', PharmaConnectColors.accentPurple),
+                _buildBadge('Générique', context.palette.secondary),
               if (product.isPrescriptionRequired)
-                _buildBadge('Ordonnance', PharmaConnectColors.accentOrange),
+                _buildBadge('Ordonnance', context.palette.warning),
               if (!product.isPrescriptionRequired)
-                _buildBadge('Libre', PharmaConnectColors.accentGreen),
+                _buildBadge('Libre', context.palette.success),
             ],
           ),
           if (showStockIndicator) ...[
@@ -85,7 +82,7 @@ class ProductCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: PharmaConnectColors.accentGreen.withValues(alpha: 0.15),
+                color: context.palette.success.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Row(
@@ -94,16 +91,16 @@ class ProductCard extends StatelessWidget {
                   Container(
                     width: 6,
                     height: 6,
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: PharmaConnectColors.accentGreen,
+                      color: context.palette.success,
                     ),
                   ),
                   const SizedBox(width: 4),
                   Text(
                     'Disponible en pharmacie',
-                    style: PharmaConnectTypography.micro.copyWith(
-                      color: PharmaConnectColors.accentGreen,
+                    style: context.text.micro.copyWith(
+                      color: context.palette.success,
                     ),
                   ),
                 ],

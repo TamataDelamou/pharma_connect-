@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../core/theme/colors.dart';
 import '../../../core/theme/spacing.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/utils/validators.dart';
 import '../models/phone_country.dart';
+import '../../../core/theme/palette.dart';
 
 /// Champ de saisie téléphone séparant l'indicatif pays du numéro local.
 ///
@@ -62,13 +61,13 @@ class _PhoneInputFieldState extends State<PhoneInputField> {
   @override
   Widget build(BuildContext context) {
     final borderColor = widget.isError
-        ? PharmaConnectColors.accentRed
-        : Colors.white.withValues(alpha: 0.10);
+        ? context.palette.danger
+        : context.palette.border;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Numéro de téléphone', style: PharmaConnectTypography.label),
+        Text('Numéro de téléphone', style: context.text.label),
         const SizedBox(height: 6),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -82,9 +81,7 @@ class _PhoneInputFieldState extends State<PhoneInputField> {
           const SizedBox(height: 4),
           Text(
             widget.errorText!,
-            style: PharmaConnectTypography.body2.copyWith(
-              color: PharmaConnectColors.accentRed,
-            ),
+            style: context.text.body2.copyWith(color: context.palette.danger),
           ),
         ],
       ],
@@ -96,20 +93,20 @@ class _PhoneInputFieldState extends State<PhoneInputField> {
       height: 52,
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.06),
+        color: context.palette.surface,
         borderRadius: BorderRadius.circular(PharmaConnectSpacing.radiusMd),
         border: Border.all(color: borderColor),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<PhoneCountry>(
           value: _selectedCountry,
-          dropdownColor: PharmaConnectColors.primaryDeep,
-          icon: const Icon(
+          dropdownColor: context.palette.background,
+          icon: Icon(
             Icons.expand_more,
-            color: PharmaConnectColors.textSecondary,
+            color: context.palette.textSecondary,
             size: 18,
           ),
-          style: PharmaConnectTypography.body1,
+          style: context.text.body1,
           items: PhoneCountry.supported.map((country) {
             return DropdownMenuItem(
               value: country,
@@ -137,16 +134,16 @@ class _PhoneInputFieldState extends State<PhoneInputField> {
         FilteringTextInputFormatter.digitsOnly,
         LengthLimitingTextInputFormatter(_selectedCountry.localDigits + 1),
       ],
-      style: PharmaConnectTypography.body1,
+      style: context.text.body1,
       onChanged: (_) => _emitChange(),
       decoration: InputDecoration(
         counterText: '',
         hintText: '6XXXXXXXX (${_selectedCountry.localDigits} chiffres)',
-        hintStyle: PharmaConnectTypography.body2.copyWith(
-          color: PharmaConnectColors.textSecondary.withValues(alpha: 0.5),
+        hintStyle: context.text.body2.copyWith(
+          color: context.palette.textHint,
         ),
         filled: true,
-        fillColor: Colors.white.withValues(alpha: 0.06),
+        fillColor: context.palette.surface,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 14,
@@ -163,8 +160,8 @@ class _PhoneInputFieldState extends State<PhoneInputField> {
           borderRadius: BorderRadius.circular(PharmaConnectSpacing.radiusMd),
           borderSide: BorderSide(
             color: widget.isError
-                ? PharmaConnectColors.accentRed
-                : PharmaConnectColors.accentCyan,
+                ? context.palette.danger
+                : context.palette.primary,
             width: 2,
           ),
         ),

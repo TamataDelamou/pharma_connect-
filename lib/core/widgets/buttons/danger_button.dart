@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../theme/colors.dart';
 import '../../theme/spacing.dart';
+import '../../theme/palette.dart';
 
 class DangerButton extends StatelessWidget {
   final String label;
@@ -31,12 +31,12 @@ class DangerButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: isInteractive ? onPressed : null,
         style: ElevatedButton.styleFrom(
-          backgroundColor: PharmaConnectColors.accentRed,
-          foregroundColor: PharmaConnectColors.textPrimary,
-          disabledBackgroundColor: PharmaConnectColors.accentRed.withValues(
+          backgroundColor: context.palette.danger,
+          foregroundColor: context.palette.onDanger,
+          disabledBackgroundColor: context.palette.danger.withValues(
             alpha: 0.3,
           ),
-          disabledForegroundColor: PharmaConnectColors.textSecondary,
+          disabledForegroundColor: context.palette.textSecondary,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(PharmaConnectSpacing.radiusMd),
           ),
@@ -46,13 +46,13 @@ class DangerButton extends StatelessWidget {
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 200),
           child: isLoading
-              ? const SizedBox(
+              ? SizedBox(
                   height: 24,
                   width: 24,
                   child: CircularProgressIndicator(
                     strokeWidth: 2.5,
                     valueColor: AlwaysStoppedAnimation<Color>(
-                      PharmaConnectColors.textPrimary,
+                      context.palette.textPrimary,
                     ),
                   ),
                 )

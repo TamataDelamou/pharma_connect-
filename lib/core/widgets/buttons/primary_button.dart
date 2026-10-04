@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../theme/colors.dart';
 import '../../theme/spacing.dart';
+import '../../theme/palette.dart';
 
 class PrimaryButton extends StatelessWidget {
   final String label;
@@ -42,12 +42,12 @@ class PrimaryButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: isInteractive ? onPressed : null,
         style: ElevatedButton.styleFrom(
-          backgroundColor: PharmaConnectColors.accentCyan,
-          foregroundColor: PharmaConnectColors.textOnAccent,
-          disabledBackgroundColor: PharmaConnectColors.accentCyan.withValues(
+          backgroundColor: context.palette.primary,
+          foregroundColor: context.palette.onPrimary,
+          disabledBackgroundColor: context.palette.primary.withValues(
             alpha: 0.3,
           ),
-          disabledForegroundColor: PharmaConnectColors.textSecondary,
+          disabledForegroundColor: context.palette.textSecondary,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(PharmaConnectSpacing.radiusMd),
           ),
@@ -57,13 +57,13 @@ class PrimaryButton extends StatelessWidget {
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 200),
           child: isLoading
-              ? const SizedBox(
+              ? SizedBox(
                   height: 24,
                   width: 24,
                   child: CircularProgressIndicator(
                     strokeWidth: 2.5,
                     valueColor: AlwaysStoppedAnimation<Color>(
-                      PharmaConnectColors.textOnAccent,
+                      context.palette.onPrimary,
                     ),
                   ),
                 )

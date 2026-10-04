@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../theme/colors.dart';
-import '../../theme/glass.dart';
+import '../../theme/palette.dart';
 
 class GlassCard extends StatelessWidget {
   final Widget child;
@@ -26,6 +25,7 @@ class GlassCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isInteractive = onTap != null;
+    final palette = context.palette;
 
     return MouseRegion(
       cursor: isInteractive ? SystemMouseCursors.click : MouseCursor.defer,
@@ -38,10 +38,13 @@ class GlassCard extends StatelessWidget {
               ? (Matrix4.identity()..translateByDouble(0, -2, 0, 0))
               : Matrix4.identity(),
           decoration: glow
-              ? (glowColor == PharmaConnectColors.accentPurple
-                  ? PharmaConnectGlass.glassGlowPurple
-                  : PharmaConnectGlass.glassGlowCyan)
-              : PharmaConnectGlass.glassPrimary,
+              ? palette.cardGlow(
+                  glowColor != null &&
+                          palette.resolve(glowColor!) == palette.secondary
+                      ? palette.secondary
+                      : palette.primary,
+                )
+              : palette.card,
           padding: padding,
           child: child,
         ),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../core/theme/colors.dart';
 import '../providers/search_provider.dart';
+import '../../../core/theme/palette.dart';
 
 class FilterChipsWidget extends StatelessWidget {
   const FilterChipsWidget({super.key});
@@ -15,16 +15,19 @@ class FilterChipsWidget extends StatelessWidget {
       runSpacing: 8,
       children: [
         _buildChip(
+          context,
           label: 'Disponible',
           selected: provider.showOnlyAvailable,
           onSelected: (_) => provider.toggleFilterAvailable(),
         ),
         _buildChip(
+          context,
           label: 'Générique',
           selected: provider.showOnlyGeneric,
           onSelected: (_) => provider.toggleFilterGeneric(),
         ),
         _buildChip(
+          context,
           label: 'Proche',
           selected: provider.showOnlyNearby,
           onSelected: (_) => provider.toggleFilterNearby(),
@@ -37,7 +40,8 @@ class FilterChipsWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildChip({
+  Widget _buildChip(
+    BuildContext context, {
     required String label,
     required bool selected,
     required Function(bool) onSelected,
@@ -46,10 +50,10 @@ class FilterChipsWidget extends StatelessWidget {
       label: Text(label),
       selected: selected,
       onSelected: onSelected,
-      selectedColor: PharmaConnectColors.accentCyan.withValues(alpha: 0.2),
+      selectedColor: context.palette.primary.withValues(alpha: 0.2),
       backgroundColor: Colors.transparent,
       side: BorderSide(
-        color: selected ? PharmaConnectColors.accentCyan : Colors.white24,
+        color: selected ? context.palette.primary : context.palette.veil(0.24),
       ),
     );
   }
@@ -61,7 +65,7 @@ class FilterChipsWidget extends StatelessWidget {
         context.read<SearchProvider>().clearFilters();
       },
       backgroundColor: Colors.transparent,
-      side: const BorderSide(color: Colors.white24),
+      side: BorderSide(color: context.palette.veil(0.24)),
     );
   }
 }

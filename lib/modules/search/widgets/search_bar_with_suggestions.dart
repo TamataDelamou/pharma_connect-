@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/inputs/glass_input.dart';
 import '../models/search_suggestion.dart';
+import '../../../core/theme/palette.dart';
 
 class SearchBarWithSuggestions extends StatelessWidget {
   final TextEditingController controller;
@@ -53,12 +52,9 @@ class SearchBarWithSuggestions extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.04),
+              color: context.palette.surfaceMuted,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.06),
-                width: 1,
-              ),
+              border: Border.all(color: context.palette.borderSubtle, width: 1),
             ),
             child: Column(
               children: [
@@ -69,15 +65,9 @@ class SearchBarWithSuggestions extends StatelessWidget {
                       suggestion.icon,
                       style: const TextStyle(fontSize: 20),
                     ),
-                    title: Text(
-                      suggestion.label,
-                      style: PharmaConnectTypography.body1,
-                    ),
+                    title: Text(suggestion.label, style: context.text.body1),
                     subtitle: suggestion.subtitle != null
-                        ? Text(
-                            suggestion.subtitle!,
-                            style: PharmaConnectTypography.micro,
-                          )
+                        ? Text(suggestion.subtitle!, style: context.text.micro)
                         : null,
                     onTap: () => onSuggestionSelected(suggestion),
                   ),
@@ -94,14 +84,14 @@ class SearchBarWithSuggestions extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             child: Row(
               children: [
-                const Text('📋 Récentes', style: PharmaConnectTypography.label),
+                Text('📋 Récentes', style: context.text.label),
                 const Spacer(),
                 TextButton(
                   onPressed: onClearHistory,
-                  child: const Text(
+                  child: Text(
                     'Effacer',
                     style: TextStyle(
-                      color: PharmaConnectColors.textSecondary,
+                      color: context.palette.textSecondary,
                       fontSize: 12,
                     ),
                   ),
@@ -114,12 +104,12 @@ class SearchBarWithSuggestions extends StatelessWidget {
               .map(
                 (term) => ListTile(
                   dense: true,
-                  leading: const Icon(
+                  leading: Icon(
                     Icons.history,
                     size: 16,
-                    color: PharmaConnectColors.textSecondary,
+                    color: context.palette.textSecondary,
                   ),
-                  title: Text(term, style: PharmaConnectTypography.body2),
+                  title: Text(term, style: context.text.body2),
                   onTap: () => onHistoryItemSelected(term),
                 ),
               ),

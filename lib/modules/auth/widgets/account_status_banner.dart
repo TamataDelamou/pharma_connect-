@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../pharmacy_staff/widgets/pending_invitations_card.dart';
 import '../models/account_status.dart';
 import '../models/user_role.dart';
 import '../providers/auth_provider.dart';
+import '../../../core/theme/palette.dart';
 
 /// C213 / D64 : bandeau d'état du compte en tête du tableau de bord.
 /// Tant que le rôle déclaré n'est pas vérifié, le compte utilise
@@ -46,7 +45,7 @@ class _AccountStatusBannerState extends State<AccountStatusBanner> {
     if (status.state == AccountState.patient) {
       if (status.rejectedRole == null) return const SizedBox.shrink();
       return _frame(
-        color: PharmaConnectColors.accentOrange,
+        color: context.palette.warning,
         icon: Icons.info_outline,
         title:
             'Votre demande de compte ${_roleLabel(status.rejectedRole!)} '
@@ -66,7 +65,7 @@ class _AccountStatusBannerState extends State<AccountStatusBanner> {
       case AccountState.noPharmacy:
       case AccountState.pharmacyApplicationRejected:
         return _frame(
-          color: PharmaConnectColors.accentCyan,
+          color: context.palette.primary,
           icon: Icons.local_pharmacy,
           title: status.state == AccountState.noPharmacy
               ? 'Votre compte pharmacien n\'est rattaché à aucune officine'
@@ -85,8 +84,8 @@ class _AccountStatusBannerState extends State<AccountStatusBanner> {
                 icon: const Icon(Icons.add_business),
                 label: const Text('Inscrire mon officine'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: PharmaConnectColors.accentCyan,
-                  foregroundColor: PharmaConnectColors.textOnAccent,
+                  backgroundColor: context.palette.primary,
+                  foregroundColor: context.palette.onPrimary,
                 ),
               ),
             ),
@@ -95,7 +94,7 @@ class _AccountStatusBannerState extends State<AccountStatusBanner> {
         );
       case AccountState.pharmacyApplicationPending:
         return _frame(
-          color: PharmaConnectColors.accentOrange,
+          color: context.palette.warning,
           icon: Icons.hourglass_top,
           title:
               'Candidature de « ${status.applicationName ?? 'votre officine'} » '
@@ -112,7 +111,7 @@ class _AccountStatusBannerState extends State<AccountStatusBanner> {
         );
       case AccountState.pharmacyInactive:
         return _frame(
-          color: PharmaConnectColors.accentRed,
+          color: context.palette.danger,
           icon: Icons.block,
           title:
               'L\'officine « ${status.pharmacyName ?? 'votre officine'} » '
@@ -125,7 +124,7 @@ class _AccountStatusBannerState extends State<AccountStatusBanner> {
         );
       case AccountState.professionalProfileMissing:
         return _frame(
-          color: PharmaConnectColors.accentOrange,
+          color: context.palette.warning,
           icon: Icons.badge,
           title: 'Votre fiche professionnelle n\'est pas encore enregistrée',
           message:
@@ -138,7 +137,7 @@ class _AccountStatusBannerState extends State<AccountStatusBanner> {
         );
       case AccountState.professionalRejected:
         return _frame(
-          color: PharmaConnectColors.accentRed,
+          color: context.palette.danger,
           icon: Icons.cancel_outlined,
           title: 'La vérification de votre fiche professionnelle a échoué',
           message: [
@@ -155,7 +154,7 @@ class _AccountStatusBannerState extends State<AccountStatusBanner> {
       case AccountState.verified:
       case AccountState.unknown:
         return _frame(
-          color: PharmaConnectColors.accentOrange,
+          color: context.palette.warning,
           icon: Icons.hourglass_top,
           title: 'Compte ${_roleLabel(status.role)} en attente de vérification',
           message:
@@ -176,8 +175,8 @@ class _AccountStatusBannerState extends State<AccountStatusBanner> {
         icon: const Icon(Icons.badge),
         label: Text(label),
         style: ElevatedButton.styleFrom(
-          backgroundColor: PharmaConnectColors.accentCyan,
-          foregroundColor: PharmaConnectColors.textOnAccent,
+          backgroundColor: context.palette.primary,
+          foregroundColor: context.palette.onPrimary,
         ),
       ),
     );
@@ -212,9 +211,9 @@ class _AccountStatusBannerState extends State<AccountStatusBanner> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: PharmaConnectTypography.subtitle1),
+                    Text(title, style: context.text.subtitle1),
                     const SizedBox(height: 4),
-                    Text(message, style: PharmaConnectTypography.body2),
+                    Text(message, style: context.text.body2),
                   ],
                 ),
               ),

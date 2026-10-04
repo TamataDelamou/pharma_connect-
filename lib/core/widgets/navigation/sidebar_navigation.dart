@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../kernel/kernel_connection_indicator.dart';
 import '../../kernel/kernel_status.dart';
-import '../../theme/colors.dart';
-import '../../theme/glass.dart';
 import '../../theme/spacing.dart';
+import '../../theme/palette.dart';
 
 class SidebarNavigationItem {
   final String label;
@@ -85,11 +84,13 @@ class _SidebarNavigationState extends State<SidebarNavigation>
       builder: (context, child) {
         return Container(
           width: _widthAnimation.value,
-          decoration: PharmaConnectGlass.glassDark.copyWith(
+          decoration: context.palette.cardRaised.copyWith(
             borderRadius: BorderRadius.circular(0),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.3),
+                color: context.palette.isDark
+                    ? Colors.black.withValues(alpha: 0.3)
+                    : context.palette.shadow,
                 blurRadius: 20,
                 offset: const Offset(0, 0),
               ),
@@ -105,28 +106,28 @@ class _SidebarNavigationState extends State<SidebarNavigation>
                 ),
                 child: Row(
                   children: [
-                    const Flexible(
+                    Flexible(
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
                         child: Text(
                           '◈',
                           style: TextStyle(
                             fontSize: 28,
-                            color: PharmaConnectColors.accentCyan,
+                            color: context.palette.primary,
                           ),
                         ),
                       ),
                     ),
                     if (widget.expanded) ...[
                       const SizedBox(width: 8),
-                      const Flexible(
+                      Flexible(
                         child: Text(
                           'PHARMACONNECT',
                           style: TextStyle(
                             fontFamily: 'Inter',
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
-                            color: PharmaConnectColors.textPrimary,
+                            color: context.palette.textPrimary,
                             letterSpacing: 0.5,
                           ),
                           overflow: TextOverflow.ellipsis,
@@ -140,7 +141,7 @@ class _SidebarNavigationState extends State<SidebarNavigation>
                           widget.expanded
                               ? Icons.chevron_left
                               : Icons.chevron_right,
-                          color: PharmaConnectColors.textSecondary,
+                          color: context.palette.textSecondary,
                           size: 20,
                         ),
                         onPressed: widget.onToggleExpand,
@@ -152,7 +153,7 @@ class _SidebarNavigationState extends State<SidebarNavigation>
                 ),
               ),
 
-              const Divider(color: Colors.white12, height: 1),
+              Divider(color: context.palette.veil(0.12), height: 1),
 
               // ==================== ITEMS ====================
               Expanded(
@@ -175,7 +176,7 @@ class _SidebarNavigationState extends State<SidebarNavigation>
 
               // ==================== DÉCONNEXION (C231) ====================
               if (widget.onLogout != null) ...[
-                const Divider(color: Colors.white12, height: 1),
+                Divider(color: context.palette.veil(0.12), height: 1),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: _SidebarItem(
@@ -272,25 +273,20 @@ class _SidebarItemState extends State<_SidebarItem> {
           margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
           decoration: BoxDecoration(
             color: widget.isActive
-                ? PharmaConnectColors.accentCyan.withValues(alpha: 0.10)
+                ? context.palette.primary.withValues(alpha: 0.10)
                 : (_isHovered
-                      ? Colors.white.withValues(alpha: 0.04)
+                      ? context.palette.surfaceMuted
                       : Colors.transparent),
             borderRadius: BorderRadius.circular(PharmaConnectSpacing.radiusMd),
             border: widget.isActive
-                ? const Border(
-                    left: BorderSide(
-                      color: PharmaConnectColors.accentCyan,
-                      width: 3,
-                    ),
+                ? Border(
+                    left: BorderSide(color: context.palette.primary, width: 3),
                   )
                 : null,
             boxShadow: widget.isActive
                 ? [
                     BoxShadow(
-                      color: PharmaConnectColors.accentCyan.withValues(
-                        alpha: 0.15,
-                      ),
+                      color: context.palette.primary.withValues(alpha: 0.15),
                       blurRadius: 16,
                       spreadRadius: 0,
                     ),
@@ -305,10 +301,10 @@ class _SidebarItemState extends State<_SidebarItem> {
                   child: Icon(
                     widget.item.icon,
                     color: widget.isActive
-                        ? PharmaConnectColors.accentCyan
+                        ? context.palette.primary
                         : (_isHovered
-                              ? PharmaConnectColors.textPrimary
-                              : PharmaConnectColors.textSecondary),
+                              ? context.palette.textPrimary
+                              : context.palette.textSecondary),
                     size: 22,
                   ),
                 ),
@@ -326,10 +322,10 @@ class _SidebarItemState extends State<_SidebarItem> {
                           ? FontWeight.w600
                           : FontWeight.w400,
                       color: widget.isActive
-                          ? PharmaConnectColors.textPrimary
+                          ? context.palette.textPrimary
                           : (_isHovered
-                                ? PharmaConnectColors.textPrimary
-                                : PharmaConnectColors.textSecondary),
+                                ? context.palette.textPrimary
+                                : context.palette.textSecondary),
                     ),
                   ),
                 ),
@@ -339,12 +335,10 @@ class _SidebarItemState extends State<_SidebarItem> {
                     height: 6,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: PharmaConnectColors.accentCyan,
+                      color: context.palette.primary,
                       boxShadow: [
                         BoxShadow(
-                          color: PharmaConnectColors.accentCyan.withValues(
-                            alpha: 0.4,
-                          ),
+                          color: context.palette.primary.withValues(alpha: 0.4),
                           blurRadius: 8,
                           spreadRadius: 0,
                         ),

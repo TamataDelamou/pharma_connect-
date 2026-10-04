@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../models/search_result.dart';
 import 'availability_badge.dart';
+import '../../../core/theme/palette.dart';
 
 class SearchResultCard extends StatelessWidget {
   final SearchResult result;
@@ -34,12 +33,12 @@ class SearchResultCard extends StatelessWidget {
             width: 56,
             height: 56,
             decoration: BoxDecoration(
-              color: PharmaConnectColors.accentCyan.withValues(alpha: 0.1),
+              color: context.palette.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.medication,
-              color: PharmaConnectColors.accentCyan,
+              color: context.palette.primary,
               size: 28,
             ),
           ),
@@ -52,7 +51,7 @@ class SearchResultCard extends StatelessWidget {
               children: [
                 Text(
                   product.name,
-                  style: PharmaConnectTypography.body1.copyWith(
+                  style: context.text.body1.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                   maxLines: 1,
@@ -60,7 +59,7 @@ class SearchResultCard extends StatelessWidget {
                 ),
                 Text(
                   product.genericName,
-                  style: PharmaConnectTypography.body2,
+                  style: context.text.body2,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -68,7 +67,7 @@ class SearchResultCard extends StatelessWidget {
                   children: [
                     Text(
                       '${product.dosage} • ${product.form}',
-                      style: PharmaConnectTypography.micro,
+                      style: context.text.micro,
                     ),
                     if (product.isGeneric) ...[
                       const SizedBox(width: 8),
@@ -78,17 +77,17 @@ class SearchResultCard extends StatelessWidget {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: PharmaConnectColors.accentPurple.withValues(
+                          color: context.palette.secondary.withValues(
                             alpha: 0.15,
                           ),
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        child: const Text(
+                        child: Text(
                           'Générique',
                           style: TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.w500,
-                            color: PharmaConnectColors.accentPurple,
+                            color: context.palette.secondary,
                           ),
                         ),
                       ),
@@ -101,17 +100,17 @@ class SearchResultCard extends StatelessWidget {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: PharmaConnectColors.accentOrange.withValues(
+                          color: context.palette.warning.withValues(
                             alpha: 0.15,
                           ),
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        child: const Text(
+                        child: Text(
                           'Ordonnance',
                           style: TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.w500,
-                            color: PharmaConnectColors.accentOrange,
+                            color: context.palette.warning,
                           ),
                         ),
                       ),
@@ -130,9 +129,9 @@ class SearchResultCard extends StatelessWidget {
                 if (bestPrice != null) ...[
                   Text(
                     CurrencyFormatter.format(bestPrice),
-                    style: PharmaConnectTypography.body1.copyWith(
+                    style: context.text.body1.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: PharmaConnectColors.accentCyan,
+                      color: context.palette.primary,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -145,7 +144,7 @@ class SearchResultCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     '📍 ${result.nearestPharmacy}',
-                    style: PharmaConnectTypography.micro,
+                    style: context.text.micro,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),

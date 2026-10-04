@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../theme/colors.dart';
-import '../../theme/typography.dart';
+import '../../theme/palette.dart';
 
 /// Écran temporaire pour les fonctionnalités pas encore implémentées.
 class PlaceholderScreen extends StatelessWidget {
@@ -27,17 +26,15 @@ class PlaceholderScreen extends StatelessWidget {
             Row(
               children: [
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.arrow_back,
-                    color: PharmaConnectColors.textPrimary,
+                    color: context.palette.textPrimary,
                   ),
                   onPressed: () => context.pop(),
                   padding: EdgeInsets.zero,
                 ),
                 const SizedBox(width: 8),
-                Expanded(
-                  child: Text(title, style: PharmaConnectTypography.heading2),
-                ),
+                Expanded(child: Text(title, style: context.text.heading2)),
               ],
             ),
             Expanded(
@@ -45,12 +42,12 @@ class PlaceholderScreen extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(icon, size: 64, color: Colors.white24),
+                    Icon(icon, size: 64, color: context.palette.veil(0.24)),
                     const SizedBox(height: 16),
                     Text(
                       message,
                       textAlign: TextAlign.center,
-                      style: PharmaConnectTypography.body2,
+                      style: context.text.body2,
                     ),
                   ],
                 ),

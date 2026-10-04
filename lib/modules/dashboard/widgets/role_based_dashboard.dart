@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../../auth/models/user_role.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -10,6 +8,7 @@ import '../widgets/quick_action_grid.dart';
 import '../widgets/activity_timeline.dart';
 import '../widgets/alert_center.dart';
 import '../models/dashboard_data.dart';
+import '../../../core/theme/palette.dart';
 
 class RoleBasedDashboard extends StatelessWidget {
   final DashboardData data;
@@ -31,15 +30,9 @@ class RoleBasedDashboard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    _getGreeting(role),
-                    style: PharmaConnectTypography.heading1,
-                  ),
+                  Text(_getGreeting(role), style: context.text.heading1),
                   const SizedBox(height: 4),
-                  Text(
-                    _getSubtitle(role),
-                    style: PharmaConnectTypography.body2,
-                  ),
+                  Text(_getSubtitle(role), style: context.text.body2),
                 ],
               ),
             ),
@@ -47,13 +40,8 @@ class RoleBasedDashboard extends StatelessWidget {
             const KernelBadge(),
             const SizedBox(width: 16),
             CircleAvatar(
-              backgroundColor: PharmaConnectColors.accentCyan.withValues(
-                alpha: 0.2,
-              ),
-              child: const Icon(
-                Icons.person,
-                color: PharmaConnectColors.accentCyan,
-              ),
+              backgroundColor: context.palette.primary.withValues(alpha: 0.2),
+              child: Icon(Icons.person, color: context.palette.primary),
             ),
           ],
         ),
@@ -72,9 +60,10 @@ class RoleBasedDashboard extends StatelessWidget {
           mainAxisSpacing: 24,
           childAspectRatio: 1.2,
           children: _getStatsForRole(
+            context,
             role,
             data.stats,
-          ).map(_buildStatCard).toList(),
+          ).map((stat) => _buildStatCard(context, stat)).toList(),
         ),
         const SizedBox(height: 32),
 
@@ -87,7 +76,11 @@ class RoleBasedDashboard extends StatelessWidget {
               child: GlassCard(
                 padding: const EdgeInsets.all(20),
                 child: ActivityTimeline(
-                  activities: _getActivitiesForRole(role, data.activities),
+                  activities: _getActivitiesForRole(
+                    context,
+                    role,
+                    data.activities,
+                  ),
                 ),
               ),
             ),
@@ -198,30 +191,34 @@ class RoleBasedDashboard extends StatelessWidget {
     }
   }
 
-  List<StatCardData> _getStatsForRole(UserRole? role, List<StatCardData> all) {
+  List<StatCardData> _getStatsForRole(
+    BuildContext context,
+    UserRole? role,
+    List<StatCardData> all,
+  ) {
     // Personnaliser les KPI selon le rôle
     if (role == UserRole.patient) {
       return [
-        const StatCardData(
+        StatCardData(
           title: 'Ordonnances',
           value: '12',
           change: '+3',
           icon: Icons.description,
-          color: PharmaConnectColors.accentCyan,
+          color: context.palette.primary,
         ),
-        const StatCardData(
+        StatCardData(
           title: 'Réservations',
           value: '5',
           change: '2 en attente',
           icon: Icons.shopping_cart,
-          color: PharmaConnectColors.accentGreen,
+          color: context.palette.success,
         ),
-        const StatCardData(
+        StatCardData(
           title: 'Traitements',
           value: '3',
           change: '2 actifs',
           icon: Icons.medication,
-          color: PharmaConnectColors.accentPurple,
+          color: context.palette.secondary,
         ),
       ];
     }
@@ -229,6 +226,7 @@ class RoleBasedDashboard extends StatelessWidget {
   }
 
   List<ActivityItem> _getActivitiesForRole(
+    BuildContext context,
     UserRole? role,
     List<ActivityItem> all,
   ) {
@@ -240,14 +238,14 @@ class RoleBasedDashboard extends StatelessWidget {
           subtitle: 'Patient : Jean Dupont',
           time: DateTime.now(),
           icon: Icons.description,
-          color: PharmaConnectColors.accentCyan,
+          color: context.palette.primary,
         ),
         ActivityItem(
           title: 'Stock faible : Paracétamol',
           subtitle: 'Seuil critique atteint',
           time: DateTime.now().subtract(const Duration(minutes: 10)),
           icon: Icons.warning,
-          color: PharmaConnectColors.accentOrange,
+          color: context.palette.warning,
         ),
         ...all,
       ];
@@ -255,7 +253,8 @@ class RoleBasedDashboard extends StatelessWidget {
     return all;
   }
 
-  Widget _buildStatCard(StatCardData stat) {
+  Widget _buildStatCard(BuildContext context, StatCardData stat) {
+    final color = context.palette.resolve(stat.color);
     return GlassCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -263,12 +262,12 @@ class RoleBasedDashboard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(stat.icon, color: stat.color, size: 28),
+              Icon(stat.icon, color: color, size: 28),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   stat.title,
-                  style: PharmaConnectTypography.body2,
+                  style: context.text.body2,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -281,7 +280,7 @@ class RoleBasedDashboard extends StatelessWidget {
               Flexible(
                 child: Text(
                   stat.value,
-                  style: PharmaConnectTypography.kpiMedium,
+                  style: context.text.kpiMedium,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -289,8 +288,8 @@ class RoleBasedDashboard extends StatelessWidget {
               Flexible(
                 child: Text(
                   stat.change,
-                  style: PharmaConnectTypography.body2.copyWith(
-                    color: stat.color,
+                  style: context.text.body2.copyWith(
+                    color: color,
                     fontWeight: FontWeight.w600,
                   ),
                   overflow: TextOverflow.ellipsis,

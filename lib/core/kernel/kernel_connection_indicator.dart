@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../theme/colors.dart';
-import '../theme/glass.dart';
 import '../theme/spacing.dart';
-import '../theme/typography.dart';
 import 'kernel_badge.dart';
 import 'kernel_status.dart';
+import '../theme/palette.dart';
 
 class KernelConnectionIndicator extends StatefulWidget {
   final KernelStatus status;
@@ -67,12 +65,12 @@ class _KernelConnectionIndicatorState extends State<KernelConnectionIndicator>
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: widget.status.isConnected
-                ? PharmaConnectColors.accentGreen
-                : PharmaConnectColors.accentRed,
+                ? context.palette.success
+                : context.palette.danger,
             boxShadow: widget.status.isConnected
                 ? [
                     BoxShadow(
-                      color: PharmaConnectColors.accentGreen.withValues(
+                      color: context.palette.success.withValues(
                         alpha: 0.4 + 0.3 * _pulseController.value,
                       ),
                       blurRadius: 12,
@@ -95,7 +93,7 @@ class _KernelConnectionIndicatorState extends State<KernelConnectionIndicator>
         child: Container(
           padding: const EdgeInsets.all(8),
           alignment: Alignment.center,
-          decoration: PharmaConnectGlass.glassDark.copyWith(
+          decoration: context.palette.cardRaised.copyWith(
             borderRadius: BorderRadius.circular(PharmaConnectSpacing.radiusMd),
           ),
           child: _buildDot(),
@@ -106,7 +104,7 @@ class _KernelConnectionIndicatorState extends State<KernelConnectionIndicator>
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeOut,
       padding: const EdgeInsets.all(12),
-      decoration: PharmaConnectGlass.glassDark.copyWith(
+      decoration: context.palette.cardRaised.copyWith(
         borderRadius: BorderRadius.circular(PharmaConnectSpacing.radiusMd),
       ),
       child: Column(
@@ -122,8 +120,8 @@ class _KernelConnectionIndicatorState extends State<KernelConnectionIndicator>
               Flexible(
                 child: Text(
                   'GSG KERNEL',
-                  style: PharmaConnectTypography.subtitle2.copyWith(
-                    color: PharmaConnectColors.textPrimary,
+                  style: context.text.subtitle2.copyWith(
+                    color: context.palette.textPrimary,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 1.0,
                   ),
@@ -137,10 +135,10 @@ class _KernelConnectionIndicatorState extends State<KernelConnectionIndicator>
                   widget.status.isConnected
                       ? 'v${widget.status.version}'
                       : 'Non connecté (Dev)',
-                  style: PharmaConnectTypography.micro.copyWith(
+                  style: context.text.micro.copyWith(
                     color: widget.status.isConnected
-                        ? PharmaConnectColors.textSecondary
-                        : PharmaConnectColors.accentOrange,
+                        ? context.palette.textSecondary
+                        : context.palette.warning,
                   ),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
@@ -153,7 +151,7 @@ class _KernelConnectionIndicatorState extends State<KernelConnectionIndicator>
           // ==================== DÉTAILS DES SERVICES ====================
           if (showDetails) ...[
             const SizedBox(height: 12),
-            const Divider(color: Colors.white24, height: 1),
+            Divider(color: context.palette.veil(0.24), height: 1),
             const SizedBox(height: 12),
             // Statistiques
             Row(
@@ -161,8 +159,8 @@ class _KernelConnectionIndicatorState extends State<KernelConnectionIndicator>
                 Expanded(
                   child: Text(
                     'Services actifs :  ${widget.status.onlineCount}/${widget.status.totalCount}',
-                    style: PharmaConnectTypography.body2.copyWith(
-                      color: PharmaConnectColors.textSecondary,
+                    style: context.text.body2.copyWith(
+                      color: context.palette.textSecondary,
                       fontWeight: FontWeight.w500,
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -175,8 +173,8 @@ class _KernelConnectionIndicatorState extends State<KernelConnectionIndicator>
               widget.status.isConnected
                   ? 'Dernière synchro : ${_formatLastSync(widget.status.lastSync)}'
                   : 'Aucune synchronisation — intégration non branchée',
-              style: PharmaConnectTypography.micro.copyWith(
-                color: PharmaConnectColors.textSecondary.withValues(alpha: 0.7),
+              style: context.text.micro.copyWith(
+                color: context.palette.textFaded(0.7),
               ),
               overflow: TextOverflow.ellipsis,
             ),
@@ -192,12 +190,14 @@ class _KernelConnectionIndicatorState extends State<KernelConnectionIndicator>
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.04),
+                    color: context.palette.surfaceMuted,
                     borderRadius: BorderRadius.circular(
                       PharmaConnectSpacing.radiusSm,
                     ),
                     border: Border.all(
-                      color: service.statusColor.withValues(alpha: 0.2),
+                      color: context.palette
+                          .resolve(service.statusColor)
+                          .withValues(alpha: 0.2),
                       width: 1,
                     ),
                   ),
@@ -214,7 +214,7 @@ class _KernelConnectionIndicatorState extends State<KernelConnectionIndicator>
                             fontFamily: 'Inter',
                             fontSize: 11,
                             fontWeight: FontWeight.w500,
-                            color: service.statusColor,
+                            color: context.palette.resolve(service.statusColor),
                           ),
                         ),
                       ),
@@ -224,7 +224,7 @@ class _KernelConnectionIndicatorState extends State<KernelConnectionIndicator>
                         height: 6,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: service.statusColor,
+                          color: context.palette.resolve(service.statusColor),
                         ),
                       ),
                     ],

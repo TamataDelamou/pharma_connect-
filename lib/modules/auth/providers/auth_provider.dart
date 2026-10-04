@@ -42,6 +42,13 @@ class AuthProvider extends ChangeNotifier {
   String? get gsgOrgId => _gsgOrgId;
   String? get pharmacyId => _pharmacyId;
 
+  /// Pose un rattachement sans appel au serveur (tests et captures d'écran).
+  @visibleForTesting
+  set pharmacyIdForTesting(String? pharmacyId) {
+    _pharmacyId = pharmacyId;
+    notifyListeners();
+  }
+
   /// Vrai si le compte connecté est aussi un membre actif du back-office GSG
   /// (`public.admin_users`, audit Module 14, 29/08/2026). Reflète côté client
   /// exactement le test déjà utilisé par la RLS `is_gsg_admin()` — sans
@@ -66,6 +73,14 @@ class AuthProvider extends ChangeNotifier {
   /// C213 / D64 : état du compte lu sur le serveur (null tant qu'il n'a pas
   /// pu être lu, par exemple hors réseau).
   AccountStatus? get accountStatus => _accountStatus;
+
+  /// Pose un état de compte sans appel au serveur (tests et captures
+  /// d'écran).
+  @visibleForTesting
+  set accountStatusForTesting(AccountStatus? status) {
+    _accountStatus = status;
+    notifyListeners();
+  }
 
   /// C213 / D64 : vrai si le rôle déclaré ouvre ses droits (vérifié par GSG,
   /// pharmacien d'une officine active). Sans état lu, l'application garde le

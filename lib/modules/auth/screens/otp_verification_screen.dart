@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/buttons/tertiary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
@@ -11,6 +9,7 @@ import '../../../core/widgets/inputs/glass_input.dart';
 import '../../../core/widgets/layout/responsive.dart';
 import '../providers/auth_provider.dart';
 import '../models/user_role.dart';
+import '../../../core/theme/palette.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
   const OtpVerificationScreen({super.key});
@@ -113,7 +112,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                 ? 'Veuillez patienter un instant avant de redemander un code.'
                 : 'Erreur lors de l\'envoi du code.',
           ),
-          backgroundColor: PharmaConnectColors.accentRed,
+          backgroundColor: context.palette.danger,
         ),
       );
     }
@@ -145,13 +144,13 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(
+                  Row(
                     children: [
                       Text(
                         '◈',
                         style: TextStyle(
                           fontSize: 28,
-                          color: PharmaConnectColors.accentCyan,
+                          color: context.palette.primary,
                         ),
                       ),
                       SizedBox(width: 8),
@@ -162,7 +161,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                             fontFamily: 'Inter',
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
-                            color: PharmaConnectColors.textPrimary,
+                            color: context.palette.textPrimary,
                             letterSpacing: 0.5,
                           ),
                         ),
@@ -171,14 +170,11 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     ],
                   ),
                   const SizedBox(height: 24),
-                  const Text(
-                    'Vérification',
-                    style: PharmaConnectTypography.heading2,
-                  ),
+                  Text('Vérification', style: context.text.heading2),
                   const SizedBox(height: 8),
                   Text(
                     'Un code à 6 chiffres a été envoyé à ${_identifier.isEmpty ? 'votre identifiant' : _identifier}.',
-                    style: PharmaConnectTypography.body2,
+                    style: context.text.body2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
@@ -186,7 +182,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     'Code demandé à $_requestedAtLabel, valable 1 heure. '
                     'Utilisez le dernier e-mail reçu : il peut mettre une '
                     'minute à arriver.',
-                    style: PharmaConnectTypography.body2,
+                    style: context.text.body2,
                   ),
                   const SizedBox(height: 32),
                   GlassInput(
@@ -212,7 +208,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                           _isResendEnabled
                               ? 'Vous n\'avez pas reçu le code ?'
                               : 'Renvoyer dans $_resendCountdown s',
-                          style: PharmaConnectTypography.body2,
+                          style: context.text.body2,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
