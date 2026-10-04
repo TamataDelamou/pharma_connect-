@@ -11,7 +11,7 @@ extension ReservationStatusExtension on ReservationStatus {
   String get label {
     switch (this) {
       case ReservationStatus.pending:
-        return 'En attente';
+        return 'Réservée';
       case ReservationStatus.confirmed:
         return 'Confirmée';
       case ReservationStatus.ready:

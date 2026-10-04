@@ -72,10 +72,19 @@ class ReservationQRScreen extends StatelessWidget {
                                 ),
                               ),
                               const SizedBox(height: 20),
+                              // C243 : code de retrait, à dicter si le QR
+                              // ne peut pas être lu.
                               Text(
-                                '#${reservation.id}',
-                                style: context.text.heading3,
+                                reservation.qrCodeToken ?? '—',
+                                style: context.text.heading2.copyWith(
+                                  letterSpacing: 4,
+                                ),
                               ),
+                              Text(
+                                'Code de retrait',
+                                style: context.text.micro,
+                              ),
+                              const SizedBox(height: 12),
                               const SizedBox(height: 4),
                               Text(
                                 reservation.pharmacyName,

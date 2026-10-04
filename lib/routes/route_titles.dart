@@ -19,6 +19,7 @@ const Map<String, String> routeTitles = {
   '/reservations/qr': 'Code de retrait',
   '/reservations/history': 'Réservations',
   '/pharmacy/queue': 'File d\'attente',
+  '/pharmacy/queue/pickup/:id': 'Retrait',
   '/pharmacy/staff': 'Personnel',
   '/pharmacy/reconciliation': 'Rapprochement',
   '/deliveries': 'Livraisons',
