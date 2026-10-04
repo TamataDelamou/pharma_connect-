@@ -409,12 +409,10 @@ class PrescriptionProvider extends ChangeNotifier {
         _controlledSubstanceMap[item.medicationName] = matches.any(
           (p) => p.isControlledSubstance,
         );
-        final stockMatches = await _stockService.searchStock(
-          query: item.medicationName,
-        );
-        _availabilityMap[item.medicationName] = stockMatches.any(
-          (s) => s.availableQuantity > 0,
-        );
+        // C242 : disponibilité calculée par le serveur, sans les lots
+        // rappelés ni périmés.
+        _availabilityMap[item.medicationName] = await _stockService
+            .isAnySellable(matches.map((p) => p.id).toList());
       } catch (_) {
         // Pas de statut renseigné plutôt qu'un faux "disponible"/"rupture".
       }

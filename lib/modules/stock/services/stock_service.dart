@@ -103,20 +103,51 @@ class StockService {
     String? referenceId,
     String? notes,
   }) async {
-    await _client.from('stock_movements').insert(
-      StockMovement(
-        id: const Uuid().v4(),
-        stockItemId: stockItemId,
-        batchId: batchId,
-        type: type,
-        quantity: quantity,
-        timestamp: DateTime.now(),
-        userId: userId,
-        userName: userName,
-        referenceId: referenceId,
-        notes: notes,
-      ).toJson(),
+    await _client
+        .from('stock_movements')
+        .insert(
+          StockMovement(
+            id: const Uuid().v4(),
+            stockItemId: stockItemId,
+            batchId: batchId,
+            type: type,
+            quantity: quantity,
+            timestamp: DateTime.now(),
+            userId: userId,
+            userName: userName,
+            referenceId: referenceId,
+            notes: notes,
+          ).toJson(),
+        );
+  }
+
+  /// C242 : quantité vendable d'un produit dans une officine active (lots
+  /// non périmés, non rappelés, hors réservé), calculée par le serveur
+  /// (`patient_stock_availability`). 0 si le produit n'y est pas en stock.
+  Future<int> getSellableQuantity({
+    required String productId,
+    required String pharmacyId,
+  }) async {
+    final List<dynamic> rows = await _client.rpc(
+      'patient_stock_availability',
+      params: {
+        'p_product_ids': [productId],
+        'p_pharmacy_id': pharmacyId,
+      },
     );
+    if (rows.isEmpty) return 0;
+    return rows.first['available_quantity'] as int? ?? 0;
+  }
+
+  /// C242 : vrai si au moins une officine active a une quantité vendable
+  /// d'un des produits donnés.
+  Future<bool> isAnySellable(List<String> productIds) async {
+    if (productIds.isEmpty) return false;
+    final List<dynamic> rows = await _client.rpc(
+      'patient_stock_availability',
+      params: {'p_product_ids': productIds},
+    );
+    return rows.any((row) => (row['available_quantity'] as int? ?? 0) > 0);
   }
 
   /// Réserve une quantité d'un produit (pour une commande/prescription).
@@ -134,6 +165,13 @@ class StockService {
     );
     if (stockItem == null) return false;
     if (stockItem.availableQuantity < quantity) return false;
+    // C242 : le total de `stock_items` compte les lots rappelés et périmés ;
+    // la quantité réellement vendable est calculée par le serveur.
+    final sellable = await getSellableQuantity(
+      productId: productId,
+      pharmacyId: pharmacyId,
+    );
+    if (sellable < quantity) return false;
 
     final sortedBatches = List<StockBatch>.from(stockItem.batches)
       ..sort((a, b) => a.expiryDate.compareTo(b.expiryDate));
@@ -386,19 +424,21 @@ class StockService {
       }
     }
 
-    await _client.from('stock_adjustments').insert(
-      StockAdjustment(
-        id: const Uuid().v4(),
-        stockItemId: stockItem.id,
-        batchId: batchId,
-        reason: reason,
-        quantity: quantity,
-        userId: userId,
-        userName: userName,
-        notes: notes ?? reason.label,
-        timestamp: DateTime.now(),
-      ).toJson(),
-    );
+    await _client
+        .from('stock_adjustments')
+        .insert(
+          StockAdjustment(
+            id: const Uuid().v4(),
+            stockItemId: stockItem.id,
+            batchId: batchId,
+            reason: reason,
+            quantity: quantity,
+            userId: userId,
+            userName: userName,
+            notes: notes ?? reason.label,
+            timestamp: DateTime.now(),
+          ).toJson(),
+        );
 
     await _recordMovement(
       stockItemId: stockItem.id,
@@ -533,7 +573,11 @@ class StockService {
     // : un embed simple sans !inner ne filtre pas, il nullifie l'objet).
     var query = _client
         .from('stock_batches')
-        .select(pharmacyId != null ? '*, stock_item:stock_items!inner(pharmacy_id)' : '*')
+        .select(
+          pharmacyId != null
+              ? '*, stock_item:stock_items!inner(pharmacy_id)'
+              : '*',
+        )
         .lt('expiry_date', threshold.toIso8601String());
     if (pharmacyId != null) {
       query = query.eq('stock_item.pharmacy_id', pharmacyId);
