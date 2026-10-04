@@ -56,6 +56,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final provider = context.watch<PaymentProvider>();
     final int cashbackAmount = (widget.amount * 2) ~/ 100;
     // RG-PAY-02 (Cahier de conception, Standard) : "Les frais de service
@@ -314,7 +315,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                               content: Text(
                                 'Vous devez être connecté pour payer.',
                               ),
-                              backgroundColor: context.palette.danger,
+                              backgroundColor: palette.danger,
                             ),
                           );
                           return;

@@ -93,6 +93,7 @@ class _MyProfessionalProfileScreenState
   }
 
   Future<void> _save() async {
+    final palette = context.palette;
     if (!_formKey.currentState!.validate()) return;
     setState(() {
       _isSaving = true;
@@ -117,7 +118,7 @@ class _MyProfessionalProfileScreenState
           content: Text(
             'Fiche enregistrée. L\'équipe GSG vérifiera votre numéro d\'ordre.',
           ),
-          backgroundColor: context.palette.success,
+          backgroundColor: palette.success,
         ),
       );
       router.go('/dashboard');

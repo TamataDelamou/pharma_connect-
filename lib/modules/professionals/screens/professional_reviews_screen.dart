@@ -305,6 +305,7 @@ class _ProfessionalReviewsScreenState extends State<ProfessionalReviewsScreen> {
   }
 
   void _showReviewDialog() {
+    final palette = context.palette;
     int rating = 0;
     final controller = TextEditingController();
 
@@ -369,7 +370,7 @@ class _ProfessionalReviewsScreenState extends State<ProfessionalReviewsScreen> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('Avis soumis avec succès !'),
-                        backgroundColor: context.palette.success,
+                        backgroundColor: palette.success,
                       ),
                     );
                   }

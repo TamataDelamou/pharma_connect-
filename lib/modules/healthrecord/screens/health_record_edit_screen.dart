@@ -408,6 +408,7 @@ class _HealthRecordEditScreenState extends State<HealthRecordEditScreen> {
   }
 
   Future<void> _saveRecord() async {
+    final palette = context.palette;
     if (!_formKey.currentState!.validate()) return;
 
     final patientId = SupabaseService().currentUser?.id;
@@ -449,7 +450,7 @@ class _HealthRecordEditScreenState extends State<HealthRecordEditScreen> {
             context.read<HealthRecordProvider>().error ??
                 'Erreur lors de l\'enregistrement',
           ),
-          backgroundColor: context.palette.danger,
+          backgroundColor: palette.danger,
         ),
       );
     }

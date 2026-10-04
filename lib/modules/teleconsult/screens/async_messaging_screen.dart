@@ -3,7 +3,6 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../services/messaging_service.dart';
@@ -281,15 +280,14 @@ class _AsyncMessagingScreenState extends State<AsyncMessagingScreen> {
                                 const SizedBox(width: 8),
                                 IconButton(
                                   icon: _isSending
-                                      ? const SizedBox(
+                                      ? SizedBox(
                                           width: 24,
                                           height: 24,
                                           child: CircularProgressIndicator(
                                             strokeWidth: 2,
                                             valueColor:
                                                 AlwaysStoppedAnimation<Color>(
-                                                  PharmaConnectColors
-                                                      .accentCyan,
+                                                  context.palette.primary,
                                                 ),
                                           ),
                                         )

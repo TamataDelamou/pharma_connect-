@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'recall_severity.dart';
 import 'recall_status.dart';
 import 'recall_affected_batch.dart';

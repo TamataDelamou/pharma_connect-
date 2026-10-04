@@ -196,6 +196,7 @@ class _ReportScreenState extends State<ReportScreen> {
     BuildContext context,
     TraceabilityProvider provider,
   ) async {
+    final palette = context.palette;
     if (_descriptionController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -227,7 +228,7 @@ class _ReportScreenState extends State<ReportScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(provider.error ?? 'Échec de l\'envoi du signalement'),
-          backgroundColor: context.palette.danger,
+          backgroundColor: palette.danger,
         ),
       );
     }

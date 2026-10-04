@@ -39,8 +39,7 @@ class GlassCard extends StatelessWidget {
               : Matrix4.identity(),
           decoration: glow
               ? palette.cardGlow(
-                  glowColor != null &&
-                          palette.resolve(glowColor!) == palette.secondary
+                  glowColor != null && glowColor! == palette.secondary
                       ? palette.secondary
                       : palette.primary,
                 )

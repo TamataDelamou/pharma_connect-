@@ -196,7 +196,7 @@ class ProfessionalReview extends Equatable {
 
   // Phase 3 (module professionals) : import Color manquant - défaut de
   // compilation, jamais détecté faute de compilateur exécuté à la clôture
-  // du Module 19/INF. Corrigé avec les tokens PharmaConnectColors (KER-DES-03)
+  // du Module 19/INF. Corrigé avec les rôles de couleur du thème (KER-DES-03)
   // plutôt qu'un import Color brut, pour ne pas réintroduire la régression
   // déjà documentée et gardée par check_no_hardcoded_color.sh.
   ColorRole get statusColor {

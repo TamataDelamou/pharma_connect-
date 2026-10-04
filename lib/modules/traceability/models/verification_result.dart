@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import '../../../core/theme/palette.dart';
 
 class VerificationResult {

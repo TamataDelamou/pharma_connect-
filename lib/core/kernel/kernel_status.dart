@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 import '../theme/palette.dart';
 
 enum KernelServiceStatus { online, degraded, offline }

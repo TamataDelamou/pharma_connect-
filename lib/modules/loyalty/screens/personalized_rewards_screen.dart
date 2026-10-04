@@ -3,7 +3,6 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
@@ -34,6 +33,7 @@ class _PersonalizedRewardsScreenState extends State<PersonalizedRewardsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final provider = context.watch<PersonalizedRewardProvider>();
 
     return Scaffold(
@@ -79,7 +79,7 @@ class _PersonalizedRewardsScreenState extends State<PersonalizedRewardsScreen> {
                                 content: Text(
                                   'Nouvelles récompenses générées !',
                                 ),
-                                backgroundColor: context.palette.success,
+                                backgroundColor: palette.success,
                               ),
                             );
                           }
@@ -213,8 +213,7 @@ class _PersonalizedRewardsScreenState extends State<PersonalizedRewardsScreen> {
                                             Text(
                                               '${reward.discountPercentage}% de réduction',
                                               style: TextStyle(
-                                                color: PharmaConnectColors
-                                                    .accentGreen,
+                                                color: context.palette.success,
                                                 fontWeight: FontWeight.w600,
                                               ),
                                             ),
@@ -222,8 +221,8 @@ class _PersonalizedRewardsScreenState extends State<PersonalizedRewardsScreen> {
                                             Text(
                                               '${reward.pointsCost} points',
                                               style: TextStyle(
-                                                color: PharmaConnectColors
-                                                    .accentPurple,
+                                                color:
+                                                    context.palette.secondary,
                                                 fontWeight: FontWeight.w600,
                                               ),
                                             ),
@@ -250,13 +249,12 @@ class _PersonalizedRewardsScreenState extends State<PersonalizedRewardsScreen> {
                                           ScaffoldMessenger.of(
                                             context,
                                           ).showSnackBar(
-                                            const SnackBar(
+                                            SnackBar(
                                               content: Text(
                                                 'Récompense utilisée !',
                                               ),
                                               backgroundColor:
-                                                  PharmaConnectColors
-                                                      .accentGreen,
+                                                  context.palette.success,
                                             ),
                                           );
                                         }

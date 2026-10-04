@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
@@ -122,8 +121,7 @@ class _DisputeScreenState extends State<DisputeScreen> {
                                       style: context.text.body2,
                                     ),
                                     selected: _selectedTransactionId == t.id,
-                                    selectedColor: PharmaConnectColors
-                                        .accentCyan
+                                    selectedColor: context.palette.primary
                                         .withValues(alpha: 0.1),
                                     onTap: () => setState(
                                       () => _selectedTransactionId = t.id,

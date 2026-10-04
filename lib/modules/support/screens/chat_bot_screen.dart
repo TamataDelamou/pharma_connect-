@@ -373,6 +373,7 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
   }
 
   void _showEscalateDialog(BotProvider provider) {
+    final palette = context.palette;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -394,7 +395,7 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('Demande d\'escalade envoyée'),
-                  backgroundColor: context.palette.success,
+                  backgroundColor: palette.success,
                 ),
               );
             },

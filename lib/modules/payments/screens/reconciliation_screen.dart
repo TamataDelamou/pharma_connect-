@@ -3,7 +3,6 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../../auth/models/user_role.dart';
@@ -271,13 +270,12 @@ class _ReconciliationScreenState extends State<ReconciliationScreen> {
                                             ScaffoldMessenger.of(
                                               context,
                                             ).showSnackBar(
-                                              const SnackBar(
+                                              SnackBar(
                                                 content: Text(
                                                   'Transaction réconciliée',
                                                 ),
                                                 backgroundColor:
-                                                    PharmaConnectColors
-                                                        .accentGreen,
+                                                    context.palette.success,
                                               ),
                                             );
                                           }

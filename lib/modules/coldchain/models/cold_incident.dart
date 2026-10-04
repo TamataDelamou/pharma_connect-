@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import '../../../core/theme/palette.dart';
 
 enum IncidentSeverity { critical, major, minor }

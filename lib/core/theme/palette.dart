@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'colors.dart';
 import 'spacing.dart';
 import 'typography.dart';
 
@@ -8,9 +7,6 @@ import 'typography.dart';
 /// KER-NOM-03). Les écrans et les widgets lisent un rôle
 /// (`context.palette.textPrimary`), jamais une valeur : le thème clair et le
 /// thème sombre sont deux instances de ce même contrat.
-///
-/// [PharmaConnectColors] garde les valeurs du thème sombre pour les écrans
-/// qui ne sont pas encore migrés ; ne plus l'utiliser dans du nouveau code.
 @immutable
 class PharmaConnectPalette extends ThemeExtension<PharmaConnectPalette> {
   final Brightness brightness;
@@ -95,27 +91,27 @@ class PharmaConnectPalette extends ThemeExtension<PharmaConnectPalette> {
   bool get isDark => brightness == Brightness.dark;
 
   // ==================== THÈME SOMBRE ====================
-  // Valeurs d'origine (colors.dart, glass.dart), à l'identique.
+  // Valeurs d'origine du produit, à l'identique.
   static final PharmaConnectPalette dark = PharmaConnectPalette(
     brightness: Brightness.dark,
-    background: PharmaConnectColors.primaryDeep,
+    background: const Color(0xFF0A0E1A),
     surface: Colors.white.withValues(alpha: 0.06),
     surfaceMuted: Colors.white.withValues(alpha: 0.04),
     surfaceRaised: Colors.white.withValues(alpha: 0.12),
     border: Colors.white.withValues(alpha: 0.10),
-    textPrimary: PharmaConnectColors.textPrimary,
-    textSecondary: PharmaConnectColors.textSecondary,
-    textMuted: PharmaConnectColors.neutralMuted,
-    primary: PharmaConnectColors.accentCyan,
-    onPrimary: PharmaConnectColors.textOnAccent,
-    secondary: PharmaConnectColors.accentPurple,
-    success: PharmaConnectColors.accentGreen,
-    warning: PharmaConnectColors.accentOrange,
-    warningStrong: PharmaConnectColors.accentAmber,
-    danger: PharmaConnectColors.accentRed,
-    onDanger: PharmaConnectColors.textPrimary,
-    info: PharmaConnectColors.accentCyan,
-    overlay: PharmaConnectColors.overlayDark,
+    textPrimary: const Color(0xFFF5F7FA),
+    textSecondary: const Color(0xFF9CA3AF),
+    textMuted: const Color(0xFF6B7280),
+    primary: const Color(0xFF00D9FF),
+    onPrimary: const Color(0xFF0A0E1A),
+    secondary: const Color(0xFF8B5CF6),
+    success: const Color(0xFF10B981),
+    warning: const Color(0xFFF59E0B),
+    warningStrong: const Color(0xFFFF9100),
+    danger: const Color(0xFFEF4444),
+    onDanger: const Color(0xFFF5F7FA),
+    info: const Color(0xFF00D9FF),
+    overlay: const Color(0xB3000000),
     shadow: Colors.black.withValues(alpha: 0.35),
     card: BoxDecoration(
       color: Colors.white.withValues(alpha: 0.06),
@@ -256,24 +252,6 @@ class PharmaConnectPalette extends ThemeExtension<PharmaConnectPalette> {
   Color tint(Color color, [double alpha = 0.15]) =>
       color.withValues(alpha: isDark ? alpha : alpha * 0.8);
 
-  /// Traduit une constante de [PharmaConnectColors] reçue d'un écran non
-  /// encore migré vers le rôle correspondant de ce thème. Sans effet en
-  /// sombre ; une couleur inconnue est rendue telle quelle.
-  Color resolve(Color color) {
-    if (color == PharmaConnectColors.accentCyan) return primary;
-    if (color == PharmaConnectColors.accentPurple) return secondary;
-    if (color == PharmaConnectColors.accentGreen) return success;
-    if (color == PharmaConnectColors.accentOrange) return warning;
-    if (color == PharmaConnectColors.accentAmber) return warningStrong;
-    if (color == PharmaConnectColors.accentRed) return danger;
-    if (color == PharmaConnectColors.textPrimary) return textPrimary;
-    if (color == PharmaConnectColors.textSecondary) return textSecondary;
-    if (color == PharmaConnectColors.textOnAccent) return onPrimary;
-    if (color == PharmaConnectColors.neutralMuted) return textMuted;
-    if (color == PharmaConnectColors.primaryDeep) return background;
-    return color;
-  }
-
   @override
   PharmaConnectPalette copyWith({
     Brightness? brightness,
@@ -382,6 +360,7 @@ class PharmaConnectTextStyles {
   TextStyle get body2 => _secondary(PharmaConnectTypography.body2);
   TextStyle get label => _secondary(PharmaConnectTypography.label);
   TextStyle get micro => _secondary(PharmaConnectTypography.micro);
+  TextStyle get mono => _secondary(PharmaConnectTypography.mono);
   TextStyle get kpiLarge => _primary(PharmaConnectTypography.kpiLarge);
   TextStyle get kpiMedium => _primary(PharmaConnectTypography.kpiMedium);
   TextStyle get kpiSmall => _primary(PharmaConnectTypography.kpiSmall);
@@ -457,4 +436,17 @@ enum ColorRole {
     ColorRole.overlay => p.overlay,
     ColorRole.shadow => p.shadow,
   };
+}
+
+/// Couleurs qui ne dépendent pas du thème : couleur de marque d'un tiers et
+/// couleurs conventionnelles (métaux des paliers de fidélité). Tout le reste
+/// passe par un rôle de [PharmaConnectPalette].
+class PharmaConnectFixedColors {
+  static const Color whatsapp = Color(0xFF25D366);
+  static const Color onWhatsapp = Color(0xFFFFFFFF);
+
+  static const Color tierBronze = Color(0xFFCD7F32);
+  static const Color tierSilver = Color(0xFFC0C0C0);
+  static const Color tierGold = Color(0xFFFFD700);
+  static const Color tierPlatinum = Color(0xFFE5E4E2);
 }

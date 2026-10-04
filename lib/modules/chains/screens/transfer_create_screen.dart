@@ -3,7 +3,6 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/tertiary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
@@ -293,8 +292,7 @@ class _TransferCreateScreenState extends State<TransferCreateScreen> {
                                             children: [
                                               Text(
                                                 item.productName,
-                                                style: PharmaConnectTypography
-                                                    .body2
+                                                style: context.text.body2
                                                     .copyWith(
                                                       fontWeight:
                                                           FontWeight.w500,
@@ -302,8 +300,7 @@ class _TransferCreateScreenState extends State<TransferCreateScreen> {
                                               ),
                                               Text(
                                                 'Qté: ${item.quantity} • Lot ${item.batchNumber} • Péremption ${_formatDate(item.expiryDate!)}',
-                                                style: PharmaConnectTypography
-                                                    .micro,
+                                                style: context.text.mono,
                                               ),
                                             ],
                                           ),
@@ -530,6 +527,7 @@ class _TransferCreateScreenState extends State<TransferCreateScreen> {
   }
 
   Future<void> _createTransfer() async {
+    final palette = context.palette;
     if (!_formKey.currentState!.validate()) return;
     if (_items.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -561,14 +559,14 @@ class _TransferCreateScreenState extends State<TransferCreateScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Transfert créé avec succès'),
-          backgroundColor: context.palette.success,
+          backgroundColor: palette.success,
         ),
       );
     } else if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(context.read<ChainProvider>().error ?? 'Erreur'),
-          backgroundColor: context.palette.danger,
+          backgroundColor: palette.danger,
         ),
       );
     }

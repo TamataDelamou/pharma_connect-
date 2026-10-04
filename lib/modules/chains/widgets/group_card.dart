@@ -52,7 +52,7 @@ class GroupCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 if (group.code != null)
-                  Text('Code: ${group.code}', style: context.text.micro),
+                  Text('Code: ${group.code}', style: context.text.mono),
                 const SizedBox(height: 4),
                 Row(
                   children: [

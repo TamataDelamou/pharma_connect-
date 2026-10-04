@@ -33,6 +33,7 @@ class _DeliveryScheduleScreenState extends State<DeliveryScheduleScreen> {
   }
 
   Future<void> _assignDriver(Delivery delivery) async {
+    final palette = context.palette;
     final provider = context.read<DeliveryProvider>();
     final driver = await showModalBottomSheet<DeliveryDriver>(
       context: context,
@@ -53,9 +54,7 @@ class _DeliveryScheduleScreenState extends State<DeliveryScheduleScreen> {
                   ? 'Livreur ${driver.name} assigné'
                   : (provider.error ?? 'Échec de l\'assignation'),
             ),
-            backgroundColor: ok
-                ? context.palette.success
-                : context.palette.danger,
+            backgroundColor: ok ? palette.success : palette.danger,
           ),
         );
       }

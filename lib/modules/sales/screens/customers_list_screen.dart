@@ -3,7 +3,6 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
@@ -131,8 +130,7 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                             child: Row(
                               children: [
                                 CircleAvatar(
-                                  backgroundColor: PharmaConnectColors
-                                      .accentCyan
+                                  backgroundColor: context.palette.primary
                                       .withValues(alpha: 0.15),
                                   child: Text(
                                     customer.firstName[0],
@@ -156,7 +154,7 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                                       ),
                                       Text(
                                         customer.code,
-                                        style: context.text.micro,
+                                        style: context.text.mono,
                                       ),
                                     ],
                                   ),

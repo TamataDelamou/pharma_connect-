@@ -88,6 +88,7 @@ class _RoleVerificationScreenState extends State<RoleVerificationScreen> {
     Future<void> Function() action,
     String successMessage,
   ) async {
+    final palette = context.palette;
     setState(() => _busyUserId = request.userId);
     final messenger = ScaffoldMessenger.of(context);
     try {
@@ -95,7 +96,7 @@ class _RoleVerificationScreenState extends State<RoleVerificationScreen> {
       messenger.showSnackBar(
         SnackBar(
           content: Text(successMessage),
-          backgroundColor: context.palette.success,
+          backgroundColor: palette.success,
         ),
       );
       await _load();
@@ -103,7 +104,7 @@ class _RoleVerificationScreenState extends State<RoleVerificationScreen> {
       messenger.showSnackBar(
         SnackBar(
           content: Text(AdminService.describeError(e)),
-          backgroundColor: context.palette.danger,
+          backgroundColor: palette.danger,
         ),
       );
     } finally {

@@ -3,7 +3,6 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/secondary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
@@ -239,10 +238,8 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                                         color: isNormal
                                             ? context.palette.textPrimary
                                             : (isHigh
-                                                  ? PharmaConnectColors
-                                                        .accentRed
-                                                  : PharmaConnectColors
-                                                        .accentCyan),
+                                                  ? context.palette.danger
+                                                  : context.palette.primary),
                                       ),
                                     ),
                                     Text(
@@ -510,6 +507,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
   }
 
   Future<void> _updateStatus(String newStatus) async {
+    final palette = context.palette;
     final device = await context.read<IotProvider>().selectedDevice;
     if (device == null) return;
 
@@ -519,7 +517,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Statut mis à jour : ${updated.statusLabel}'),
-          backgroundColor: context.palette.success,
+          backgroundColor: palette.success,
         ),
       );
       context.read<IotProvider>().loadDevice(widget.deviceId);

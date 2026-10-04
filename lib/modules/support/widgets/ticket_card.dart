@@ -72,7 +72,7 @@ class TicketCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                Text(ticket.ticketNumber, style: context.text.micro),
+                Text(ticket.ticketNumber, style: context.text.mono),
                 const SizedBox(height: 4),
                 Row(
                   children: [

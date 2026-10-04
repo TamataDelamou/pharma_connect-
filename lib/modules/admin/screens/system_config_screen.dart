@@ -24,6 +24,7 @@ class _SystemConfigScreenState extends State<SystemConfigScreen> {
   }
 
   Future<void> _editConfig(SystemConfig config) async {
+    final palette = context.palette;
     final controller = TextEditingController(text: config.value);
     final newValue = await showDialog<String>(
       context: context,
@@ -74,9 +75,7 @@ class _SystemConfigScreenState extends State<SystemConfigScreen> {
                 ? 'Paramètre ${config.key} mis à jour'
                 : (provider.error ?? 'Échec de la mise à jour'),
           ),
-          backgroundColor: ok
-              ? context.palette.success
-              : context.palette.danger,
+          backgroundColor: ok ? palette.success : palette.danger,
         ),
       );
     }

@@ -332,6 +332,7 @@ class _OfferCreateScreenState extends State<OfferCreateScreen> {
   // `profiles(id)`. Corrigé via `AuthProvider.pharmacyId`, comme dans tous
   // les autres modules du projet.
   Future<void> _submit() async {
+    final palette = context.palette;
     if (!_formKey.currentState!.validate()) return;
 
     final pharmacyId = context.read<AuthProvider>().pharmacyId;
@@ -387,14 +388,14 @@ class _OfferCreateScreenState extends State<OfferCreateScreen> {
           content: Text(
             _isEditing ? 'Offre mise à jour' : 'Offre publiée avec succès',
           ),
-          backgroundColor: context.palette.success,
+          backgroundColor: palette.success,
         ),
       );
     } else if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(context.read<MarketplaceProvider>().error ?? 'Erreur'),
-          backgroundColor: context.palette.danger,
+          backgroundColor: palette.danger,
         ),
       );
     }

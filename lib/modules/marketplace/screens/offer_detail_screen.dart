@@ -596,6 +596,7 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
   }
 
   void _showCounterOfferDialog(B2BNegotiation neg) {
+    final palette = context.palette;
     final priceController = TextEditingController(
       text: neg.proposedPrice.toString(),
     );
@@ -657,7 +658,7 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text('Contre-offre envoyée'),
-                    backgroundColor: context.palette.primary,
+                    backgroundColor: palette.primary,
                   ),
                 );
                 // Phase 4 (module marketplace) : même correctif que la

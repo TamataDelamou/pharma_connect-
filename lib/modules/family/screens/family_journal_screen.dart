@@ -196,6 +196,7 @@ class _FamilyJournalScreenState extends State<FamilyJournalScreen> {
   }
 
   Future<void> _addActivity() async {
+    final palette = context.palette;
     final note = _noteController.text.trim();
     if (note.isEmpty) return;
 
@@ -220,7 +221,7 @@ class _FamilyJournalScreenState extends State<FamilyJournalScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Activité partagée !'),
-          backgroundColor: context.palette.success,
+          backgroundColor: palette.success,
         ),
       );
       context.read<FamilyChallengeProvider>().loadActivities(

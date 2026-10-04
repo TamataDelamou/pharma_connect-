@@ -3,7 +3,6 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/buttons/tertiary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
@@ -342,13 +341,12 @@ class _PrescriptionDetailScreenState extends State<PrescriptionDetailScreen> {
                                           ScaffoldMessenger.of(
                                             context,
                                           ).showSnackBar(
-                                            const SnackBar(
+                                            SnackBar(
                                               content: Text(
                                                 'Ordonnance dispensée',
                                               ),
                                               backgroundColor:
-                                                  PharmaConnectColors
-                                                      .accentCyan,
+                                                  context.palette.primary,
                                             ),
                                           );
                                         }

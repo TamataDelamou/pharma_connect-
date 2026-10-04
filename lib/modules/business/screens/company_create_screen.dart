@@ -351,6 +351,7 @@ class _CompanyCreateScreenState extends State<CompanyCreateScreen> {
   }
 
   Future<void> _saveCompany() async {
+    final palette = context.palette;
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
@@ -425,7 +426,7 @@ class _CompanyCreateScreenState extends State<CompanyCreateScreen> {
                 ? 'Partenaire mis à jour avec succès'
                 : 'Partenaire créé avec succès',
           ),
-          backgroundColor: context.palette.success,
+          backgroundColor: palette.success,
         ),
       );
     } else if (context.mounted) {
@@ -435,7 +436,7 @@ class _CompanyCreateScreenState extends State<CompanyCreateScreen> {
             context.read<BusinessProvider>().error ??
                 'Erreur lors de l\'enregistrement',
           ),
-          backgroundColor: context.palette.danger,
+          backgroundColor: palette.danger,
         ),
       );
     }

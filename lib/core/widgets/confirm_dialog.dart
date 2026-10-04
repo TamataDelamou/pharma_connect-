@@ -41,7 +41,7 @@ Future<bool> showConfirmDialog(
           style: ElevatedButton.styleFrom(
             backgroundColor: confirmColor == null
                 ? context.palette.danger
-                : context.palette.resolve(confirmColor),
+                : confirmColor,
             foregroundColor: context.palette.onDanger,
           ),
           child: Text(confirmText),

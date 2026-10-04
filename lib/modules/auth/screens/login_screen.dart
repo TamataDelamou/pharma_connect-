@@ -137,16 +137,22 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 8),
 
-                  // ===== FOOTER KERNEL =====
+                  // ===== PIED DE CARTE =====
                   Divider(color: context.palette.veil(0.12), height: 24),
                   Wrap(
                     alignment: WrapAlignment.center,
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
-                      const Text('⚡', style: TextStyle(fontSize: 12)),
+                      Icon(
+                        Icons.lock_outline,
+                        size: 14,
+                        color: context.palette.textFaded(0.6),
+                      ),
                       const SizedBox(width: 4),
+                      // Le Kernel GSG n'est pas branché (registre, D2) : pas
+                      // de mention du Kernel ici.
                       Text(
-                        'Authentification sécurisée via GSG Kernel',
+                        'Connexion sécurisée',
                         style: context.text.micro.copyWith(
                           color: context.palette.textFaded(0.6),
                         ),
@@ -283,13 +289,13 @@ class _LoginScreenState extends State<LoginScreen> {
   String _getButtonLabel() {
     switch (_selectedMethod) {
       case LoginMethod.phoneSms:
-        return 'Envoyer le code par SMS';
+        return 'Recevoir le code';
       case LoginMethod.phoneWhatsapp:
-        return 'Envoyer le code par WhatsApp';
+        return 'Recevoir le code';
       case LoginMethod.emailMagic:
-        return 'Envoyer le lien de connexion';
+        return 'Recevoir le lien';
       case LoginMethod.emailCode:
-        return 'Envoyer le code par email';
+        return 'Recevoir le code';
     }
   }
 

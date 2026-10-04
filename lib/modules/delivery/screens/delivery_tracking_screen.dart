@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/buttons/tertiary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
@@ -270,8 +269,7 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen>
                                             48 + 20 * _pulseController.value,
                                         decoration: BoxDecoration(
                                           shape: BoxShape.circle,
-                                          color: PharmaConnectColors
-                                              .accentPurple
+                                          color: context.palette.secondary
                                               .withValues(
                                                 alpha:
                                                     0.3 -

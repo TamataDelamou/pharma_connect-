@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'record_type.dart';
 import '../../../core/theme/palette.dart';
 

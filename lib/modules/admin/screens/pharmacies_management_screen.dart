@@ -49,6 +49,7 @@ class _PharmaciesManagementScreenState
     PharmacyStatus status,
     String successMessage,
   ) async {
+    final palette = context.palette;
     final provider = context.read<AdminProvider>();
     final ok = await provider.updatePharmacyStatus(pharmacy.id, status);
     if (context.mounted) {
@@ -57,9 +58,7 @@ class _PharmaciesManagementScreenState
           content: Text(
             ok ? successMessage : (provider.error ?? 'Échec de la mise à jour'),
           ),
-          backgroundColor: ok
-              ? context.palette.success
-              : context.palette.danger,
+          backgroundColor: ok ? palette.success : palette.danger,
         ),
       );
     }
@@ -308,7 +307,7 @@ class _PharmacyCard extends StatelessWidget {
           Text(pharmacy.address, style: context.text.body2),
           Text(
             '${pharmacy.phone} • ${pharmacy.licenseNumber ?? 'Sans licence déclarée'}',
-            style: context.text.micro,
+            style: context.text.mono,
           ),
           if (pharmacy.managerName != null)
             Text('Gérant : ${pharmacy.managerName}', style: context.text.micro),

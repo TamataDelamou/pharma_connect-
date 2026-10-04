@@ -86,7 +86,7 @@ class MovementTimeline extends StatelessWidget {
                     const SizedBox(width: 12),
                     Text(
                       '📦 ${movement.trackingNumber}',
-                      style: context.text.micro,
+                      style: context.text.mono,
                     ),
                   ],
                 ],

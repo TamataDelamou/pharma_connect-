@@ -3,8 +3,6 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/widgets/inputs/glass_input.dart';
@@ -140,8 +138,7 @@ class _LoyaltyPharmacySelectScreenState
                                               Text(
                                                 account.pharmacyName ??
                                                     'Officine',
-                                                style: PharmaConnectTypography
-                                                    .body1
+                                                style: context.text.body1
                                                     .copyWith(
                                                       fontWeight:
                                                           FontWeight.w600,
@@ -149,8 +146,7 @@ class _LoyaltyPharmacySelectScreenState
                                               ),
                                               Text(
                                                 '${account.pointsBalance} points • ${account.tierLabel}',
-                                                style: PharmaConnectTypography
-                                                    .body2,
+                                                style: context.text.body2,
                                               ),
                                             ],
                                           ),
@@ -218,16 +214,13 @@ class _LoyaltyPharmacySelectScreenState
                                                 Text(
                                                   pharmacy['name'] as String? ??
                                                       'Officine',
-                                                  style: PharmaConnectTypography
-                                                      .body1,
+                                                  style: context.text.body1,
                                                 ),
                                                 if (pharmacy['address'] != null)
                                                   Text(
                                                     pharmacy['address']
                                                         as String,
-                                                    style:
-                                                        PharmaConnectTypography
-                                                            .micro,
+                                                    style: context.text.micro,
                                                     maxLines: 1,
                                                     overflow:
                                                         TextOverflow.ellipsis,
@@ -235,10 +228,10 @@ class _LoyaltyPharmacySelectScreenState
                                               ],
                                             ),
                                           ),
-                                          const Icon(
+                                          Icon(
                                             Icons.chevron_right,
-                                            color: PharmaConnectColors
-                                                .textSecondary,
+                                            color:
+                                                context.palette.textSecondary,
                                           ),
                                         ],
                                       ),

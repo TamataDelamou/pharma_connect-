@@ -200,6 +200,7 @@ class _InspectionCreateScreenState extends State<InspectionCreateScreen> {
   String _formatDate(DateTime date) => '${date.day}/${date.month}/${date.year}';
 
   Future<void> _submit() async {
+    final palette = context.palette;
     if (_entityType == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Veuillez indiquer le type d\'entité')),
@@ -257,7 +258,7 @@ class _InspectionCreateScreenState extends State<InspectionCreateScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Inspection planifiée'),
-          backgroundColor: context.palette.success,
+          backgroundColor: palette.success,
         ),
       );
     } else if (context.mounted) {
@@ -267,7 +268,7 @@ class _InspectionCreateScreenState extends State<InspectionCreateScreen> {
             context.read<InspectionProvider>().error ??
                 'Erreur lors de l\'envoi',
           ),
-          backgroundColor: context.palette.danger,
+          backgroundColor: palette.danger,
         ),
       );
     }

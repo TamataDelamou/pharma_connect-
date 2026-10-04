@@ -67,8 +67,18 @@ class PharmaConnectTypography {
     letterSpacing: 0.3,
   );
 
+  /// Petit texte d'accompagnement (mention, légende), en police normale.
   static const TextStyle micro = TextStyle(
-    fontFamily: 'JetBrainsMono', // Police monospace pour code
+    fontFamily: fontFamily,
+    fontSize: 12,
+    fontWeight: FontWeight.w400,
+    height: 1.4,
+  );
+
+  /// Police à chasse fixe, réservée aux codes, aux montants et aux
+  /// références (C234).
+  static const TextStyle mono = TextStyle(
+    fontFamily: 'JetBrainsMono',
     fontSize: 12,
     fontWeight: FontWeight.w400,
     height: 1.4,

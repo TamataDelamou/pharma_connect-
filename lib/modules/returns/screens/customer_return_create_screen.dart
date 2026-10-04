@@ -475,6 +475,7 @@ class _CustomerReturnCreateScreenState
   }
 
   Future<void> _createReturn() async {
+    final palette = context.palette;
     if (!_formKey.currentState!.validate()) return;
 
     final pharmacyId = context.read<AuthProvider>().pharmacyId;
@@ -528,7 +529,7 @@ class _CustomerReturnCreateScreenState
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Retour créé avec succès'),
-          backgroundColor: context.palette.success,
+          backgroundColor: palette.success,
         ),
       );
     } else if (context.mounted) {
@@ -538,7 +539,7 @@ class _CustomerReturnCreateScreenState
             context.read<ReturnsProvider>().error ??
                 'Erreur lors de la création',
           ),
-          backgroundColor: context.palette.danger,
+          backgroundColor: palette.danger,
         ),
       );
     }

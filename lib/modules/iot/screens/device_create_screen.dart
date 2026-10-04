@@ -229,6 +229,7 @@ class _DeviceCreateScreenState extends State<DeviceCreateScreen> {
   }
 
   Future<void> _saveDevice() async {
+    final palette = context.palette;
     if (!_formKey.currentState!.validate()) return;
 
     // Audit Module 21 (IOT), Étape 2 (30/08/2026), C99 : voir le correctif
@@ -278,14 +279,14 @@ class _DeviceCreateScreenState extends State<DeviceCreateScreen> {
                 ? 'Appareil ajouté avec succès'
                 : 'Appareil mis à jour',
           ),
-          backgroundColor: context.palette.success,
+          backgroundColor: palette.success,
         ),
       );
     } else if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(context.read<IotProvider>().error ?? 'Erreur'),
-          backgroundColor: context.palette.danger,
+          backgroundColor: palette.danger,
         ),
       );
     }

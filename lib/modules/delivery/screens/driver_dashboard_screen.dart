@@ -353,6 +353,7 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
   }
 
   Widget _buildDeliveryCard(Delivery delivery) {
+    final palette = context.palette;
     final isReady = delivery.status == DeliveryStatus.arrived;
 
     return GlassCard(
@@ -467,7 +468,7 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('Livraison démarrée !'),
-                      backgroundColor: context.palette.success,
+                      backgroundColor: palette.success,
                     ),
                   );
                 }

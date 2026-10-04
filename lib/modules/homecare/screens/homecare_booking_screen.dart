@@ -4,8 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/tertiary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
@@ -168,16 +166,16 @@ class _HomecareBookingScreenState extends State<HomecareBookingScreen> {
                                     child: Row(
                                       children: [
                                         CircleAvatar(
-                                          backgroundColor: PharmaConnectColors
-                                              .accentGreen
+                                          backgroundColor: context
+                                              .palette
+                                              .success
                                               .withValues(alpha: 0.2),
                                           child: Text(
                                             proName.isNotEmpty
                                                 ? proName[0]
                                                 : '?',
-                                            style: const TextStyle(
-                                              color: PharmaConnectColors
-                                                  .accentGreen,
+                                            style: TextStyle(
+                                              color: context.palette.success,
                                             ),
                                           ),
                                         ),
@@ -189,13 +187,11 @@ class _HomecareBookingScreenState extends State<HomecareBookingScreen> {
                                             children: [
                                               Text(
                                                 proName,
-                                                style: PharmaConnectTypography
-                                                    .body1,
+                                                style: context.text.body1,
                                               ),
                                               Text(
                                                 proSpecialty,
-                                                style: PharmaConnectTypography
-                                                    .body2,
+                                                style: context.text.body2,
                                               ),
                                             ],
                                           ),
@@ -305,8 +301,7 @@ class _HomecareBookingScreenState extends State<HomecareBookingScreen> {
                                             ),
                                             border: Border.all(
                                               color: isSelected
-                                                  ? PharmaConnectColors
-                                                        .accentCyan
+                                                  ? context.palette.primary
                                                   : context.palette.veil(0.24),
                                             ),
                                           ),
@@ -314,10 +309,8 @@ class _HomecareBookingScreenState extends State<HomecareBookingScreen> {
                                             '${slot.hour}:${slot.minute.toString().padLeft(2, '0')}',
                                             style: TextStyle(
                                               color: isSelected
-                                                  ? PharmaConnectColors
-                                                        .accentCyan
-                                                  : PharmaConnectColors
-                                                        .textPrimary,
+                                                  ? context.palette.primary
+                                                  : context.palette.textPrimary,
                                             ),
                                           ),
                                         ),
@@ -389,6 +382,7 @@ class _HomecareBookingScreenState extends State<HomecareBookingScreen> {
   }
 
   Future<void> _submitBooking() async {
+    final palette = context.palette;
     if (!_formKey.currentState!.validate()) return;
 
     if (_selectedProfessionalId == null ||
@@ -436,14 +430,14 @@ class _HomecareBookingScreenState extends State<HomecareBookingScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Votre demande d\'intervention a été envoyée'),
-          backgroundColor: context.palette.success,
+          backgroundColor: palette.success,
         ),
       );
     } else if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(context.read<HomecareProvider>().error ?? 'Erreur'),
-          backgroundColor: context.palette.danger,
+          backgroundColor: palette.danger,
         ),
       );
     }

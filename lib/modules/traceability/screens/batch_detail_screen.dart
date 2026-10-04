@@ -145,7 +145,7 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
                                     ),
                                     Text(
                                       'SN: ${batch.serialNumber}',
-                                      style: context.text.micro,
+                                      style: context.text.mono,
                                     ),
                                   ],
                                 ),

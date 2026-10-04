@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import '../../../shared/models/product.dart';
 import 'pharmacy.dart';
 import '../../../core/theme/palette.dart';

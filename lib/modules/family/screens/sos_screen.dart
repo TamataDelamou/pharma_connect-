@@ -91,8 +91,15 @@ class _SOSScreenState extends State<SOSScreen>
                           height: 180,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            gradient: const RadialGradient(
-                              colors: [Color(0xFFEF4444), Color(0xFFDC2626)],
+                            gradient: RadialGradient(
+                              colors: [
+                                context.palette.danger,
+                                Color.lerp(
+                                  context.palette.danger,
+                                  context.palette.textPrimary,
+                                  context.palette.isDark ? 0.0 : 0.15,
+                                )!,
+                              ],
                               stops: [0.6, 1.0],
                             ),
                             boxShadow: [
@@ -244,6 +251,7 @@ class _SOSScreenState extends State<SOSScreen>
   }
 
   Future<void> _sendSOS(String type, String? userId) async {
+    final palette = context.palette;
     if (userId == null) {
       ScaffoldMessenger.of(
         context,
@@ -283,7 +291,7 @@ class _SOSScreenState extends State<SOSScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Alerte envoyée à vos proches'),
-          backgroundColor: context.palette.success,
+          backgroundColor: palette.success,
         ),
       );
     } catch (e) {

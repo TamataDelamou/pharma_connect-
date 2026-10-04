@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart'; // <-- Ajout
 import '../../../core/theme/palette.dart';
 
 enum BatchStatus {

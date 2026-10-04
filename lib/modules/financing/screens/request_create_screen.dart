@@ -232,6 +232,7 @@ class _RequestCreateScreenState extends State<RequestCreateScreen> {
   }
 
   Future<void> _submitRequest() async {
+    final palette = context.palette;
     if (!_formKey.currentState!.validate()) return;
 
     // Bug corrigé (audit Module 14, 29/08/2026) : utilisait
@@ -286,14 +287,14 @@ class _RequestCreateScreenState extends State<RequestCreateScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Demande soumise avec succès'),
-          backgroundColor: context.palette.success,
+          backgroundColor: palette.success,
         ),
       );
     } else if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(context.read<FinancingProvider>().error ?? 'Erreur'),
-          backgroundColor: context.palette.danger,
+          backgroundColor: palette.danger,
         ),
       );
     }

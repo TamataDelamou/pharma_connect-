@@ -3,7 +3,6 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
 import '../providers/admin_provider.dart';
 import '../models/admin_role.dart';
 import '../../../core/theme/palette.dart';
@@ -141,11 +140,9 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
                                           ),
                                           decoration: BoxDecoration(
                                             color: user.isVerified
-                                                ? PharmaConnectColors
-                                                      .accentGreen
+                                                ? context.palette.success
                                                       .withValues(alpha: 0.15)
-                                                : PharmaConnectColors
-                                                      .accentOrange
+                                                : context.palette.warning
                                                       .withValues(alpha: 0.15),
                                             borderRadius: BorderRadius.circular(
                                               4,
@@ -159,10 +156,8 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
                                               fontSize: 9,
                                               fontWeight: FontWeight.w600,
                                               color: user.isVerified
-                                                  ? PharmaConnectColors
-                                                        .accentGreen
-                                                  : PharmaConnectColors
-                                                        .accentOrange,
+                                                  ? context.palette.success
+                                                  : context.palette.warning,
                                             ),
                                           ),
                                         ),
@@ -174,8 +169,7 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
                                           ),
                                           decoration: BoxDecoration(
                                             color: user.isActive
-                                                ? PharmaConnectColors
-                                                      .accentGreen
+                                                ? context.palette.success
                                                       .withValues(alpha: 0.15)
                                                 : context.palette.danger
                                                       .withValues(alpha: 0.15),
@@ -189,10 +183,8 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
                                               fontSize: 9,
                                               fontWeight: FontWeight.w600,
                                               color: user.isActive
-                                                  ? PharmaConnectColors
-                                                        .accentGreen
-                                                  : PharmaConnectColors
-                                                        .accentRed,
+                                                  ? context.palette.success
+                                                  : context.palette.danger,
                                             ),
                                           ),
                                         ),
@@ -206,11 +198,9 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
                                             color:
                                                 user.role ==
                                                     AdminRole.superAdmin
-                                                ? PharmaConnectColors
-                                                      .accentPurple
+                                                ? context.palette.secondary
                                                       .withValues(alpha: 0.15)
-                                                : PharmaConnectColors
-                                                      .textSecondary
+                                                : context.palette.textSecondary
                                                       .withValues(alpha: 0.15),
                                             borderRadius: BorderRadius.circular(
                                               4,
@@ -224,9 +214,9 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
                                               color:
                                                   user.role ==
                                                       AdminRole.superAdmin
-                                                  ? PharmaConnectColors
-                                                        .accentPurple
-                                                  : PharmaConnectColors
+                                                  ? context.palette.secondary
+                                                  : context
+                                                        .palette
                                                         .textSecondary,
                                             ),
                                           ),

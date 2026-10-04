@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
 import '../../../core/theme/spacing.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../providers/search_provider.dart';
@@ -104,8 +103,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                         children: [
                                           Text(
                                             availability.product.name,
-                                            style: PharmaConnectTypography
-                                                .heading3,
+                                            style: context.text.heading3,
                                           ),
                                           Text(
                                             availability.product.genericName,

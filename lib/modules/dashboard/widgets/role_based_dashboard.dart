@@ -254,7 +254,7 @@ class RoleBasedDashboard extends StatelessWidget {
   }
 
   Widget _buildStatCard(BuildContext context, StatCardData stat) {
-    final color = context.palette.resolve(stat.color.of(context.palette));
+    final color = stat.color.of(context.palette);
     return GlassCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

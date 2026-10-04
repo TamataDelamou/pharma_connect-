@@ -181,6 +181,7 @@ class _HealthGoalCreateScreenState extends State<HealthGoalCreateScreen> {
   }
 
   Future<void> _saveGoal() async {
+    final palette = context.palette;
     if (!_formKey.currentState!.validate()) return;
 
     final userId = SupabaseService().currentUser?.id;
@@ -220,14 +221,14 @@ class _HealthGoalCreateScreenState extends State<HealthGoalCreateScreen> {
                 ? 'Objectif créé avec succès'
                 : 'Objectif mis à jour',
           ),
-          backgroundColor: context.palette.success,
+          backgroundColor: palette.success,
         ),
       );
     } else if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(context.read<HealthGoalProvider>().error ?? 'Erreur'),
-          backgroundColor: context.palette.danger,
+          backgroundColor: palette.danger,
         ),
       );
     }

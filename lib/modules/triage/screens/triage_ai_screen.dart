@@ -283,6 +283,7 @@ class _TriageAIScreenState extends State<TriageAIScreen> {
   }
 
   Widget _buildFeedbackSection(TriageAIProvider provider) {
+    final palette = context.palette;
     final analysis = provider.currentAnalysis!;
 
     return GlassCard(
@@ -360,7 +361,7 @@ class _TriageAIScreenState extends State<TriageAIScreen> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text('Feedback enregistré, merci !'),
-                          backgroundColor: context.palette.success,
+                          backgroundColor: palette.success,
                         ),
                       );
                     }

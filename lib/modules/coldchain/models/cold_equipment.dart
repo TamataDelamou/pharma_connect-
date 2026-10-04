@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'equipment_type.dart';
 import 'equipment_status.dart';
 import '../../../core/theme/palette.dart';

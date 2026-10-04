@@ -204,6 +204,7 @@ class _TriageNewScreenState extends State<TriageNewScreen> {
   }
 
   Future<void> _submitPatient() async {
+    final palette = context.palette;
     if (!_formKey.currentState!.validate()) return;
 
     if (_patientIdController.text.trim().isEmpty) {
@@ -246,14 +247,14 @@ class _TriageNewScreenState extends State<TriageNewScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Patient enregistré en triage'),
-          backgroundColor: context.palette.success,
+          backgroundColor: palette.success,
         ),
       );
     } else if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(context.read<TriageProvider>().error ?? 'Erreur'),
-          backgroundColor: context.palette.danger,
+          backgroundColor: palette.danger,
         ),
       );
     }

@@ -46,6 +46,7 @@ class _PendingInvitationsCardState extends State<PendingInvitationsCard> {
   }
 
   Future<void> _respond(StaffInvitation invitation, bool accept) async {
+    final palette = context.palette;
     setState(() => _busyId = invitation.invitationId);
     final messenger = ScaffoldMessenger.of(context);
     final auth = context.read<AuthProvider>();
@@ -61,7 +62,7 @@ class _PendingInvitationsCardState extends State<PendingInvitationsCard> {
               'Vous faites partie du personnel de '
               '${invitation.pharmacyName}',
             ),
-            backgroundColor: context.palette.success,
+            backgroundColor: palette.success,
           ),
         );
         router.go('/dashboard');
@@ -75,7 +76,7 @@ class _PendingInvitationsCardState extends State<PendingInvitationsCard> {
       messenger.showSnackBar(
         SnackBar(
           content: Text(PharmacyStaffService.describeError(e)),
-          backgroundColor: context.palette.danger,
+          backgroundColor: palette.danger,
         ),
       );
       await _load();

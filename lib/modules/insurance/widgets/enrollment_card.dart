@@ -85,7 +85,7 @@ class EnrollmentCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     Text(
                       'N° ${enrollment.policyNumber}',
-                      style: context.text.micro,
+                      style: context.text.mono,
                     ),
                   ],
                 ),

@@ -333,6 +333,7 @@ class _NewTicketScreenState extends State<NewTicketScreen> {
   }
 
   Future<void> _submitTicket() async {
+    final palette = context.palette;
     if (!_formKey.currentState!.validate()) return;
 
     final userId = SupabaseService().currentUser?.id;
@@ -379,14 +380,14 @@ class _NewTicketScreenState extends State<NewTicketScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Ticket créé avec succès'),
-          backgroundColor: context.palette.success,
+          backgroundColor: palette.success,
         ),
       );
     } else if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(context.read<SupportProvider>().error ?? 'Erreur'),
-          backgroundColor: context.palette.danger,
+          backgroundColor: palette.danger,
         ),
       );
     }

@@ -235,6 +235,7 @@ class _PreventiveAlertCreateScreenState
   }
 
   Future<void> _saveAlert() async {
+    final palette = context.palette;
     if (!_formKey.currentState!.validate()) return;
 
     final userId = SupabaseService().currentUser?.id;
@@ -274,7 +275,7 @@ class _PreventiveAlertCreateScreenState
                 ? 'Alerte créée avec succès'
                 : 'Alerte mise à jour',
           ),
-          backgroundColor: context.palette.success,
+          backgroundColor: palette.success,
         ),
       );
     } else if (context.mounted) {
@@ -283,7 +284,7 @@ class _PreventiveAlertCreateScreenState
           content: Text(
             context.read<PreventiveAlertProvider>().error ?? 'Erreur',
           ),
-          backgroundColor: context.palette.danger,
+          backgroundColor: palette.danger,
         ),
       );
     }

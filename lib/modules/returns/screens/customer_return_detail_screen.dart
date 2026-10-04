@@ -245,15 +245,15 @@ class _CustomerReturnDetailScreenState
   Color _statusColor(ReturnStatus status) {
     switch (status) {
       case ReturnStatus.pending:
-        return const Color(0xFFF59E0B);
+        return context.palette.warning;
       case ReturnStatus.approved:
-        return const Color(0xFF10B981);
+        return context.palette.success;
       case ReturnStatus.rejected:
-        return const Color(0xFFEF4444);
+        return context.palette.danger;
       case ReturnStatus.completed:
-        return const Color(0xFF00D9FF);
+        return context.palette.info;
       case ReturnStatus.cancelled:
-        return const Color(0xFF9CA3AF);
+        return context.palette.textSecondary;
     }
   }
 

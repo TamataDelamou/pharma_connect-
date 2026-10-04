@@ -300,6 +300,7 @@ class _AdverseReactionReportScreenState
   }
 
   Future<void> _submitReport() async {
+    final palette = context.palette;
     if (!_formKey.currentState!.validate()) return;
 
     if (_medicationController.text.trim().isEmpty) {
@@ -376,7 +377,7 @@ class _AdverseReactionReportScreenState
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Signalement envoyé avec succès'),
-          backgroundColor: context.palette.success,
+          backgroundColor: palette.success,
         ),
       );
     } else if (context.mounted) {
@@ -386,7 +387,7 @@ class _AdverseReactionReportScreenState
             context.read<RegulatorProvider>().error ??
                 'Erreur lors de l\'envoi',
           ),
-          backgroundColor: context.palette.danger,
+          backgroundColor: palette.danger,
         ),
       );
     }

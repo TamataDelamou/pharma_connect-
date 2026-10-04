@@ -27,11 +27,11 @@ class WhatsAppSupportButton extends StatelessWidget {
 
     return ElevatedButton.icon(
       onPressed: () => service.startSupportChat(initialMessage: initialMessage),
-      icon: Icon(Icons.chat, color: context.palette.textPrimary),
+      icon: const Icon(Icons.chat),
       label: const Text('💬 Support WhatsApp'),
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF25D366),
-        foregroundColor: context.palette.onPrimary,
+        backgroundColor: PharmaConnectFixedColors.whatsapp,
+        foregroundColor: PharmaConnectFixedColors.onWhatsapp,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );

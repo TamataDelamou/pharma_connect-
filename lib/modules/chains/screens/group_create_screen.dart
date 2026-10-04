@@ -171,6 +171,7 @@ class _GroupCreateScreenState extends State<GroupCreateScreen> {
   }
 
   Future<void> _createGroup() async {
+    final palette = context.palette;
     if (!_formKey.currentState!.validate()) return;
 
     final userId = SupabaseService().currentUser?.id;
@@ -206,7 +207,7 @@ class _GroupCreateScreenState extends State<GroupCreateScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Groupe créé avec succès'),
-          backgroundColor: context.palette.success,
+          backgroundColor: palette.success,
         ),
       );
     } else if (context.mounted) {
@@ -215,7 +216,7 @@ class _GroupCreateScreenState extends State<GroupCreateScreen> {
           content: Text(
             context.read<ChainProvider>().error ?? 'Erreur lors de la création',
           ),
-          backgroundColor: context.palette.danger,
+          backgroundColor: palette.danger,
         ),
       );
     }

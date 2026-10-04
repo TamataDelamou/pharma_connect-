@@ -73,6 +73,7 @@ class _PharmacyStaffScreenState extends State<PharmacyStaffScreen> {
     Future<void> Function() action,
     String successMessage,
   ) async {
+    final palette = context.palette;
     setState(() => _busyId = busyId);
     final messenger = ScaffoldMessenger.of(context);
     try {
@@ -80,7 +81,7 @@ class _PharmacyStaffScreenState extends State<PharmacyStaffScreen> {
       messenger.showSnackBar(
         SnackBar(
           content: Text(successMessage),
-          backgroundColor: context.palette.success,
+          backgroundColor: palette.success,
         ),
       );
       await _load();
@@ -88,7 +89,7 @@ class _PharmacyStaffScreenState extends State<PharmacyStaffScreen> {
       messenger.showSnackBar(
         SnackBar(
           content: Text(PharmacyStaffService.describeError(e)),
-          backgroundColor: context.palette.danger,
+          backgroundColor: palette.danger,
         ),
       );
     } finally {

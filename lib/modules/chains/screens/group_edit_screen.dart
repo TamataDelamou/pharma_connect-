@@ -236,6 +236,7 @@ class _GroupEditScreenState extends State<GroupEditScreen> {
   }
 
   Future<void> _saveGroup() async {
+    final palette = context.palette;
     if (!_formKey.currentState!.validate()) return;
 
     final currentGroup = context.read<ChainProvider>().selectedGroup;
@@ -262,20 +263,21 @@ class _GroupEditScreenState extends State<GroupEditScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Groupe mis à jour'),
-          backgroundColor: context.palette.success,
+          backgroundColor: palette.success,
         ),
       );
     } else if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(context.read<ChainProvider>().error ?? 'Erreur'),
-          backgroundColor: context.palette.danger,
+          backgroundColor: palette.danger,
         ),
       );
     }
   }
 
   void _confirmDelete() {
+    final palette = context.palette;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -304,7 +306,7 @@ class _GroupEditScreenState extends State<GroupEditScreen> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text('Groupe supprimé'),
-                    backgroundColor: context.palette.danger,
+                    backgroundColor: palette.danger,
                   ),
                 );
               }

@@ -9,7 +9,7 @@
 #      (18 occurrences dans traceability/) et de nouveau le 26/08/2026
 #      (47 occurrences dans 10 modèles : alerts, admin, coldchain,
 #      traceability, recall, stock). Tout modèle ou widget doit référencer
-#      une constante PharmaConnectColors (ou son futur équivalent GSG Design
+#      un rôle de PharmaConnectPalette (ou son futur équivalent GSG Design
 #      Kit) à la place.
 #
 # Volontairement exclu du point 2 : Colors.white / Colors.black /
@@ -47,7 +47,7 @@ if [ -n "$HEX_MATCHES" ] || [ -n "$NAMED_MATCHES" ]; then
     echo "$NAMED_MATCHES"
   fi
   echo ""
-  echo "Utilisez une constante PharmaConnectColors au lieu d'un Color(0xFF...) ou Colors.<nom> littéral."
+  echo "Utilisez un rôle de PharmaConnectPalette (context.palette, ColorRole) au lieu d'un Color(0xFF...) ou Colors.<nom> littéral."
   exit 1
 fi
 

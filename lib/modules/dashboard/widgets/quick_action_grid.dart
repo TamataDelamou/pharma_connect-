@@ -34,9 +34,7 @@ class QuickActionGrid extends StatelessWidget {
             children: [
               Icon(
                 action.icon,
-                color: context.palette.resolve(
-                  action.color.of(context.palette),
-                ),
+                color: action.color.of(context.palette),
                 size: 32,
               ),
               const SizedBox(height: 8),

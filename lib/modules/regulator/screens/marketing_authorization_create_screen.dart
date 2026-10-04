@@ -138,6 +138,7 @@ class _MarketingAuthorizationCreateScreenState
   }
 
   Future<void> _submit() async {
+    final palette = context.palette;
     if (_productNameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Veuillez indiquer le médicament')),
@@ -187,10 +188,7 @@ class _MarketingAuthorizationCreateScreenState
     if (success && context.mounted) {
       context.pop();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('AMM créée'),
-          backgroundColor: context.palette.success,
-        ),
+        SnackBar(content: Text('AMM créée'), backgroundColor: palette.success),
       );
     } else if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -199,7 +197,7 @@ class _MarketingAuthorizationCreateScreenState
             context.read<MarketingAuthorizationProvider>().error ??
                 'Erreur lors de l\'envoi',
           ),
-          backgroundColor: context.palette.danger,
+          backgroundColor: palette.danger,
         ),
       );
     }

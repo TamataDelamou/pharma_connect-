@@ -236,7 +236,7 @@ class _ReceptionScreenState extends State<ReceptionScreen> {
                       ),
                       Text(
                         'Lot: ${batch.batchNumber} • ${batch.statusLabel}',
-                        style: context.text.micro,
+                        style: context.text.mono,
                       ),
                     ],
                   ),

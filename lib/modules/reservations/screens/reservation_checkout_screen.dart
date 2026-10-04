@@ -438,6 +438,7 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
   // ==================== ÉTAPE 4 : PAIEMENT ====================
 
   Widget _buildPaymentStep(ReservationProvider provider) {
+    final palette = context.palette;
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -567,8 +568,7 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
                                     'cet appareil et sera envoyée automatiquement au '
                                     'retour du réseau.',
                                   ),
-                                  backgroundColor:
-                                      context.palette.warningStrong,
+                                  backgroundColor: palette.warningStrong,
                                 ),
                               );
                             }
@@ -610,8 +610,7 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
                                     'indisponible hors connexion. Réglez-le '
                                     'depuis l\'historique dès votre retour en ligne.',
                                   ),
-                                  backgroundColor:
-                                      context.palette.warningStrong,
+                                  backgroundColor: palette.warningStrong,
                                 ),
                               );
                             } else if (paymentMethod != null &&
@@ -636,8 +635,7 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
                                       '${paymentProvider.error ?? "erreur inconnue"}. '
                                       'Vous pourrez réessayer depuis l\'historique.',
                                     ),
-                                    backgroundColor:
-                                        context.palette.warningStrong,
+                                    backgroundColor: palette.warningStrong,
                                   ),
                                 );
                               }
@@ -688,8 +686,7 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
                                       '${deliveryProvider.error ?? "erreur inconnue"}. '
                                       'Contactez l\'officine.',
                                     ),
-                                    backgroundColor:
-                                        context.palette.warningStrong,
+                                    backgroundColor: palette.warningStrong,
                                   ),
                                 );
                               }
@@ -705,7 +702,7 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
                                   provider.error ??
                                       'Erreur lors de la création de la commande',
                                 ),
-                                backgroundColor: context.palette.danger,
+                                backgroundColor: palette.danger,
                               ),
                             );
                           }

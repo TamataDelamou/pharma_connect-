@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
@@ -223,8 +222,7 @@ class _LoyaltyDashboardScreenState extends State<LoyaltyDashboardScreen> {
                                         Text(
                                           '${reward.pointsRequired} points',
                                           style: context.text.micro.copyWith(
-                                            color:
-                                                PharmaConnectColors.accentCyan,
+                                            color: context.palette.primary,
                                           ),
                                         ),
                                         const SizedBox(height: 8),
@@ -331,13 +329,13 @@ class _LoyaltyDashboardScreenState extends State<LoyaltyDashboardScreen> {
   Color _tierColor(String tier) {
     switch (tier) {
       case 'bronze':
-        return const Color(0xFFCD7F32);
+        return PharmaConnectFixedColors.tierBronze;
       case 'silver':
-        return const Color(0xFFC0C0C0);
+        return PharmaConnectFixedColors.tierSilver;
       case 'gold':
-        return const Color(0xFFFFD700);
+        return PharmaConnectFixedColors.tierGold;
       case 'platinum':
-        return const Color(0xFFE5E4E2);
+        return PharmaConnectFixedColors.tierPlatinum;
       default:
         return context.palette.textSecondary;
     }

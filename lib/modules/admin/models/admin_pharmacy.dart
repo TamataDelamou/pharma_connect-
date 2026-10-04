@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 import 'pharmacy_status.dart';
 import '../../../core/theme/palette.dart';
 

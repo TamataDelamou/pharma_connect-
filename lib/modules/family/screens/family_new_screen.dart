@@ -176,6 +176,7 @@ class _FamilyNewScreenState extends State<FamilyNewScreen> {
   }
 
   Future<void> _submitLink() async {
+    final palette = context.palette;
     if (!_formKey.currentState!.validate()) return;
 
     if (_familyMemberIdController.text.trim().isEmpty) {
@@ -231,14 +232,14 @@ class _FamilyNewScreenState extends State<FamilyNewScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Invitation envoyée !'),
-          backgroundColor: context.palette.success,
+          backgroundColor: palette.success,
         ),
       );
     } else if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(context.read<FamilyProvider>().error ?? 'Erreur'),
-          backgroundColor: context.palette.danger,
+          backgroundColor: palette.danger,
         ),
       );
     }

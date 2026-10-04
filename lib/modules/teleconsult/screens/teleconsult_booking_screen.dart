@@ -4,8 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/tertiary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
@@ -174,14 +172,14 @@ class _TeleconsultBookingScreenState extends State<TeleconsultBookingScreen> {
                                     child: Row(
                                       children: [
                                         CircleAvatar(
-                                          backgroundColor: PharmaConnectColors
-                                              .accentPurple
+                                          backgroundColor: context
+                                              .palette
+                                              .secondary
                                               .withValues(alpha: 0.2),
                                           child: Text(
                                             name.isNotEmpty ? name[0] : '?',
-                                            style: const TextStyle(
-                                              color: PharmaConnectColors
-                                                  .accentPurple,
+                                            style: TextStyle(
+                                              color: context.palette.secondary,
                                             ),
                                           ),
                                         ),
@@ -193,13 +191,11 @@ class _TeleconsultBookingScreenState extends State<TeleconsultBookingScreen> {
                                             children: [
                                               Text(
                                                 name,
-                                                style: PharmaConnectTypography
-                                                    .body1,
+                                                style: context.text.body1,
                                               ),
                                               Text(
                                                 specialty,
-                                                style: PharmaConnectTypography
-                                                    .body2,
+                                                style: context.text.body2,
                                               ),
                                             ],
                                           ),
@@ -313,8 +309,7 @@ class _TeleconsultBookingScreenState extends State<TeleconsultBookingScreen> {
                                             ),
                                             border: Border.all(
                                               color: isSelected
-                                                  ? PharmaConnectColors
-                                                        .accentCyan
+                                                  ? context.palette.primary
                                                   : context.palette.veil(0.24),
                                             ),
                                           ),
@@ -322,10 +317,8 @@ class _TeleconsultBookingScreenState extends State<TeleconsultBookingScreen> {
                                             '${slot.hour}:${slot.minute.toString().padLeft(2, '0')}',
                                             style: TextStyle(
                                               color: isSelected
-                                                  ? PharmaConnectColors
-                                                        .accentCyan
-                                                  : PharmaConnectColors
-                                                        .textPrimary,
+                                                  ? context.palette.primary
+                                                  : context.palette.textPrimary,
                                             ),
                                           ),
                                         ),
@@ -397,6 +390,7 @@ class _TeleconsultBookingScreenState extends State<TeleconsultBookingScreen> {
   }
 
   Future<void> _submitBooking() async {
+    final palette = context.palette;
     if (!_formKey.currentState!.validate()) return;
 
     if (_selectedProfessionalId == null) {
@@ -448,7 +442,7 @@ class _TeleconsultBookingScreenState extends State<TeleconsultBookingScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Votre rendez-vous a été envoyé pour confirmation'),
-          backgroundColor: context.palette.success,
+          backgroundColor: palette.success,
         ),
       );
     } else if (context.mounted) {
@@ -458,7 +452,7 @@ class _TeleconsultBookingScreenState extends State<TeleconsultBookingScreen> {
             context.read<TeleconsultProvider>().error ??
                 'Erreur lors de la prise de rendez-vous',
           ),
-          backgroundColor: context.palette.danger,
+          backgroundColor: palette.danger,
         ),
       );
     }

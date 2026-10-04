@@ -24,7 +24,7 @@ class StatusCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.palette;
     // Les écrans non migrés passent encore une constante du thème sombre.
-    final statusColor = palette.resolve(this.statusColor);
+    final statusColor = this.statusColor;
     return GlassCard(
       onTap: onTap,
       padding: padding,
