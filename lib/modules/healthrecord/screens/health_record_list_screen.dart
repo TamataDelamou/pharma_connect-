@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
+import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import '../providers/health_record_provider.dart';
 import '../widgets/health_record_card.dart';
 import 'package:pharma_connect/core/theme/palette.dart';
@@ -49,33 +50,31 @@ class _HealthRecordListScreenState extends State<HealthRecordListScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        isOwnRecord
-                            ? 'Dossier de santé'
-                            : 'Dossier de santé du patient',
-                        style: context.text.heading1,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        isOwnRecord
-                            ? 'Consultez et gérez vos informations médicales'
-                            : 'Consultation en lecture seule, enregistrée et '
-                                  'visible par le patient',
-                        style: context.text.body2,
-                      ),
-                    ],
+            // Header. C233 : sur téléphone, le titre prend toute la largeur
+            // et les actions passent en dessous (HeaderRow).
+            HeaderRow(
+              leading: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    isOwnRecord
+                        ? 'Dossier de santé'
+                        : 'Dossier de santé du patient',
+                    style: context.text.heading1,
                   ),
-                ),
+                  const SizedBox(height: 4),
+                  Text(
+                    isOwnRecord
+                        ? 'Consultez et gérez vos informations médicales'
+                        : 'Consultation en lecture seule, enregistrée et '
+                              'visible par le patient',
+                    style: context.text.body2,
+                  ),
+                ],
+              ),
+              trailing: [
                 const KernelBadge(),
                 if (isOwnRecord) ...[
-                  const SizedBox(width: 16),
                   // C219 / D63 : le patient voit qui a ouvert son dossier en
                   // urgence et peut mettre fin à un accès en cours.
                   OutlinedButton.icon(
@@ -88,7 +87,6 @@ class _HealthRecordListScreenState extends State<HealthRecordListScreen> {
                       foregroundColor: context.palette.primary,
                     ),
                   ),
-                  const SizedBox(width: 8),
                   ElevatedButton.icon(
                     onPressed: () => context.push('/healthrecord/edit'),
                     icon: const Icon(Icons.add),
