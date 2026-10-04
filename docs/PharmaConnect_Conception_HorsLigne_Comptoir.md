@@ -1,8 +1,8 @@
 # PharmaConnect — Note de conception : vente au comptoir hors ligne (C239, partie B)
 
-**Statut :** proposition à valider par Achille. Aucun code du hors-ligne n'est écrit tant que cette note n'est pas validée.
+**Statut :** validée le 04/10/2026 par Achille, avec les sept décisions reportées en fin de note. Aucun code du hors-ligne n'est encore écrit : l'étape 1 ne commence qu'après la correction et la validation de C240 (lot rappelé vendu en ligne).
 **Date :** 04/10/2026.
-**Lié à :** registre, ligne C239 et point A35 ; reprend le chantier C195 (vente hors ligne retirée par C191).
+**Lié à :** registre, lignes C239 et C240, point A35 ; reprend le chantier C195 (vente hors ligne retirée par C191).
 
 ## Ce qui est décidé (Achille, 04/10/2026)
 
@@ -12,7 +12,9 @@
 - **Bandeau d'avertissement dès 12 h** sans synchronisation, **blocage de la vente après 24 h**.
 - Principe : **une vente faite hors ligne n'est jamais rejetée par le serveur**. Elle est enregistrée, et chaque anomalie (prix changé entre-temps, stock insuffisant, lot rappelé) part dans une **file à régulariser** par le pharmacien.
 
-## En bref : ce que je propose
+## En bref : ce qui est retenu
+
+Choix techniques validés le 04/10/2026 : Drift chiffré, `pos_sync_offline_sale` séparée, `pos_create_sale` inchangée, code PIN local, horloge interne.
 
 1. Une petite base locale chiffrée sur l'appareil (SQLite avec Drift), réservée au comptoir.
 2. Chaque vente reçoit sur l'appareil un identifiant unique ; le serveur s'en sert pour ne jamais enregistrer deux fois la même vente.
@@ -20,7 +22,9 @@
 4. Un écran « À régulariser » pour le pharmacien.
 5. Un code PIN local pour continuer à vendre quand la session Supabase a expiré, sans jamais donner accès au serveur.
 
-Effort estimé : **21 à 28 jours de travail**, en huit étapes (détail en section 8). Sept points restent à trancher par Achille (liste en fin de note).
+6. Une ouverture de caisse provisoire hors ligne, avec fond de caisse déclaré, confirmée à la synchronisation.
+
+Effort estimé : **23 à 30 jours de travail**, en huit étapes, ouverture de caisse hors ligne incluse (détail en section 8). Les sept questions sont tranchées (fin de note).
 
 ---
 
@@ -88,7 +92,7 @@ Le ticket papier porte un **numéro provisoire** propre à l'appareil (par exemp
 ### Déroulement
 
 1. Le caissier compose le panier à partir du catalogue local. Le prix vient du cache, jamais d'une saisie.
-2. L'application vérifie localement : caisse ouverte connue, délai de 24 h non dépassé, produit non concerné par un rappel connu, lot non périmé, stock local suffisant. Médicament sur ordonnance : même avertissement et même confirmation qu'en ligne (D60), sans blocage.
+2. L'application vérifie localement : caisse ouverte (connue du serveur ou ouverte provisoirement hors ligne), délai de 24 h non dépassé, produit non concerné par un rappel connu, lot non périmé, stock local suffisant, produit non classé stupéfiant. Médicament sur ordonnance : même avertissement et même confirmation qu'en ligne (D60), sans blocage.
 3. Dans **une seule transaction locale** : la vente, ses lignes, la baisse du stock local, l'entrée d'espèces dans la caisse locale, l'ajout à la file.
 4. Le ticket provisoire est imprimé ou affiché, avec la mention « Vente enregistrée hors ligne ».
 
@@ -107,11 +111,39 @@ Un indicateur permanent au comptoir affiche « Hors ligne — N ventes en attent
 | Vente en espèces | Autorisée | Décision du 04/10/2026 |
 | Tout autre moyen de paiement | Bloqué | Décision ; pas de confirmation possible |
 | Remboursement, retour | Bloqué | Décision ; règle D57 (plafond, jour même, titulaire) non vérifiable sans serveur |
-| Remise | Bloquée | Non vérifiable ; à confirmer (question 5) |
-| Ouverture et fermeture de caisse | Bloquées (proposition, question 1) | Le solde attendu dépend des ventes non envoyées |
+| Remise | Bloquée | Décision 5 |
+| Vente d'un stupéfiant | Bloquée | Décision 7 ; voir « Stupéfiants » ci-dessous |
+| Ouverture de caisse | Autorisée, provisoire | Décision 1 ; voir « Ouverture de caisse hors ligne » ci-dessous |
+| Fermeture de caisse | Bloquée | Le solde attendu dépend des ventes non envoyées |
 | Réception, ajustement, inventaire de stock | Bloqués | Hors périmètre du pilote |
 | Vente d'un produit dont le rappel est connu sur l'appareil | Bloquée | Sécurité du patient |
 | Vente après 24 h sans synchronisation | Bloquée | Décision |
+
+### Stupéfiants
+
+Le catalogue permet de les identifier : `products.regulatory_class` vaut `libre`, `sur_ordonnance`, `stupefiant` ou `psychotrope` (colonne obligatoire). La classe est téléchargée avec le catalogue ; un produit classé `stupefiant` ne peut pas être ajouté au panier hors ligne, avec le message « Stupéfiant : vente possible en ligne seulement ».
+
+Deux limites à connaître :
+
+- La valeur par défaut de la colonne est `libre`. Un stupéfiant mal classé au catalogue ne sera pas bloqué. La qualité du blocage dépend donc de la saisie du catalogue, à contrôler avant le pilote.
+- La décision vise les stupéfiants. Les **psychotropes** gardent hors ligne le traitement qu'ils ont en ligne (avertissement et confirmation de l'ordonnance, D60). À confirmer si le blocage doit aussi les couvrir : c'est une valeur à changer.
+
+Si une vente de stupéfiant arrive tout de même par la synchronisation (application modifiée), le serveur l'enregistre, comme toute vente hors ligne, avec une anomalie de gravité haute.
+
+### Ouverture de caisse hors ligne (décision 1)
+
+Le matin, sans réseau, le caissier peut ouvrir sa caisse :
+
+1. Il déverrouille l'appareil avec son code PIN et déclare son **fond de caisse**.
+2. L'appareil crée une **session provisoire** avec son propre identifiant unique, l'heure déclarée et le fond déclaré. Une seule session provisoire par caissier et par appareil ; impossible si l'appareil connaît déjà une caisse ouverte pour ce caissier.
+3. Les ventes hors ligne sont rattachées à cette session provisoire. Le ticket et l'écran portent la mention « Caisse ouverte hors ligne, à confirmer ».
+4. À la synchronisation, l'ouverture part **avant** les ventes, par une fonction dédiée (`cash_sync_offline_opening`), elle aussi protégée contre les doublons par son identifiant. Trois cas :
+   - le caissier n'a aucune caisse ouverte sur le serveur : la session est créée, avec l'origine « hors ligne », l'heure déclarée et l'heure de réception ; l'ouverture est confirmée ;
+   - le caissier a déjà une caisse ouverte sur le serveur (ouverte sur un autre appareil, ou non fermée la veille) : aucune seconde session n'est créée (une seule caisse ouverte par caissier) ; les ventes sont rattachées à la session existante et une anomalie « ouverture en double » garde le fond déclaré, à rapprocher ;
+   - le caissier n'appartient plus à l'officine : refus d'accès, l'ouverture et ses ventes restent dans la file (décision 3).
+5. La **fermeture** reste en ligne seulement, une fois la file vidée.
+
+Le fond déclaré hors ligne n'est vérifié par personne au moment de l'ouverture, comme en ligne. Il apparaît dans le rapport de caisse avec la mention « ouverture hors ligne ».
 
 ---
 
@@ -123,7 +155,7 @@ Nouvelle fonction `pos_sync_offline_sale`, dans une **nouvelle migration** (aucu
 
 Ce qu'elle fait, en **une seule transaction** :
 
-1. Vérifie que l'appelant est bien du personnel de cette officine (`is_pharmacy_staff`). C'est le seul refus possible : c'est un refus d'accès, pas un rejet de vente. La vente reste alors dans la file de l'appareil (question 3).
+1. Vérifie que l'appelant est du personnel de cette officine (`is_pharmacy_staff`) ou un administrateur GSG. C'est le seul refus possible : c'est un refus d'accès, pas un rejet de vente. La vente reste alors dans la file de l'appareil, jusqu'à ce qu'un autre membre du personnel ou GSG l'envoie (décision 3).
 2. Si `client_sale_id` existe déjà : renvoie le résultat déjà enregistré et s'arrête.
 3. Enregistre la vente telle qu'elle a eu lieu : quantités et prix **réellement pratiqués**, origine `offline`, heure déclarée par l'appareil et heure de réception par le serveur, appareil, vendeur.
 4. Choisit les lots comme en ligne (péremption la plus proche d'abord, verrou sur les lots) et décrémente le stock disponible.
@@ -141,11 +173,13 @@ Ce qu'elle fait, en **une seule transaction** :
 | Lot périmé | Il ne reste que des lots périmés | Comme stock insuffisant, avec le motif. |
 | Caisse fermée entre-temps | La session connue de l'appareil est fermée | Enregistre la vente **sans toucher à la session fermée** (son rapport reste tel que signé) ; l'encaissement est noté « hors session », à rattacher. |
 | Produit retiré du stock | Le produit n'est plus au stock de l'officine | Enregistre la ligne sans lot ; anomalie. |
-| Officine suspendue entre-temps | Statut de l'officine changé (C210) | Voir question 3. |
+| Compte ou officine désactivés entre-temps | Vendeur détaché de l'officine, ou officine suspendue (C210) | La vente reste dans la file. Un autre membre du personnel l'envoie ; si l'officine est suspendue, GSG l'envoie. Elle est enregistrée avec l'anomalie « vendeur ou officine désactivés » (décision 3). |
+| Ouverture en double | Ouverture provisoire hors ligne alors qu'une caisse du même caissier est déjà ouverte sur le serveur | Ventes rattachées à la session existante ; fond déclaré gardé dans l'anomalie. |
+| Stupéfiant vendu hors ligne | Ligne dont le produit est classé `stupefiant` | Enregistre ; anomalie de gravité haute. |
 | Heure suspecte | Heure déclarée dans le futur, ou antérieure à la dernière synchronisation | Enregistre ; anomalie d'information. |
 | Envoi tardif | Vente faite plus de 24 h après la dernière synchronisation | Enregistre ; anomalie (ne devrait pas arriver, l'appareil bloque avant). |
 
-**Stock négatif : proposition.** Deux façons d'enregistrer une vente quand le stock ne suffit pas : laisser la quantité du lot passer sous zéro, ou la garder à zéro et noter le manque à part. Je propose la seconde. Un stock négatif fausserait la recherche de disponibilité des patients, les alertes de seuil et le choix des lots, qui supposent tous une quantité positive. Le manque reste visible et chiffré dans la file à régulariser.
+**Jamais de stock négatif (décision 4).** Deux façons d'enregistrer une vente quand le stock ne suffit pas : laisser la quantité du lot passer sous zéro, ou la garder à zéro et noter le manque à part. La seconde est retenue. Un stock négatif fausserait la recherche de disponibilité des patients, les alertes de seuil et le choix des lots, qui supposent tous une quantité positive. Le manque reste visible et chiffré dans la file à régulariser.
 
 Nouvelle table `pos_sale_anomalies` : vente, ligne, type, détail chiffré, gravité, état (`ouverte`, `régularisée`), décision prise, auteur, date, commentaire. Lecture réservée au personnel de l'officine et à GSG ; **aucune écriture directe** : la régularisation passe par une fonction dédiée, journalisée.
 
@@ -161,13 +195,15 @@ Nouvel écran « À régulariser » (officine), avec un compteur visible sur le 
 | Caisse fermée entre-temps | Rattacher l'encaissement à la session suivante comme écart expliqué. |
 | Autres | Prendre acte, avec commentaire. |
 
-Chaque régularisation exige un motif et est journalisée avec son auteur. Qui peut régulariser (titulaire seul ou tout le personnel) : question 2.
+Chaque régularisation exige un motif et est journalisée avec son auteur.
+
+**Qui régularise (décision 2).** Tout le personnel de l'officine régularise les cas simples. Le **titulaire seul** régularise une anomalie « lot rappelé » et tout écart dont le montant dépasse le plafond de D57 (`pharmacies.pos_refund_staff_limit`, 100 000 GNF par défaut, propre à chaque officine). La règle est appliquée par le serveur, dans la fonction de régularisation ; l'écran grise l'action et affiche « Réservé au titulaire ».
 
 ### Deux appareils de la même officine hors ligne en même temps
 
 - **Pas de doublon** : chaque vente a son identifiant, chaque appareil son préfixe de numéro provisoire.
 - **Stock vendu deux fois** : les deux appareils partent du même stock connu et peuvent vendre la même dernière boîte. À la synchronisation, le serveur traite les ventes une par une, lots verrouillés : la première reçue prend le stock, la seconde reçoit l'anomalie « stock insuffisant ». L'ordre est celui d'arrivée, pas celui des heures déclarées (non fiables).
-- **Caisse** : chaque caissier vend dans sa propre session. En base, la règle est bien « une session ouverte par caissier et par officine » (index `cash_drawer_sessions_one_open` de C205) : deux caissiers peuvent donc vendre en même temps, chacun sur son appareil et dans sa caisse. Le texte de D62 au registre (« au plus une ouverte par officine ») se lit autrement ; à corriger au registre si la base est la bonne lecture (question 6).
+- **Caisse** : chaque caissier vend dans sa propre session. En base, la règle est bien « une session ouverte par caissier et par officine » (index `cash_drawer_sessions_one_open` de C205) : deux caissiers peuvent donc vendre en même temps, chacun sur son appareil et dans sa caisse. C'est la règle confirmée (décision 6) ; le texte de D62 au registre a été corrigé.
 - **Fermeture de caisse** : le serveur ne peut pas savoir qu'un appareil garde des ventes non envoyées. Proposition : chaque appareil s'enregistre (`pos_devices` : appareil, officine, dernière synchronisation). À la fermeture de caisse, l'écran prévient : « L'appareil A3 n'a pas synchronisé depuis 5 h. »
 - **Un appareil partagé par deux employés** : chacun déverrouille avec son code PIN ; la vente porte le vendeur déverrouillé à ce moment-là.
 
@@ -208,7 +244,7 @@ Le jeton d'accès Supabase dure 1 heure (`jwt_expiry = 3600`). Son renouvellemen
 
 ### Proposition : un verrou local, distinct de la session serveur
 
-- **Le droit de vendre hors ligne se gagne en ligne.** Il faut s'être connecté par code e-mail sur cet appareil, avoir été reconnu par le serveur comme personnel d'une officine active, et avoir une caisse ouverte. L'appareil enregistre alors : qui, quelle officine, jusqu'à quand.
+- **Le droit de vendre hors ligne se gagne en ligne.** Il faut s'être connecté par code e-mail sur cet appareil et avoir été reconnu par le serveur comme personnel d'une officine active. L'appareil enregistre alors : qui, quelle officine, jusqu'à quand. La caisse, elle, peut être ouverte hors ligne (section 3).
 - **Code PIN à 6 chiffres**, propre à chaque employé et à chaque appareil, choisi en ligne. Il est gardé sous forme d'empreinte lente et salée dans la base chiffrée ; jamais en clair, jamais envoyé au serveur. Sans code PIN défini, pas de vente hors ligne.
 - **Verrouillage automatique** après 5 minutes sans activité au comptoir ; le code PIN déverrouille.
 - **5 codes faux de suite** : le déverrouillage hors ligne de cet employé est désactivé jusqu'à une connexion en ligne.
@@ -239,13 +275,13 @@ Principe général : **la vente en ligne ne change pas.** `pos_create_sale` gard
 | **Vente sur le vrai stock** (C201, D60) | Lots choisis par le serveur ; stock insuffisant ou lot périmé : vente refusée. | La vente est enregistrée même si le stock ne suffit pas ; le manque part en anomalie. Une vente peut donc exister sans sortie de stock complète. | Le serveur choisit toujours les lots. Plus de catalogue fictif. Aucune quantité de lot négative. Chaque boîte vendue est soit sortie d'un vrai lot, soit inscrite dans la file à régulariser. |
 | **Vente et remboursement atomiques** (C197, C203) | Tout ou rien. | Rien ne change : la synchronisation d'une vente est une seule transaction. | Jamais de vente à moitié écrite. Jamais de doublon (identifiant unique). Contrôles de cohérence des montants conservés, mais un écart devient une anomalie au lieu d'un refus. |
 | **Numérotation globale** (C197, C202) | Numéro attribué par le serveur. | Le ticket porte d'abord un numéro provisoire ; le numéro officiel arrive à la synchronisation. | Un seul numéro officiel par vente, sans trou ni doublon créé par le hors-ligne. |
-| **Remboursement** (C204, D57) | Jour même et plafond hors titulaire, motif, destination du stock. | Rien : remboursement en ligne seulement. À décider : le « jour même » se compte-t-il depuis l'heure de vente déclarée ou depuis l'enregistrement par le serveur ? (question 7) | Toute la règle D57. |
-| **Caisse liée aux ventes** (C205, D62) | Vente en espèces refusée sans caisse ouverte ; encaissement écrit dans la session. | Vente hors ligne possible seulement si une caisse ouverte est connue de l'appareil. Si elle a été fermée entre-temps : vente enregistrée, encaissement « hors session » en anomalie. | Une session fermée n'est jamais modifiée. Tout encaissement en espèces est soit dans une session, soit dans la file à régulariser. |
-| **Officine suspendue** (C210) | Plus aucun droit d'écriture. | L'appareil hors ligne ne le sait pas avant de se reconnecter : jusqu'à 24 h de ventes possibles. | Blocage dès la reconnexion. Sort des ventes déjà faites : question 3. |
+| **Remboursement** (C204, D57) | Jour même et plafond hors titulaire, motif, destination du stock. | Remboursement en ligne seulement. Pour une vente hors ligne, le « jour même » se compte depuis **l'heure de vente déclarée par l'appareil** (décision 7), pas depuis l'enregistrement par le serveur. `pos_refund_sale` est donc recréée, dans une nouvelle migration, avec ce seul changement de date de référence. | Toute la règle D57 ; pour une vente en ligne, rien ne change (les tests C204 repassent tels quels). Limite : l'heure déclarée n'est pas prouvée ; elle est bornée par l'heure de réception et par la règle des 24 h. |
+| **Caisse liée aux ventes** (C205, D62) | Vente en espèces refusée sans caisse ouverte ; encaissement écrit dans la session. | Vente hors ligne possible avec une caisse ouverte connue de l'appareil, ou ouverte provisoirement hors ligne avec un fond déclaré et confirmée à la synchronisation. Si la caisse a été fermée entre-temps : vente enregistrée, encaissement « hors session » en anomalie. | Une session fermée n'est jamais modifiée. Jamais deux caisses ouvertes pour un même caissier. Tout encaissement en espèces est soit dans une session, soit dans la file à régulariser. |
+| **Officine suspendue** (C210) | Plus aucun droit d'écriture. | L'appareil hors ligne ne le sait pas avant de se reconnecter : jusqu'à 24 h de ventes possibles. | Blocage dès la reconnexion. Les ventes déjà faites restent dans la file et sont envoyées par GSG, avec une anomalie (décision 3). |
 | **Rôles vérifiés** (C211) | Droits fondés sur le rôle vérifié. | Rien : la fonction de synchronisation vérifie l'appartenance à l'officine. | Personne d'extérieur à l'officine ne peut envoyer une vente. |
 | **Journal d'audit** | Écritures seules, auteur et heure serveur. | L'heure de la vente est celle déclarée par l'appareil ; elle n'est pas prouvée. | Le journal garde les deux heures (déclarée et reçue), l'appareil, l'origine `offline`, chaque anomalie et chaque régularisation avec son auteur. Toujours aucune modification ni suppression possible. |
 
-**Constat fait en préparant cette note, à traiter à part :** `pos_create_sale` ne vérifie aujourd'hui **aucun rappel de lot**, même en ligne. Elle écarte seulement les lots périmés. Le contrôle « lot rappelé » demandé pour le hors-ligne n'a donc pas d'équivalent en ligne. De plus, `recall_affected_batches` désigne les lots par numéro de lot et par produit (lien vers `traceable_batches`), pas par lot de stock de l'officine : le rapprochement se fera sur (produit, numéro de lot). Je propose d'ouvrir une ligne au registre pour le contrôle en ligne.
+**Prérequis : C240.** `pos_create_sale` ne vérifie aujourd'hui **aucun rappel de lot**, même en ligne. Elle écarte seulement les lots périmés. Le contrôle « lot rappelé » demandé pour le hors-ligne n'a donc pas d'équivalent en ligne. De plus, les rappels désignent les lots par numéro de lot et par produit, pas par lot de stock de l'officine : le rapprochement se fera sur (produit, numéro de lot). Ce point est ouvert au registre sous **C240**, prioritaire ; la fonction de rapprochement écrite pour C240 sera réutilisée telle quelle par `pos_sync_offline_sale`. L'étape 1 du hors-ligne ne commence pas avant la correction et la validation de C240.
 
 ---
 
@@ -278,7 +314,18 @@ Nouveau fichier `supabase/sql_tests/c239_pos_offline_sync.sql`, au format des fi
 | 19. Écriture directe dans `pos_sale_anomalies` | Refusée |
 | 20. Régularisation | Motif obligatoire, auteur et date enregistrés, journal d'audit écrit ; seconde régularisation refusée |
 | 21. Lecture des anomalies par une autre officine | Aucune ligne |
-| 22. `pos_create_sale` | Résultats inchangés : les tests C197, C201, C203, C205 et C218 repassent tels quels |
+| 22. `pos_create_sale` | Résultats inchangés : les tests C197, C201, C203, C205, C218 et C240 repassent tels quels |
+| 23. Régularisation d'un « lot rappelé » par un employé | Refus (42501) ; acceptée pour le titulaire |
+| 24. Régularisation d'un écart au-dessus du plafond de l'officine par un employé | Refus (42501) ; acceptée pour le titulaire ; acceptée pour un employé sous le plafond |
+| 25. Ouverture de caisse hors ligne, caissier sans caisse ouverte | Session créée avec le fond déclaré, origine « hors ligne », heure déclarée et heure de réception ; mouvement d'ouverture écrit |
+| 26. Même ouverture envoyée deux fois | Une seule session, même réponse |
+| 27. Ouverture hors ligne alors qu'une caisse du caissier est déjà ouverte | Aucune seconde session ; anomalie « ouverture en double » avec le fond déclaré |
+| 28. Ventes rattachées à une ouverture hors ligne | Encaissements dans la session confirmée ; solde attendu = fond déclaré + ventes |
+| 29. Ouverture hors ligne avec un fond négatif, ou au nom d'un autre caissier | Refus de la demande (22023, 42501) |
+| 30. Vente d'un stupéfiant | Enregistrée, anomalie de gravité haute |
+| 31. Remise non nulle | Refus de la demande (22023) : ce chemin n'accepte aucune remise |
+| 32. Envoi par GSG pour une officine suspendue | Vente enregistrée, anomalie « vendeur ou officine désactivés » ; même envoi par un compte ordinaire : refus |
+| 33. Remboursement d'une vente hors ligne (`pos_refund_sale`) | « Jour même » compté depuis l'heure déclarée : employé accepté le jour de la vente déclarée, refusé le lendemain même si le serveur a reçu la vente ce jour-là ; tests C204 inchangés pour une vente en ligne |
 
 Script de concurrence (sur le modèle de `concurrency_numbering.sh`) : deux sessions envoient en même temps deux ventes de la dernière boîte. Attendu : deux ventes enregistrées, une seule anomalie « stock insuffisant », stock à zéro. Et : la même vente envoyée par deux sessions en même temps donne une seule vente.
 
@@ -287,11 +334,13 @@ Script de concurrence (sur le modèle de `concurrency_numbering.sh`) : deux sess
 - **Base locale** (Drift en mémoire) : vente locale en une transaction ; stock local décrémenté ; file dans l'ordre ; reprise après arrêt brutal de l'application au milieu d'un envoi.
 - **Règle des 24 h** (horloge simulée) : indicateur avant 12 h, bandeau à 12 h, blocage à 24 h, déblocage après synchronisation, heure reculée, heure avancée, redémarrage.
 - **Code PIN** : bon code, 5 erreurs, verrouillage après inactivité, expiration à 24 h.
-- **Écrans** : comptoir hors ligne (moyens autres qu'espèces absents, remboursement inaccessible), écran « À régulariser », à 360 px.
+- **Ouverture de caisse hors ligne** : fond déclaré, une seule session provisoire par caissier, ouverture envoyée avant les ventes, cas « ouverture en double ».
+- **Blocages** : stupéfiant refusé au panier hors ligne, remise indisponible, fermeture de caisse indisponible.
+- **Écrans** : comptoir hors ligne (moyens autres qu'espèces absents, remboursement inaccessible), ouverture de caisse hors ligne, écran « À régulariser » (action réservée au titulaire grisée pour un employé), à 360 px.
 
 ### Tests sur appareil réel
 
-Sur un téléphone Android, en mode avion : une journée de ventes simulée ; coupure du réseau au milieu d'un envoi ; redémarrage hors ligne ; changement de l'heure ; deux appareils sur la même officine ; reconnexion après expiration de la session. Ces tests ne peuvent pas être remplacés par des tests automatiques.
+Sur un téléphone Android, en mode avion : ouverture de caisse le matin sans réseau ; une journée de ventes simulée ; coupure du réseau au milieu d'un envoi ; redémarrage hors ligne ; changement de l'heure ; deux appareils sur la même officine ; reconnexion après expiration de la session. Ces tests ne peuvent pas être remplacés par des tests automatiques.
 
 ### Estimation par étape
 
@@ -299,27 +348,34 @@ Estimations en jours de travail, à affiner après validation de la note. Elles 
 
 | Étape | Contenu | Effort |
 |---|---|---|
-| 0 | Décisions d'Achille sur les sept questions ci-dessous | — |
-| 1 | Serveur : migration (identifiant unique, origine, heures, appareils, anomalies, historique des prix), `pos_sync_offline_sale`, fonction de régularisation, tests SQL et concurrence | 4 à 5 j |
+| Préalable | C240 : lot rappelé refusé en ligne (hors de ce total, estimé à 1,5 à 2 j) | — |
+| 0 | Décisions d'Achille sur les sept questions | fait le 04/10/2026 |
+| 1 | Serveur : migration (identifiant unique, origine, heures, appareils, anomalies, historique des prix), `pos_sync_offline_sale`, `cash_sync_offline_opening`, fonction de régularisation avec la règle du titulaire, envoi par GSG, `pos_refund_sale` sur l'heure déclarée, tests SQL et concurrence | 5 à 6 j |
 | 2 | Base locale Drift chiffrée, téléchargement de l'instantané de l'officine | 3 à 4 j |
-| 3 | Comptoir hors ligne : panier sur les données locales, vente locale, ticket provisoire, blocages | 3 à 4 j |
-| 4 | Moteur de synchronisation : file, reprises, indicateur | 2 à 3 j |
+| 3 | Comptoir hors ligne : panier sur les données locales, vente locale, ticket provisoire, blocages (stupéfiants, remises), ouverture de caisse provisoire | 4 à 5 j |
+| 4 | Moteur de synchronisation : file (ouverture puis ventes), reprises, indicateur | 2 à 3 j |
 | 5 | Règle des 24 h, bandeau, horloge interne (code natif Android) | 1,5 à 2 j |
 | 6 | Verrou local et code PIN | 2 à 3 j |
 | 7 | Écran « À régulariser » et compteurs | 2 à 3 j |
 | 8 | Tests sur appareil réel, corrections, mise à jour du registre | 3 à 4 j |
-| | **Total** | **21 à 28 j** |
+| | **Total** | **23 à 30 j** |
 
-Ordre conseillé : l'étape 1 d'abord, seule. Elle se teste entièrement en SQL, sans application, et c'est elle qui porte les garanties. Chaque étape fait l'objet d'un commit et d'une relecture avant la suivante.
+Par rapport à la première version (21 à 28 j) : + 2 jours pour l'ouverture de caisse hors ligne, répartis sur les étapes 1 et 3. Les autres décisions (titulaire pour certaines régularisations, envoi par GSG, stupéfiants, heure déclarée pour le remboursement) tiennent dans les fourchettes des étapes 1 et 3.
+
+Ordre conseillé : C240 d'abord ; puis l'étape 1, seule. Elle se teste entièrement en SQL, sans application, et c'est elle qui porte les garanties. Chaque étape fait l'objet d'un commit et d'une relecture avant la suivante.
 
 ---
 
-## Questions à trancher par Achille avant de coder
+## Questions : décisions d'Achille (04/10/2026)
 
-1. **Ouverture de caisse hors ligne.** Le matin, sans réseau, le caissier ne peut pas ouvrir sa caisse, donc pas vendre. Proposition pour le pilote : ouverture en ligne obligatoire (plus simple, plus sûr). L'autre choix, une ouverture provisoire hors ligne confirmée à la synchronisation, ajoute environ 2 jours.
-2. **Qui régularise ?** Le titulaire seul, ou tout le personnel avec le titulaire pour les cas graves (lot rappelé, écart au-dessus d'un plafond, sur le modèle de D57) ?
-3. **Compte ou officine désactivés pendant le hors-ligne.** Les ventes ont eu lieu. Proposition : elles restent dans la file et un autre membre du personnel, ou GSG, les envoie ; elles sont alors enregistrées avec une anomalie. Cela demande un chemin d'envoi par GSG pour une officine suspendue.
-4. **Stock insuffisant : manque noté à part (proposition) ou stock négatif ?**
-5. **Remises hors ligne : bloquées (proposition) ou autorisées ?**
-6. **Une caisse ouverte par caissier : à confirmer.** La base autorise une session ouverte par caissier (donc deux appareils peuvent vendre en même temps) ; le texte de D62 au registre dit « au plus une ouverte par officine ». Laquelle des deux lectures est la bonne ?
-7. **Médicaments sur ordonnance et stupéfiants hors ligne** : même règle qu'en ligne (avertir sans bloquer, D60), ou vente de stupéfiants bloquée hors ligne ? Et pour le remboursement « jour même » (D57) : compté depuis l'heure de vente déclarée ou depuis l'enregistrement par le serveur ?
+| # | Question | Décision |
+|---|---|---|
+| 1 | Ouverture de caisse hors ligne | **Permise.** Ouverture provisoire avec fond de caisse déclaré, confirmée à la synchronisation (section 3, « Ouverture de caisse hors ligne » ; tests 25 à 29). |
+| 2 | Qui régularise ? | **Tout le personnel** pour les cas simples ; **titulaire seul** pour « lot rappelé » et pour un écart au-dessus du plafond de D57 (section 4). |
+| 3 | Compte ou officine désactivés pendant le hors-ligne | Les ventes restent dans la file ; un autre membre du personnel, ou GSG, les envoie ; elles sont enregistrées avec une anomalie. Chemin d'envoi par GSG pour une officine suspendue (section 4). |
+| 4 | Stock insuffisant | Manque noté à part, **jamais de stock négatif**. |
+| 5 | Remises hors ligne | **Bloquées.** |
+| 6 | Caisses | **Une session ouverte par caissier**, comme la base. Texte de D62 corrigé au registre. |
+| 7 | Ordonnance, stupéfiants, remboursement | Ordonnance : avertissement comme en ligne (D60). Stupéfiants : vente **bloquée** hors ligne ; le catalogue permet de les identifier (`products.regulatory_class = 'stupefiant'`), sous réserve qu'ils soient bien classés (section 3, « Stupéfiants »). Remboursement « jour même » (D57) : compté depuis **l'heure de vente déclarée par l'appareil**. |
+
+Reste à confirmer, sans bloquer le démarrage : les **psychotropes** gardent-ils hors ligne le simple avertissement, ou sont-ils bloqués comme les stupéfiants ?
