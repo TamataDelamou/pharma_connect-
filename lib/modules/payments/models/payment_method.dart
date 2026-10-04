@@ -1,3 +1,5 @@
+import '../../../core/pilot/pilot_config.dart';
+
 enum PaymentMethod {
   orangeMoney,
   mtnMomo,
@@ -44,6 +46,27 @@ extension PaymentMethodExtension on PaymentMethod {
         return '💰';
       case PaymentMethod.installment:
         return '📆';
+    }
+  }
+
+  /// C239 : moyen de paiement proposé dans le périmètre du pilote
+  /// (`PilotConfig`).
+  bool get isEnabled {
+    switch (this) {
+      case PaymentMethod.orangeMoney:
+        return PilotConfig.payOrangeMoney;
+      case PaymentMethod.mtnMomo:
+        return PilotConfig.payMtnMomo;
+      case PaymentMethod.moovMoney:
+        return PilotConfig.payMoovMoney;
+      case PaymentMethod.bankCard:
+        return PilotConfig.payBankCard;
+      case PaymentMethod.gsgWallet:
+        return PilotConfig.payGsgWallet;
+      case PaymentMethod.cashOnDelivery:
+        return PilotConfig.payOnDelivery;
+      case PaymentMethod.installment:
+        return PilotConfig.payInstallment;
     }
   }
 

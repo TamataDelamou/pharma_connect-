@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/kernel/kernel_badge.dart';
+import '../../../core/pilot/pilot_config.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/buttons/tertiary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
@@ -173,10 +174,13 @@ class _LoginScreenState extends State<LoginScreen> {
       spacing: 8,
       runSpacing: 8,
       children: [
-        _buildChip(LoginMethod.emailCode, '📧 Code OTP'),
-        _buildChip(LoginMethod.emailMagic, '🔗 Magic Link'),
-        _buildChip(LoginMethod.phoneWhatsapp, '💬 WhatsApp'),
-        _buildChip(LoginMethod.phoneSms, '📱 SMS'),
+        _buildChip(LoginMethod.emailCode, '📧 Code par e-mail'),
+        // C239 : autres modes masqués pour le pilote (`PilotConfig`).
+        if (PilotConfig.authMagicLink)
+          _buildChip(LoginMethod.emailMagic, '🔗 Magic Link'),
+        if (PilotConfig.authWhatsapp)
+          _buildChip(LoginMethod.phoneWhatsapp, '💬 WhatsApp'),
+        if (PilotConfig.authSms) _buildChip(LoginMethod.phoneSms, '📱 SMS'),
       ],
     );
   }

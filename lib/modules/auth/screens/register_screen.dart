@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/kernel/kernel_badge.dart';
+import '../../../core/pilot/pilot_config.dart';
 import '../../../core/theme/spacing.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/buttons/tertiary_button.dart';
@@ -209,9 +210,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     spacing: 8,
                     runSpacing: 8,
                     children: [
-                      _buildChip('Email (code)', 'emailCode'),
-                      _buildChip('WhatsApp', 'phoneWhatsapp'),
-                      _buildChip('SMS', 'phoneSms'),
+                      _buildChip('Code par e-mail', 'emailCode'),
+                      // C239 : autres modes masqués pour le pilote
+                      // (`PilotConfig`).
+                      if (PilotConfig.authWhatsapp)
+                        _buildChip('WhatsApp', 'phoneWhatsapp'),
+                      if (PilotConfig.authSms) _buildChip('SMS', 'phoneSms'),
                     ],
                   ),
                   const SizedBox(height: 8),

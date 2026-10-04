@@ -14,6 +14,8 @@ import '../../auth/services/profile_service.dart';
 import '../../delivery/providers/delivery_provider.dart';
 import '../../payments/models/payment_method.dart';
 import '../../payments/providers/payment_provider.dart';
+import '../../payments/widgets/pay_at_pickup_notice.dart';
+import '../../../core/pilot/pilot_config.dart';
 import '../providers/reservation_provider.dart';
 import '../widgets/checkout_step_indicator.dart';
 import '../widgets/timeslot_picker.dart';
@@ -35,7 +37,9 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
   final _notesController = TextEditingController();
   final ProfileService _profileService = ProfileService();
   final OfflineSyncService _offlineSync = OfflineSyncService();
-  String _selectedPaymentMethod = 'Orange Money';
+  late String _selectedPaymentMethod = _paymentMethods.isNotEmpty
+      ? _paymentMethods.first
+      : PilotConfig.payAtPickupLabel;
   bool _isSubmitting = false;
   // RG-LIV-01 (audit Module 7, 29/08/2026) : aucun produit ne porte
   // aujourd'hui de drapeau chaîne du froid automatique (voir Module 3/CAT —
@@ -59,13 +63,18 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
   // conséquence. _selectedDate pilote la navigation par jour du picker.
   DateTime _selectedDate = DateTime.now();
 
-  final List<String> _paymentMethods = [
+  // C239 : seuls les moyens activés dans `PilotConfig` sont proposés. Liste
+  // vide : la réservation se termine par « À payer à l'officine au retrait »,
+  // sans transaction de paiement.
+  late final List<String> _paymentMethods = [
     'Orange Money',
     'MTN MoMo',
     'Moov Money',
     'Portefeuille GSG',
     'Paiement à la livraison',
-  ];
+  ].where((label) => _mapPaymentMethod(label)?.isEnabled ?? false).toList();
+
+  bool get _payAtPickup => _paymentMethods.isEmpty;
 
   @override
   void dispose() {
@@ -446,7 +455,10 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Mode de paiement', style: context.text.heading3),
+                Text(
+                  _payAtPickup ? 'Paiement' : 'Mode de paiement',
+                  style: context.text.heading3,
+                ),
                 const SizedBox(height: 8),
                 Text('Montant total :', style: context.text.label),
                 Text(
@@ -456,12 +468,18 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Text(
-                  'Choisissez votre moyen de paiement',
-                  style: context.text.label,
-                ),
-                const SizedBox(height: 8),
-                ..._paymentMethods.map((method) => _buildPaymentOption(method)),
+                if (_payAtPickup)
+                  const PayAtPickupNotice()
+                else ...[
+                  Text(
+                    'Choisissez votre moyen de paiement',
+                    style: context.text.label,
+                  ),
+                  const SizedBox(height: 8),
+                  ..._paymentMethods.map(
+                    (method) => _buildPaymentOption(method),
+                  ),
+                ],
               ],
             ),
           ),
@@ -827,6 +845,11 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
                   style: context.text.body2,
                 ),
                 const SizedBox(height: 16),
+                // C239 : pas de paiement en ligne pendant le pilote.
+                if (_payAtPickup) ...[
+                  const PayAtPickupNotice(),
+                  const SizedBox(height: 16),
+                ],
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(

@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 
+import '../core/pilot/pilot_config.dart'; // C239
 import '../core/services/supabase_service.dart';
 import '../core/widgets/screens/not_found_screen.dart';
 import 'app_shell.dart'; // C226
@@ -503,6 +504,9 @@ class AppRouter {
           GoRoute(
             path: '/payments/installment/:id',
             name: 'payments-installment',
+            // C239 : paiement en plusieurs fois masqué pour le pilote.
+            redirect: (context, state) =>
+                PilotConfig.payInstallment ? null : '/payments',
             builder: (context, state) {
               final id = state.pathParameters['id']!;
               return InstallmentPlanScreen(transactionId: id);
@@ -511,6 +515,9 @@ class AppRouter {
           GoRoute(
             path: '/wallet',
             name: 'wallet',
+            // C239 : portefeuille GSG masqué pour le pilote.
+            redirect: (context, state) =>
+                PilotConfig.payGsgWallet ? null : '/dashboard',
             builder: (context, state) => const WalletScreen(),
           ),
           GoRoute(
