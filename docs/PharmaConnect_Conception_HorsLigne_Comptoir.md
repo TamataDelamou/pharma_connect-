@@ -92,7 +92,7 @@ Le ticket papier porte un **numéro provisoire** propre à l'appareil (par exemp
 ### Déroulement
 
 1. Le caissier compose le panier à partir du catalogue local. Le prix vient du cache, jamais d'une saisie.
-2. L'application vérifie localement : caisse ouverte (connue du serveur ou ouverte provisoirement hors ligne), délai de 24 h non dépassé, produit non concerné par un rappel connu, lot non périmé, stock local suffisant, produit non classé stupéfiant. Médicament sur ordonnance : même avertissement et même confirmation qu'en ligne (D60), sans blocage.
+2. L'application vérifie localement : caisse ouverte (connue du serveur ou ouverte provisoirement hors ligne), délai de 24 h non dépassé, produit non concerné par un rappel connu, lot non périmé, stock local suffisant, produit non classé stupéfiant ni psychotrope. Médicament sur ordonnance : même avertissement et même confirmation qu'en ligne (D60), sans blocage.
 3. Dans **une seule transaction locale** : la vente, ses lignes, la baisse du stock local, l'entrée d'espèces dans la caisse locale, l'ajout à la file.
 4. Le ticket provisoire est imprimé ou affiché, avec la mention « Vente enregistrée hors ligne ».
 
@@ -112,23 +112,23 @@ Un indicateur permanent au comptoir affiche « Hors ligne — N ventes en attent
 | Tout autre moyen de paiement | Bloqué | Décision ; pas de confirmation possible |
 | Remboursement, retour | Bloqué | Décision ; règle D57 (plafond, jour même, titulaire) non vérifiable sans serveur |
 | Remise | Bloquée | Décision 5 |
-| Vente d'un stupéfiant | Bloquée | Décision 7 ; voir « Stupéfiants » ci-dessous |
+| Vente d'un stupéfiant ou d'un psychotrope | Bloquée | Décision 7 et complément du 04/10/2026 ; voir « Stupéfiants et psychotropes » ci-dessous |
 | Ouverture de caisse | Autorisée, provisoire | Décision 1 ; voir « Ouverture de caisse hors ligne » ci-dessous |
 | Fermeture de caisse | Bloquée | Le solde attendu dépend des ventes non envoyées |
 | Réception, ajustement, inventaire de stock | Bloqués | Hors périmètre du pilote |
 | Vente d'un produit dont le rappel est connu sur l'appareil | Bloquée | Sécurité du patient |
 | Vente après 24 h sans synchronisation | Bloquée | Décision |
 
-### Stupéfiants
+### Stupéfiants et psychotropes
 
-Le catalogue permet de les identifier : `products.regulatory_class` vaut `libre`, `sur_ordonnance`, `stupefiant` ou `psychotrope` (colonne obligatoire). La classe est téléchargée avec le catalogue ; un produit classé `stupefiant` ne peut pas être ajouté au panier hors ligne, avec le message « Stupéfiant : vente possible en ligne seulement ».
+Le catalogue permet de les identifier : `products.regulatory_class` vaut `libre`, `sur_ordonnance`, `stupefiant` ou `psychotrope` (colonne obligatoire). La classe est téléchargée avec le catalogue ; un produit classé `stupefiant` ou `psychotrope` ne peut pas être ajouté au panier hors ligne, avec le message « Stupéfiant ou psychotrope : vente possible en ligne seulement ».
 
-Deux limites à connaître :
+À savoir :
 
-- La valeur par défaut de la colonne est `libre`. Un stupéfiant mal classé au catalogue ne sera pas bloqué. La qualité du blocage dépend donc de la saisie du catalogue, à contrôler avant le pilote.
-- La décision vise les stupéfiants. Les **psychotropes** gardent hors ligne le traitement qu'ils ont en ligne (avertissement et confirmation de l'ordonnance, D60). À confirmer si le blocage doit aussi les couvrir : c'est une valeur à changer.
+- La valeur par défaut de la colonne est `libre`. Un stupéfiant ou un psychotrope mal classé au catalogue ne sera pas bloqué. Le contrôle du classement avant le pilote, et une correction pour qu'un oubli de classement ne passe plus inaperçu, sont suivis au registre sous **C241**.
+- Les **psychotropes** sont bloqués hors ligne comme les stupéfiants (décision d'Achille, complément du 04/10/2026). En ligne, rien ne change pour eux : avertissement et confirmation de l'ordonnance (D60).
 
-Si une vente de stupéfiant arrive tout de même par la synchronisation (application modifiée), le serveur l'enregistre, comme toute vente hors ligne, avec une anomalie de gravité haute.
+Si une vente de stupéfiant ou de psychotrope arrive tout de même par la synchronisation (application modifiée), le serveur l'enregistre, comme toute vente hors ligne, avec une anomalie de gravité haute.
 
 ### Ouverture de caisse hors ligne (décision 1)
 
@@ -175,7 +175,7 @@ Ce qu'elle fait, en **une seule transaction** :
 | Produit retiré du stock | Le produit n'est plus au stock de l'officine | Enregistre la ligne sans lot ; anomalie. |
 | Compte ou officine désactivés entre-temps | Vendeur détaché de l'officine, ou officine suspendue (C210) | La vente reste dans la file. Un autre membre du personnel l'envoie ; si l'officine est suspendue, GSG l'envoie. Elle est enregistrée avec l'anomalie « vendeur ou officine désactivés » (décision 3). |
 | Ouverture en double | Ouverture provisoire hors ligne alors qu'une caisse du même caissier est déjà ouverte sur le serveur | Ventes rattachées à la session existante ; fond déclaré gardé dans l'anomalie. |
-| Stupéfiant vendu hors ligne | Ligne dont le produit est classé `stupefiant` | Enregistre ; anomalie de gravité haute. |
+| Stupéfiant ou psychotrope vendu hors ligne | Ligne dont le produit est classé `stupefiant` ou `psychotrope` | Enregistre ; anomalie de gravité haute. |
 | Heure suspecte | Heure déclarée dans le futur, ou antérieure à la dernière synchronisation | Enregistre ; anomalie d'information. |
 | Envoi tardif | Vente faite plus de 24 h après la dernière synchronisation | Enregistre ; anomalie (ne devrait pas arriver, l'appareil bloque avant). |
 
@@ -322,7 +322,7 @@ Nouveau fichier `supabase/sql_tests/c239_pos_offline_sync.sql`, au format des fi
 | 27. Ouverture hors ligne alors qu'une caisse du caissier est déjà ouverte | Aucune seconde session ; anomalie « ouverture en double » avec le fond déclaré |
 | 28. Ventes rattachées à une ouverture hors ligne | Encaissements dans la session confirmée ; solde attendu = fond déclaré + ventes |
 | 29. Ouverture hors ligne avec un fond négatif, ou au nom d'un autre caissier | Refus de la demande (22023, 42501) |
-| 30. Vente d'un stupéfiant | Enregistrée, anomalie de gravité haute |
+| 30. Vente d'un stupéfiant, puis d'un psychotrope | Enregistrées, anomalie de gravité haute pour chacune |
 | 31. Remise non nulle | Refus de la demande (22023) : ce chemin n'accepte aucune remise |
 | 32. Envoi par GSG pour une officine suspendue | Vente enregistrée, anomalie « vendeur ou officine désactivés » ; même envoi par un compte ordinaire : refus |
 | 33. Remboursement d'une vente hors ligne (`pos_refund_sale`) | « Jour même » compté depuis l'heure déclarée : employé accepté le jour de la vente déclarée, refusé le lendemain même si le serveur a reçu la vente ce jour-là ; tests C204 inchangés pour une vente en ligne |
@@ -335,7 +335,7 @@ Script de concurrence (sur le modèle de `concurrency_numbering.sh`) : deux sess
 - **Règle des 24 h** (horloge simulée) : indicateur avant 12 h, bandeau à 12 h, blocage à 24 h, déblocage après synchronisation, heure reculée, heure avancée, redémarrage.
 - **Code PIN** : bon code, 5 erreurs, verrouillage après inactivité, expiration à 24 h.
 - **Ouverture de caisse hors ligne** : fond déclaré, une seule session provisoire par caissier, ouverture envoyée avant les ventes, cas « ouverture en double ».
-- **Blocages** : stupéfiant refusé au panier hors ligne, remise indisponible, fermeture de caisse indisponible.
+- **Blocages** : stupéfiant et psychotrope refusés au panier hors ligne, remise indisponible, fermeture de caisse indisponible.
 - **Écrans** : comptoir hors ligne (moyens autres qu'espèces absents, remboursement inaccessible), ouverture de caisse hors ligne, écran « À régulariser » (action réservée au titulaire grisée pour un employé), à 360 px.
 
 ### Tests sur appareil réel
@@ -352,7 +352,7 @@ Estimations en jours de travail, à affiner après validation de la note. Elles 
 | 0 | Décisions d'Achille sur les sept questions | fait le 04/10/2026 |
 | 1 | Serveur : migration (identifiant unique, origine, heures, appareils, anomalies, historique des prix), `pos_sync_offline_sale`, `cash_sync_offline_opening`, fonction de régularisation avec la règle du titulaire, envoi par GSG, `pos_refund_sale` sur l'heure déclarée, tests SQL et concurrence | 5 à 6 j |
 | 2 | Base locale Drift chiffrée, téléchargement de l'instantané de l'officine | 3 à 4 j |
-| 3 | Comptoir hors ligne : panier sur les données locales, vente locale, ticket provisoire, blocages (stupéfiants, remises), ouverture de caisse provisoire | 4 à 5 j |
+| 3 | Comptoir hors ligne : panier sur les données locales, vente locale, ticket provisoire, blocages (stupéfiants, psychotropes, remises), ouverture de caisse provisoire | 4 à 5 j |
 | 4 | Moteur de synchronisation : file (ouverture puis ventes), reprises, indicateur | 2 à 3 j |
 | 5 | Règle des 24 h, bandeau, horloge interne (code natif Android) | 1,5 à 2 j |
 | 6 | Verrou local et code PIN | 2 à 3 j |
@@ -376,6 +376,6 @@ Ordre conseillé : C240 d'abord ; puis l'étape 1, seule. Elle se teste entière
 | 4 | Stock insuffisant | Manque noté à part, **jamais de stock négatif**. |
 | 5 | Remises hors ligne | **Bloquées.** |
 | 6 | Caisses | **Une session ouverte par caissier**, comme la base. Texte de D62 corrigé au registre. |
-| 7 | Ordonnance, stupéfiants, remboursement | Ordonnance : avertissement comme en ligne (D60). Stupéfiants : vente **bloquée** hors ligne ; le catalogue permet de les identifier (`products.regulatory_class = 'stupefiant'`), sous réserve qu'ils soient bien classés (section 3, « Stupéfiants »). Remboursement « jour même » (D57) : compté depuis **l'heure de vente déclarée par l'appareil**. |
+| 7 | Ordonnance, stupéfiants, remboursement | Ordonnance : avertissement comme en ligne (D60). Stupéfiants et psychotropes (complément du 04/10/2026) : vente **bloquée** hors ligne ; le catalogue permet de les identifier (`products.regulatory_class`), sous réserve qu'ils soient bien classés (section 3, « Stupéfiants »). Remboursement « jour même » (D57) : compté depuis **l'heure de vente déclarée par l'appareil** ; la recréation de `pos_refund_sale` est acceptée, dans l'étape 1. |
 
-Reste à confirmer, sans bloquer le démarrage : les **psychotropes** gardent-ils hors ligne le simple avertissement, ou sont-ils bloqués comme les stupéfiants ?
+Plus aucune question ouverte. Le contrôle du classement réglementaire du catalogue est suivi sous C241.
