@@ -6,7 +6,7 @@ Référence produit : *Cahier de Conception PharmaConnect v2.1* (34 modules, 66 
 
 ## État au 04/10/2026 — à lire en premier
 
-Les sections « Mise à jour » et « État du projet » plus bas sont l'historique d'août 2026 : plusieurs constats y sont dépassés (nombre de tests, état de la CI, commandes, chantiers). La référence vivante est le registre `docs/PharmaConnect_Registre_Ecarts_A_Verifier.md` (décisions D1–D67, tickets C1–C238, section A « à prouver avant pilote » A31–A39).
+Les sections « Mise à jour » et « État du projet » plus bas sont l'historique d'août 2026 : plusieurs constats y sont dépassés (nombre de tests, état de la CI, commandes, chantiers). La référence vivante est le registre `docs/PharmaConnect_Registre_Ecarts_A_Verifier.md` (décisions D1–D67, tickets C1–C239, section A « à prouver avant pilote » A31–A39).
 
 **Base de données**
 - 123 migrations dans `supabase/migrations/`, toutes appliquées sur le projet en ligne depuis le 02/10/2026 (`supabase db push`, après sauvegarde dans `..\pharma_connect_backups\20261002_avant_push_22\` et répétition locale). La base en ligne ne contient aucune donnée réelle (catalogue de démonstration de `seed.sql`, 2 comptes d'essai sans profil).
