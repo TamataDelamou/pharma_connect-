@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/kernel/kernel_badge.dart';
+import '../../core/pilot/pilot_config.dart';
 import '../../core/widgets/cards/glass_card.dart';
 import '../../core/widgets/layout/responsive.dart';
 import '../auth/models/user_role.dart';
@@ -115,25 +116,33 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   QuickActionGrid(
                     actions: _actionsFor(role, dashboard.data.actions),
                   ),
-                  const SizedBox(height: 32),
 
                   // ===== INDICATEURS CLÉS (3 cartes stats) =====
-                  GridView.count(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    crossAxisCount: compact ? 1 : 3,
-                    crossAxisSpacing: 24,
-                    mainAxisSpacing: compact ? 12 : 24,
-                    childAspectRatio: compact ? 2.6 : 1.2,
-                    children: dashboard.data.stats.map((stat) {
-                      return _buildStatCard(stat);
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 32),
+                  // C239 : valeurs fictives, masquées pour le pilote
+                  // (`PilotConfig.dashboardDemoStats`).
+                  if (PilotConfig.dashboardDemoStats) ...[
+                    const SizedBox(height: 32),
+                    GridView.count(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisCount: compact ? 1 : 3,
+                      crossAxisSpacing: 24,
+                      mainAxisSpacing: compact ? 12 : 24,
+                      childAspectRatio: compact ? 2.6 : 1.2,
+                      children: dashboard.data.stats.map((stat) {
+                        return _buildStatCard(stat);
+                      }).toList(),
+                    ),
+                  ],
 
                   // ===== ACTIVITÉ RÉCENTE + ALERTES =====
                   // C233 : 2 colonnes en largeur, empilées sur téléphone.
-                  if (compact) ...[
+                  // C239 : contenu fictif, masqué pour le pilote
+                  // (`PilotConfig.dashboardDemoActivity`).
+                  if (!PilotConfig.dashboardDemoActivity)
+                    const SizedBox.shrink()
+                  else if (compact) ...[
+                    const SizedBox(height: 32),
                     GlassCard(
                       padding: const EdgeInsets.all(16),
                       child: ActivityTimeline(
@@ -145,7 +154,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       padding: const EdgeInsets.all(16),
                       child: AlertCenter(alerts: dashboard.data.alerts),
                     ),
-                  ] else
+                  ] else ...[
+                    const SizedBox(height: 32),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -168,6 +178,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                       ],
                     ),
+                  ],
                 ],
               ),
       ),

@@ -7,6 +7,7 @@ import '../models/prescription_item.dart';
 import '../models/prescription_status.dart';
 import '../services/prescription_service.dart';
 import '../services/ocr_service.dart';
+import '../../../core/pilot/pilot_config.dart';
 import '../../../core/services/offline_sync_service.dart';
 import '../../../core/services/supabase_service.dart';
 import '../../catalog/services/catalog_service.dart';
@@ -194,9 +195,14 @@ class PrescriptionProvider extends ChangeNotifier {
       // coupure réseau, on met l'écriture en file d'attente locale (rejouée
       // par OfflineSyncService.syncAll()) exactement comme le fait déjà
       // StockProvider pour un ajustement de stock (Module 4).
-      final ocrResult = await _ocrService.extractFromImage(imagePath);
-      _extractedItems = ocrResult['items'] as List<PrescriptionItem>;
-      _ocrConfidenceScore = ocrResult['confidenceScore'] as double;
+      // C239 : lecture automatique masquée pour le pilote
+      // (`PilotConfig.aiPrescriptionOcr`) : l'ordonnance part en photo,
+      // sans médicament extrait ni score de confiance.
+      if (PilotConfig.aiPrescriptionOcr) {
+        final ocrResult = await _ocrService.extractFromImage(imagePath);
+        _extractedItems = ocrResult['items'] as List<PrescriptionItem>;
+        _ocrConfidenceScore = ocrResult['confidenceScore'] as double;
+      }
       _isProcessingOcr = false;
 
       Prescription prescription;

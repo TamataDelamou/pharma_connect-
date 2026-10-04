@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
+import '../../../core/pilot/pilot_config.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../../auth/models/user_role.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -56,8 +57,11 @@ class _StockAlertsScreenState extends State<StockAlertsScreen> {
                 // mais n'avaient aucun point d'entrée de navigation nulle
                 // part dans l'app — même défaut que /alerts/thresholds et
                 // /alerts/preferences avant leur correction au Module 10.
-                if (context.watch<AuthProvider>().effectiveRole ==
-                    UserRole.pharmacien)
+                // C239 : prévision simulée, masquée pour le pilote
+                // (`PilotConfig.aiDemandForecast`).
+                if (PilotConfig.aiDemandForecast &&
+                    context.watch<AuthProvider>().effectiveRole ==
+                        UserRole.pharmacien)
                   IconButton(
                     icon: Icon(
                       Icons.insights_outlined,

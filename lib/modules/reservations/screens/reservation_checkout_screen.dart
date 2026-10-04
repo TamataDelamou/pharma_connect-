@@ -14,6 +14,8 @@ import '../../auth/services/profile_service.dart';
 import '../../delivery/providers/delivery_provider.dart';
 import '../../payments/models/payment_method.dart';
 import '../../payments/providers/payment_provider.dart';
+import '../../payments/widgets/pay_at_pickup_notice.dart';
+import '../../../core/pilot/pilot_config.dart';
 import '../providers/reservation_provider.dart';
 import '../widgets/checkout_step_indicator.dart';
 import '../widgets/timeslot_picker.dart';
@@ -35,7 +37,9 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
   final _notesController = TextEditingController();
   final ProfileService _profileService = ProfileService();
   final OfflineSyncService _offlineSync = OfflineSyncService();
-  String _selectedPaymentMethod = 'Orange Money';
+  late String _selectedPaymentMethod = _paymentMethods.isNotEmpty
+      ? _paymentMethods.first
+      : PilotConfig.payAtPickupLabel;
   bool _isSubmitting = false;
   // RG-LIV-01 (audit Module 7, 29/08/2026) : aucun produit ne porte
   // aujourd'hui de drapeau chaîne du froid automatique (voir Module 3/CAT —
@@ -59,13 +63,57 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
   // conséquence. _selectedDate pilote la navigation par jour du picker.
   DateTime _selectedDate = DateTime.now();
 
-  final List<String> _paymentMethods = [
+  // C239 : seuls les moyens activés dans `PilotConfig` sont proposés. Liste
+  // vide : la réservation se termine par « À payer à l'officine au retrait »,
+  // sans transaction de paiement.
+  late final List<String> _paymentMethods = [
     'Orange Money',
     'MTN MoMo',
     'Moov Money',
     'Portefeuille GSG',
     'Paiement à la livraison',
+  ].where((label) => _mapPaymentMethod(label)?.isEnabled ?? false).toList();
+
+  bool get _payAtPickup => _paymentMethods.isEmpty;
+
+  // C239 : étapes affichées, dans l'ordre. « Créneau » (disponibilités
+  // tirées au hasard) et « Livraison » (le pilote se fait en Click &
+  // Collect) sont masquées par `PilotConfig` ; la numérotation suit.
+  static const List<CheckoutStep> _steps = [
+    CheckoutStep.summary,
+    if (PilotConfig.reservationTimeslots) CheckoutStep.timeslot,
+    if (PilotConfig.reservationDelivery) CheckoutStep.details,
+    CheckoutStep.payment,
+    CheckoutStep.confirmation,
   ];
+
+  static const Map<CheckoutStep, String> _stepLabels = {
+    CheckoutStep.summary: 'Récapitulatif',
+    CheckoutStep.timeslot: 'Créneau',
+    CheckoutStep.details: 'Livraison',
+    CheckoutStep.payment: 'Paiement',
+    CheckoutStep.confirmation: 'Confirmation',
+  };
+
+  void _goToNextStep(ReservationProvider provider) {
+    final next = _steps[_steps.indexOf(_currentStep) + 1];
+    setState(() => _currentStep = next);
+    if (next == CheckoutStep.timeslot) {
+      final pharmacyId = provider.selectedPharmacyId;
+      if (pharmacyId != null) {
+        provider.loadAvailableSlots(
+          pharmacyId: pharmacyId,
+          date: _selectedDate,
+        );
+      }
+    }
+  }
+
+  void _goToPreviousStep() {
+    setState(() {
+      _currentStep = _steps[_steps.indexOf(_currentStep) - 1];
+    });
+  }
 
   @override
   void dispose() {
@@ -96,10 +144,7 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
                     ),
                     onPressed: () {
                       if (_currentStep != CheckoutStep.summary) {
-                        setState(() {
-                          _currentStep =
-                              CheckoutStep.values[_currentStep.index - 1];
-                        });
+                        _goToPreviousStep();
                       } else {
                         context.pop();
                       }
@@ -123,14 +168,8 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
 
             // Indicateur d'étape
             CheckoutStepIndicator(
-              currentStep: _currentStep.index,
-              steps: const [
-                'Récapitulatif',
-                'Créneau',
-                'Livraison',
-                'Paiement',
-                'Confirmation',
-              ],
+              currentStep: _steps.indexOf(_currentStep),
+              steps: [for (final step in _steps) _stepLabels[step]!],
             ),
             const SizedBox(height: 24),
 
@@ -230,39 +269,20 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () => context.pop(),
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: context.palette.veil(0.24)),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                  child: const Text('Retour au panier'),
-                ),
+          _buildStepActions(
+            back: OutlinedButton(
+              onPressed: () => context.pop(),
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: context.palette.veil(0.24)),
+                padding: const EdgeInsets.symmetric(vertical: 14),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                flex: 2,
-                child: PrimaryButton(
-                  label: 'Continuer',
-                  icon: Icons.arrow_forward,
-                  onPressed: () {
-                    setState(() {
-                      _currentStep = CheckoutStep.timeslot;
-                    });
-                    final pharmacyId = provider.selectedPharmacyId;
-                    if (pharmacyId != null) {
-                      provider.loadAvailableSlots(
-                        pharmacyId: pharmacyId,
-                        date: _selectedDate,
-                      );
-                    }
-                  },
-                ),
-              ),
-            ],
+              child: const Text('Retour au panier'),
+            ),
+            primary: PrimaryButton(
+              label: 'Continuer',
+              icon: Icons.arrow_forward,
+              onPressed: () => _goToNextStep(provider),
+            ),
           ),
         ],
       ),
@@ -310,11 +330,7 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
             children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: () {
-                    setState(() {
-                      _currentStep = CheckoutStep.summary;
-                    });
-                  },
+                  onPressed: _goToPreviousStep,
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(color: context.palette.veil(0.24)),
                     padding: const EdgeInsets.symmetric(vertical: 14),
@@ -328,11 +344,7 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
                 child: PrimaryButton(
                   label: 'Continuer',
                   icon: Icons.arrow_forward,
-                  onPressed: () {
-                    setState(() {
-                      _currentStep = CheckoutStep.details;
-                    });
-                  },
+                  onPressed: () => _goToNextStep(provider),
                 ),
               ),
             ],
@@ -403,11 +415,7 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
             children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: () {
-                    setState(() {
-                      _currentStep = CheckoutStep.timeslot;
-                    });
-                  },
+                  onPressed: _goToPreviousStep,
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(color: context.palette.veil(0.24)),
                     padding: const EdgeInsets.symmetric(vertical: 14),
@@ -421,11 +429,7 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
                 child: PrimaryButton(
                   label: 'Continuer',
                   icon: Icons.arrow_forward,
-                  onPressed: () {
-                    setState(() {
-                      _currentStep = CheckoutStep.payment;
-                    });
-                  },
+                  onPressed: () => _goToNextStep(provider),
                 ),
               ),
             ],
@@ -446,7 +450,10 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Mode de paiement', style: context.text.heading3),
+                Text(
+                  _payAtPickup ? 'Paiement' : 'Mode de paiement',
+                  style: context.text.heading3,
+                ),
                 const SizedBox(height: 8),
                 Text('Montant total :', style: context.text.label),
                 Text(
@@ -456,263 +463,270 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Text(
-                  'Choisissez votre moyen de paiement',
-                  style: context.text.label,
-                ),
-                const SizedBox(height: 8),
-                ..._paymentMethods.map((method) => _buildPaymentOption(method)),
+                if (_payAtPickup)
+                  const PayAtPickupNotice()
+                else ...[
+                  Text(
+                    'Choisissez votre moyen de paiement',
+                    style: context.text.label,
+                  ),
+                  const SizedBox(height: 8),
+                  ..._paymentMethods.map(
+                    (method) => _buildPaymentOption(method),
+                  ),
+                ],
               ],
             ),
           ),
           const SizedBox(height: 24),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () {
-                    setState(() {
-                      _currentStep = CheckoutStep.details;
-                    });
-                  },
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: context.palette.veil(0.24)),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                  child: const Text('Retour'),
-                ),
+          _buildStepActions(
+            back: OutlinedButton(
+              onPressed: _goToPreviousStep,
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: context.palette.veil(0.24)),
+                padding: const EdgeInsets.symmetric(vertical: 14),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                flex: 2,
-                child: PrimaryButton(
-                  label: _isSubmitting
-                      ? 'Validation...'
-                      : 'Confirmer la commande',
-                  isLoading: _isSubmitting,
-                  onPressed: _isSubmitting
-                      ? null
-                      : () async {
-                          // Bug corrigé (audit Module 6, 29/08/2026) : cet
-                          // écran envoyait un patientId ('patient_123', pas
-                          // un uuid valide), un patientName et un
-                          // patientPhone en dur, et repliait un pharmacyId
-                          // absent sur 'ph_1' — même défaut déjà corrigé
-                          // pour prescription_upload_screen.dart (Module 5)
-                          // et stock_adjustment_screen.dart (Module 4).
-                          // reservations.patient_id/pharmacy_id sont de type
-                          // uuid : ces insertions échouaient pour tout le
-                          // monde en production.
-                          final auth = context.read<AuthProvider>();
-                          final patientId = auth.userId;
-                          final pharmacyId = provider.selectedPharmacyId;
-                          if (patientId == null) {
+              child: const Text('Retour'),
+            ),
+            primary: PrimaryButton(
+              label: _isSubmitting ? 'Validation...' : 'Confirmer la commande',
+              isLoading: _isSubmitting,
+              onPressed: _isSubmitting
+                  ? null
+                  : () async {
+                      // Bug corrigé (audit Module 6, 29/08/2026) : cet
+                      // écran envoyait un patientId ('patient_123', pas
+                      // un uuid valide), un patientName et un
+                      // patientPhone en dur, et repliait un pharmacyId
+                      // absent sur 'ph_1' — même défaut déjà corrigé
+                      // pour prescription_upload_screen.dart (Module 5)
+                      // et stock_adjustment_screen.dart (Module 4).
+                      // reservations.patient_id/pharmacy_id sont de type
+                      // uuid : ces insertions échouaient pour tout le
+                      // monde en production.
+                      final auth = context.read<AuthProvider>();
+                      final patientId = auth.userId;
+                      final pharmacyId = provider.selectedPharmacyId;
+                      if (patientId == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Vous devez être connecté pour réserver.',
+                            ),
+                            backgroundColor: context.palette.danger,
+                          ),
+                        );
+                        return;
+                      }
+                      if (pharmacyId == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Aucune officine sélectionnée pour cette commande.',
+                            ),
+                            backgroundColor: context.palette.danger,
+                          ),
+                        );
+                        return;
+                      }
+                      setState(() => _isSubmitting = true);
+                      final fullName = await _profileService.getFullName(
+                        patientId,
+                      );
+                      final patientName =
+                          fullName ??
+                          auth.userEmail ??
+                          auth.userPhone ??
+                          'Patient';
+                      final reservation = await provider.createReservation(
+                        patientId: patientId,
+                        patientName: patientName,
+                        patientPhone: auth.userPhone ?? '',
+                        patientEmail: auth.userEmail,
+                        pharmacyId: pharmacyId,
+                        pharmacyName:
+                            provider.selectedPharmacyName ?? 'Pharmacie',
+                        pharmacyAddress:
+                            provider.selectedPharmacyAddress ?? 'Adresse',
+                        pharmacyPhone: provider.selectedPharmacyPhone,
+                        preferredPickupTime: provider.selectedSlot?.start,
+                        deliveryAddress: _addressController.text.trim(),
+                        paymentMethod: _selectedPaymentMethod,
+                        notes: _notesController.text.trim(),
+                      );
+                      setState(() => _isSubmitting = false);
+                      if (reservation != null && context.mounted) {
+                        // Mode hors-ligne (directive standing) : la
+                        // commande est prise en compte localement et
+                        // sera envoyée automatiquement au retour du
+                        // réseau — informatif, non bloquant (même
+                        // distinction que Module 5).
+                        if (provider.isOffline) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Hors connexion : la commande est enregistrée sur '
+                                'cet appareil et sera envoyée automatiquement au '
+                                'retour du réseau.',
+                              ),
+                              backgroundColor: palette.warningStrong,
+                            ),
+                          );
+                        }
+                        // Bug corrigé (audit Module 8, 29/08/2026) :
+                        // cet écran ne faisait que stocker un libellé
+                        // libre paymentMethod sur la réservation elle-
+                        // même — aucun lien avec transactions/wallets/
+                        // invoices. PaymentService.initiateTransaction /
+                        // PaymentProvider.initiatePayment étaient
+                        // entièrement fonctionnels mais n'avaient
+                        // jusqu'ici AUCUN point d'entrée réel dans
+                        // l'application (voir le rapport d'audit) : ni
+                        // paiement, ni portefeuille, ni facture n'a
+                        // jamais été créé par un vrai parcours d'achat.
+                        // Non bloquant pour la confirmation de commande
+                        // (même logique que l'échec de programmation de
+                        // livraison ci-dessous) : la réservation existe
+                        // déjà, le patient est informé si le paiement
+                        // échoue plutôt que de perdre sa commande.
+                        final paymentMethod = _mapPaymentMethod(
+                          _selectedPaymentMethod,
+                        );
+                        // Décision D13 (audit Module 8, 29/08/2026,
+                        // arbitrée par le porteur du projet) : le
+                        // paiement est bloqué explicitement hors
+                        // connexion plutôt que de tenter un appel
+                        // réseau voué à l'échec — la réservation, elle,
+                        // reste prise en compte (mode hors-ligne déjà
+                        // géré plus haut, RES).
+                        final hasInternet = await _offlineSync.hasInternet();
+                        if (paymentMethod != null &&
+                            !hasInternet &&
+                            context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Commande confirmée, mais le paiement est '
+                                'indisponible hors connexion. Réglez-le '
+                                'depuis l\'historique dès votre retour en ligne.',
+                              ),
+                              backgroundColor: palette.warningStrong,
+                            ),
+                          );
+                        } else if (paymentMethod != null && context.mounted) {
+                          final paymentProvider = context
+                              .read<PaymentProvider>();
+                          final transaction = await paymentProvider
+                              .initiatePayment(
+                                userId: patientId,
+                                userPhone: auth.userPhone ?? '',
+                                amount: provider.cartTotal,
+                                method: paymentMethod,
+                                reservationId: reservation.id,
+                                pharmacyId: pharmacyId,
+                                pharmacyName: provider.selectedPharmacyName,
+                              );
+                          if (transaction == null && context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                  'Vous devez être connecté pour réserver.',
+                                  'Commande confirmée, mais le paiement a échoué : '
+                                  '${paymentProvider.error ?? "erreur inconnue"}. '
+                                  'Vous pourrez réessayer depuis l\'historique.',
                                 ),
-                                backgroundColor: context.palette.danger,
+                                backgroundColor: palette.warningStrong,
                               ),
                             );
-                            return;
                           }
-                          if (pharmacyId == null) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'Aucune officine sélectionnée pour cette commande.',
+                        }
+                        // Bug corrigé (audit Module 7, 29/08/2026) :
+                        // cet écran collectait une adresse de livraison
+                        // mais ne créait jamais de Delivery — le module
+                        // LIV tout entier (DeliveryService.scheduleDelivery
+                        // et tout ce qui en dépend) était donc inatteignable
+                        // depuis l'application, malgré "Livraison à
+                        // domicile" comme fonctionnalité clé du cahier.
+                        // Livraison programmée seulement si une adresse a
+                        // été renseignée (elle reste optionnelle : sans
+                        // adresse, le patient retire en officine, sans
+                        // création de Delivery).
+                        if (!context.mounted) return;
+                        final deliveryAddress = _addressController.text.trim();
+                        if (deliveryAddress.isNotEmpty && context.mounted) {
+                          final deliveryProvider = context
+                              .read<DeliveryProvider>();
+                          final delivery = await deliveryProvider
+                              .scheduleDelivery(
+                                reservationId: reservation.id,
+                                patientId: patientId,
+                                patientName: patientName,
+                                patientPhone: auth.userPhone ?? '',
+                                deliveryAddress: deliveryAddress,
+                                // Aucune étape dédiée au choix d'un
+                                // horaire de livraison n'existe encore
+                                // (le créneau choisi plus haut concerne
+                                // le retrait en officine) — délai par
+                                // défaut documenté au registre comme
+                                // piste d'amélioration UX.
+                                scheduledAt: DateTime.now().add(
+                                  const Duration(hours: 2),
                                 ),
-                                backgroundColor: context.palette.danger,
-                              ),
-                            );
-                            return;
-                          }
-                          setState(() => _isSubmitting = true);
-                          final fullName = await _profileService.getFullName(
-                            patientId,
-                          );
-                          final patientName =
-                              fullName ??
-                              auth.userEmail ??
-                              auth.userPhone ??
-                              'Patient';
-                          final reservation = await provider.createReservation(
-                            patientId: patientId,
-                            patientName: patientName,
-                            patientPhone: auth.userPhone ?? '',
-                            patientEmail: auth.userEmail,
-                            pharmacyId: pharmacyId,
-                            pharmacyName:
-                                provider.selectedPharmacyName ?? 'Pharmacie',
-                            pharmacyAddress:
-                                provider.selectedPharmacyAddress ?? 'Adresse',
-                            pharmacyPhone: provider.selectedPharmacyPhone,
-                            preferredPickupTime: provider.selectedSlot?.start,
-                            deliveryAddress: _addressController.text.trim(),
-                            paymentMethod: _selectedPaymentMethod,
-                            notes: _notesController.text.trim(),
-                          );
-                          setState(() => _isSubmitting = false);
-                          if (reservation != null && context.mounted) {
-                            // Mode hors-ligne (directive standing) : la
-                            // commande est prise en compte localement et
-                            // sera envoyée automatiquement au retour du
-                            // réseau — informatif, non bloquant (même
-                            // distinction que Module 5).
-                            if (provider.isOffline) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    'Hors connexion : la commande est enregistrée sur '
-                                    'cet appareil et sera envoyée automatiquement au '
-                                    'retour du réseau.',
-                                  ),
-                                  backgroundColor: palette.warningStrong,
-                                ),
+                                isColdChainRequired: _isColdChainRequired,
                               );
-                            }
-                            // Bug corrigé (audit Module 8, 29/08/2026) :
-                            // cet écran ne faisait que stocker un libellé
-                            // libre paymentMethod sur la réservation elle-
-                            // même — aucun lien avec transactions/wallets/
-                            // invoices. PaymentService.initiateTransaction /
-                            // PaymentProvider.initiatePayment étaient
-                            // entièrement fonctionnels mais n'avaient
-                            // jusqu'ici AUCUN point d'entrée réel dans
-                            // l'application (voir le rapport d'audit) : ni
-                            // paiement, ni portefeuille, ni facture n'a
-                            // jamais été créé par un vrai parcours d'achat.
-                            // Non bloquant pour la confirmation de commande
-                            // (même logique que l'échec de programmation de
-                            // livraison ci-dessous) : la réservation existe
-                            // déjà, le patient est informé si le paiement
-                            // échoue plutôt que de perdre sa commande.
-                            final paymentMethod = _mapPaymentMethod(
-                              _selectedPaymentMethod,
-                            );
-                            // Décision D13 (audit Module 8, 29/08/2026,
-                            // arbitrée par le porteur du projet) : le
-                            // paiement est bloqué explicitement hors
-                            // connexion plutôt que de tenter un appel
-                            // réseau voué à l'échec — la réservation, elle,
-                            // reste prise en compte (mode hors-ligne déjà
-                            // géré plus haut, RES).
-                            final hasInternet = await _offlineSync
-                                .hasInternet();
-                            if (paymentMethod != null &&
-                                !hasInternet &&
-                                context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    'Commande confirmée, mais le paiement est '
-                                    'indisponible hors connexion. Réglez-le '
-                                    'depuis l\'historique dès votre retour en ligne.',
-                                  ),
-                                  backgroundColor: palette.warningStrong,
-                                ),
-                              );
-                            } else if (paymentMethod != null &&
-                                context.mounted) {
-                              final paymentProvider = context
-                                  .read<PaymentProvider>();
-                              final transaction = await paymentProvider
-                                  .initiatePayment(
-                                    userId: patientId,
-                                    userPhone: auth.userPhone ?? '',
-                                    amount: provider.cartTotal,
-                                    method: paymentMethod,
-                                    reservationId: reservation.id,
-                                    pharmacyId: pharmacyId,
-                                    pharmacyName: provider.selectedPharmacyName,
-                                  );
-                              if (transaction == null && context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      'Commande confirmée, mais le paiement a échoué : '
-                                      '${paymentProvider.error ?? "erreur inconnue"}. '
-                                      'Vous pourrez réessayer depuis l\'historique.',
-                                    ),
-                                    backgroundColor: palette.warningStrong,
-                                  ),
-                                );
-                              }
-                            }
-                            // Bug corrigé (audit Module 7, 29/08/2026) :
-                            // cet écran collectait une adresse de livraison
-                            // mais ne créait jamais de Delivery — le module
-                            // LIV tout entier (DeliveryService.scheduleDelivery
-                            // et tout ce qui en dépend) était donc inatteignable
-                            // depuis l'application, malgré "Livraison à
-                            // domicile" comme fonctionnalité clé du cahier.
-                            // Livraison programmée seulement si une adresse a
-                            // été renseignée (elle reste optionnelle : sans
-                            // adresse, le patient retire en officine, sans
-                            // création de Delivery).
-                            if (!context.mounted) return;
-                            final deliveryAddress = _addressController.text
-                                .trim();
-                            if (deliveryAddress.isNotEmpty && context.mounted) {
-                              final deliveryProvider = context
-                                  .read<DeliveryProvider>();
-                              final delivery = await deliveryProvider
-                                  .scheduleDelivery(
-                                    reservationId: reservation.id,
-                                    patientId: patientId,
-                                    patientName: patientName,
-                                    patientPhone: auth.userPhone ?? '',
-                                    deliveryAddress: deliveryAddress,
-                                    // Aucune étape dédiée au choix d'un
-                                    // horaire de livraison n'existe encore
-                                    // (le créneau choisi plus haut concerne
-                                    // le retrait en officine) — délai par
-                                    // défaut documenté au registre comme
-                                    // piste d'amélioration UX.
-                                    scheduledAt: DateTime.now().add(
-                                      const Duration(hours: 2),
-                                    ),
-                                    isColdChainRequired: _isColdChainRequired,
-                                  );
-                              if (delivery != null) {
-                                _scheduledDeliveryId = delivery.id;
-                              } else if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      'Commande confirmée, mais la programmation de '
-                                      'la livraison a échoué : '
-                                      '${deliveryProvider.error ?? "erreur inconnue"}. '
-                                      'Contactez l\'officine.',
-                                    ),
-                                    backgroundColor: palette.warningStrong,
-                                  ),
-                                );
-                              }
-                            }
-                            if (!context.mounted) return;
-                            setState(() {
-                              _currentStep = CheckoutStep.confirmation;
-                            });
+                          if (delivery != null) {
+                            _scheduledDeliveryId = delivery.id;
                           } else if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                  provider.error ??
-                                      'Erreur lors de la création de la commande',
+                                  'Commande confirmée, mais la programmation de '
+                                  'la livraison a échoué : '
+                                  '${deliveryProvider.error ?? "erreur inconnue"}. '
+                                  'Contactez l\'officine.',
                                 ),
-                                backgroundColor: palette.danger,
+                                backgroundColor: palette.warningStrong,
                               ),
                             );
                           }
-                        },
-                ),
-              ),
-            ],
+                        }
+                        if (!context.mounted) return;
+                        setState(() {
+                          _currentStep = CheckoutStep.confirmation;
+                        });
+                      } else if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              provider.error ??
+                                  'Erreur lors de la création de la commande',
+                            ),
+                            backgroundColor: palette.danger,
+                          ),
+                        );
+                      }
+                    },
+            ),
           ),
         ],
       ),
+    );
+  }
+
+  /// C239 : sur téléphone, les deux boutons sont empilés pour que le libellé
+  /// de l'action principale ne soit pas coupé (« Confirmer la commande »).
+  Widget _buildStepActions({required Widget back, required Widget primary}) {
+    if (isCompactWidth(context)) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [primary, const SizedBox(height: 12), back],
+      );
+    }
+    return Row(
+      children: [
+        Expanded(child: back),
+        const SizedBox(width: 12),
+        Expanded(flex: 2, child: primary),
+      ],
     );
   }
 
@@ -827,6 +841,11 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
                   style: context.text.body2,
                 ),
                 const SizedBox(height: 16),
+                // C239 : pas de paiement en ligne pendant le pilote.
+                if (_payAtPickup) ...[
+                  const PayAtPickupNotice(),
+                  const SizedBox(height: 16),
+                ],
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(

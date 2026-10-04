@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/kernel/kernel_badge.dart';
+import '../../../core/pilot/pilot_config.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/buttons/tertiary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
@@ -80,14 +81,19 @@ class _LoginScreenState extends State<LoginScreen> {
                   Text('Connexion', style: context.text.heading2),
                   const SizedBox(height: 8),
                   Text(
-                    'Choisissez votre identifiant et le mode de réception',
+                    PilotConfig.authEmailOnly
+                        ? PilotConfig.authEmailOnlySubtitle
+                        : 'Choisissez votre identifiant et le mode de réception',
                     style: context.text.body2,
                   ),
                   const SizedBox(height: 32),
 
                   // ===== CHOIX DE LA MÉTHODE =====
-                  _buildMethodChoiceChips(),
-                  const SizedBox(height: 24),
+                  // C239 : un seul mode, pas de puce de choix.
+                  if (!PilotConfig.authEmailOnly) ...[
+                    _buildMethodChoiceChips(),
+                    const SizedBox(height: 24),
+                  ],
 
                   // ===== CHAMP IDENTIFIANT =====
                   _isPhoneMethod
@@ -173,10 +179,13 @@ class _LoginScreenState extends State<LoginScreen> {
       spacing: 8,
       runSpacing: 8,
       children: [
-        _buildChip(LoginMethod.emailCode, '📧 Code OTP'),
-        _buildChip(LoginMethod.emailMagic, '🔗 Magic Link'),
-        _buildChip(LoginMethod.phoneWhatsapp, '💬 WhatsApp'),
-        _buildChip(LoginMethod.phoneSms, '📱 SMS'),
+        _buildChip(LoginMethod.emailCode, '📧 Code par e-mail'),
+        // C239 : autres modes masqués pour le pilote (`PilotConfig`).
+        if (PilotConfig.authMagicLink)
+          _buildChip(LoginMethod.emailMagic, '🔗 Magic Link'),
+        if (PilotConfig.authWhatsapp)
+          _buildChip(LoginMethod.phoneWhatsapp, '💬 WhatsApp'),
+        if (PilotConfig.authSms) _buildChip(LoginMethod.phoneSms, '📱 SMS'),
       ],
     );
   }

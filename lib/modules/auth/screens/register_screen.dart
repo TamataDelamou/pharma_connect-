@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/kernel/kernel_badge.dart';
+import '../../../core/pilot/pilot_config.dart';
 import '../../../core/theme/spacing.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/buttons/tertiary_button.dart';
@@ -101,7 +102,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   Text('Créer un compte', style: context.text.heading2),
                   const SizedBox(height: 8),
                   Text(
-                    'Rejoignez l\'infrastructure numérique de la santé',
+                    PilotConfig.authEmailOnly
+                        ? PilotConfig.authEmailOnlySubtitle
+                        : 'Rejoignez l\'infrastructure numérique de la santé',
                     style: context.text.body2,
                   ),
                   const SizedBox(height: 24),
@@ -205,16 +208,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 12),
 
                   // Choix du mode de réception
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      _buildChip('Email (code)', 'emailCode'),
-                      _buildChip('WhatsApp', 'phoneWhatsapp'),
-                      _buildChip('SMS', 'phoneSms'),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
+                  // C239 : un seul mode, pas de puce de choix ; autres modes
+                  // masqués pour le pilote (`PilotConfig`).
+                  if (PilotConfig.authSms || PilotConfig.authWhatsapp) ...[
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        _buildChip('Code par e-mail', 'emailCode'),
+                        if (PilotConfig.authWhatsapp)
+                          _buildChip('WhatsApp', 'phoneWhatsapp'),
+                        if (PilotConfig.authSms) _buildChip('SMS', 'phoneSms'),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                  ],
 
                   Container(
                     padding: const EdgeInsets.all(12),

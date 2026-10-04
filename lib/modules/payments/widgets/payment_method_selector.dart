@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/pilot/pilot_config.dart';
 import '../../../core/theme/spacing.dart';
 import '../models/payment_method.dart';
 import '../../../core/theme/palette.dart';
@@ -67,7 +68,10 @@ class _PaymentMethodSelectorState extends State<PaymentMethodSelector> {
                       ),
                     ),
                   ),
-                  if (widget.showCashback && cashback) ...[
+                  // C239 : pastille masquée pour le pilote (`PilotConfig`).
+                  if (PilotConfig.cashback &&
+                      widget.showCashback &&
+                      cashback) ...[
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,

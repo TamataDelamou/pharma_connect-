@@ -249,7 +249,10 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                                   ],
                                 ),
                               ),
-                              if (repayment.status == 'pending' &&
+                              // C239 : règlement par le portefeuille GSG,
+                              // masqué pour le pilote (`PilotConfig`).
+                              if (PaymentMethod.gsgWallet.isEnabled &&
+                                  repayment.status == 'pending' &&
                                   request.status == 'active' &&
                                   isOwner) ...[
                                 PrimaryButton(

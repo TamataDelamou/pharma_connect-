@@ -199,6 +199,13 @@ class PaymentProvider extends ChangeNotifier {
     // PaymentMethod.installment (3 par défaut).
     int numberOfPayments = 3,
   }) async {
+    // C239 : aucun paiement par un moyen masqué pour le pilote, quel que
+    // soit l'écran appelant.
+    if (!method.isEnabled) {
+      _error = 'Ce moyen de paiement n\'est pas disponible.';
+      notifyListeners();
+      return null;
+    }
     _isLoading = true;
     _error = null;
     notifyListeners();

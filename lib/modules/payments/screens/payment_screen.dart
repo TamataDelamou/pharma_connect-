@@ -10,7 +10,9 @@ import '../../../core/services/offline_sync_service.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../models/payment_method.dart';
 import '../providers/payment_provider.dart';
+import '../widgets/pay_at_pickup_notice.dart';
 import '../widgets/payment_method_selector.dart';
+import '../../../core/pilot/pilot_config.dart';
 import '../../../core/theme/palette.dart';
 
 class PaymentScreen extends StatefulWidget {
@@ -34,7 +36,9 @@ class PaymentScreen extends StatefulWidget {
 }
 
 class _PaymentScreenState extends State<PaymentScreen> {
-  PaymentMethod _selectedMethod = PaymentMethod.orangeMoney;
+  late PaymentMethod _selectedMethod = _availableMethods.isNotEmpty
+      ? _availableMethods.first
+      : PaymentMethod.cashOnDelivery;
   bool _useCashback = true;
   bool _isProcessing = false;
   // Amélioration/correctif (audit Module 8, 29/08/2026) : "Paiement en
@@ -44,6 +48,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
   int _numberOfPayments = 3;
   final OfflineSyncService _offlineSync = OfflineSyncService();
 
+  // C239 : seuls les moyens activés dans `PilotConfig` sont proposés.
   final List<PaymentMethod> _availableMethods = [
     PaymentMethod.orangeMoney,
     PaymentMethod.mtnMomo,
@@ -52,12 +57,16 @@ class _PaymentScreenState extends State<PaymentScreen> {
     PaymentMethod.bankCard,
     PaymentMethod.cashOnDelivery,
     PaymentMethod.installment,
-  ];
+  ].where((method) => method.isEnabled).toList();
+
+  /// C239 : aucun moyen activé, le règlement se fait à l'officine au retrait.
+  bool get _payAtPickup => _availableMethods.isEmpty;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
     final provider = context.watch<PaymentProvider>();
+    final bool useCashback = PilotConfig.cashback && _useCashback;
     final int cashbackAmount = (widget.amount * 2) ~/ 100;
     // RG-PAY-02 (Cahier de conception, Standard) : "Les frais de service
     // PharmaConnect sont calculés et affichés de manière transparente avant
@@ -65,10 +74,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
     // 29/08/2026) : les frais (1%, hors gsgWallet — voir
     // PaymentService._feePercent) n'étaient jusqu'ici jamais affichés nulle
     // part sur cet écran, malgré leur application réelle côté service.
-    final int feeAmount = _selectedMethod == PaymentMethod.gsgWallet
+    final int feeAmount =
+        _payAtPickup || _selectedMethod == PaymentMethod.gsgWallet
         ? 0
         : (widget.amount * 1) ~/ 100;
-    final int finalAmount = _useCashback
+    final int finalAmount = useCashback
         ? widget.amount + feeAmount - cashbackAmount
         : widget.amount + feeAmount;
 
@@ -158,7 +168,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                               ],
                             ),
                           ],
-                          if (_useCashback && cashbackAmount > 0) ...[
+                          if (useCashback && cashbackAmount > 0) ...[
                             const SizedBox(height: 4),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -202,183 +212,189 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     ),
                     const SizedBox(height: 24),
 
-                    // Choix du moyen de paiement
-                    PaymentMethodSelector(
-                      availableMethods: _availableMethods,
-                      selectedMethod: _selectedMethod,
-                      onMethodSelected: (method) {
-                        setState(() => _selectedMethod = method);
-                      },
-                      showCashback: true,
-                    ),
-                    const SizedBox(height: 8),
-
-                    // Option cashback
-                    if (_selectedMethod.isMobileMoney ||
-                        _selectedMethod == PaymentMethod.gsgWallet) ...[
-                      Row(
-                        children: [
-                          Checkbox(
-                            value: _useCashback,
-                            onChanged: (value) {
-                              setState(() => _useCashback = value ?? true);
-                            },
-                            activeColor: context.palette.primary,
-                          ),
-                          Expanded(
-                            child: Text(
-                              'Utiliser mon cashback (${CurrencyFormatter.format(cashbackAmount)})',
-                              style: context.text.body2,
-                            ),
-                          ),
-                        ],
+                    // C239 : sans moyen de paiement activé, pas de choix ni
+                    // de bouton « Payer ».
+                    if (_payAtPickup)
+                      const PayAtPickupNotice()
+                    else ...[
+                      // Choix du moyen de paiement
+                      PaymentMethodSelector(
+                        availableMethods: _availableMethods,
+                        selectedMethod: _selectedMethod,
+                        onMethodSelected: (method) {
+                          setState(() => _selectedMethod = method);
+                        },
+                        showCashback: true,
                       ),
-                    ],
+                      const SizedBox(height: 8),
 
-                    // Nombre d'échéances (audit Module 8, 29/08/2026) :
-                    // sélecteur ajouté pour piloter numberOfPayments,
-                    // jusqu'ici jamais exposé côté UI.
-                    if (_selectedMethod == PaymentMethod.installment) ...[
-                      const SizedBox(height: 8),
-                      Text('Nombre d\'échéances', style: context.text.label),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [3, 6, 12].map((n) {
-                          final isSelected = _numberOfPayments == n;
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: ChoiceChip(
-                              label: Text('$n fois'),
-                              selected: isSelected,
-                              onSelected: (_) =>
-                                  setState(() => _numberOfPayments = n),
-                              selectedColor: context.palette.primary.withValues(
-                                alpha: 0.2,
-                              ),
-                              backgroundColor: Colors.transparent,
-                              side: BorderSide(
-                                color: isSelected
-                                    ? context.palette.primary
-                                    : context.palette.veil(0.24),
+                      // Option cashback
+                      if (PilotConfig.cashback &&
+                          (_selectedMethod.isMobileMoney ||
+                              _selectedMethod == PaymentMethod.gsgWallet)) ...[
+                        Row(
+                          children: [
+                            Checkbox(
+                              value: _useCashback,
+                              onChanged: (value) {
+                                setState(() => _useCashback = value ?? true);
+                              },
+                              activeColor: context.palette.primary,
+                            ),
+                            Expanded(
+                              child: Text(
+                                'Utiliser mon cashback (${CurrencyFormatter.format(cashbackAmount)})',
+                                style: context.text.body2,
                               ),
                             ),
-                          );
-                        }).toList(),
-                      ),
-                    ],
+                          ],
+                        ),
+                      ],
 
-                    const SizedBox(height: 24),
+                      // Nombre d'échéances (audit Module 8, 29/08/2026) :
+                      // sélecteur ajouté pour piloter numberOfPayments,
+                      // jusqu'ici jamais exposé côté UI.
+                      if (_selectedMethod == PaymentMethod.installment) ...[
+                        const SizedBox(height: 8),
+                        Text('Nombre d\'échéances', style: context.text.label),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [3, 6, 12].map((n) {
+                            final isSelected = _numberOfPayments == n;
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: ChoiceChip(
+                                label: Text('$n fois'),
+                                selected: isSelected,
+                                onSelected: (_) =>
+                                    setState(() => _numberOfPayments = n),
+                                selectedColor: context.palette.primary
+                                    .withValues(alpha: 0.2),
+                                backgroundColor: Colors.transparent,
+                                side: BorderSide(
+                                  color: isSelected
+                                      ? context.palette.primary
+                                      : context.palette.veil(0.24),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ],
 
-                    // Bouton de paiement
-                    PrimaryButton(
-                      label: _selectedMethod == PaymentMethod.installment
-                          ? 'Payer en plusieurs fois'
-                          : 'Payer ${CurrencyFormatter.format(finalAmount)}',
-                      isLoading: _isProcessing || provider.isLoading,
-                      onPressed: () async {
-                        // Décision D13 (audit Module 8, 29/08/2026,
-                        // arbitrée par le porteur du projet) : le mode
-                        // hors-ligne de PAY reste volontairement limité à
-                        // la lecture (solde, historique) — un paiement
-                        // rejoué après coupure réseau risquerait un double
-                        // débit ou une double confirmation. Plutôt que de
-                        // laisser l'appel réseau simplement échouer avec un
-                        // message générique, on bloque explicitement ici,
-                        // avant tout appel.
-                        final hasInternet = await _offlineSync.hasInternet();
-                        if (!hasInternet) {
-                          if (context.mounted) {
+                      const SizedBox(height: 24),
+
+                      // Bouton de paiement
+                      PrimaryButton(
+                        label: _selectedMethod == PaymentMethod.installment
+                            ? 'Payer en plusieurs fois'
+                            : 'Payer ${CurrencyFormatter.format(finalAmount)}',
+                        isLoading: _isProcessing || provider.isLoading,
+                        onPressed: () async {
+                          // Décision D13 (audit Module 8, 29/08/2026,
+                          // arbitrée par le porteur du projet) : le mode
+                          // hors-ligne de PAY reste volontairement limité à
+                          // la lecture (solde, historique) — un paiement
+                          // rejoué après coupure réseau risquerait un double
+                          // débit ou une double confirmation. Plutôt que de
+                          // laisser l'appel réseau simplement échouer avec un
+                          // message générique, on bloque explicitement ici,
+                          // avant tout appel.
+                          final hasInternet = await _offlineSync.hasInternet();
+                          if (!hasInternet) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Paiement indisponible hors connexion. '
+                                    'Reconnectez-vous pour régler cette commande.',
+                                  ),
+                                  backgroundColor: context.palette.danger,
+                                ),
+                              );
+                            }
+                            return;
+                          }
+
+                          // Bug corrigé (audit Module 8, 29/08/2026) : userId
+                          // et userPhone en dur ('patient_123',
+                          // '+224612345678') — 5e/6e occurrence du même
+                          // défaut que Modules 4/5/6/7. Toute transaction
+                          // créée depuis cet écran s'écrivait sous une
+                          // identité fictive.
+                          final auth = context.read<AuthProvider>();
+                          final userId = auth.userId;
+                          if (userId == null) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                  'Paiement indisponible hors connexion. '
-                                  'Reconnectez-vous pour régler cette commande.',
+                                  'Vous devez être connecté pour payer.',
+                                ),
+                                backgroundColor: palette.danger,
+                              ),
+                            );
+                            return;
+                          }
+
+                          setState(() => _isProcessing = true);
+
+                          final transaction = await provider.initiatePayment(
+                            userId: userId,
+                            userPhone: auth.userPhone ?? '',
+                            amount: widget.amount,
+                            method: _selectedMethod,
+                            reservationId: widget.reservationId,
+                            deliveryId: widget.deliveryId,
+                            pharmacyId: widget.pharmacyId,
+                            pharmacyName: widget.pharmacyName,
+                            useCashback: useCashback,
+                            numberOfPayments: _numberOfPayments,
+                          );
+
+                          setState(() => _isProcessing = false);
+
+                          if (transaction != null && context.mounted) {
+                            if (_selectedMethod == PaymentMethod.installment) {
+                              context.go(
+                                '/payments/installment/${transaction.id}',
+                              );
+                            } else {
+                              // C225 / D67 : le paiement n'est « payé » qu'une
+                              // fois l'encaissement confirmé par l'officine.
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Paiement enregistré : l\'officine le '
+                                    'confirmera dès réception.',
+                                  ),
+                                  backgroundColor: context.palette.success,
+                                ),
+                              );
+                              context.go('/reservations/confirmation');
+                            }
+                          } else if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  provider.error ?? 'Erreur lors du paiement',
                                 ),
                                 backgroundColor: context.palette.danger,
                               ),
                             );
                           }
-                          return;
-                        }
+                        },
+                      ),
 
-                        // Bug corrigé (audit Module 8, 29/08/2026) : userId
-                        // et userPhone en dur ('patient_123',
-                        // '+224612345678') — 5e/6e occurrence du même
-                        // défaut que Modules 4/5/6/7. Toute transaction
-                        // créée depuis cet écran s'écrivait sous une
-                        // identité fictive.
-                        final auth = context.read<AuthProvider>();
-                        final userId = auth.userId;
-                        if (userId == null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Vous devez être connecté pour payer.',
-                              ),
-                              backgroundColor: palette.danger,
-                            ),
-                          );
-                          return;
-                        }
-
-                        setState(() => _isProcessing = true);
-
-                        final transaction = await provider.initiatePayment(
-                          userId: userId,
-                          userPhone: auth.userPhone ?? '',
-                          amount: widget.amount,
-                          method: _selectedMethod,
-                          reservationId: widget.reservationId,
-                          deliveryId: widget.deliveryId,
-                          pharmacyId: widget.pharmacyId,
-                          pharmacyName: widget.pharmacyName,
-                          useCashback: _useCashback,
-                          numberOfPayments: _numberOfPayments,
-                        );
-
-                        setState(() => _isProcessing = false);
-
-                        if (transaction != null && context.mounted) {
-                          if (_selectedMethod == PaymentMethod.installment) {
-                            context.go(
-                              '/payments/installment/${transaction.id}',
-                            );
-                          } else {
-                            // C225 / D67 : le paiement n'est « payé » qu'une
-                            // fois l'encaissement confirmé par l'officine.
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'Paiement enregistré : l\'officine le '
-                                  'confirmera dès réception.',
-                                ),
-                                backgroundColor: context.palette.success,
-                              ),
-                            );
-                            context.go('/reservations/confirmation');
-                          }
-                        } else if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                provider.error ?? 'Erreur lors du paiement',
-                              ),
-                              backgroundColor: context.palette.danger,
-                            ),
-                          );
-                        }
-                      },
-                    ),
-
-                    const SizedBox(height: 16),
-                    Center(
-                      child: Text(
-                        'Paiement sécurisé',
-                        style: context.text.micro.copyWith(
-                          color: context.palette.textSecondary,
+                      const SizedBox(height: 16),
+                      Center(
+                        child: Text(
+                          'Paiement sécurisé',
+                          style: context.text.micro.copyWith(
+                            color: context.palette.textSecondary,
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ),

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
+import '../../../core/pilot/pilot_config.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/buttons/tertiary_button.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -100,8 +101,17 @@ class _PrescriptionUploadScreenState extends State<PrescriptionUploadScreen> {
             style: context.text.body2,
           ),
           const SizedBox(height: 32),
-          Row(
+          // C239 : boutons empilés sur téléphone (« Galerie » débordait à
+          // 360 px), côte à côte en largeur.
+          Flex(
+            direction: isCompactWidth(context)
+                ? Axis.vertical
+                : Axis.horizontal,
             mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: isCompactWidth(context)
+                ? CrossAxisAlignment.stretch
+                : CrossAxisAlignment.center,
             children: [
               ElevatedButton.icon(
                 onPressed: () => _pickImageWithGuidance(ImageSource.camera),
@@ -116,7 +126,7 @@ class _PrescriptionUploadScreenState extends State<PrescriptionUploadScreen> {
                   ),
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 16, height: 12),
               OutlinedButton.icon(
                 onPressed: () => _pickImageWithGuidance(ImageSource.gallery),
                 icon: const Icon(Icons.photo_library),
@@ -180,7 +190,10 @@ class _PrescriptionUploadScreenState extends State<PrescriptionUploadScreen> {
               Expanded(
                 flex: 2,
                 child: PrimaryButton(
-                  label: 'Analyser l\'ordonnance',
+                  // C239 : sans lecture automatique, simple envoi.
+                  label: PilotConfig.aiPrescriptionOcr
+                      ? 'Analyser l\'ordonnance'
+                      : 'Envoyer l\'ordonnance',
                   isLoading:
                       provider.isProcessingOcr ||
                       provider.uploadStatus ==
@@ -239,7 +252,16 @@ class _PrescriptionUploadScreenState extends State<PrescriptionUploadScreen> {
                     if (provider.uploadStatus ==
                             PrescriptionUploadStatus.ready &&
                         context.mounted) {
-                      context.go('/prescriptions/preview');
+                      if (PilotConfig.aiPrescriptionOcr) {
+                        context.go('/prescriptions/preview');
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Ordonnance envoyée à l\'officine.'),
+                          ),
+                        );
+                        context.go('/prescriptions');
+                      }
                     }
                   },
                 ),
@@ -251,7 +273,9 @@ class _PrescriptionUploadScreenState extends State<PrescriptionUploadScreen> {
             const LinearProgressIndicator(),
             const SizedBox(height: 8),
             Text(
-              'Analyse en cours...',
+              PilotConfig.aiPrescriptionOcr
+                  ? 'Analyse en cours...'
+                  : 'Envoi en cours...',
               style: context.text.body2.copyWith(
                 color: context.palette.textSecondary,
               ),

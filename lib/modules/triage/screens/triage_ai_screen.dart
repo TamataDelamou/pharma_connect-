@@ -63,7 +63,8 @@ class _TriageAIScreenState extends State<TriageAIScreen> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      '🧠 Triage intelligent',
+                      // C239 : règles lues en base, pas d'« IA » dans le nom.
+                      'Aide au triage',
                       style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -114,7 +115,7 @@ class _TriageAIScreenState extends State<TriageAIScreen> {
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
-                                    'L\'IA analyse les symptômes pour déterminer la priorité et orienter le patient',
+                                    'Les règles de triage proposent une priorité et une orientation à partir des symptômes',
                                     style: context.text.micro.copyWith(
                                       color: context.palette.textSecondary,
                                     ),
@@ -296,7 +297,7 @@ class _TriageAIScreenState extends State<TriageAIScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Aidez à améliorer l\'IA en fournissant votre évaluation réelle',
+            'Aidez à améliorer les règles de triage en fournissant votre évaluation réelle',
             style: context.text.body2,
           ),
           const SizedBox(height: 12),
