@@ -373,7 +373,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     const SizedBox(height: 16),
                     Center(
                       child: Text(
-                        'Sécurisé par GSG Kernel',
+                        'Paiement sécurisé',
                         style: context.text.micro.copyWith(
                           color: context.palette.textSecondary,
                         ),

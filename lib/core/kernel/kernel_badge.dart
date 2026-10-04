@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'kernel_ui.dart';
 
 import '../theme/spacing.dart';
 import '../theme/typography.dart';
@@ -18,6 +19,8 @@ class KernelBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!KernelUi.enabled) return const SizedBox.shrink();
+
     // C233 : en largeur téléphone, le badge se réduit à son icône. Il est
     // posé dans l'en-tête de la plupart des écrans, à côté du titre, auquel
     // il ne laissait presque plus de place.

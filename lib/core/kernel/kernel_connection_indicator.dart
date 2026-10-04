@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'kernel_ui.dart';
 
 import '../theme/spacing.dart';
 import 'kernel_badge.dart';
@@ -41,6 +42,8 @@ class _KernelConnectionIndicatorState extends State<KernelConnectionIndicator>
 
   @override
   Widget build(BuildContext context) {
+    if (!KernelUi.enabled) return const SizedBox.shrink();
+
     // C229 : la barre latérale s'anime entre 72 et 260 px ; en dessous de
     // ces seuils, l'en-tête (point, textes, badge) et le détail des services
     // débordaient. Point seul quand la place manque, badge et détail
