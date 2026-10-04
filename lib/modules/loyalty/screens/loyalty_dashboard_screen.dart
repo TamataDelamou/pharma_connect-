@@ -139,12 +139,23 @@ class _LoyaltyDashboardScreenState extends State<LoyaltyDashboardScreen> {
                               children: [
                                 Row(
                                   children: [
-                                    Text(
-                                      '${account.tierEmoji} ${account.tierLabel}',
-                                      style: TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w700,
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
                                         color: _tierColor(account.tier),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Text(
+                                        '${account.tierEmoji} ${account.tierLabel}',
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w700,
+                                          color:
+                                              PharmaConnectFixedColors.onTier,
+                                        ),
                                       ),
                                     ),
                                     const Spacer(),
@@ -164,7 +175,7 @@ class _LoyaltyDashboardScreenState extends State<LoyaltyDashboardScreen> {
                                 LinearProgressIndicator(
                                   value: _progressToNextTier(account),
                                   backgroundColor: context.palette.veil(0.24),
-                                  color: _tierColor(account.tier),
+                                  color: context.palette.primary,
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
@@ -337,7 +348,7 @@ class _LoyaltyDashboardScreenState extends State<LoyaltyDashboardScreen> {
       case 'platinum':
         return PharmaConnectFixedColors.tierPlatinum;
       default:
-        return context.palette.textSecondary;
+        return context.palette.surfaceMuted;
     }
   }
 
