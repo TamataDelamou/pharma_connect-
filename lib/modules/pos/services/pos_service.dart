@@ -247,6 +247,12 @@ class POSService {
       'a 1 pres': 'à 1 près',
       'non renseigne': 'non renseigné',
       'en especes': 'en espèces',
+      // C240 : lot rappelé.
+      'est rappele': 'est rappelé',
+      'unite(s) en lot rappele': 'unité(s) en lot rappelé',
+      'a retirer de la vente': 'à retirer de la vente',
+      'du regulateur': 'du régulateur',
+      'signale en tracabilite': 'signalé en traçabilité',
     };
     accents.forEach((from, to) => message = message.replaceAll(from, to));
     message = message.replaceAllMapped(
