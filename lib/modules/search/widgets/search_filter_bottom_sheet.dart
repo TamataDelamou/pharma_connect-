@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../models/search_filters.dart';
+import '../../../core/theme/palette.dart';
 
 class SearchFilterBottomSheet extends StatefulWidget {
   final SearchFilters filters;
@@ -40,9 +39,7 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
           // En-tête
           Row(
             children: [
-              const Expanded(
-                child: Text('Filtres', style: PharmaConnectTypography.heading2),
-              ),
+              Expanded(child: Text('Filtres', style: context.text.heading2)),
               TextButton(
                 onPressed: () {
                   setState(() {
@@ -56,7 +53,7 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
             ],
           ),
           const SizedBox(height: 16),
-          const Divider(color: Colors.white24),
+          Divider(color: context.palette.veil(0.24)),
           const SizedBox(height: 16),
 
           // Disponibilité
@@ -97,11 +94,11 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
           ),
 
           const SizedBox(height: 16),
-          const Divider(color: Colors.white24),
+          Divider(color: context.palette.veil(0.24)),
           const SizedBox(height: 16),
 
           // Prix
-          const Text('Prix', style: PharmaConnectTypography.label),
+          Text('Prix', style: context.text.label),
           const SizedBox(height: 8),
           Row(
             children: [
@@ -128,7 +125,7 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
           ),
 
           const SizedBox(height: 24),
-          const Divider(color: Colors.white24),
+          Divider(color: context.palette.veil(0.24)),
           const SizedBox(height: 16),
 
           // Boutons
@@ -138,7 +135,7 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
                 child: OutlinedButton(
                   onPressed: () => Navigator.pop(context),
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.white24),
+                    side: BorderSide(color: context.palette.veil(0.24)),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                   child: const Text('Annuler'),
@@ -153,8 +150,8 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
                     Navigator.pop(context);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: PharmaConnectColors.accentCyan,
-                    foregroundColor: PharmaConnectColors.textOnAccent,
+                    backgroundColor: context.palette.primary,
+                    foregroundColor: context.palette.onPrimary,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                   child: const Text('Appliquer les filtres'),
@@ -173,10 +170,10 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
     required ValueChanged<bool> onChanged,
   }) {
     return SwitchListTile(
-      title: Text(label, style: PharmaConnectTypography.body1),
+      title: Text(label, style: context.text.body1),
       value: value,
       onChanged: onChanged,
-      activeColor: PharmaConnectColors.accentCyan,
+      activeColor: context.palette.primary,
       contentPadding: EdgeInsets.zero,
       dense: true,
     );
@@ -192,20 +189,20 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
       keyboardType: TextInputType.number,
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: PharmaConnectTypography.label,
+        labelStyle: context.text.label,
         filled: true,
-        fillColor: Colors.white.withValues(alpha: 0.06),
+        fillColor: context.palette.surface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.white24),
+          borderSide: BorderSide(color: context.palette.veil(0.24)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.white24),
+          borderSide: BorderSide(color: context.palette.veil(0.24)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: PharmaConnectColors.accentCyan),
+          borderSide: BorderSide(color: context.palette.primary),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 12,

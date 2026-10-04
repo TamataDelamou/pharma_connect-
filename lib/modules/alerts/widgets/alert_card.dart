@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../models/alert.dart';
 import '../models/alert_type.dart';
 import '../models/alert_severity.dart';
+import '../../../core/theme/palette.dart';
 
 class AlertCard extends StatelessWidget {
   final Alert alert;
@@ -33,7 +32,9 @@ class AlertCard extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: alert.severityColor.withValues(alpha: 0.15),
+              color: alert.severityColor
+                  .of(context.palette)
+                  .withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Center(
@@ -55,13 +56,13 @@ class AlertCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         alert.title,
-                        style: PharmaConnectTypography.body1.copyWith(
+                        style: context.text.body1.copyWith(
                           fontWeight: alert.isRead
                               ? FontWeight.w400
                               : FontWeight.w600,
                           color: alert.isRead
-                              ? PharmaConnectColors.textSecondary
-                              : PharmaConnectColors.textPrimary,
+                              ? context.palette.textSecondary
+                              : context.palette.textPrimary,
                         ),
                       ),
                     ),
@@ -72,21 +73,19 @@ class AlertCard extends StatelessWidget {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: PharmaConnectColors.accentRed.withValues(
-                            alpha: 0.15,
-                          ),
+                          color: context.palette.danger.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(4),
                           border: Border.all(
-                            color: PharmaConnectColors.accentRed,
+                            color: context.palette.danger,
                             width: 1,
                           ),
                         ),
-                        child: const Text(
+                        child: Text(
                           'URGENT',
                           style: TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.w700,
-                            color: PharmaConnectColors.accentRed,
+                            color: context.palette.danger,
                           ),
                         ),
                       ),
@@ -98,10 +97,10 @@ class AlertCard extends StatelessWidget {
                         height: 8,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: PharmaConnectColors.accentCyan,
+                          color: context.palette.primary,
                           boxShadow: [
                             BoxShadow(
-                              color: PharmaConnectColors.accentCyan.withValues(
+                              color: context.palette.primary.withValues(
                                 alpha: 0.4,
                               ),
                               blurRadius: 8,
@@ -116,14 +115,14 @@ class AlertCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   alert.message,
-                  style: PharmaConnectTypography.body2.copyWith(
-                    color: isCritical ? PharmaConnectColors.textPrimary : null,
+                  style: context.text.body2.copyWith(
+                    color: isCritical ? context.palette.textPrimary : null,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    Text(alert.timeAgo, style: PharmaConnectTypography.micro),
+                    Text(alert.timeAgo, style: context.text.micro),
                     const SizedBox(width: 12),
                     Container(
                       padding: const EdgeInsets.symmetric(
@@ -131,7 +130,9 @@ class AlertCard extends StatelessWidget {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: alert.severityColor.withValues(alpha: 0.15),
+                        color: alert.severityColor
+                            .of(context.palette)
+                            .withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -139,7 +140,7 @@ class AlertCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w500,
-                          color: alert.severityColor,
+                          color: alert.severityColor.of(context.palette),
                         ),
                       ),
                     ),
@@ -159,27 +160,25 @@ class AlertCard extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: PharmaConnectColors.accentCyan.withValues(
-                      alpha: 0.15,
-                    ),
+                    color: context.palette.primary.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
                     alert.actionLabel!,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w600,
-                      color: PharmaConnectColors.accentCyan,
+                      color: context.palette.primary,
                     ),
                   ),
                 ),
                 const SizedBox(height: 4),
               ],
               IconButton(
-                icon: const Icon(
+                icon: Icon(
                   Icons.close,
                   size: 16,
-                  color: PharmaConnectColors.textSecondary,
+                  color: context.palette.textSecondary,
                 ),
                 onPressed: onDismiss,
                 padding: EdgeInsets.zero,
@@ -196,7 +195,7 @@ class AlertCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: PharmaConnectColors.accentRed, width: 2),
+        border: Border.all(color: context.palette.danger, width: 2),
       ),
       child: card,
     );

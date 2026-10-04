@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/utils/currency_formatter.dart';
 import '../models/b2b_order.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 /// Audit Module 13 (B2B, 29/08/2026) : même import mort que `OfferCard`
 /// (voir son commentaire) — `OrderCard` n'existait nulle part non plus.
@@ -13,22 +12,22 @@ class OrderCard extends StatelessWidget {
 
   const OrderCard({super.key, required this.order, this.onTap});
 
-  Color _statusColor() {
+  Color _statusColor(BuildContext context) {
     switch (order.status) {
       case 'draft':
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
       case 'submitted':
-        return PharmaConnectColors.accentCyan;
+        return context.palette.primary;
       case 'confirmed':
-        return PharmaConnectColors.accentGreen;
+        return context.palette.success;
       case 'shipped':
-        return PharmaConnectColors.accentPurple;
+        return context.palette.secondary;
       case 'delivered':
-        return PharmaConnectColors.accentGreen;
+        return context.palette.success;
       case 'cancelled':
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       default:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
     }
   }
 
@@ -41,7 +40,7 @@ class OrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = _statusColor();
+    final color = _statusColor(context);
     return GlassCard(
       onTap: onTap,
       padding: const EdgeInsets.all(16),
@@ -53,7 +52,7 @@ class OrderCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   _itemsSummary(),
-                  style: PharmaConnectTypography.body1.copyWith(
+                  style: context.text.body1.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                   maxLines: 1,
@@ -61,10 +60,7 @@ class OrderCard extends StatelessWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 2,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(4),
@@ -83,12 +79,16 @@ class OrderCard extends StatelessWidget {
           const SizedBox(height: 6),
           Row(
             children: [
-              const Icon(Icons.swap_horiz, size: 14, color: Colors.white54),
+              Icon(
+                Icons.swap_horiz,
+                size: 14,
+                color: context.palette.textSecondary,
+              ),
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
                   '${order.buyerName ?? 'Acheteur'} → ${order.sellerName ?? 'Vendeur'}',
-                  style: PharmaConnectTypography.micro,
+                  style: context.text.micro,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -104,12 +104,12 @@ class OrderCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: PharmaConnectColors.accentCyan,
+                  color: context.palette.primary,
                 ),
               ),
               Text(
                 '${order.createdAt.day}/${order.createdAt.month}/${order.createdAt.year}',
-                style: PharmaConnectTypography.micro,
+                style: context.text.micro,
               ),
             ],
           ),

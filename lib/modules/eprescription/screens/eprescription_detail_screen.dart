@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/secondary_button.dart';
@@ -11,6 +9,7 @@ import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../auth/models/user_role.dart';
 import '../providers/eprescription_provider.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class EPrescriptionDetailScreen extends StatefulWidget {
   final String prescriptionId;
@@ -47,9 +46,7 @@ class _EPrescriptionDetailScreenState extends State<EPrescriptionDetailScreen> {
         body: Center(
           child: Text(
             provider.error ?? 'Prescription introuvable',
-            style: PharmaConnectTypography.body2.copyWith(
-              color: PharmaConnectColors.accentRed,
-            ),
+            style: context.text.body2.copyWith(color: context.palette.danger),
           ),
         ),
       );
@@ -81,9 +78,9 @@ class _EPrescriptionDetailScreenState extends State<EPrescriptionDetailScreen> {
             Row(
               children: [
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.arrow_back,
-                    color: PharmaConnectColors.textPrimary,
+                    color: context.palette.textPrimary,
                   ),
                   onPressed: () => context.pop(),
                   padding: EdgeInsets.zero,
@@ -92,7 +89,7 @@ class _EPrescriptionDetailScreenState extends State<EPrescriptionDetailScreen> {
                 Expanded(
                   child: Text(
                     'e-Prescription #${prescription.prescriptionNumber}',
-                    style: PharmaConnectTypography.heading2,
+                    style: context.text.heading2,
                   ),
                 ),
                 const KernelBadge(),
@@ -134,11 +131,11 @@ class _EPrescriptionDetailScreenState extends State<EPrescriptionDetailScreen> {
                                 ),
                                 Text(
                                   'Prescrit le ${_formatDate(prescription.prescribedAt)}',
-                                  style: PharmaConnectTypography.body2,
+                                  style: context.text.body2,
                                 ),
                                 Text(
                                   'Valable jusqu\'au ${_formatDate(prescription.validUntil)}',
-                                  style: PharmaConnectTypography.micro,
+                                  style: context.text.micro,
                                 ),
                               ],
                             ),
@@ -157,29 +154,29 @@ class _EPrescriptionDetailScreenState extends State<EPrescriptionDetailScreen> {
                             'Patient',
                             prescription.patientName ?? prescription.patientId,
                           ),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           _buildInfoRow(
                             'Médecin',
                             prescription.doctorName ?? prescription.doctorId,
                           ),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           if (prescription.pharmacyName != null) ...[
                             _buildInfoRow(
                               'Pharmacie',
                               prescription.pharmacyName!,
                             ),
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                           ],
                           if (prescription.diagnosis != null) ...[
                             _buildInfoRow(
                               'Diagnostic',
                               prescription.diagnosis!,
                             ),
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                           ],
                           if (prescription.notes != null) ...[
                             _buildInfoRow('Notes', prescription.notes!),
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                           ],
                           if (prescription.isRenewable) ...[
                             _buildInfoRow(
@@ -188,7 +185,7 @@ class _EPrescriptionDetailScreenState extends State<EPrescriptionDetailScreen> {
                             ),
                           ],
                           if (prescription.accessCode != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow(
                               'Code d\'accès',
                               prescription.accessCode!,
@@ -201,20 +198,17 @@ class _EPrescriptionDetailScreenState extends State<EPrescriptionDetailScreen> {
 
                     // Items
                     if (provider.items.isNotEmpty) ...[
-                      const Text(
-                        'Médicaments',
-                        style: PharmaConnectTypography.heading3,
-                      ),
+                      Text('Médicaments', style: context.text.heading3),
                       const SizedBox(height: 8),
                       ...provider.items.map((item) {
                         return Container(
                           padding: const EdgeInsets.all(12),
                           margin: const EdgeInsets.only(bottom: 6),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.04),
+                            color: context.palette.surfaceMuted,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.06),
+                              color: context.palette.borderSubtle,
                             ),
                           ),
                           child: Column(
@@ -222,23 +216,23 @@ class _EPrescriptionDetailScreenState extends State<EPrescriptionDetailScreen> {
                             children: [
                               Text(
                                 item.medicationName,
-                                style: PharmaConnectTypography.body1.copyWith(
+                                style: context.text.body1.copyWith(
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
                               Text(
                                 '${item.dosage} • ${item.frequency} • ${item.duration}',
-                                style: PharmaConnectTypography.body2,
+                                style: context.text.body2,
                               ),
                               Text(
                                 'Quantité: ${item.quantity}',
-                                style: PharmaConnectTypography.micro,
+                                style: context.text.micro,
                               ),
                               if (item.instructions != null)
                                 Text(
                                   item.instructions!,
-                                  style: PharmaConnectTypography.micro.copyWith(
-                                    color: PharmaConnectColors.textSecondary,
+                                  style: context.text.micro.copyWith(
+                                    color: context.palette.textSecondary,
                                   ),
                                 ),
                               if (item.isSubstitutionAllowed)
@@ -249,16 +243,17 @@ class _EPrescriptionDetailScreenState extends State<EPrescriptionDetailScreen> {
                                   ),
                                   margin: const EdgeInsets.only(top: 4),
                                   decoration: BoxDecoration(
-                                    color: PharmaConnectColors.accentPurple
-                                        .withValues(alpha: 0.15),
+                                    color: context.palette.secondary.withValues(
+                                      alpha: 0.15,
+                                    ),
                                     borderRadius: BorderRadius.circular(4),
                                   ),
-                                  child: const Text(
+                                  child: Text(
                                     'Substitution autorisée',
                                     style: TextStyle(
                                       fontSize: 10,
                                       fontWeight: FontWeight.w500,
-                                      color: PharmaConnectColors.accentPurple,
+                                      color: context.palette.secondary,
                                     ),
                                   ),
                                 ),
@@ -271,31 +266,28 @@ class _EPrescriptionDetailScreenState extends State<EPrescriptionDetailScreen> {
                     // History
                     if (provider.history.isNotEmpty) ...[
                       const SizedBox(height: 16),
-                      const Text(
-                        'Historique',
-                        style: PharmaConnectTypography.heading3,
-                      ),
+                      Text('Historique', style: context.text.heading3),
                       const SizedBox(height: 8),
                       ...provider.history.map((entry) {
                         return Container(
                           padding: const EdgeInsets.symmetric(vertical: 4),
                           child: Row(
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.timeline,
                                 size: 14,
-                                color: Colors.white54,
+                                color: context.palette.textSecondary,
                               ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   '${entry.oldStatus ?? 'Création'} → ${entry.newStatus}',
-                                  style: PharmaConnectTypography.micro,
+                                  style: context.text.micro,
                                 ),
                               ),
                               Text(
                                 _formatDate(entry.createdAt),
-                                style: PharmaConnectTypography.micro,
+                                style: context.text.micro,
                               ),
                             ],
                           ),
@@ -320,10 +312,9 @@ class _EPrescriptionDetailScreenState extends State<EPrescriptionDetailScreen> {
                                 );
                                 if (success && context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
+                                    SnackBar(
                                       content: Text('Prescription envoyée'),
-                                      backgroundColor:
-                                          PharmaConnectColors.accentGreen,
+                                      backgroundColor: context.palette.success,
                                     ),
                                   );
                                   provider.loadPrescription(prescription.id);
@@ -371,10 +362,9 @@ class _EPrescriptionDetailScreenState extends State<EPrescriptionDetailScreen> {
                                 );
                                 if (success && context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
+                                    SnackBar(
                                       content: Text('Prescription validée'),
-                                      backgroundColor:
-                                          PharmaConnectColors.accentGreen,
+                                      backgroundColor: context.palette.success,
                                     ),
                                   );
                                   provider.loadPrescription(prescription.id);
@@ -419,10 +409,9 @@ class _EPrescriptionDetailScreenState extends State<EPrescriptionDetailScreen> {
                           );
                           if (success && context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
+                              SnackBar(
                                 content: Text('Médicaments dispensés'),
-                                backgroundColor:
-                                    PharmaConnectColors.accentGreen,
+                                backgroundColor: context.palette.success,
                               ),
                             );
                             provider.loadPrescription(prescription.id);
@@ -457,7 +446,7 @@ class _EPrescriptionDetailScreenState extends State<EPrescriptionDetailScreen> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: PharmaConnectColors.textSecondary.withValues(
+                          color: context.palette.textSecondary.withValues(
                             alpha: 0.1,
                           ),
                           borderRadius: BorderRadius.circular(8),
@@ -468,13 +457,13 @@ class _EPrescriptionDetailScreenState extends State<EPrescriptionDetailScreen> {
                               prescription.status == 'dispensed'
                                   ? Icons.done_all
                                   : Icons.block,
-                              color: PharmaConnectColors.textSecondary,
+                              color: context.palette.textSecondary,
                             ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 'Cette prescription est ${prescription.statusLabel.toLowerCase()}',
-                                style: PharmaConnectTypography.body2,
+                                style: context.text.body2,
                               ),
                             ),
                           ],
@@ -497,11 +486,8 @@ class _EPrescriptionDetailScreenState extends State<EPrescriptionDetailScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 120,
-            child: Text(label, style: PharmaConnectTypography.label),
-          ),
-          Expanded(child: Text(value, style: PharmaConnectTypography.body1)),
+          SizedBox(width: 120, child: Text(label, style: context.text.label)),
+          Expanded(child: Text(value, style: context.text.body1)),
         ],
       ),
     );
@@ -514,21 +500,21 @@ class _EPrescriptionDetailScreenState extends State<EPrescriptionDetailScreen> {
   Color _statusColor(String status) {
     switch (status) {
       case 'draft':
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
       case 'sent':
-        return PharmaConnectColors.accentCyan;
+        return context.palette.primary;
       case 'received':
-        return PharmaConnectColors.accentOrange;
+        return context.palette.warning;
       case 'validated':
-        return PharmaConnectColors.accentGreen;
+        return context.palette.success;
       case 'dispensed':
-        return PharmaConnectColors.accentPurple;
+        return context.palette.secondary;
       case 'expired':
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       case 'cancelled':
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       default:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
     }
   }
 }

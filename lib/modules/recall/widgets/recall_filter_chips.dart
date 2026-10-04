@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../core/theme/colors.dart';
 import '../providers/recall_provider.dart';
 import '../models/recall_status.dart';
 import '../models/recall_severity.dart';
+import '../../../core/theme/palette.dart';
 
 class RecallFilterChips extends StatefulWidget {
   const RecallFilterChips({super.key});
@@ -23,13 +23,13 @@ class _RecallFilterChipsState extends State<RecallFilterChips> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Filtres',
           style: TextStyle(
             fontFamily: 'Inter',
             fontSize: 13,
             fontWeight: FontWeight.w500,
-            color: PharmaConnectColors.textSecondary,
+            color: context.palette.textSecondary,
           ),
         ),
         const SizedBox(height: 8),
@@ -88,13 +88,15 @@ class _RecallFilterChipsState extends State<RecallFilterChips> {
       label: Text(label),
       selected: selected,
       onSelected: (_) => onTap(),
-      selectedColor: PharmaConnectColors.accentCyan.withValues(alpha: 0.2),
+      selectedColor: context.palette.primary.withValues(alpha: 0.2),
       backgroundColor: Colors.transparent,
       side: BorderSide(
-        color: selected ? PharmaConnectColors.accentCyan : Colors.white24,
+        color: selected ? context.palette.primary : context.palette.veil(0.24),
       ),
       labelStyle: TextStyle(
-        color: selected ? PharmaConnectColors.accentCyan : Colors.white70,
+        color: selected
+            ? context.palette.primary
+            : context.palette.textSecondary,
         fontSize: 12,
       ),
     );

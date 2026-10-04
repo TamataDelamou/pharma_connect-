@@ -3,11 +3,10 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import '../providers/network_admin_provider.dart';
 import '../widgets/network_alert_card.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 // Audit Module 26 (CHN), Étape 3 (05/09/2026) — CHN-3 : ce fichier
 // n'existait pas alors qu'il était importé et utilisé (`NetworkAlertsScreen`)
@@ -55,18 +54,18 @@ class _NetworkAlertsScreenState extends State<NetworkAlertsScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       '🚨 Alertes réseau',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -120,18 +119,12 @@ class _NetworkAlertsScreenState extends State<NetworkAlertsScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 48,
-              color: PharmaConnectColors.accentRed,
-            ),
+            Icon(Icons.error_outline, size: 48, color: context.palette.danger),
             const SizedBox(height: 16),
             Text(
               provider.error!,
               textAlign: TextAlign.center,
-              style: PharmaConnectTypography.body2.copyWith(
-                color: PharmaConnectColors.accentRed,
-              ),
+              style: context.text.body2.copyWith(color: context.palette.danger),
             ),
             const SizedBox(height: 16),
             PrimaryButton(
@@ -147,11 +140,8 @@ class _NetworkAlertsScreenState extends State<NetworkAlertsScreen> {
       );
     }
     if (provider.alerts.isEmpty) {
-      return const Center(
-        child: Text(
-          'Aucune alerte réseau',
-          style: PharmaConnectTypography.body2,
-        ),
+      return Center(
+        child: Text('Aucune alerte réseau', style: context.text.body2),
       );
     }
     return ListView.builder(

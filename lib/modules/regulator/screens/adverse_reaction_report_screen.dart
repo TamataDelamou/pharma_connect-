@@ -4,14 +4,13 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/tertiary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/widgets/inputs/glass_input.dart';
 import '../providers/regulator_provider.dart';
 import '../models/adverse_reaction.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class AdverseReactionReportScreen extends StatefulWidget {
   const AdverseReactionReportScreen({super.key});
@@ -59,18 +58,18 @@ class _AdverseReactionReportScreenState
                 leading: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.arrow_back,
-                        color: PharmaConnectColors.textPrimary,
+                        color: context.palette.textPrimary,
                       ),
                       onPressed: () => context.pop(),
                       padding: EdgeInsets.zero,
                     ),
                     const SizedBox(width: 8),
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         'Signaler un effet indésirable',
-                        style: PharmaConnectTypography.heading2,
+                        style: context.text.heading2,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -118,9 +117,8 @@ class _AdverseReactionReportScreenState
                                   builder: (context, child) {
                                     return Theme(
                                       data: ThemeData.dark().copyWith(
-                                        colorScheme: const ColorScheme.dark(
-                                          primary:
-                                              PharmaConnectColors.accentCyan,
+                                        colorScheme: ColorScheme.dark(
+                                          primary: context.palette.primary,
                                         ),
                                       ),
                                       child: child!,
@@ -302,6 +300,7 @@ class _AdverseReactionReportScreenState
   }
 
   Future<void> _submitReport() async {
+    final palette = context.palette;
     if (!_formKey.currentState!.validate()) return;
 
     if (_medicationController.text.trim().isEmpty) {
@@ -376,9 +375,9 @@ class _AdverseReactionReportScreenState
     if (success && context.mounted) {
       context.pop();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Signalement envoyé avec succès'),
-          backgroundColor: PharmaConnectColors.accentGreen,
+          backgroundColor: palette.success,
         ),
       );
     } else if (context.mounted) {
@@ -388,7 +387,7 @@ class _AdverseReactionReportScreenState
             context.read<RegulatorProvider>().error ??
                 'Erreur lors de l\'envoi',
           ),
-          backgroundColor: PharmaConnectColors.accentRed,
+          backgroundColor: palette.danger,
         ),
       );
     }

@@ -3,11 +3,10 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import '../providers/health_goal_provider.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class HealthMilestonesScreen extends StatefulWidget {
   const HealthMilestonesScreen({super.key});
@@ -43,18 +42,18 @@ class _HealthMilestonesScreenState extends State<HealthMilestonesScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       '🏅 Jalons santé',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -73,16 +72,16 @@ class _HealthMilestonesScreenState extends State<HealthMilestonesScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.error_outline,
                             size: 48,
-                            color: PharmaConnectColors.accentRed,
+                            color: context.palette.danger,
                           ),
                           const SizedBox(height: 16),
                           Text(
                             provider.error!,
-                            style: PharmaConnectTypography.body2.copyWith(
-                              color: PharmaConnectColors.accentRed,
+                            style: context.text.body2.copyWith(
+                              color: context.palette.danger,
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -101,24 +100,24 @@ class _HealthMilestonesScreenState extends State<HealthMilestonesScreen> {
                       ),
                     )
                   : provider.milestones.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
                             Icons.emoji_events_outlined,
                             size: 64,
-                            color: Colors.white24,
+                            color: context.palette.veil(0.24),
                           ),
                           SizedBox(height: 16),
                           Text(
                             'Aucun jalon atteint',
-                            style: PharmaConnectTypography.heading3,
+                            style: context.text.heading3,
                           ),
                           SizedBox(height: 8),
                           Text(
                             'Atteignez vos objectifs pour débloquer des jalons',
-                            style: PharmaConnectTypography.body2,
+                            style: context.text.body2,
                             textAlign: TextAlign.center,
                           ),
                         ],
@@ -132,19 +131,19 @@ class _HealthMilestonesScreenState extends State<HealthMilestonesScreen> {
                           padding: const EdgeInsets.all(16),
                           margin: const EdgeInsets.only(bottom: 8),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.04),
+                            color: context.palette.surfaceMuted,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: PharmaConnectColors.accentAmber.withValues(
+                              color: context.palette.warningStrong.withValues(
                                 alpha: 0.2,
                               ),
                             ),
                           ),
                           child: Row(
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.emoji_events,
-                                color: PharmaConnectColors.accentAmber,
+                                color: context.palette.warningStrong,
                               ),
                               const SizedBox(width: 12),
                               Expanded(
@@ -153,18 +152,17 @@ class _HealthMilestonesScreenState extends State<HealthMilestonesScreen> {
                                   children: [
                                     Text(
                                       milestone.achievement,
-                                      style: PharmaConnectTypography.body1
-                                          .copyWith(
-                                            fontWeight: FontWeight.w600,
-                                          ),
+                                      style: context.text.body1.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
                                     Text(
                                       milestone.typeLabel,
-                                      style: PharmaConnectTypography.body2,
+                                      style: context.text.body2,
                                     ),
                                     Text(
                                       'Atteint le ${_formatDate(milestone.achievedAt)}',
-                                      style: PharmaConnectTypography.micro,
+                                      style: context.text.micro,
                                     ),
                                   ],
                                 ),

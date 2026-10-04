@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
+import '../../../core/theme/palette.dart';
 
 class CheckoutStepIndicator extends StatelessWidget {
   final int currentStep;
@@ -29,13 +29,10 @@ class CheckoutStepIndicator extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: isActive
-                      ? PharmaConnectColors.accentCyan
-                      : Colors.white.withValues(alpha: 0.1),
+                      ? context.palette.primary
+                      : context.palette.border,
                   border: isCurrent
-                      ? Border.all(
-                          color: PharmaConnectColors.accentCyan,
-                          width: 3,
-                        )
+                      ? Border.all(color: context.palette.primary, width: 3)
                       : null,
                 ),
                 child: Center(
@@ -43,8 +40,8 @@ class CheckoutStepIndicator extends StatelessWidget {
                     '${index + 1}',
                     style: TextStyle(
                       color: isActive
-                          ? PharmaConnectColors.textOnAccent
-                          : PharmaConnectColors.textSecondary,
+                          ? context.palette.onPrimary
+                          : context.palette.textSecondary,
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
                     ),
@@ -57,8 +54,8 @@ class CheckoutStepIndicator extends StatelessWidget {
                   child: Container(
                     height: 2,
                     color: index < currentStep
-                        ? PharmaConnectColors.accentCyan
-                        : Colors.white.withValues(alpha: 0.1),
+                        ? context.palette.primary
+                        : context.palette.border,
                   ),
                 ),
               ],

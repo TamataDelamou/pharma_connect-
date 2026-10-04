@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../theme/colors.dart';
-import '../../theme/glass.dart';
 import '../../theme/spacing.dart';
-import '../../theme/typography.dart';
+import '../../theme/palette.dart';
 
 class GlassModal extends StatelessWidget {
   final Widget child;
@@ -35,7 +33,7 @@ class GlassModal extends StatelessWidget {
         duration: const Duration(milliseconds: 250),
         curve: Curves.easeOut,
         width: width.clamp(0, MediaQuery.of(context).size.width * maxWidth),
-        decoration: PharmaConnectGlass.glassPrimary.copyWith(
+        decoration: context.palette.card.copyWith(
           borderRadius: BorderRadius.circular(PharmaConnectSpacing.radiusXl),
         ),
         child: Column(
@@ -50,19 +48,16 @@ class GlassModal extends StatelessWidget {
                   children: [
                     if (title != null) ...[
                       Expanded(
-                        child: Text(
-                          title!,
-                          style: PharmaConnectTypography.heading3,
-                        ),
+                        child: Text(title!, style: context.text.heading3),
                       ),
                     ],
                     if (actions != null) ...[...actions!],
                     if (dismissible) ...[
                       const SizedBox(width: 8),
                       IconButton(
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.close,
-                          color: PharmaConnectColors.textSecondary,
+                          color: context.palette.textSecondary,
                           size: 24,
                         ),
                         onPressed:
@@ -74,7 +69,7 @@ class GlassModal extends StatelessWidget {
                   ],
                 ),
               ),
-              const Divider(color: Colors.white24, height: 1),
+              Divider(color: context.palette.veil(0.24), height: 1),
             ],
             // ==================== CONTENU ====================
             Flexible(
@@ -99,7 +94,7 @@ class GlassModal extends StatelessWidget {
     return showDialog<T>(
       context: context,
       barrierDismissible: dismissible,
-      barrierColor: PharmaConnectColors.overlayDark,
+      barrierColor: context.palette.overlay,
       builder: (context) => GlassModal(
         width: width,
         maxWidth: maxWidth,

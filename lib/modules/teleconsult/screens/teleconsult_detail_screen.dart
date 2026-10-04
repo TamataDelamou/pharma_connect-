@@ -4,13 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/secondary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../providers/teleconsult_provider.dart';
 import '../models/consultation_status.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class TeleconsultDetailScreen extends StatefulWidget {
   final String consultationId;
@@ -47,9 +46,7 @@ class _TeleconsultDetailScreenState extends State<TeleconsultDetailScreen> {
         body: Center(
           child: Text(
             provider.error ?? 'Consultation introuvable',
-            style: PharmaConnectTypography.body2.copyWith(
-              color: PharmaConnectColors.accentRed,
-            ),
+            style: context.text.body2.copyWith(color: context.palette.danger),
           ),
         ),
       );
@@ -71,18 +68,18 @@ class _TeleconsultDetailScreenState extends State<TeleconsultDetailScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Détail de la consultation',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -108,8 +105,8 @@ class _TeleconsultDetailScreenState extends State<TeleconsultDetailScreen> {
                     icon: const Icon(Icons.video_call),
                     label: const Text('Rejoindre'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: PharmaConnectColors.accentGreen,
-                      foregroundColor: PharmaConnectColors.textPrimary,
+                      backgroundColor: context.palette.success,
+                      foregroundColor: context.palette.onPrimary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -129,10 +126,10 @@ class _TeleconsultDetailScreenState extends State<TeleconsultDetailScreen> {
                       glow: true,
                       glowColor:
                           consultation.status == ConsultationStatus.confirmed
-                          ? PharmaConnectColors.accentGreen
+                          ? context.palette.success
                           : consultation.status == ConsultationStatus.pending
-                          ? PharmaConnectColors.accentOrange
-                          : PharmaConnectColors.textSecondary,
+                          ? context.palette.warning
+                          : context.palette.textSecondary,
                       child: Row(
                         children: [
                           Container(
@@ -150,11 +147,11 @@ class _TeleconsultDetailScreenState extends State<TeleconsultDetailScreen> {
                               children: [
                                 Text(
                                   'Statut : ${consultation.status.label}',
-                                  style: PharmaConnectTypography.heading3,
+                                  style: context.text.heading3,
                                 ),
                                 Text(
                                   _formatDate(consultation.scheduledAt),
-                                  style: PharmaConnectTypography.body2,
+                                  style: context.text.body2,
                                 ),
                               ],
                             ),
@@ -173,36 +170,36 @@ class _TeleconsultDetailScreenState extends State<TeleconsultDetailScreen> {
                             'Patient',
                             consultation.patientName ?? consultation.patientId,
                           ),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           _buildDetailRow(
                             'Professionnel',
                             consultation.professionalName ??
                                 consultation.professionalId,
                           ),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           _buildDetailRow(
                             'Durée',
                             '${consultation.durationMinutes} min',
                           ),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           if (consultation.reason != null)
                             _buildDetailRow('Motif', consultation.reason!),
                           if (consultation.meetingUrl != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildDetailRow(
                               'Lien de visio',
                               consultation.meetingUrl!,
                             ),
                           ],
                           if (consultation.professionalNotes != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildDetailRow(
                               'Notes du professionnel',
                               consultation.professionalNotes!,
                             ),
                           ],
                           if (consultation.patientFeedback != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildDetailRow(
                               'Feedback du patient',
                               consultation.patientFeedback!,
@@ -230,10 +227,10 @@ class _TeleconsultDetailScreenState extends State<TeleconsultDetailScreen> {
                                       );
                                   if (success && context.mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
+                                      SnackBar(
                                         content: Text('Consultation confirmée'),
                                         backgroundColor:
-                                            PharmaConnectColors.accentGreen,
+                                            context.palette.success,
                                       ),
                                     );
                                     provider.loadConsultation(consultation.id);
@@ -304,10 +301,9 @@ class _TeleconsultDetailScreenState extends State<TeleconsultDetailScreen> {
                                     );
                                 if (success && context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
+                                    SnackBar(
                                       content: Text('Consultation terminée'),
-                                      backgroundColor:
-                                          PharmaConnectColors.accentGreen,
+                                      backgroundColor: context.palette.success,
                                     ),
                                   );
                                   provider.loadConsultation(consultation.id);
@@ -374,10 +370,8 @@ class _TeleconsultDetailScreenState extends State<TeleconsultDetailScreen> {
                         icon: const Icon(Icons.delete_outline),
                         label: const Text('Supprimer'),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: PharmaConnectColors.accentRed,
-                          side: const BorderSide(
-                            color: PharmaConnectColors.accentRed,
-                          ),
+                          foregroundColor: context.palette.danger,
+                          side: BorderSide(color: context.palette.danger),
                         ),
                       ),
                     ],
@@ -397,11 +391,8 @@ class _TeleconsultDetailScreenState extends State<TeleconsultDetailScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 120,
-            child: Text(label, style: PharmaConnectTypography.label),
-          ),
-          Expanded(child: Text(value, style: PharmaConnectTypography.body1)),
+          SizedBox(width: 120, child: Text(label, style: context.text.label)),
+          Expanded(child: Text(value, style: context.text.body1)),
         ],
       ),
     );
@@ -414,15 +405,15 @@ class _TeleconsultDetailScreenState extends State<TeleconsultDetailScreen> {
   Color _statusColor(ConsultationStatus status) {
     switch (status) {
       case ConsultationStatus.pending:
-        return PharmaConnectColors.accentOrange;
+        return context.palette.warning;
       case ConsultationStatus.confirmed:
-        return PharmaConnectColors.accentGreen;
+        return context.palette.success;
       case ConsultationStatus.completed:
-        return PharmaConnectColors.accentCyan;
+        return context.palette.primary;
       case ConsultationStatus.cancelled:
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       case ConsultationStatus.missed:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
     }
   }
 
@@ -430,7 +421,7 @@ class _TeleconsultDetailScreenState extends State<TeleconsultDetailScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: PharmaConnectColors.primaryDeep,
+        backgroundColor: context.palette.background,
         title: const Text('Supprimer la consultation'),
         content: const Text(
           'Êtes-vous sûr de vouloir supprimer cette consultation ? Cette action est irréversible.',
@@ -451,8 +442,8 @@ class _TeleconsultDetailScreenState extends State<TeleconsultDetailScreen> {
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: PharmaConnectColors.accentRed,
-              foregroundColor: PharmaConnectColors.textPrimary,
+              backgroundColor: context.palette.danger,
+              foregroundColor: context.palette.onDanger,
             ),
             child: const Text('Supprimer'),
           ),

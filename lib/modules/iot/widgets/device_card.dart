@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../models/iot_device.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class DeviceCard extends StatelessWidget {
   final IotDevice device;
@@ -23,9 +22,7 @@ class DeviceCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             device.name,
-            style: PharmaConnectTypography.body1.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+            style: context.text.body1.copyWith(fontWeight: FontWeight.w600),
             textAlign: TextAlign.center,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -33,7 +30,7 @@ class DeviceCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             device.typeLabel,
-            style: PharmaConnectTypography.micro,
+            style: context.text.micro,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -41,7 +38,10 @@ class DeviceCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
-              color: _statusColor(device.status).withValues(alpha: 0.15),
+              color: _statusColor(
+                context,
+                device.status,
+              ).withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -49,7 +49,7 @@ class DeviceCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w500,
-                color: _statusColor(device.status),
+                color: _statusColor(context, device.status),
               ),
             ),
           ),
@@ -60,8 +60,8 @@ class DeviceCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 10,
                 color: device.lastBatteryLevel! < 20
-                    ? PharmaConnectColors.accentRed
-                    : PharmaConnectColors.textSecondary,
+                    ? context.palette.danger
+                    : context.palette.textSecondary,
               ),
             ),
           ],
@@ -69,7 +69,7 @@ class DeviceCard extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               'Dernière lecture: ${_formatDate(device.lastReadingAt!)}',
-              style: const TextStyle(fontSize: 9, color: Colors.white38),
+              style: TextStyle(fontSize: 9, color: context.palette.textMuted),
             ),
           ],
         ],
@@ -94,18 +94,18 @@ class DeviceCard extends StatelessWidget {
     }
   }
 
-  Color _statusColor(String status) {
+  Color _statusColor(BuildContext context, String status) {
     switch (status) {
       case 'active':
-        return PharmaConnectColors.accentGreen;
+        return context.palette.success;
       case 'inactive':
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
       case 'maintenance':
-        return PharmaConnectColors.accentOrange;
+        return context.palette.warning;
       case 'offline':
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       default:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
     }
   }
 

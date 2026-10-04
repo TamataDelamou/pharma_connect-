@@ -3,8 +3,6 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/utils/currency_formatter.dart';
@@ -12,6 +10,7 @@ import 'package:fl_chart/fl_chart.dart';
 import '../models/pos_sale.dart';
 import '../providers/pos_provider.dart';
 import '../../auth/providers/auth_provider.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class POSSalesReportScreen extends StatefulWidget {
   const POSSalesReportScreen({super.key});
@@ -70,11 +69,11 @@ class _POSSalesReportScreenState extends State<POSSalesReportScreen> {
   Widget build(BuildContext context) {
     final pharmacyId = context.watch<AuthProvider>().pharmacyId;
     if (pharmacyId == null) {
-      return const Scaffold(
+      return Scaffold(
         body: Center(
           child: Text(
             'Aucune officine rattachée à ce compte pharmacien.',
-            style: PharmaConnectTypography.body2,
+            style: context.text.body2,
             textAlign: TextAlign.center,
           ),
         ),
@@ -94,18 +93,18 @@ class _POSSalesReportScreenState extends State<POSSalesReportScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       '📊 Rapport de vente',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -121,8 +120,8 @@ class _POSSalesReportScreenState extends State<POSSalesReportScreen> {
                   icon: const Icon(Icons.file_download),
                   label: const Text('Exporter'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: PharmaConnectColors.accentPurple,
-                    foregroundColor: PharmaConnectColors.textPrimary,
+                    backgroundColor: context.palette.primary,
+                    foregroundColor: context.palette.onPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -170,7 +169,7 @@ class _POSSalesReportScreenState extends State<POSSalesReportScreen> {
       padding: const EdgeInsets.all(12),
       child: Row(
         children: [
-          const Text('Période:', style: PharmaConnectTypography.label),
+          Text('Période:', style: context.text.label),
           const SizedBox(width: 12),
           _buildPeriodChip('Jour', 'day'),
           _buildPeriodChip('Semaine', 'week'),
@@ -178,9 +177,9 @@ class _POSSalesReportScreenState extends State<POSSalesReportScreen> {
           _buildPeriodChip('Année', 'year'),
           const Spacer(),
           IconButton(
-            icon: const Icon(
+            icon: Icon(
               Icons.chevron_left,
-              color: PharmaConnectColors.textSecondary,
+              color: context.palette.textSecondary,
             ),
             onPressed: () {
               setState(() {
@@ -191,12 +190,12 @@ class _POSSalesReportScreenState extends State<POSSalesReportScreen> {
           ),
           Text(
             '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
-            style: PharmaConnectTypography.body2,
+            style: context.text.body2,
           ),
           IconButton(
-            icon: const Icon(
+            icon: Icon(
               Icons.chevron_right,
-              color: PharmaConnectColors.textSecondary,
+              color: context.palette.textSecondary,
             ),
             onPressed: () {
               setState(() {
@@ -221,19 +220,21 @@ class _POSSalesReportScreenState extends State<POSSalesReportScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         decoration: BoxDecoration(
           color: isSelected
-              ? PharmaConnectColors.accentCyan.withValues(alpha: 0.15)
+              ? context.palette.primary.withValues(alpha: 0.15)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(6),
           border: Border.all(
-            color: isSelected ? PharmaConnectColors.accentCyan : Colors.white24,
+            color: isSelected
+                ? context.palette.primary
+                : context.palette.veil(0.24),
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
             color: isSelected
-                ? PharmaConnectColors.accentCyan
-                : PharmaConnectColors.textSecondary,
+                ? context.palette.primary
+                : context.palette.textSecondary,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
           ),
         ),
@@ -258,13 +259,13 @@ class _POSSalesReportScreenState extends State<POSSalesReportScreen> {
             padding: const EdgeInsets.all(12),
             child: Column(
               children: [
-                Text('CA total', style: PharmaConnectTypography.micro),
+                Text('CA total', style: context.text.micro),
                 Text(
                   CurrencyFormatter.format(total),
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
-                    color: PharmaConnectColors.accentGreen,
+                    color: context.palette.success,
                   ),
                 ),
               ],
@@ -277,13 +278,13 @@ class _POSSalesReportScreenState extends State<POSSalesReportScreen> {
             padding: const EdgeInsets.all(12),
             child: Column(
               children: [
-                Text('Ventes', style: PharmaConnectTypography.micro),
+                Text('Ventes', style: context.text.micro),
                 Text(
                   '${completedSales.length}',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
-                    color: PharmaConnectColors.accentCyan,
+                    color: context.palette.primary,
                   ),
                 ),
               ],
@@ -296,13 +297,13 @@ class _POSSalesReportScreenState extends State<POSSalesReportScreen> {
             padding: const EdgeInsets.all(12),
             child: Column(
               children: [
-                Text('Panier moyen', style: PharmaConnectTypography.micro),
+                Text('Panier moyen', style: context.text.micro),
                 Text(
                   CurrencyFormatter.format(avgTicket),
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
-                    color: PharmaConnectColors.accentPurple,
+                    color: context.palette.secondary,
                   ),
                 ),
               ],
@@ -315,15 +316,15 @@ class _POSSalesReportScreenState extends State<POSSalesReportScreen> {
             padding: const EdgeInsets.all(12),
             child: Column(
               children: [
-                Text('Remboursements', style: PharmaConnectTypography.micro),
+                Text('Remboursements', style: context.text.micro),
                 Text(
                   '$refunded',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
                     color: refunded > 0
-                        ? PharmaConnectColors.accentOrange
-                        : PharmaConnectColors.textSecondary,
+                        ? context.palette.warning
+                        : context.palette.textSecondary,
                   ),
                 ),
               ],
@@ -365,10 +366,7 @@ class _POSSalesReportScreenState extends State<POSSalesReportScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Évolution des ventes',
-          style: PharmaConnectTypography.label,
-        ),
+        Text('Évolution des ventes', style: context.text.label),
         const SizedBox(height: 8),
         Expanded(
           child: LineChart(
@@ -397,9 +395,9 @@ class _POSSalesReportScreenState extends State<POSSalesReportScreen> {
                         padding: const EdgeInsets.only(top: 4),
                         child: Text(
                           '${date.day}/${date.month}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 9,
-                            color: Colors.white54,
+                            color: context.palette.textSecondary,
                           ),
                         ),
                       );
@@ -416,13 +414,11 @@ class _POSSalesReportScreenState extends State<POSSalesReportScreen> {
                 LineChartBarData(
                   spots: spots,
                   isCurved: true,
-                  color: PharmaConnectColors.accentCyan,
+                  color: context.palette.primary,
                   barWidth: 2,
                   belowBarData: BarAreaData(
                     show: true,
-                    color: PharmaConnectColors.accentCyan.withValues(
-                      alpha: 0.1,
-                    ),
+                    color: context.palette.primary.withValues(alpha: 0.1),
                   ),
                   dotData: const FlDotData(show: true),
                 ),
@@ -447,18 +443,15 @@ class _POSSalesReportScreenState extends State<POSSalesReportScreen> {
         children: [
           Row(
             children: [
-              const Text(
-                '🔄 Remboursements',
-                style: PharmaConnectTypography.heading3,
-              ),
+              Text('🔄 Remboursements', style: context.text.heading3),
               const Spacer(),
               Text(
                 '${refunds.length} · ${CurrencyFormatter.format(total)}',
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
                   color: refunds.isEmpty
-                      ? PharmaConnectColors.textSecondary
-                      : PharmaConnectColors.accentOrange,
+                      ? context.palette.textSecondary
+                      : context.palette.warning,
                 ),
               ),
             ],
@@ -471,7 +464,7 @@ class _POSSalesReportScreenState extends State<POSSalesReportScreen> {
                 ? Center(
                     child: Text(
                       provider.refundsError!,
-                      style: PharmaConnectTypography.micro,
+                      style: context.text.micro,
                     ),
                   )
                 : refunds.isEmpty
@@ -479,7 +472,7 @@ class _POSSalesReportScreenState extends State<POSSalesReportScreen> {
                 : ListView.separated(
                     itemCount: refunds.length,
                     separatorBuilder: (_, _) =>
-                        const Divider(color: Colors.white12, height: 12),
+                        Divider(color: context.palette.veil(0.12), height: 12),
                     itemBuilder: (_, i) => _buildRefundRow(refunds[i]),
                   ),
           ),
@@ -501,9 +494,9 @@ class _POSSalesReportScreenState extends State<POSSalesReportScreen> {
             const Spacer(),
             Text(
               CurrencyFormatter.format(sale.finalAmount),
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w600,
-                color: PharmaConnectColors.accentOrange,
+                color: context.palette.warning,
               ),
             ),
           ],
@@ -512,12 +505,12 @@ class _POSSalesReportScreenState extends State<POSSalesReportScreen> {
           'Vendue le ${_formatDateTime(sale.createdAt)} · '
           'remboursée le ${sale.refundedAt != null ? _formatDateTime(sale.refundedAt!) : '—'} '
           'par ${sale.refundedByName ?? sale.refundedBy ?? '—'}',
-          style: PharmaConnectTypography.micro,
+          style: context.text.micro,
         ),
         Text(
           'Motif : ${sale.refundReason ?? '—'} · '
           '${sale.refundStockDispositionLabel ?? '—'}',
-          style: PharmaConnectTypography.body2,
+          style: context.text.body2,
         ),
       ],
     );
@@ -551,10 +544,7 @@ class _POSSalesReportScreenState extends State<POSSalesReportScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '🏆 Top produits',
-            style: PharmaConnectTypography.heading3,
-          ),
+          Text('🏆 Top produits', style: context.text.heading3),
           const SizedBox(height: 8),
           ...sortedProducts.take(5).map((entry) {
             return Container(
@@ -563,7 +553,7 @@ class _POSSalesReportScreenState extends State<POSSalesReportScreen> {
                 children: [
                   Text(
                     entry.key,
-                    style: PharmaConnectTypography.body2,
+                    style: context.text.body2,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -572,7 +562,7 @@ class _POSSalesReportScreenState extends State<POSSalesReportScreen> {
                     '${entry.value} vendus',
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
-                      color: PharmaConnectColors.accentCyan,
+                      color: context.palette.primary,
                     ),
                   ),
                 ],

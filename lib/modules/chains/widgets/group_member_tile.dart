@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import '../models/group_member.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class GroupMemberTile extends StatelessWidget {
   final GroupMember member;
@@ -13,21 +12,24 @@ class GroupMemberTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.04),
+        color: context.palette.surfaceMuted,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        border: Border.all(color: context.palette.borderSubtle),
       ),
       child: Row(
         children: [
           CircleAvatar(
             radius: 16,
-            backgroundColor: _roleColor(member.role).withValues(alpha: 0.15),
+            backgroundColor: _roleColor(
+              context,
+              member.role,
+            ).withValues(alpha: 0.15),
             child: Text(
               member.pharmacyName?.substring(0, 1) ?? 'P',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
-                color: _roleColor(member.role),
+                color: _roleColor(context, member.role),
               ),
             ),
           ),
@@ -38,22 +40,19 @@ class GroupMemberTile extends StatelessWidget {
               children: [
                 Text(
                   member.pharmacyName ?? member.pharmacyId,
-                  style: PharmaConnectTypography.body1.copyWith(
+                  style: context.text.body1.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 if (member.pharmacyCity != null)
-                  Text(
-                    member.pharmacyCity!,
-                    style: PharmaConnectTypography.micro,
-                  ),
+                  Text(member.pharmacyCity!, style: context.text.micro),
               ],
             ),
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
-              color: _roleColor(member.role).withValues(alpha: 0.15),
+              color: _roleColor(context, member.role).withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -61,7 +60,7 @@ class GroupMemberTile extends StatelessWidget {
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w500,
-                color: _roleColor(member.role),
+                color: _roleColor(context, member.role),
               ),
             ),
           ),
@@ -70,18 +69,18 @@ class GroupMemberTile extends StatelessWidget {
     );
   }
 
-  Color _roleColor(String role) {
+  Color _roleColor(BuildContext context, String role) {
     switch (role) {
       case 'admin':
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       case 'manager':
-        return PharmaConnectColors.accentOrange;
+        return context.palette.warning;
       case 'staff':
-        return PharmaConnectColors.accentCyan;
+        return context.palette.primary;
       case 'viewer':
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
       default:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
     }
   }
 }

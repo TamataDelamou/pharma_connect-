@@ -3,8 +3,6 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/buttons/tertiary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
@@ -12,6 +10,7 @@ import '../../auth/models/user_role.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/prescription_provider.dart';
 import '../widgets/prescription_item_tile.dart';
+import '../../../core/theme/palette.dart';
 
 class PrescriptionDetailScreen extends StatefulWidget {
   final String prescriptionId;
@@ -64,8 +63,8 @@ class _PrescriptionDetailScreenState extends State<PrescriptionDetailScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Text(
                   'Erreur : ${provider.error}',
-                  style: PharmaConnectTypography.body2.copyWith(
-                    color: PharmaConnectColors.accentRed,
+                  style: context.text.body2.copyWith(
+                    color: context.palette.danger,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -99,18 +98,18 @@ class _PrescriptionDetailScreenState extends State<PrescriptionDetailScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Détail de l\'ordonnance',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -127,29 +126,25 @@ class _PrescriptionDetailScreenState extends State<PrescriptionDetailScreen> {
                   vertical: 10,
                 ),
                 decoration: BoxDecoration(
-                  color: PharmaConnectColors.accentAmber.withValues(
-                    alpha: 0.12,
-                  ),
+                  color: context.palette.warningStrong.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: PharmaConnectColors.accentAmber.withValues(
-                      alpha: 0.3,
-                    ),
+                    color: context.palette.warningStrong.withValues(alpha: 0.3),
                   ),
                 ),
                 child: Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.cloud_off,
                       size: 18,
-                      color: PharmaConnectColors.accentAmber,
+                      color: context.palette.warningStrong,
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         provider.error ??
                             'Hors-ligne — dernière version connue.',
-                        style: PharmaConnectTypography.micro,
+                        style: context.text.micro,
                       ),
                     ),
                   ],
@@ -174,7 +169,9 @@ class _PrescriptionDetailScreenState extends State<PrescriptionDetailScreen> {
                                 width: 4,
                                 height: 40,
                                 decoration: BoxDecoration(
-                                  color: prescription.statusColor,
+                                  color: prescription.statusColor.of(
+                                    context.palette,
+                                  ),
                                   borderRadius: BorderRadius.circular(2),
                                 ),
                               ),
@@ -185,7 +182,7 @@ class _PrescriptionDetailScreenState extends State<PrescriptionDetailScreen> {
                                   children: [
                                     Text(
                                       'Ordonnance #${prescription.id}',
-                                      style: PharmaConnectTypography.heading3,
+                                      style: context.text.heading3,
                                     ),
                                     Row(
                                       children: [
@@ -196,6 +193,7 @@ class _PrescriptionDetailScreenState extends State<PrescriptionDetailScreen> {
                                           ),
                                           decoration: BoxDecoration(
                                             color: prescription.statusColor
+                                                .of(context.palette)
                                                 .withValues(alpha: 0.15),
                                             borderRadius: BorderRadius.circular(
                                               4,
@@ -206,14 +204,15 @@ class _PrescriptionDetailScreenState extends State<PrescriptionDetailScreen> {
                                             style: TextStyle(
                                               fontSize: 11,
                                               fontWeight: FontWeight.w600,
-                                              color: prescription.statusColor,
+                                              color: prescription.statusColor
+                                                  .of(context.palette),
                                             ),
                                           ),
                                         ),
                                         const SizedBox(width: 8),
                                         Text(
                                           _formatDate(prescription.uploadedAt),
-                                          style: PharmaConnectTypography.micro,
+                                          style: context.text.micro,
                                         ),
                                       ],
                                     ),
@@ -223,7 +222,7 @@ class _PrescriptionDetailScreenState extends State<PrescriptionDetailScreen> {
                             ],
                           ),
                           const SizedBox(height: 12),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           const SizedBox(height: 12),
                           Row(
                             children: [
@@ -231,13 +230,10 @@ class _PrescriptionDetailScreenState extends State<PrescriptionDetailScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
-                                      'Patient',
-                                      style: PharmaConnectTypography.label,
-                                    ),
+                                    Text('Patient', style: context.text.label),
                                     Text(
                                       prescription.patientName,
-                                      style: PharmaConnectTypography.body1,
+                                      style: context.text.body1,
                                     ),
                                   ],
                                 ),
@@ -246,14 +242,11 @@ class _PrescriptionDetailScreenState extends State<PrescriptionDetailScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
-                                      'Médecin',
-                                      style: PharmaConnectTypography.label,
-                                    ),
+                                    Text('Médecin', style: context.text.label),
                                     Text(
                                       prescription.doctorName ??
                                           'Non renseigné',
-                                      style: PharmaConnectTypography.body1,
+                                      style: context.text.body1,
                                     ),
                                   ],
                                 ),
@@ -264,9 +257,9 @@ class _PrescriptionDetailScreenState extends State<PrescriptionDetailScreen> {
                             const SizedBox(height: 8),
                             Row(
                               children: [
-                                const Text(
+                                Text(
                                   'Confiance OCR : ',
-                                  style: PharmaConnectTypography.label,
+                                  style: context.text.label,
                                 ),
                                 Text(
                                   '${(prescription.ocrConfidenceScore! * 100).toStringAsFixed(0)}%',
@@ -274,8 +267,8 @@ class _PrescriptionDetailScreenState extends State<PrescriptionDetailScreen> {
                                     fontWeight: FontWeight.w600,
                                     color:
                                         prescription.ocrConfidenceScore! > 0.8
-                                        ? PharmaConnectColors.accentGreen
-                                        : PharmaConnectColors.accentOrange,
+                                        ? context.palette.success
+                                        : context.palette.warning,
                                   ),
                                 ),
                               ],
@@ -293,7 +286,7 @@ class _PrescriptionDetailScreenState extends State<PrescriptionDetailScreen> {
                     // Médicaments
                     Text(
                       'Médicaments (${prescription.items.length})',
-                      style: PharmaConnectTypography.heading3,
+                      style: context.text.heading3,
                     ),
                     const SizedBox(height: 8),
                     ...prescription.items.map((item) {
@@ -322,12 +315,12 @@ class _PrescriptionDetailScreenState extends State<PrescriptionDetailScreen> {
                                   );
                                   if (context.mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
+                                      SnackBar(
                                         content: Text(
                                           'Ordonnance validée avec succès',
                                         ),
                                         backgroundColor:
-                                            PharmaConnectColors.accentGreen,
+                                            context.palette.success,
                                       ),
                                     );
                                   }
@@ -348,13 +341,12 @@ class _PrescriptionDetailScreenState extends State<PrescriptionDetailScreen> {
                                           ScaffoldMessenger.of(
                                             context,
                                           ).showSnackBar(
-                                            const SnackBar(
+                                            SnackBar(
                                               content: Text(
                                                 'Ordonnance dispensée',
                                               ),
                                               backgroundColor:
-                                                  PharmaConnectColors
-                                                      .accentCyan,
+                                                  context.palette.primary,
                                             ),
                                           );
                                         }
@@ -371,10 +363,10 @@ class _PrescriptionDetailScreenState extends State<PrescriptionDetailScreen> {
                             await provider.archivePrescription(prescription.id);
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
+                                SnackBar(
                                   content: Text('Ordonnance archivée'),
                                   backgroundColor:
-                                      PharmaConnectColors.textSecondary,
+                                      context.palette.textSecondary,
                                 ),
                               );
                               context.pop();
@@ -384,7 +376,7 @@ class _PrescriptionDetailScreenState extends State<PrescriptionDetailScreen> {
                       ] else ...[
                         _StatusNotice(
                           icon: Icons.hourglass_top,
-                          color: PharmaConnectColors.accentOrange,
+                          color: context.palette.warning,
                           text:
                               'En attente de validation par un pharmacien habilité.',
                         ),
@@ -402,10 +394,9 @@ class _PrescriptionDetailScreenState extends State<PrescriptionDetailScreen> {
                             );
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
+                                SnackBar(
                                   content: Text('Ordonnance dispensée'),
-                                  backgroundColor:
-                                      PharmaConnectColors.accentCyan,
+                                  backgroundColor: context.palette.primary,
                                 ),
                               );
                             }
@@ -414,7 +405,7 @@ class _PrescriptionDetailScreenState extends State<PrescriptionDetailScreen> {
                       ] else ...[
                         _StatusNotice(
                           icon: Icons.check_circle_outline,
-                          color: PharmaConnectColors.accentGreen,
+                          color: context.palette.success,
                           text:
                               'Validée par un pharmacien — à retirer en officine.',
                         ),
@@ -425,27 +416,25 @@ class _PrescriptionDetailScreenState extends State<PrescriptionDetailScreen> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: PharmaConnectColors.accentGreen.withValues(
-                            alpha: 0.1,
-                          ),
+                          color: context.palette.success.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: PharmaConnectColors.accentGreen.withValues(
+                            color: context.palette.success.withValues(
                               alpha: 0.2,
                             ),
                           ),
                         ),
                         child: Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.check_circle,
-                              color: PharmaConnectColors.accentGreen,
+                              color: context.palette.success,
                             ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 'Ordonnance dispensée le ${_formatDateFull(prescription.dispensedAt!)}',
-                                style: PharmaConnectTypography.body1,
+                                style: context.text.body1,
                               ),
                             ),
                           ],
@@ -503,10 +492,7 @@ class _StatusNotice extends StatelessWidget {
           Icon(icon, color: color, size: 20),
           const SizedBox(width: 8),
           Expanded(
-            child: Text(
-              text,
-              style: PharmaConnectTypography.body1.copyWith(color: color),
-            ),
+            child: Text(text, style: context.text.body1.copyWith(color: color)),
           ),
         ],
       ),

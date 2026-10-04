@@ -3,14 +3,13 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../providers/eprescription_provider.dart';
 import '../models/eprescription.dart';
 import '../models/eprescription_item.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 // PRE-5 (audit Module 25, Étape 2/3, 30/08/2026) : écran de création
 // d'ordonnance électronique, jusqu'ici totalement absent du module (voir
@@ -97,18 +96,18 @@ class _EPrescriptionFormScreenState extends State<EPrescriptionFormScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Nouvelle prescription électronique',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -129,16 +128,13 @@ class _EPrescriptionFormScreenState extends State<EPrescriptionFormScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Patient',
-                              style: PharmaConnectTypography.heading3,
-                            ),
+                            Text('Patient', style: context.text.heading3),
                             const SizedBox(height: 4),
-                            const Text(
+                            Text(
                               'Aucun sélecteur de patient n\'existe encore '
                               'dans ce module — voir le registre (même '
                               'limite que l\'adhésion d\'assurance).',
-                              style: PharmaConnectTypography.micro,
+                              style: context.text.micro,
                             ),
                             const SizedBox(height: 12),
                             _buildTextField(
@@ -154,9 +150,9 @@ class _EPrescriptionFormScreenState extends State<EPrescriptionFormScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'Détails de la prescription',
-                              style: PharmaConnectTypography.heading3,
+                              style: context.text.heading3,
                             ),
                             const SizedBox(height: 12),
                             _buildTextField(
@@ -179,9 +175,9 @@ class _EPrescriptionFormScreenState extends State<EPrescriptionFormScreen> {
                             const SizedBox(height: 12),
                             SwitchListTile(
                               contentPadding: EdgeInsets.zero,
-                              title: const Text(
+                              title: Text(
                                 'Renouvelable',
-                                style: PharmaConnectTypography.body2,
+                                style: context.text.body2,
                               ),
                               value: _isRenewable,
                               onChanged: (v) => setState(() {
@@ -207,16 +203,16 @@ class _EPrescriptionFormScreenState extends State<EPrescriptionFormScreen> {
                           children: [
                             Row(
                               children: [
-                                const Expanded(
+                                Expanded(
                                   child: Text(
                                     'Médicaments',
-                                    style: PharmaConnectTypography.heading3,
+                                    style: context.text.heading3,
                                   ),
                                 ),
                                 IconButton(
-                                  icon: const Icon(
+                                  icon: Icon(
                                     Icons.add_circle,
-                                    color: PharmaConnectColors.accentCyan,
+                                    color: context.palette.primary,
                                   ),
                                   onPressed: () =>
                                       setState(() => _items.add(_ItemDraft())),
@@ -224,9 +220,9 @@ class _EPrescriptionFormScreenState extends State<EPrescriptionFormScreen> {
                               ],
                             ),
                             const SizedBox(height: 4),
-                            const Text(
+                            Text(
                               'Au moins un médicament est requis.',
-                              style: PharmaConnectTypography.micro,
+                              style: context.text.micro,
                             ),
                             const SizedBox(height: 8),
                             for (var i = 0; i < _items.length; i++)
@@ -238,8 +234,8 @@ class _EPrescriptionFormScreenState extends State<EPrescriptionFormScreen> {
                       if (_error != null) ...[
                         Text(
                           _error!,
-                          style: PharmaConnectTypography.body2.copyWith(
-                            color: PharmaConnectColors.accentRed,
+                          style: context.text.body2.copyWith(
+                            color: context.palette.danger,
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -247,8 +243,8 @@ class _EPrescriptionFormScreenState extends State<EPrescriptionFormScreen> {
                       if (provider.error != null) ...[
                         Text(
                           provider.error!,
-                          style: PharmaConnectTypography.body2.copyWith(
-                            color: PharmaConnectColors.accentRed,
+                          style: context.text.body2.copyWith(
+                            color: context.palette.danger,
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -275,9 +271,9 @@ class _EPrescriptionFormScreenState extends State<EPrescriptionFormScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.04),
+        color: context.palette.surfaceMuted,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        border: Border.all(color: context.palette.borderSubtle),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -287,17 +283,17 @@ class _EPrescriptionFormScreenState extends State<EPrescriptionFormScreen> {
               Expanded(
                 child: Text(
                   'Médicament ${index + 1}',
-                  style: PharmaConnectTypography.body2.copyWith(
+                  style: context.text.body2.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
               if (_items.length > 1)
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.delete_outline,
                     size: 18,
-                    color: PharmaConnectColors.accentRed,
+                    color: context.palette.danger,
                   ),
                   onPressed: () => setState(() {
                     _items[index].dispose();
@@ -367,10 +363,7 @@ class _EPrescriptionFormScreenState extends State<EPrescriptionFormScreen> {
           CheckboxListTile(
             contentPadding: EdgeInsets.zero,
             controlAffinity: ListTileControlAffinity.leading,
-            title: const Text(
-              'Substitution autorisée',
-              style: PharmaConnectTypography.body2,
-            ),
+            title: Text('Substitution autorisée', style: context.text.body2),
             value: item.isSubstitutionAllowed,
             onChanged: (v) =>
                 setState(() => item.isSubstitutionAllowed = v ?? false),

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'colors.dart';
-
+/// Tailles, graisses et interlignes. Les styles ne portent pas de couleur
+/// (C234) : elle vient du thème, par `context.text` (palette.dart) ou, à
+/// défaut, par la couleur de texte par défaut du thème.
 class PharmaConnectTypography {
   static const String fontFamily = 'Inter';
 
@@ -12,7 +13,6 @@ class PharmaConnectTypography {
     fontWeight: FontWeight.w700,
     height: 1.2,
     letterSpacing: -0.5,
-    color: PharmaConnectColors.textPrimary,
   );
 
   static const TextStyle heading2 = TextStyle(
@@ -21,7 +21,6 @@ class PharmaConnectTypography {
     fontWeight: FontWeight.w700,
     height: 1.2,
     letterSpacing: -0.3,
-    color: PharmaConnectColors.textPrimary,
   );
 
   static const TextStyle heading3 = TextStyle(
@@ -30,7 +29,6 @@ class PharmaConnectTypography {
     fontWeight: FontWeight.w600,
     height: 1.3,
     letterSpacing: -0.2,
-    color: PharmaConnectColors.textPrimary,
   );
 
   static const TextStyle subtitle1 = TextStyle(
@@ -38,7 +36,6 @@ class PharmaConnectTypography {
     fontSize: 18,
     fontWeight: FontWeight.w500,
     height: 1.3,
-    color: PharmaConnectColors.textPrimary,
   );
 
   static const TextStyle subtitle2 = TextStyle(
@@ -46,7 +43,6 @@ class PharmaConnectTypography {
     fontSize: 16,
     fontWeight: FontWeight.w500,
     height: 1.4,
-    color: PharmaConnectColors.textSecondary,
   );
 
   static const TextStyle body1 = TextStyle(
@@ -54,7 +50,6 @@ class PharmaConnectTypography {
     fontSize: 16,
     fontWeight: FontWeight.w400,
     height: 1.5,
-    color: PharmaConnectColors.textPrimary,
   );
 
   static const TextStyle body2 = TextStyle(
@@ -62,7 +57,6 @@ class PharmaConnectTypography {
     fontSize: 14,
     fontWeight: FontWeight.w400,
     height: 1.5,
-    color: PharmaConnectColors.textSecondary,
   );
 
   static const TextStyle label = TextStyle(
@@ -70,16 +64,24 @@ class PharmaConnectTypography {
     fontSize: 13,
     fontWeight: FontWeight.w500,
     height: 1.4,
-    color: PharmaConnectColors.textSecondary,
     letterSpacing: 0.3,
   );
 
+  /// Petit texte d'accompagnement (mention, légende), en police normale.
   static const TextStyle micro = TextStyle(
-    fontFamily: 'JetBrainsMono', // Police monospace pour code
+    fontFamily: fontFamily,
     fontSize: 12,
     fontWeight: FontWeight.w400,
     height: 1.4,
-    color: PharmaConnectColors.textSecondary,
+  );
+
+  /// Police à chasse fixe, réservée aux codes, aux montants et aux
+  /// références (C234).
+  static const TextStyle mono = TextStyle(
+    fontFamily: 'JetBrainsMono',
+    fontSize: 12,
+    fontWeight: FontWeight.w400,
+    height: 1.4,
   );
 
   static const TextStyle kpiLarge = TextStyle(
@@ -87,7 +89,6 @@ class PharmaConnectTypography {
     fontSize: 48,
     fontWeight: FontWeight.w700,
     height: 1.0,
-    color: PharmaConnectColors.textPrimary,
   );
 
   static const TextStyle kpiMedium = TextStyle(
@@ -95,7 +96,6 @@ class PharmaConnectTypography {
     fontSize: 32,
     fontWeight: FontWeight.w700,
     height: 1.0,
-    color: PharmaConnectColors.textPrimary,
   );
 
   static const TextStyle kpiSmall = TextStyle(
@@ -103,7 +103,6 @@ class PharmaConnectTypography {
     fontSize: 24,
     fontWeight: FontWeight.w700,
     height: 1.0,
-    color: PharmaConnectColors.textPrimary,
   );
 
   // ==================== ÉCHELLE ADAPTATIVE (C233) ====================
@@ -149,19 +148,6 @@ class PharmaConnectTypography {
   }) => AdaptiveTextScaler(
     compact: width < compactBreakpoint,
     system: system.clamp(maxScaleFactor: maxSystemTextScale),
-  );
-
-  // ==================== TEXT THEME ====================
-  static TextTheme get textTheme => const TextTheme(
-    displayLarge: heading1,
-    displayMedium: heading2,
-    displaySmall: heading3,
-    headlineMedium: subtitle1,
-    headlineSmall: subtitle2,
-    bodyLarge: body1,
-    bodyMedium: body2,
-    labelLarge: label,
-    labelSmall: micro,
   );
 }
 

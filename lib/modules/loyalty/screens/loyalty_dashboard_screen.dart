@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../providers/loyalty_provider.dart';
 import '../models/loyalty_account.dart';
 import '../models/loyalty_reward.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class LoyaltyDashboardScreen extends StatefulWidget {
   // Audit Module 16 (FID, 29/08/2026) : devenu obligatoire — cet écran est
@@ -55,26 +54,26 @@ class _LoyaltyDashboardScreenState extends State<LoyaltyDashboardScreen> {
             Row(
               children: [
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.arrow_back,
-                    color: PharmaConnectColors.textPrimary,
+                    color: context.palette.textPrimary,
                   ),
                   onPressed: () => context.pop(),
                   padding: EdgeInsets.zero,
                 ),
                 const SizedBox(width: 8),
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'Programme de fidélité',
-                        style: PharmaConnectTypography.heading1,
+                        style: context.text.heading1,
                       ),
                       SizedBox(height: 4),
                       Text(
                         'Gagnez des points à chaque achat',
-                        style: PharmaConnectTypography.body2,
+                        style: context.text.body2,
                       ),
                     ],
                   ),
@@ -92,17 +91,17 @@ class _LoyaltyDashboardScreenState extends State<LoyaltyDashboardScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.error_outline,
                             size: 48,
-                            color: PharmaConnectColors.accentRed,
+                            color: context.palette.danger,
                           ),
                           const SizedBox(height: 16),
                           Text(
                             provider.error!,
                             textAlign: TextAlign.center,
-                            style: PharmaConnectTypography.body2.copyWith(
-                              color: PharmaConnectColors.accentRed,
+                            style: context.text.body2.copyWith(
+                              color: context.palette.danger,
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -112,10 +111,7 @@ class _LoyaltyDashboardScreenState extends State<LoyaltyDashboardScreen> {
                               provider.clearError();
                               final userId = SupabaseService().currentUser?.id;
                               if (userId != null) {
-                                provider.loadAccount(
-                                  userId,
-                                  widget.pharmacyId,
-                                );
+                                provider.loadAccount(userId, widget.pharmacyId);
                               }
                             },
                             width: 200,
@@ -124,10 +120,10 @@ class _LoyaltyDashboardScreenState extends State<LoyaltyDashboardScreen> {
                       ),
                     )
                   : account == null
-                  ? const Center(
+                  ? Center(
                       child: Text(
                         'Aucun compte de fidélité trouvé',
-                        style: PharmaConnectTypography.body2,
+                        style: context.text.body2,
                       ),
                     )
                   : SingleChildScrollView(
@@ -143,18 +139,29 @@ class _LoyaltyDashboardScreenState extends State<LoyaltyDashboardScreen> {
                               children: [
                                 Row(
                                   children: [
-                                    Text(
-                                      '${account.tierEmoji} ${account.tierLabel}',
-                                      style: TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w700,
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
                                         color: _tierColor(account.tier),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Text(
+                                        '${account.tierEmoji} ${account.tierLabel}',
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w700,
+                                          color:
+                                              PharmaConnectFixedColors.onTier,
+                                        ),
                                       ),
                                     ),
                                     const Spacer(),
                                     Text(
                                       'Points : ${account.pointsBalance}',
-                                      style: PharmaConnectTypography.kpiMedium,
+                                      style: context.text.kpiMedium,
                                     ),
                                   ],
                                 ),
@@ -162,18 +169,18 @@ class _LoyaltyDashboardScreenState extends State<LoyaltyDashboardScreen> {
                                 if (account.pointsToNextTier > 0)
                                   Text(
                                     '${account.pointsToNextTier} points pour le prochain niveau',
-                                    style: PharmaConnectTypography.body2,
+                                    style: context.text.body2,
                                   ),
                                 const SizedBox(height: 8),
                                 LinearProgressIndicator(
                                   value: _progressToNextTier(account),
-                                  backgroundColor: Colors.white24,
-                                  color: _tierColor(account.tier),
+                                  backgroundColor: context.palette.veil(0.24),
+                                  color: context.palette.primary,
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
                                   '${account.totalPointsEarned} points gagnés • ${account.totalPointsRedeemed} points utilisés',
-                                  style: PharmaConnectTypography.micro,
+                                  style: context.text.micro,
                                 ),
                               ],
                             ),
@@ -181,15 +188,15 @@ class _LoyaltyDashboardScreenState extends State<LoyaltyDashboardScreen> {
                           const SizedBox(height: 16),
 
                           // Rewards catalog
-                          const Text(
+                          Text(
                             'Récompenses disponibles',
-                            style: PharmaConnectTypography.heading3,
+                            style: context.text.heading3,
                           ),
                           const SizedBox(height: 8),
                           if (provider.rewards.isEmpty)
-                            const Text(
+                            Text(
                               'Aucune récompense disponible',
-                              style: PharmaConnectTypography.body2,
+                              style: context.text.body2,
                             )
                           else
                             Wrap(
@@ -204,14 +211,10 @@ class _LoyaltyDashboardScreenState extends State<LoyaltyDashboardScreen> {
                                     width: 160,
                                     padding: const EdgeInsets.all(12),
                                     decoration: BoxDecoration(
-                                      color: Colors.white.withValues(
-                                        alpha: 0.04,
-                                      ),
+                                      color: context.palette.surfaceMuted,
                                       borderRadius: BorderRadius.circular(8),
                                       border: Border.all(
-                                        color: Colors.white.withValues(
-                                          alpha: 0.06,
-                                        ),
+                                        color: context.palette.borderSubtle,
                                       ),
                                     ),
                                     child: Column(
@@ -220,21 +223,18 @@ class _LoyaltyDashboardScreenState extends State<LoyaltyDashboardScreen> {
                                       children: [
                                         Text(
                                           reward.name,
-                                          style: PharmaConnectTypography.body1
-                                              .copyWith(
-                                                fontWeight: FontWeight.w600,
-                                              ),
+                                          style: context.text.body1.copyWith(
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
                                           '${reward.pointsRequired} points',
-                                          style: PharmaConnectTypography.micro
-                                              .copyWith(
-                                                color: PharmaConnectColors
-                                                    .accentCyan,
-                                              ),
+                                          style: context.text.micro.copyWith(
+                                            color: context.palette.primary,
+                                          ),
                                         ),
                                         const SizedBox(height: 8),
                                         PrimaryButton(
@@ -256,16 +256,13 @@ class _LoyaltyDashboardScreenState extends State<LoyaltyDashboardScreen> {
                           const SizedBox(height: 24),
 
                           // Recent transactions
-                          const Text(
+                          Text(
                             'Activité récente',
-                            style: PharmaConnectTypography.heading3,
+                            style: context.text.heading3,
                           ),
                           const SizedBox(height: 8),
                           if (provider.transactions.isEmpty)
-                            const Text(
-                              'Aucune activité',
-                              style: PharmaConnectTypography.body2,
-                            )
+                            Text('Aucune activité', style: context.text.body2)
                           else
                             ...provider.transactions.take(5).map((tx) {
                               return Container(
@@ -275,9 +272,7 @@ class _LoyaltyDashboardScreenState extends State<LoyaltyDashboardScreen> {
                                 decoration: BoxDecoration(
                                   border: Border(
                                     bottom: BorderSide(
-                                      color: Colors.white.withValues(
-                                        alpha: 0.06,
-                                      ),
+                                      color: context.palette.borderSubtle,
                                     ),
                                   ),
                                 ),
@@ -295,13 +290,11 @@ class _LoyaltyDashboardScreenState extends State<LoyaltyDashboardScreen> {
                                         children: [
                                           Text(
                                             tx.typeLabel,
-                                            style:
-                                                PharmaConnectTypography.body2,
+                                            style: context.text.body2,
                                           ),
                                           Text(
                                             tx.description ?? '',
-                                            style:
-                                                PharmaConnectTypography.micro,
+                                            style: context.text.micro,
                                           ),
                                         ],
                                       ),
@@ -312,8 +305,8 @@ class _LoyaltyDashboardScreenState extends State<LoyaltyDashboardScreen> {
                                           : '${tx.amount}',
                                       style: TextStyle(
                                         color: tx.amount > 0
-                                            ? PharmaConnectColors.accentGreen
-                                            : PharmaConnectColors.accentRed,
+                                            ? context.palette.success
+                                            : context.palette.danger,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -347,15 +340,15 @@ class _LoyaltyDashboardScreenState extends State<LoyaltyDashboardScreen> {
   Color _tierColor(String tier) {
     switch (tier) {
       case 'bronze':
-        return const Color(0xFFCD7F32);
+        return PharmaConnectFixedColors.tierBronze;
       case 'silver':
-        return const Color(0xFFC0C0C0);
+        return PharmaConnectFixedColors.tierSilver;
       case 'gold':
-        return const Color(0xFFFFD700);
+        return PharmaConnectFixedColors.tierGold;
       case 'platinum':
-        return const Color(0xFFE5E4E2);
+        return PharmaConnectFixedColors.tierPlatinum;
       default:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.surfaceMuted;
     }
   }
 
@@ -368,7 +361,7 @@ class _LoyaltyDashboardScreenState extends State<LoyaltyDashboardScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: PharmaConnectColors.primaryDeep,
+        backgroundColor: context.palette.background,
         title: Text('Échanger : ${reward.name}'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -378,7 +371,7 @@ class _LoyaltyDashboardScreenState extends State<LoyaltyDashboardScreen> {
             if (account.pointsBalance < reward.pointsRequired)
               Text(
                 'Points insuffisants',
-                style: TextStyle(color: PharmaConnectColors.accentRed),
+                style: TextStyle(color: context.palette.danger),
               ),
           ],
         ),
@@ -397,17 +390,17 @@ class _LoyaltyDashboardScreenState extends State<LoyaltyDashboardScreen> {
                     );
                     if (success && context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
+                        SnackBar(
                           content: Text('Récompense échangée avec succès !'),
-                          backgroundColor: PharmaConnectColors.accentGreen,
+                          backgroundColor: context.palette.success,
                         ),
                       );
                     }
                   }
                 : null,
             style: ElevatedButton.styleFrom(
-              backgroundColor: PharmaConnectColors.accentCyan,
-              foregroundColor: PharmaConnectColors.textOnAccent,
+              backgroundColor: context.palette.primary,
+              foregroundColor: context.palette.onPrimary,
             ),
             child: const Text('Échanger'),
           ),

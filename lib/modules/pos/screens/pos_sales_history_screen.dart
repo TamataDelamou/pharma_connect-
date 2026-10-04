@@ -3,14 +3,13 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/utils/currency_formatter.dart';
 import '../providers/pos_provider.dart';
 import '../models/pos_sale.dart';
 import '../../auth/providers/auth_provider.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class POSSalesHistoryScreen extends StatefulWidget {
   const POSSalesHistoryScreen({super.key});
@@ -48,11 +47,11 @@ class _POSSalesHistoryScreenState extends State<POSSalesHistoryScreen> {
   Widget build(BuildContext context) {
     final pharmacyId = context.watch<AuthProvider>().pharmacyId;
     if (pharmacyId == null) {
-      return const Scaffold(
+      return Scaffold(
         body: Center(
           child: Text(
             'Aucune officine rattachée à ce compte pharmacien.',
-            style: PharmaConnectTypography.body2,
+            style: context.text.body2,
             textAlign: TextAlign.center,
           ),
         ),
@@ -72,18 +71,18 @@ class _POSSalesHistoryScreenState extends State<POSSalesHistoryScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       '📋 Historique des ventes',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -109,11 +108,8 @@ class _POSSalesHistoryScreenState extends State<POSSalesHistoryScreen> {
                   : provider.error != null
                   ? Center(child: Text(provider.error!))
                   : provider.sales.isEmpty
-                  ? const Center(
-                      child: Text(
-                        'Aucune vente',
-                        style: PharmaConnectTypography.body2,
-                      ),
+                  ? Center(
+                      child: Text('Aucune vente', style: context.text.body2),
                     )
                   : ListView.builder(
                       itemCount: provider.sales.length,
@@ -146,8 +142,8 @@ class _POSSalesHistoryScreenState extends State<POSSalesHistoryScreen> {
                   builder: (context, child) {
                     return Theme(
                       data: ThemeData.dark().copyWith(
-                        colorScheme: const ColorScheme.dark(
-                          primary: PharmaConnectColors.accentCyan,
+                        colorScheme: ColorScheme.dark(
+                          primary: context.palette.primary,
                         ),
                       ),
                       child: child!,
@@ -165,7 +161,7 @@ class _POSSalesHistoryScreenState extends State<POSSalesHistoryScreen> {
                   vertical: 10,
                 ),
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.white24),
+                  border: Border.all(color: context.palette.veil(0.24)),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -176,7 +172,7 @@ class _POSSalesHistoryScreenState extends State<POSSalesHistoryScreen> {
                       _startDate != null
                           ? '${_startDate!.day}/${_startDate!.month}/${_startDate!.year}'
                           : 'Début',
-                      style: PharmaConnectTypography.body2,
+                      style: context.text.body2,
                     ),
                   ],
                 ),
@@ -196,8 +192,8 @@ class _POSSalesHistoryScreenState extends State<POSSalesHistoryScreen> {
                   builder: (context, child) {
                     return Theme(
                       data: ThemeData.dark().copyWith(
-                        colorScheme: const ColorScheme.dark(
-                          primary: PharmaConnectColors.accentCyan,
+                        colorScheme: ColorScheme.dark(
+                          primary: context.palette.primary,
                         ),
                       ),
                       child: child!,
@@ -215,7 +211,7 @@ class _POSSalesHistoryScreenState extends State<POSSalesHistoryScreen> {
                   vertical: 10,
                 ),
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.white24),
+                  border: Border.all(color: context.palette.veil(0.24)),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -226,7 +222,7 @@ class _POSSalesHistoryScreenState extends State<POSSalesHistoryScreen> {
                       _endDate != null
                           ? '${_endDate!.day}/${_endDate!.month}/${_endDate!.year}'
                           : 'Fin',
-                      style: PharmaConnectTypography.body2,
+                      style: context.text.body2,
                     ),
                   ],
                 ),
@@ -264,10 +260,7 @@ class _POSSalesHistoryScreenState extends State<POSSalesHistoryScreen> {
           const SizedBox(width: 8),
           // Refresh
           IconButton(
-            icon: const Icon(
-              Icons.refresh,
-              color: PharmaConnectColors.textSecondary,
-            ),
+            icon: Icon(Icons.refresh, color: context.palette.textSecondary),
             onPressed: _loadSales,
           ),
         ],
@@ -290,45 +283,45 @@ class _POSSalesHistoryScreenState extends State<POSSalesHistoryScreen> {
           Expanded(
             child: Column(
               children: [
-                Text('Total ventes', style: PharmaConnectTypography.micro),
+                Text('Total ventes', style: context.text.micro),
                 Text(
                   '$totalSales',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: PharmaConnectColors.accentCyan,
+                    color: context.palette.primary,
                   ),
                 ),
               ],
             ),
           ),
-          Container(width: 1, height: 30, color: Colors.white12),
+          Container(width: 1, height: 30, color: context.palette.veil(0.12)),
           Expanded(
             child: Column(
               children: [
-                Text('CA total', style: PharmaConnectTypography.micro),
+                Text('CA total', style: context.text.micro),
                 Text(
                   CurrencyFormatter.format(totalRevenue),
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: PharmaConnectColors.accentGreen,
+                    color: context.palette.success,
                   ),
                 ),
               ],
             ),
           ),
-          Container(width: 1, height: 30, color: Colors.white12),
+          Container(width: 1, height: 30, color: context.palette.veil(0.12)),
           Expanded(
             child: Column(
               children: [
-                Text('Remboursements', style: PharmaConnectTypography.micro),
+                Text('Remboursements', style: context.text.micro),
                 Text(
                   '${provider.sales.where((s) => s.status == 'refunded').length}',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: PharmaConnectColors.accentOrange,
+                    color: context.palette.warning,
                   ),
                 ),
               ],
@@ -352,10 +345,10 @@ class _POSSalesHistoryScreenState extends State<POSSalesHistoryScreen> {
               height: 40,
               decoration: BoxDecoration(
                 color: sale.status == 'completed'
-                    ? PharmaConnectColors.accentGreen
+                    ? context.palette.success
                     : sale.status == 'refunded'
-                    ? PharmaConnectColors.accentOrange
-                    : PharmaConnectColors.accentRed,
+                    ? context.palette.warning
+                    : context.palette.danger,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -368,15 +361,12 @@ class _POSSalesHistoryScreenState extends State<POSSalesHistoryScreen> {
                     children: [
                       Text(
                         sale.saleNumber,
-                        style: PharmaConnectTypography.body1.copyWith(
+                        style: context.text.body1.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Text(
-                        sale.paymentLabel,
-                        style: PharmaConnectTypography.micro,
-                      ),
+                      Text(sale.paymentLabel, style: context.text.micro),
                       const Spacer(),
                       Text(
                         sale.statusLabel,
@@ -384,10 +374,10 @@ class _POSSalesHistoryScreenState extends State<POSSalesHistoryScreen> {
                           fontSize: 10,
                           fontWeight: FontWeight.w500,
                           color: sale.status == 'completed'
-                              ? PharmaConnectColors.accentGreen
+                              ? context.palette.success
                               : sale.status == 'refunded'
-                              ? PharmaConnectColors.accentOrange
-                              : PharmaConnectColors.accentRed,
+                              ? context.palette.warning
+                              : context.palette.danger,
                         ),
                       ),
                     ],
@@ -397,14 +387,14 @@ class _POSSalesHistoryScreenState extends State<POSSalesHistoryScreen> {
                     children: [
                       Text(
                         _formatDate(sale.createdAt),
-                        style: PharmaConnectTypography.micro,
+                        style: context.text.micro,
                       ),
                       const Spacer(),
                       Text(
                         CurrencyFormatter.format(sale.finalAmount),
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
-                          color: PharmaConnectColors.accentCyan,
+                          color: context.palette.primary,
                         ),
                       ),
                     ],
@@ -412,7 +402,7 @@ class _POSSalesHistoryScreenState extends State<POSSalesHistoryScreen> {
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right, color: Colors.white24),
+            Icon(Icons.chevron_right, color: context.palette.veil(0.24)),
           ],
         ),
       ),

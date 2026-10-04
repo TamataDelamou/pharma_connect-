@@ -4,8 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/tertiary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
@@ -13,6 +11,7 @@ import 'package:pharma_connect/core/widgets/inputs/glass_input.dart';
 import '../providers/triage_provider.dart';
 import '../models/triage_patient.dart';
 import '../models/triage_status.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class TriageNewScreen extends StatefulWidget {
   const TriageNewScreen({super.key});
@@ -55,18 +54,18 @@ class _TriageNewScreenState extends State<TriageNewScreen> {
                 leading: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.arrow_back,
-                        color: PharmaConnectColors.textPrimary,
+                        color: context.palette.textPrimary,
                       ),
                       onPressed: () => context.pop(),
                       padding: EdgeInsets.zero,
                     ),
                     const SizedBox(width: 8),
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         'Nouveau patient triage',
-                        style: PharmaConnectTypography.heading2,
+                        style: context.text.heading2,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -116,10 +115,7 @@ class _TriageNewScreenState extends State<TriageNewScreen> {
                               keyboardType: TextInputType.multiline,
                             ),
                             const SizedBox(height: 12),
-                            const Text(
-                              'Priorité',
-                              style: PharmaConnectTypography.label,
-                            ),
+                            Text('Priorité', style: context.text.label),
                             const SizedBox(height: 4),
                             Row(
                               children: List.generate(5, (index) {
@@ -149,7 +145,7 @@ class _TriageNewScreenState extends State<TriageNewScreen> {
                                           border: Border.all(
                                             color: _priorityLevel == level
                                                 ? _priorityColor(level)
-                                                : Colors.white24,
+                                                : context.palette.veil(0.24),
                                           ),
                                         ),
                                         child: Center(
@@ -208,6 +204,7 @@ class _TriageNewScreenState extends State<TriageNewScreen> {
   }
 
   Future<void> _submitPatient() async {
+    final palette = context.palette;
     if (!_formKey.currentState!.validate()) return;
 
     if (_patientIdController.text.trim().isEmpty) {
@@ -248,16 +245,16 @@ class _TriageNewScreenState extends State<TriageNewScreen> {
     if (success && context.mounted) {
       context.pop();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Patient enregistré en triage'),
-          backgroundColor: PharmaConnectColors.accentGreen,
+          backgroundColor: palette.success,
         ),
       );
     } else if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(context.read<TriageProvider>().error ?? 'Erreur'),
-          backgroundColor: PharmaConnectColors.accentRed,
+          backgroundColor: palette.danger,
         ),
       );
     }
@@ -266,17 +263,17 @@ class _TriageNewScreenState extends State<TriageNewScreen> {
   Color _priorityColor(int level) {
     switch (level) {
       case 1:
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       case 2:
-        return PharmaConnectColors.accentOrange;
+        return context.palette.warning;
       case 3:
-        return PharmaConnectColors.accentAmber;
+        return context.palette.warningStrong;
       case 4:
-        return PharmaConnectColors.accentCyan;
+        return context.palette.primary;
       case 5:
-        return PharmaConnectColors.accentGreen;
+        return context.palette.success;
       default:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
     }
   }
 

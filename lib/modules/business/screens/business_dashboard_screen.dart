@@ -3,12 +3,11 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../providers/business_provider.dart';
 import '../widgets/company_card.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class BusinessDashboardScreen extends StatefulWidget {
   const BusinessDashboardScreen({super.key});
@@ -76,19 +75,19 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen>
           children: [
             // C233 : en-tête adaptable (actions sous le titre sur téléphone).
             HeaderRow(
-              leading: const Column(
+              leading: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     '🤝 Business',
-                    style: PharmaConnectTypography.heading1,
+                    style: context.text.heading1,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(height: 4),
                   Text(
                     'Gestion des partenariats et relations commerciales',
-                    style: PharmaConnectTypography.body2,
+                    style: context.text.body2,
                   ),
                 ],
               ),
@@ -99,8 +98,8 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen>
                   icon: const Icon(Icons.add),
                   label: const Text('Nouveau partenaire'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: PharmaConnectColors.accentCyan,
-                    foregroundColor: PharmaConnectColors.textOnAccent,
+                    backgroundColor: context.palette.primary,
+                    foregroundColor: context.palette.onPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -117,9 +116,9 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen>
                 Tab(text: 'Grossistes'),
                 Tab(text: 'Hôpitaux'),
               ],
-              labelColor: PharmaConnectColors.accentCyan,
-              unselectedLabelColor: PharmaConnectColors.textSecondary,
-              indicatorColor: PharmaConnectColors.accentCyan,
+              labelColor: context.palette.primary,
+              unselectedLabelColor: context.palette.textSecondary,
+              indicatorColor: context.palette.primary,
               indicatorWeight: 3,
               dividerColor: Colors.transparent,
             ),
@@ -142,18 +141,12 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 48,
-              color: PharmaConnectColors.accentRed,
-            ),
+            Icon(Icons.error_outline, size: 48, color: context.palette.danger),
             const SizedBox(height: 16),
             Text(
               provider.error!,
               textAlign: TextAlign.center,
-              style: PharmaConnectTypography.body2.copyWith(
-                color: PharmaConnectColors.accentRed,
-              ),
+              style: context.text.body2.copyWith(color: context.palette.danger),
             ),
             const SizedBox(height: 16),
             PrimaryButton(
@@ -170,20 +163,21 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen>
     }
 
     if (provider.companies.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.business_outlined, size: 64, color: Colors.white24),
-            SizedBox(height: 16),
-            Text(
-              'Aucun partenaire commercial',
-              style: PharmaConnectTypography.heading3,
+            Icon(
+              Icons.business_outlined,
+              size: 64,
+              color: context.palette.veil(0.24),
             ),
+            SizedBox(height: 16),
+            Text('Aucun partenaire commercial', style: context.text.heading3),
             SizedBox(height: 8),
             Text(
               'Ajoutez votre premier partenaire pour commencer',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
               textAlign: TextAlign.center,
             ),
           ],

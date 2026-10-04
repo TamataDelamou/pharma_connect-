@@ -3,8 +3,6 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/buttons/secondary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
@@ -13,6 +11,7 @@ import '../providers/recall_provider.dart';
 import '../models/recall_severity.dart';
 import '../models/recall_affected_batch.dart';
 import '../models/batch_recall_status.dart';
+import '../../../core/theme/palette.dart';
 
 class RecallCreateScreen extends StatefulWidget {
   const RecallCreateScreen({super.key});
@@ -57,18 +56,18 @@ class _RecallCreateScreenState extends State<RecallCreateScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Nouveau rappel',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -78,9 +77,9 @@ class _RecallCreateScreenState extends State<RecallCreateScreen> {
               trailing: [const KernelBadge()],
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Créez un rappel de lot pour une alerte de sécurité ou un défaut de fabrication',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
             ),
             const SizedBox(height: 24),
 
@@ -92,9 +91,9 @@ class _RecallCreateScreenState extends State<RecallCreateScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Informations générales',
-                            style: PharmaConnectTypography.heading3,
+                            style: context.text.heading3,
                           ),
                           const SizedBox(height: 16),
 
@@ -123,9 +122,9 @@ class _RecallCreateScreenState extends State<RecallCreateScreen> {
                           ),
                           const SizedBox(height: 12),
 
-                          const Text(
+                          Text(
                             'Gravité du rappel *',
-                            style: PharmaConnectTypography.label,
+                            style: context.text.label,
                           ),
                           const SizedBox(height: 4),
                           Wrap(
@@ -142,33 +141,34 @@ class _RecallCreateScreenState extends State<RecallCreateScreen> {
                                   }
                                 },
                                 selectedColor: severity == RecallSeverity.classI
-                                    ? PharmaConnectColors.accentRed.withValues(
+                                    ? context.palette.danger.withValues(
                                         alpha: 0.2,
                                       )
                                     : severity == RecallSeverity.classII
-                                    ? PharmaConnectColors.accentOrange
-                                          .withValues(alpha: 0.2)
-                                    : PharmaConnectColors.accentCyan.withValues(
+                                    ? context.palette.warning.withValues(
+                                        alpha: 0.2,
+                                      )
+                                    : context.palette.primary.withValues(
                                         alpha: 0.2,
                                       ),
                                 backgroundColor: Colors.transparent,
                                 side: BorderSide(
                                   color: _selectedSeverity == severity
                                       ? severity == RecallSeverity.classI
-                                            ? PharmaConnectColors.accentRed
+                                            ? context.palette.danger
                                             : severity == RecallSeverity.classII
-                                            ? PharmaConnectColors.accentOrange
-                                            : PharmaConnectColors.accentCyan
-                                      : Colors.white24,
+                                            ? context.palette.warning
+                                            : context.palette.primary
+                                      : context.palette.veil(0.24),
                                 ),
                                 labelStyle: TextStyle(
                                   color: _selectedSeverity == severity
                                       ? severity == RecallSeverity.classI
-                                            ? PharmaConnectColors.accentRed
+                                            ? context.palette.danger
                                             : severity == RecallSeverity.classII
-                                            ? PharmaConnectColors.accentOrange
-                                            : PharmaConnectColors.accentCyan
-                                      : Colors.white70,
+                                            ? context.palette.warning
+                                            : context.palette.primary
+                                      : context.palette.textSecondary,
                                   fontSize: 12,
                                 ),
                               );
@@ -200,12 +200,9 @@ class _RecallCreateScreenState extends State<RecallCreateScreen> {
                                 onChanged: (value) {
                                   setState(() => _isPublic = value ?? true);
                                 },
-                                activeColor: PharmaConnectColors.accentCyan,
+                                activeColor: context.palette.primary,
                               ),
-                              const Text(
-                                'Rappel public',
-                                style: PharmaConnectTypography.body1,
-                              ),
+                              Text('Rappel public', style: context.text.body1),
                             ],
                           ),
                         ],
@@ -220,15 +217,15 @@ class _RecallCreateScreenState extends State<RecallCreateScreen> {
                         children: [
                           Row(
                             children: [
-                              const Text(
+                              Text(
                                 'Lots affectés',
-                                style: PharmaConnectTypography.heading3,
+                                style: context.text.heading3,
                               ),
                               const Spacer(),
                               IconButton(
-                                icon: const Icon(
+                                icon: Icon(
                                   Icons.add_circle,
-                                  color: PharmaConnectColors.accentCyan,
+                                  color: context.palette.primary,
                                 ),
                                 onPressed: () => _showAddBatchDialog(context),
                               ),
@@ -236,17 +233,14 @@ class _RecallCreateScreenState extends State<RecallCreateScreen> {
                           ),
                           const SizedBox(height: 8),
                           if (_affectedBatches.isEmpty) ...[
-                            const Text(
-                              'Aucun lot ajouté',
-                              style: PharmaConnectTypography.body2,
-                            ),
+                            Text('Aucun lot ajouté', style: context.text.body2),
                           ] else ...[
                             ..._affectedBatches.map(
                               (batch) => Container(
                                 padding: const EdgeInsets.all(8),
                                 margin: const EdgeInsets.only(bottom: 4),
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: 0.04),
+                                  color: context.palette.surfaceMuted,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Row(
@@ -258,23 +252,21 @@ class _RecallCreateScreenState extends State<RecallCreateScreen> {
                                         children: [
                                           Text(
                                             batch.productName,
-                                            style: PharmaConnectTypography.body1
-                                                .copyWith(
-                                                  fontWeight: FontWeight.w600,
-                                                ),
+                                            style: context.text.body1.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                           ),
                                           Text(
                                             'Lot: ${batch.batchNumber} • ${batch.totalUnits} unités',
-                                            style:
-                                                PharmaConnectTypography.body2,
+                                            style: context.text.body2,
                                           ),
                                         ],
                                       ),
                                     ),
                                     IconButton(
-                                      icon: const Icon(
+                                      icon: Icon(
                                         Icons.close,
-                                        color: PharmaConnectColors.accentRed,
+                                        color: context.palette.danger,
                                         size: 16,
                                       ),
                                       onPressed: () {
@@ -320,12 +312,12 @@ class _RecallCreateScreenState extends State<RecallCreateScreen> {
                                       ScaffoldMessenger.of(
                                         context,
                                       ).showSnackBar(
-                                        const SnackBar(
+                                        SnackBar(
                                           content: Text(
                                             'Veuillez remplir tous les champs obligatoires',
                                           ),
                                           backgroundColor:
-                                              PharmaConnectColors.accentRed,
+                                              context.palette.danger,
                                         ),
                                       );
                                       return;
@@ -351,12 +343,12 @@ class _RecallCreateScreenState extends State<RecallCreateScreen> {
                                       ScaffoldMessenger.of(
                                         context,
                                       ).showSnackBar(
-                                        const SnackBar(
+                                        SnackBar(
                                           content: Text(
                                             'Rappel créé avec succès',
                                           ),
                                           backgroundColor:
-                                              PharmaConnectColors.accentGreen,
+                                              context.palette.success,
                                         ),
                                       );
                                       context.go('/recall/${recall.id}');
@@ -384,7 +376,7 @@ class _RecallCreateScreenState extends State<RecallCreateScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: PharmaConnectColors.primaryDeep,
+        backgroundColor: context.palette.background,
         title: const Text('Ajouter un lot'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -428,11 +420,11 @@ class _RecallCreateScreenState extends State<RecallCreateScreen> {
                   units == null ||
                   units <= 0) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
+                  SnackBar(
                     content: Text(
                       'Veuillez remplir tous les champs correctement',
                     ),
-                    backgroundColor: PharmaConnectColors.accentRed,
+                    backgroundColor: context.palette.danger,
                   ),
                 );
                 return;
@@ -458,8 +450,8 @@ class _RecallCreateScreenState extends State<RecallCreateScreen> {
               Navigator.pop(context);
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: PharmaConnectColors.accentCyan,
-              foregroundColor: PharmaConnectColors.textOnAccent,
+              backgroundColor: context.palette.primary,
+              foregroundColor: context.palette.onPrimary,
             ),
             child: const Text('Ajouter'),
           ),

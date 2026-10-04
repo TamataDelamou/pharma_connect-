@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/buttons/tertiary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
@@ -11,6 +9,7 @@ import '../../../core/widgets/inputs/glass_input.dart';
 import '../../../core/widgets/layout/responsive.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/phone_input_field.dart';
+import '../../../core/theme/palette.dart';
 
 /// C228 : un compte créé depuis l'écran de connexion n'a pas de nom
 /// (`profiles.full_name` vide), l'écran de connexion ne le demandant pas.
@@ -57,9 +56,9 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
       context.go('/dashboard');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Enregistrement impossible. Réessayez.'),
-          backgroundColor: PharmaConnectColors.accentRed,
+          backgroundColor: context.palette.danger,
         ),
       );
     }
@@ -81,17 +80,17 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text(
+                  Text(
                     'Complétez votre profil',
-                    style: PharmaConnectTypography.heading2,
+                    style: context.text.heading2,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 8),
-                  const Text(
+                  Text(
                     'Votre nom apparaît sur vos ordonnances et vos '
                     'réservations.',
-                    style: PharmaConnectTypography.body2,
+                    style: context.text.body2,
                   ),
                   const SizedBox(height: 24),
                   GlassInput(
@@ -103,10 +102,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                     errorText: _nameMissing ? 'Le nom est obligatoire' : null,
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    'Téléphone (facultatif)',
-                    style: PharmaConnectTypography.label,
-                  ),
+                  Text('Téléphone (facultatif)', style: context.text.label),
                   const SizedBox(height: 8),
                   PhoneInputField(
                     onChanged: (e164) => setState(() => _phoneE164 = e164),

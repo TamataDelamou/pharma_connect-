@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../theme/colors.dart';
 import '../badges/status_badge.dart';
 import 'glass_card.dart';
+import '../../theme/palette.dart';
 
 class StatusCard extends StatelessWidget {
   final Widget child;
@@ -22,6 +22,9 @@ class StatusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+    // Les écrans non migrés passent encore une constante du thème sombre.
+    final statusColor = this.statusColor;
     return GlassCard(
       onTap: onTap,
       padding: padding,
@@ -38,7 +41,9 @@ class StatusCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(2),
                   boxShadow: [
                     BoxShadow(
-                      color: statusColor.withValues(alpha: 0.4),
+                      color: statusColor.withValues(
+                        alpha: palette.isDark ? 0.4 : 0.15,
+                      ),
                       blurRadius: 12,
                       spreadRadius: 0,
                     ),
@@ -54,7 +59,7 @@ class StatusCard extends StatelessWidget {
             alignment: Alignment.centerRight,
             child: StatusBadge(
               label: statusLabel,
-              status: _mapStatusToBadge(statusColor),
+              status: _mapStatusToBadge(palette, statusColor),
             ),
           ),
         ],
@@ -62,14 +67,14 @@ class StatusCard extends StatelessWidget {
     );
   }
 
-  StatusBadgeType _mapStatusToBadge(Color color) {
-    if (color == PharmaConnectColors.accentGreen) {
+  StatusBadgeType _mapStatusToBadge(PharmaConnectPalette p, Color color) {
+    if (color == p.success) {
       return StatusBadgeType.success;
-    } else if (color == PharmaConnectColors.accentOrange) {
+    } else if (color == p.warning) {
       return StatusBadgeType.warning;
-    } else if (color == PharmaConnectColors.accentRed) {
+    } else if (color == p.danger) {
       return StatusBadgeType.danger;
-    } else if (color == PharmaConnectColors.accentPurple) {
+    } else if (color == p.secondary) {
       return StatusBadgeType.kernel;
     }
     return StatusBadgeType.info;

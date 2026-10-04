@@ -1,6 +1,4 @@
-import 'package:flutter/material.dart';
-
-import '../theme/colors.dart';
+import '../theme/palette.dart';
 
 enum KernelServiceStatus { online, degraded, offline }
 
@@ -15,14 +13,14 @@ class KernelService {
     required this.status,
   });
 
-  Color get statusColor {
+  ColorRole get statusColor {
     switch (status) {
       case KernelServiceStatus.online:
-        return PharmaConnectColors.accentGreen;
+        return ColorRole.success;
       case KernelServiceStatus.degraded:
-        return PharmaConnectColors.accentOrange;
+        return ColorRole.warning;
       case KernelServiceStatus.offline:
-        return PharmaConnectColors.accentRed;
+        return ColorRole.danger;
     }
   }
 

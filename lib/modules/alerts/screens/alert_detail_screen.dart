@@ -3,8 +3,6 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../providers/alert_provider.dart';
@@ -12,6 +10,7 @@ import '../models/alert.dart';
 import '../models/alert_status.dart';
 import '../models/alert_severity.dart';
 import '../models/alert_type.dart';
+import '../../../core/theme/palette.dart';
 
 /// Écran « Détail d'une alerte avec recommandation » (Module 10 — ALR).
 ///
@@ -63,9 +62,9 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () {
                       context.read<AlertProvider>().clearSelected();
@@ -74,10 +73,10 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Détail de l\'alerte',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -117,7 +116,9 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: alert.severityColor.withValues(alpha: 0.15),
+                      color: alert.severityColor
+                          .of(context.palette)
+                          .withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Center(
@@ -132,14 +133,11 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          alert.title,
-                          style: PharmaConnectTypography.heading3,
-                        ),
+                        Text(alert.title, style: context.text.heading3),
                         const SizedBox(height: 4),
                         Text(
                           '${alert.type.icon} ${alert.type.label} · ${alert.timeAgo}',
-                          style: PharmaConnectTypography.body2,
+                          style: context.text.body2,
                         ),
                       ],
                     ),
@@ -147,7 +145,7 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
                 ],
               ),
               const SizedBox(height: 16),
-              Text(alert.message, style: PharmaConnectTypography.body1),
+              Text(alert.message, style: context.text.body1),
               const SizedBox(height: 12),
               Container(
                 padding: const EdgeInsets.symmetric(
@@ -155,15 +153,15 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: PharmaConnectColors.accentCyan.withValues(alpha: 0.15),
+                  color: context.palette.primary.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
                   'Statut : ${alert.statusLabel}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: PharmaConnectColors.accentCyan,
+                    color: context.palette.primary,
                   ),
                 ),
               ),
@@ -183,18 +181,15 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
                   Icon(
                     Icons.lightbulb_outline,
                     color: isCritical
-                        ? PharmaConnectColors.accentRed
-                        : PharmaConnectColors.accentCyan,
+                        ? context.palette.danger
+                        : context.palette.primary,
                   ),
                   const SizedBox(width: 8),
-                  Text(
-                    'Recommandation',
-                    style: PharmaConnectTypography.heading3,
-                  ),
+                  Text('Recommandation', style: context.text.heading3),
                 ],
               ),
               const SizedBox(height: 8),
-              Text(alert.recommendation, style: PharmaConnectTypography.body2),
+              Text(alert.recommendation, style: context.text.body2),
             ],
           ),
         ),
@@ -218,9 +213,9 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
                     );
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
+                        SnackBar(
                           content: Text('Alerte marquée comme traitée'),
-                          backgroundColor: PharmaConnectColors.accentGreen,
+                          backgroundColor: context.palette.success,
                         ),
                       );
                     }
@@ -243,13 +238,13 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
             ],
           ),
         ] else ...[
-          const Row(
+          Row(
             children: [
-              Icon(Icons.check_circle, color: PharmaConnectColors.accentGreen),
+              Icon(Icons.check_circle, color: context.palette.success),
               SizedBox(width: 8),
               Text(
                 'Cette alerte a déjà été traitée.',
-                style: PharmaConnectTypography.body2,
+                style: context.text.body2,
               ),
             ],
           ),

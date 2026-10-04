@@ -4,8 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../providers/health_record_provider.dart';
@@ -13,6 +11,7 @@ import '../widgets/allergy_tile.dart';
 import '../widgets/condition_tile.dart';
 import '../widgets/medication_tile.dart';
 import '../widgets/vaccination_tile.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class HealthRecordDetailScreen extends StatefulWidget {
   final String recordId;
@@ -47,9 +46,7 @@ class _HealthRecordDetailScreenState extends State<HealthRecordDetailScreen> {
         body: Center(
           child: Text(
             provider.error ?? 'Dossier introuvable',
-            style: PharmaConnectTypography.body2.copyWith(
-              color: PharmaConnectColors.accentRed,
-            ),
+            style: context.text.body2.copyWith(color: context.palette.danger),
           ),
         ),
       );
@@ -67,18 +64,18 @@ class _HealthRecordDetailScreenState extends State<HealthRecordDetailScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Dossier de santé',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -97,8 +94,8 @@ class _HealthRecordDetailScreenState extends State<HealthRecordDetailScreen> {
                     icon: const Icon(Icons.edit),
                     label: const Text('Modifier'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: PharmaConnectColors.accentCyan,
-                      foregroundColor: PharmaConnectColors.textOnAccent,
+                      backgroundColor: context.palette.primary,
+                      foregroundColor: context.palette.onPrimary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -119,22 +116,22 @@ class _HealthRecordDetailScreenState extends State<HealthRecordDetailScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Informations générales',
-                            style: PharmaConnectTypography.heading3,
+                            style: context.text.heading3,
                           ),
                           const SizedBox(height: 12),
                           if (record.bloodType != null) ...[
                             _buildInfoRow('Groupe sanguin', record.bloodType!),
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                           ],
                           if (record.height != null) ...[
                             _buildInfoRow('Taille', '${record.height} cm'),
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                           ],
                           if (record.weight != null) ...[
                             _buildInfoRow('Poids', '${record.weight} kg'),
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                           ],
                           if (record.notes != null) ...[
                             _buildInfoRow('Notes', record.notes!),
@@ -142,8 +139,8 @@ class _HealthRecordDetailScreenState extends State<HealthRecordDetailScreen> {
                           const SizedBox(height: 8),
                           Text(
                             'Dernière mise à jour : ${_formatDate(record.updatedAt)}',
-                            style: PharmaConnectTypography.micro.copyWith(
-                              color: PharmaConnectColors.textSecondary,
+                            style: context.text.micro.copyWith(
+                              color: context.palette.textSecondary,
                             ),
                           ),
                         ],
@@ -153,10 +150,7 @@ class _HealthRecordDetailScreenState extends State<HealthRecordDetailScreen> {
 
                     // Allergies
                     if (record.allergies.isNotEmpty) ...[
-                      const Text(
-                        'Allergies',
-                        style: PharmaConnectTypography.heading3,
-                      ),
+                      Text('Allergies', style: context.text.heading3),
                       const SizedBox(height: 8),
                       ...record.allergies.map((a) => AllergyTile(allergy: a)),
                       const SizedBox(height: 16),
@@ -164,9 +158,9 @@ class _HealthRecordDetailScreenState extends State<HealthRecordDetailScreen> {
 
                     // Medical conditions
                     if (record.medicalConditions.isNotEmpty) ...[
-                      const Text(
+                      Text(
                         'Antécédents médicaux',
-                        style: PharmaConnectTypography.heading3,
+                        style: context.text.heading3,
                       ),
                       const SizedBox(height: 8),
                       ...record.medicalConditions.map(
@@ -177,9 +171,9 @@ class _HealthRecordDetailScreenState extends State<HealthRecordDetailScreen> {
 
                     // Medications
                     if (record.medications.isNotEmpty) ...[
-                      const Text(
+                      Text(
                         'Traitements en cours',
-                        style: PharmaConnectTypography.heading3,
+                        style: context.text.heading3,
                       ),
                       const SizedBox(height: 8),
                       ...record.medications.map(
@@ -190,10 +184,7 @@ class _HealthRecordDetailScreenState extends State<HealthRecordDetailScreen> {
 
                     // Vaccinations
                     if (record.vaccinations.isNotEmpty) ...[
-                      const Text(
-                        'Vaccinations',
-                        style: PharmaConnectTypography.heading3,
-                      ),
+                      Text('Vaccinations', style: context.text.heading3),
                       const SizedBox(height: 8),
                       ...record.vaccinations.map(
                         (v) => VaccinationTile(vaccination: v),
@@ -208,10 +199,8 @@ class _HealthRecordDetailScreenState extends State<HealthRecordDetailScreen> {
                       icon: const Icon(Icons.delete_outline),
                       label: const Text('Supprimer ce dossier'),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: PharmaConnectColors.accentRed,
-                        side: const BorderSide(
-                          color: PharmaConnectColors.accentRed,
-                        ),
+                        foregroundColor: context.palette.danger,
+                        side: BorderSide(color: context.palette.danger),
                       ),
                     ),
                   ],
@@ -229,11 +218,8 @@ class _HealthRecordDetailScreenState extends State<HealthRecordDetailScreen> {
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          SizedBox(
-            width: 120,
-            child: Text(label, style: PharmaConnectTypography.label),
-          ),
-          Expanded(child: Text(value, style: PharmaConnectTypography.body1)),
+          SizedBox(width: 120, child: Text(label, style: context.text.label)),
+          Expanded(child: Text(value, style: context.text.body1)),
         ],
       ),
     );
@@ -247,7 +233,7 @@ class _HealthRecordDetailScreenState extends State<HealthRecordDetailScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: PharmaConnectColors.primaryDeep,
+        backgroundColor: context.palette.background,
         title: const Text('Supprimer le dossier'),
         content: const Text(
           'Êtes-vous sûr de vouloir supprimer ce dossier de santé ? Cette action est irréversible.',
@@ -268,8 +254,8 @@ class _HealthRecordDetailScreenState extends State<HealthRecordDetailScreen> {
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: PharmaConnectColors.accentRed,
-              foregroundColor: PharmaConnectColors.textPrimary,
+              backgroundColor: context.palette.danger,
+              foregroundColor: context.palette.onDanger,
             ),
             child: const Text('Supprimer'),
           ),

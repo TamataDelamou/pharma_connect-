@@ -3,8 +3,6 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -12,6 +10,7 @@ import '../../auth/models/user_role.dart';
 import '../providers/teleconsult_provider.dart';
 import '../models/consultation_status.dart';
 import '../widgets/consultation_card.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class TeleconsultListScreen extends StatefulWidget {
   final bool asProfessional;
@@ -110,21 +109,21 @@ class _TeleconsultListScreenState extends State<TeleconsultListScreen>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
+                Icon(
                   Icons.lock_outline,
                   size: 48,
-                  color: PharmaConnectColors.textSecondary,
+                  color: context.palette.textSecondary,
                 ),
                 const SizedBox(height: 16),
-                const Text(
+                Text(
                   'Accès réservé aux professionnels de santé',
-                  style: PharmaConnectTypography.heading3,
+                  style: context.text.heading3,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
-                const Text(
+                Text(
                   'Cette page n\'est pas disponible pour votre profil.',
-                  style: PharmaConnectTypography.body2,
+                  style: context.text.body2,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16),
@@ -150,19 +149,19 @@ class _TeleconsultListScreenState extends State<TeleconsultListScreen>
           children: [
             // C233 : en-tête adaptable (actions sous le titre sur téléphone).
             HeaderRow(
-              leading: const Column(
+              leading: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Téléconsultations',
-                    style: PharmaConnectTypography.heading1,
+                    style: context.text.heading1,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(height: 4),
                   Text(
                     'Consultez à distance vos patients ou professionnels de santé',
-                    style: PharmaConnectTypography.body2,
+                    style: context.text.body2,
                   ),
                 ],
               ),
@@ -175,8 +174,8 @@ class _TeleconsultListScreenState extends State<TeleconsultListScreen>
                     icon: const Icon(Icons.add),
                     label: const Text('Prendre RDV'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: PharmaConnectColors.accentCyan,
-                      foregroundColor: PharmaConnectColors.textOnAccent,
+                      backgroundColor: context.palette.primary,
+                      foregroundColor: context.palette.onPrimary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -195,9 +194,9 @@ class _TeleconsultListScreenState extends State<TeleconsultListScreen>
                 Tab(text: 'En attente'),
                 Tab(text: 'Confirmées'),
               ],
-              labelColor: PharmaConnectColors.accentCyan,
-              unselectedLabelColor: PharmaConnectColors.textSecondary,
-              indicatorColor: PharmaConnectColors.accentCyan,
+              labelColor: context.palette.primary,
+              unselectedLabelColor: context.palette.textSecondary,
+              indicatorColor: context.palette.primary,
               indicatorWeight: 3,
               dividerColor: Colors.transparent,
             ),
@@ -220,18 +219,12 @@ class _TeleconsultListScreenState extends State<TeleconsultListScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 48,
-              color: PharmaConnectColors.accentRed,
-            ),
+            Icon(Icons.error_outline, size: 48, color: context.palette.danger),
             const SizedBox(height: 16),
             Text(
               provider.error!,
               textAlign: TextAlign.center,
-              style: PharmaConnectTypography.body2.copyWith(
-                color: PharmaConnectColors.accentRed,
-              ),
+              style: context.text.body2.copyWith(color: context.palette.danger),
             ),
             const SizedBox(height: 16),
             PrimaryButton(
@@ -252,18 +245,19 @@ class _TeleconsultListScreenState extends State<TeleconsultListScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.video_call_outlined, size: 64, color: Colors.white24),
-            SizedBox(height: 16),
-            Text(
-              'Aucune consultation',
-              style: PharmaConnectTypography.heading3,
+            Icon(
+              Icons.video_call_outlined,
+              size: 64,
+              color: context.palette.veil(0.24),
             ),
+            SizedBox(height: 16),
+            Text('Aucune consultation', style: context.text.heading3),
             SizedBox(height: 8),
             Text(
               widget.asProfessional
                   ? 'Aucun patient n\'a pris de rendez-vous avec vous'
                   : 'Prenez un rendez-vous pour une téléconsultation',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
               textAlign: TextAlign.center,
             ),
           ],

@@ -3,13 +3,12 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/inputs/glass_input.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/payment_provider.dart';
 import '../widgets/transaction_list_tile.dart';
 import '../models/transaction_status.dart';
+import '../../../core/theme/palette.dart';
 
 class TransactionHistoryScreen extends StatefulWidget {
   const TransactionHistoryScreen({super.key});
@@ -61,18 +60,18 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Historique des transactions',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -82,9 +81,9 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
               trailing: [const KernelBadge()],
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Consultez toutes vos transactions passées',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
             ),
             const SizedBox(height: 16),
 
@@ -116,19 +115,19 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
               child: provider.isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : filteredTransactions.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
                             Icons.receipt_long_outlined,
                             size: 48,
-                            color: Colors.white24,
+                            color: context.palette.veil(0.24),
                           ),
                           SizedBox(height: 8),
                           Text(
                             'Aucune transaction trouvée',
-                            style: PharmaConnectTypography.body2,
+                            style: context.text.body2,
                           ),
                         ],
                       ),
@@ -162,10 +161,12 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
         selected: isSelected,
         onSelected: (_) =>
             setState(() => _selectedStatus = isSelected ? null : status),
-        selectedColor: PharmaConnectColors.accentCyan.withValues(alpha: 0.2),
+        selectedColor: context.palette.primary.withValues(alpha: 0.2),
         backgroundColor: Colors.transparent,
         side: BorderSide(
-          color: isSelected ? PharmaConnectColors.accentCyan : Colors.white24,
+          color: isSelected
+              ? context.palette.primary
+              : context.palette.veil(0.24),
         ),
       ),
     );

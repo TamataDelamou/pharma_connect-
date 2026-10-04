@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../models/family_challenge.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class FamilyChallengeCard extends StatelessWidget {
   final FamilyChallenge challenge;
@@ -26,8 +25,8 @@ class FamilyChallengeCard extends StatelessWidget {
             height: 40,
             decoration: BoxDecoration(
               color: challenge.isCompleted
-                  ? PharmaConnectColors.accentGreen
-                  : PharmaConnectColors.accentCyan,
+                  ? context.palette.success
+                  : context.palette.primary,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -46,7 +45,7 @@ class FamilyChallengeCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         'Défi ${challenge.typeLabel}',
-                        style: PharmaConnectTypography.body1.copyWith(
+                        style: context.text.body1.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                         maxLines: 1,
@@ -60,12 +59,8 @@ class FamilyChallengeCard extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: challenge.isCompleted
-                            ? PharmaConnectColors.accentGreen.withValues(
-                                alpha: 0.15,
-                              )
-                            : PharmaConnectColors.accentCyan.withValues(
-                                alpha: 0.15,
-                              ),
+                            ? context.palette.success.withValues(alpha: 0.15)
+                            : context.palette.primary.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -74,8 +69,8 @@ class FamilyChallengeCard extends StatelessWidget {
                           fontSize: 10,
                           fontWeight: FontWeight.w500,
                           color: challenge.isCompleted
-                              ? PharmaConnectColors.accentGreen
-                              : PharmaConnectColors.accentCyan,
+                              ? context.palette.success
+                              : context.palette.primary,
                         ),
                       ),
                     ),
@@ -87,7 +82,7 @@ class FamilyChallengeCard extends StatelessWidget {
                     Container(
                       height: 4,
                       decoration: BoxDecoration(
-                        color: Colors.white24,
+                        color: context.palette.veil(0.24),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -97,8 +92,8 @@ class FamilyChallengeCard extends StatelessWidget {
                         height: 4,
                         decoration: BoxDecoration(
                           color: challenge.isCompleted
-                              ? PharmaConnectColors.accentGreen
-                              : PharmaConnectColors.accentCyan,
+                              ? context.palette.success
+                              : context.palette.primary,
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -108,12 +103,12 @@ class FamilyChallengeCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   '${challenge.progress}/${challenge.targetValue}',
-                  style: PharmaConnectTypography.micro,
+                  style: context.text.micro,
                 ),
               ],
             ),
           ),
-          const Icon(Icons.chevron_right, color: Colors.white24),
+          Icon(Icons.chevron_right, color: context.palette.veil(0.24)),
         ],
       ),
     );

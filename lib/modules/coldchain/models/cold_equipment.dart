@@ -1,7 +1,6 @@
-import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
 import 'equipment_type.dart';
 import 'equipment_status.dart';
+import '../../../core/theme/palette.dart';
 
 class ColdEquipment {
   final String id;
@@ -146,16 +145,16 @@ class ColdEquipment {
     }
   }
 
-  Color get statusColor {
+  ColorRole get statusColor {
     switch (status) {
       case EquipmentStatus.operational:
-        return PharmaConnectColors.accentGreen;
+        return ColorRole.success;
       case EquipmentStatus.maintenance:
-        return PharmaConnectColors.accentOrange;
+        return ColorRole.warning;
       case EquipmentStatus.alarm:
-        return PharmaConnectColors.accentRed;
+        return ColorRole.danger;
       case EquipmentStatus.offline:
-        return PharmaConnectColors.neutralMuted;
+        return ColorRole.textMuted;
     }
   }
 

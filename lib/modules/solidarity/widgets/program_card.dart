@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../models/solidarity_program.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class ProgramCard extends StatelessWidget {
   final SolidarityProgram program;
@@ -21,12 +20,12 @@ class ProgramCard extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: _typeColor(program.type).withValues(alpha: 0.15),
+              color: _typeColor(context, program.type).withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
               _typeIcon(program.type),
-              color: _typeColor(program.type),
+              color: _typeColor(context, program.type),
             ),
           ),
           const SizedBox(width: 12),
@@ -36,7 +35,7 @@ class ProgramCard extends StatelessWidget {
               children: [
                 Text(
                   program.name,
-                  style: PharmaConnectTypography.body1.copyWith(
+                  style: context.text.body1.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                   maxLines: 1,
@@ -44,7 +43,7 @@ class ProgramCard extends StatelessWidget {
                 ),
                 Text(
                   program.typeLabel,
-                  style: PharmaConnectTypography.body2,
+                  style: context.text.body2,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -52,16 +51,13 @@ class ProgramCard extends StatelessWidget {
                 Row(
                   children: [
                     if (program.pharmacyName != null)
-                      Text(
-                        program.pharmacyName!,
-                        style: PharmaConnectTypography.micro,
-                      ),
+                      Text(program.pharmacyName!, style: context.text.micro),
                     const Spacer(),
                     if (program.beneficiariesCount != null)
                       Text(
                         '${program.beneficiariesCount} bénéficiaires',
-                        style: PharmaConnectTypography.micro.copyWith(
-                          color: PharmaConnectColors.accentCyan,
+                        style: context.text.micro.copyWith(
+                          color: context.palette.primary,
                         ),
                       ),
                     const SizedBox(width: 8),
@@ -72,12 +68,8 @@ class ProgramCard extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: program.isActive
-                            ? PharmaConnectColors.accentGreen.withValues(
-                                alpha: 0.15,
-                              )
-                            : PharmaConnectColors.accentRed.withValues(
-                                alpha: 0.15,
-                              ),
+                            ? context.palette.success.withValues(alpha: 0.15)
+                            : context.palette.danger.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -86,8 +78,8 @@ class ProgramCard extends StatelessWidget {
                           fontSize: 10,
                           fontWeight: FontWeight.w500,
                           color: program.isActive
-                              ? PharmaConnectColors.accentGreen
-                              : PharmaConnectColors.accentRed,
+                              ? context.palette.success
+                              : context.palette.danger,
                         ),
                       ),
                     ),
@@ -96,7 +88,7 @@ class ProgramCard extends StatelessWidget {
               ],
             ),
           ),
-          const Icon(Icons.chevron_right, color: Colors.white24),
+          Icon(Icons.chevron_right, color: context.palette.veil(0.24)),
         ],
       ),
     );
@@ -117,18 +109,18 @@ class ProgramCard extends StatelessWidget {
     }
   }
 
-  Color _typeColor(String type) {
+  Color _typeColor(BuildContext context, String type) {
     switch (type) {
       case 'free_medication':
-        return PharmaConnectColors.accentGreen;
+        return context.palette.success;
       case 'subsidized_care':
-        return PharmaConnectColors.accentCyan;
+        return context.palette.primary;
       case 'emergency_aid':
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       case 'health_education':
-        return PharmaConnectColors.accentPurple;
+        return context.palette.secondary;
       default:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
     }
   }
 }

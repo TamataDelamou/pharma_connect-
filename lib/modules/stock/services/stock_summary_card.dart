@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/cards/glass_card.dart';
+import '../../../core/theme/palette.dart';
 
 class StockSummaryCard extends StatelessWidget {
   final int totalProducts;
@@ -22,37 +21,42 @@ class StockSummaryCard extends StatelessWidget {
     return Row(
       children: [
         _buildStatCard(
+          context,
           label: 'Produits',
           value: totalProducts.toString(),
           icon: Icons.inventory_2,
-          color: PharmaConnectColors.accentCyan,
+          color: context.palette.primary,
         ),
         const SizedBox(width: 12),
         _buildStatCard(
+          context,
           label: 'Unités',
           value: totalStock.toString(),
           icon: Icons.numbers,
-          color: PharmaConnectColors.accentPurple,
+          color: context.palette.secondary,
         ),
         const SizedBox(width: 12),
         _buildStatCard(
+          context,
           label: '⚠️ Faible',
           value: lowStockCount.toString(),
           icon: Icons.warning_amber,
-          color: PharmaConnectColors.accentOrange,
+          color: context.palette.warning,
         ),
         const SizedBox(width: 12),
         _buildStatCard(
+          context,
           label: '🔴 Rupture',
           value: outOfStockCount.toString(),
           icon: Icons.error_outline,
-          color: PharmaConnectColors.accentRed,
+          color: context.palette.danger,
         ),
       ],
     );
   }
 
-  Widget _buildStatCard({
+  Widget _buildStatCard(
+    BuildContext context, {
     required String label,
     required String value,
     required IconData icon,
@@ -71,7 +75,7 @@ class StockSummaryCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     label,
-                    style: PharmaConnectTypography.micro,
+                    style: context.text.micro,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -80,7 +84,7 @@ class StockSummaryCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               value,
-              style: PharmaConnectTypography.kpiMedium.copyWith(
+              style: context.text.kpiMedium.copyWith(
                 color: color,
                 fontSize: 24,
               ),

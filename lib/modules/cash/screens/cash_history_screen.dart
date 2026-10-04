@@ -3,14 +3,13 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/utils/currency_formatter.dart';
 import '../providers/cash_provider.dart';
 import '../models/cash_drawer_session.dart';
 import '../../auth/providers/auth_provider.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class CashHistoryScreen extends StatefulWidget {
   const CashHistoryScreen({super.key});
@@ -45,11 +44,11 @@ class _CashHistoryScreenState extends State<CashHistoryScreen> {
   Widget build(BuildContext context) {
     final pharmacyId = context.watch<AuthProvider>().pharmacyId;
     if (pharmacyId == null) {
-      return const Scaffold(
+      return Scaffold(
         body: Center(
           child: Text(
             'Aucune officine rattachée à ce compte pharmacien.',
-            style: PharmaConnectTypography.body2,
+            style: context.text.body2,
             textAlign: TextAlign.center,
           ),
         ),
@@ -69,18 +68,18 @@ class _CashHistoryScreenState extends State<CashHistoryScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       '📋 Historique de caisse',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -103,13 +102,13 @@ class _CashHistoryScreenState extends State<CashHistoryScreen> {
                       setState(() => _selectedRange = days);
                       _loadSessions();
                     },
-                    selectedColor: PharmaConnectColors.accentCyan.withValues(
+                    selectedColor: context.palette.primary.withValues(
                       alpha: 0.2,
                     ),
                     labelStyle: TextStyle(
                       color: selected
-                          ? PharmaConnectColors.accentCyan
-                          : PharmaConnectColors.textSecondary,
+                          ? context.palette.primary
+                          : context.palette.textSecondary,
                     ),
                   ),
                 );
@@ -134,18 +133,12 @@ class _CashHistoryScreenState extends State<CashHistoryScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 48,
-              color: PharmaConnectColors.accentRed,
-            ),
+            Icon(Icons.error_outline, size: 48, color: context.palette.danger),
             const SizedBox(height: 16),
             Text(
               provider.error!,
               textAlign: TextAlign.center,
-              style: PharmaConnectTypography.body2.copyWith(
-                color: PharmaConnectColors.accentRed,
-              ),
+              style: context.text.body2.copyWith(color: context.palette.danger),
             ),
             const SizedBox(height: 16),
             PrimaryButton(
@@ -162,24 +155,21 @@ class _CashHistoryScreenState extends State<CashHistoryScreen> {
     }
 
     if (provider.sessions.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               Icons.account_balance_wallet_outlined,
               size: 64,
-              color: Colors.white24,
+              color: context.palette.veil(0.24),
             ),
             SizedBox(height: 16),
-            Text(
-              'Aucune session de caisse',
-              style: PharmaConnectTypography.heading3,
-            ),
+            Text('Aucune session de caisse', style: context.text.heading3),
             SizedBox(height: 8),
             Text(
               'Les sessions de caisse fermées apparaîtront ici',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
               textAlign: TextAlign.center,
             ),
           ],
@@ -214,7 +204,7 @@ class _CashHistoryScreenState extends State<CashHistoryScreen> {
                         children: [
                           Text(
                             _formatDate(session.openedAt),
-                            style: PharmaConnectTypography.body1.copyWith(
+                            style: context.text.body1.copyWith(
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -243,12 +233,12 @@ class _CashHistoryScreenState extends State<CashHistoryScreen> {
                       ),
                       Text(
                         session.cashierName ?? session.cashierId,
-                        style: PharmaConnectTypography.body2,
+                        style: context.text.body2,
                       ),
                       Text(
                         'Ouverture ${CurrencyFormatter.format(session.openingBalance)}'
                         '${session.closingBalance != null ? ' • Clôture ${CurrencyFormatter.format(session.closingBalance!)}' : ''}',
-                        style: PharmaConnectTypography.micro,
+                        style: context.text.micro,
                       ),
                     ],
                   ),
@@ -258,7 +248,7 @@ class _CashHistoryScreenState extends State<CashHistoryScreen> {
                     session.differenceLabel,
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
-                      color: session.differenceColor,
+                      color: session.differenceColor.of(context.palette),
                     ),
                   ),
               ],
@@ -272,11 +262,11 @@ class _CashHistoryScreenState extends State<CashHistoryScreen> {
   Color _statusColor(CashSessionStatus status) {
     switch (status) {
       case CashSessionStatus.open:
-        return PharmaConnectColors.accentGreen;
+        return context.palette.success;
       case CashSessionStatus.closed:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
       case CashSessionStatus.suspended:
-        return PharmaConnectColors.accentOrange;
+        return context.palette.warning;
     }
   }
 

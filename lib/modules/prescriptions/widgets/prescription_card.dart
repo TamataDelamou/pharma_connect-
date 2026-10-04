@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
 import '../../../core/theme/spacing.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../models/prescription.dart';
+import '../../../core/theme/palette.dart';
 
 class PrescriptionCard extends StatelessWidget {
   final Prescription prescription;
@@ -29,7 +28,9 @@ class PrescriptionCard extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: prescription.statusColor.withValues(alpha: 0.15),
+              color: prescription.statusColor
+                  .of(context.palette)
+                  .withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(
                 PharmaConnectSpacing.radiusSm,
               ),
@@ -40,7 +41,7 @@ class PrescriptionCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
-                  color: prescription.statusColor,
+                  color: prescription.statusColor.of(context.palette),
                 ),
               ),
             ),
@@ -53,7 +54,7 @@ class PrescriptionCard extends StatelessWidget {
               children: [
                 Text(
                   prescription.patientName,
-                  style: PharmaConnectTypography.body1.copyWith(
+                  style: context.text.body1.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                   maxLines: 1,
@@ -64,7 +65,7 @@ class PrescriptionCard extends StatelessWidget {
                     prescription.items
                         .map((item) => item.medicationName)
                         .join(', '),
-                    style: PharmaConnectTypography.body2,
+                    style: context.text.body2,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -77,7 +78,9 @@ class PrescriptionCard extends StatelessWidget {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: prescription.statusColor.withValues(alpha: 0.15),
+                        color: prescription.statusColor
+                            .of(context.palette)
+                            .withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -85,14 +88,14 @@ class PrescriptionCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
-                          color: prescription.statusColor,
+                          color: prescription.statusColor.of(context.palette),
                         ),
                       ),
                     ),
                     const SizedBox(width: 8),
                     Text(
                       _formatDate(prescription.uploadedAt),
-                      style: PharmaConnectTypography.micro,
+                      style: context.text.micro,
                     ),
                   ],
                 ),
@@ -109,11 +112,11 @@ class PrescriptionCard extends StatelessWidget {
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: prescription.ocrConfidenceScore! > 0.8
-                        ? PharmaConnectColors.accentGreen
-                        : PharmaConnectColors.accentOrange,
+                        ? context.palette.success
+                        : context.palette.warning,
                   ),
                 ),
-                const Text('Confiance', style: PharmaConnectTypography.micro),
+                Text('Confiance', style: context.text.micro),
               ],
             ),
           ],

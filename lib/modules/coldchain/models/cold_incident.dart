@@ -1,5 +1,4 @@
-import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
+import '../../../core/theme/palette.dart';
 
 enum IncidentSeverity { critical, major, minor }
 
@@ -131,14 +130,14 @@ class ColdIncident {
     }
   }
 
-  Color get severityColor {
+  ColorRole get severityColor {
     switch (severity) {
       case IncidentSeverity.critical:
-        return PharmaConnectColors.accentRed;
+        return ColorRole.danger;
       case IncidentSeverity.major:
-        return PharmaConnectColors.accentOrange;
+        return ColorRole.warning;
       case IncidentSeverity.minor:
-        return PharmaConnectColors.accentAmber;
+        return ColorRole.warningStrong;
     }
   }
 

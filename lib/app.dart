@@ -169,7 +169,11 @@ class PharmaConnectApp extends StatelessWidget {
       providers: appProviders(),
       child: MaterialApp.router(
         title: 'PharmaConnect',
-        theme: PharmaConnectAppTheme.dark(),
+        // C234 : thème clair par défaut ; le thème sombre est conservé, sans
+        // sélecteur tant que l'écran Paramètres (C227) n'existe pas.
+        theme: PharmaConnectAppTheme.light(),
+        darkTheme: PharmaConnectAppTheme.dark(),
+        themeMode: ThemeMode.light,
         debugShowCheckedModeBanner: false,
         routerConfig: AppRouter.router,
         // C233 : titres réduits en largeur téléphone, réglage de taille de

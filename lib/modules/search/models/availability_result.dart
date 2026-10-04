@@ -1,7 +1,6 @@
-import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
 import '../../../shared/models/product.dart';
 import 'pharmacy.dart';
+import '../../../core/theme/palette.dart';
 
 class AvailabilityResult {
   final Product product;
@@ -71,11 +70,11 @@ class PharmacyStock {
     return 'Disponible';
   }
 
-  Color get stockColor {
-    if (isOutdated) return PharmaConnectColors.accentAmber;
-    if (stock <= 0) return PharmaConnectColors.accentRed;
-    if (stock < 5) return PharmaConnectColors.accentAmber;
-    if (stock < 20) return PharmaConnectColors.accentOrange;
-    return PharmaConnectColors.accentGreen;
+  ColorRole get stockColor {
+    if (isOutdated) return ColorRole.warningStrong;
+    if (stock <= 0) return ColorRole.danger;
+    if (stock < 5) return ColorRole.warningStrong;
+    if (stock < 20) return ColorRole.warning;
+    return ColorRole.success;
   }
 }

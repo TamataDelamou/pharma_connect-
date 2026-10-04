@@ -3,8 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
 import '../providers/search_provider.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/palette.dart';
 
 class BarcodeScannerScreen extends StatefulWidget {
   const BarcodeScannerScreen({super.key});
@@ -28,7 +29,17 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Fond noir et textes clairs dans les deux thèmes, caméra active ou
+    // refusée : l'écran utilise la palette sombre.
+    return Theme(
+      data: PharmaConnectAppTheme.dark(),
+      child: Builder(builder: _buildScanner),
+    );
+  }
+
+  Widget _buildScanner(BuildContext context) {
     return Scaffold(
+      backgroundColor: PharmaConnectFixedColors.cameraBackdrop,
       body: Stack(
         children: [
           // Scanner
@@ -43,15 +54,15 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
           ),
 
           // Overlay
-          _buildOverlay(),
+          _buildOverlay(context),
 
           // Loading
           if (_isLoading) ...[
             Container(
-              color: Colors.black.withValues(alpha: 0.5),
-              child: const Center(
+              color: context.palette.overlay,
+              child: Center(
                 child: CircularProgressIndicator(
-                  color: PharmaConnectColors.accentCyan,
+                  color: context.palette.primary,
                 ),
               ),
             ),
@@ -61,7 +72,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
     );
   }
 
-  Widget _buildOverlay() {
+  Widget _buildOverlay(BuildContext context) {
     return Column(
       children: [
         // En-tête
@@ -71,15 +82,18 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
             child: Row(
               children: [
                 IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  icon: Icon(
+                    Icons.arrow_back,
+                    color: PharmaConnectFixedColors.onCamera,
+                  ),
                   onPressed: () => context.pop(),
                 ),
                 const SizedBox(width: 8),
-                const Expanded(
+                Expanded(
                   child: Text(
                     'Scanner un code-barres',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: PharmaConnectFixedColors.onCamera,
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
                     ),
@@ -100,27 +114,24 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
             width: 250,
             height: 250,
             decoration: BoxDecoration(
-              border: Border.all(
-                color: PharmaConnectColors.accentCyan,
-                width: 3,
-              ),
+              border: Border.all(color: context.palette.primary, width: 3),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.qr_code_scanner,
-                    color: PharmaConnectColors.accentCyan,
+                    color: context.palette.primary,
                     size: 48,
                   ),
                   const SizedBox(height: 8),
-                  const Text(
+                  Text(
                     'Positionnez le code-barres dans le cadre',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Colors.white,
+                      color: PharmaConnectFixedColors.onCamera,
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),
@@ -141,13 +152,19 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.flash_on, color: Colors.white54, size: 20),
+                  Icon(
+                    Icons.flash_on,
+                    color: PharmaConnectFixedColors.onCameraMuted,
+                    size: 20,
+                  ),
                   const SizedBox(width: 8),
                   TextButton(
                     onPressed: () => _controller.toggleTorch(),
-                    child: const Text(
+                    child: Text(
                       'Activer la lampe',
-                      style: TextStyle(color: Colors.white54),
+                      style: TextStyle(
+                        color: PharmaConnectFixedColors.onCameraMuted,
+                      ),
                     ),
                   ),
                 ],
@@ -156,10 +173,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
                 const SizedBox(height: 8),
                 Text(
                   _error!,
-                  style: const TextStyle(
-                    color: PharmaConnectColors.accentRed,
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(color: context.palette.danger, fontSize: 14),
                 ),
               ],
             ],

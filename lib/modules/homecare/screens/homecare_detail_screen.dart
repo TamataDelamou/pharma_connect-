@@ -4,13 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/secondary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../providers/homecare_provider.dart';
 import '../models/homecare_status.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class HomecareDetailScreen extends StatefulWidget {
   final String interventionId;
@@ -66,9 +65,7 @@ class _HomecareDetailScreenState extends State<HomecareDetailScreen> {
         body: Center(
           child: Text(
             provider.error ?? 'Intervention introuvable',
-            style: PharmaConnectTypography.body2.copyWith(
-              color: PharmaConnectColors.accentRed,
-            ),
+            style: context.text.body2.copyWith(color: context.palette.danger),
           ),
         ),
       );
@@ -90,18 +87,18 @@ class _HomecareDetailScreenState extends State<HomecareDetailScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Détail de l\'intervention',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -137,11 +134,11 @@ class _HomecareDetailScreenState extends State<HomecareDetailScreen> {
                               children: [
                                 Text(
                                   'Statut : ${intervention.status.label}',
-                                  style: PharmaConnectTypography.heading3,
+                                  style: context.text.heading3,
                                 ),
                                 Text(
                                   _formatDate(intervention.scheduledAt),
-                                  style: PharmaConnectTypography.body2,
+                                  style: context.text.body2,
                                 ),
                               ],
                             ),
@@ -159,43 +156,43 @@ class _HomecareDetailScreenState extends State<HomecareDetailScreen> {
                             'Patient',
                             intervention.patientName ?? intervention.patientId,
                           ),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           _buildInfoRow(
                             'Professionnel',
                             intervention.professionalName ??
                                 intervention.professionalId,
                           ),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           _buildInfoRow('Adresse', intervention.address),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           _buildInfoRow('Motif', intervention.reason),
                           if (intervention.durationMinutes > 0) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow(
                               'Durée',
                               '${intervention.durationMinutes} min',
                             ),
                           ],
                           if (intervention.startedAt != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow(
                               'Débuté le',
                               _formatDate(intervention.startedAt!),
                             ),
                           ],
                           if (intervention.completedAt != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow(
                               'Terminé le',
                               _formatDate(intervention.completedAt!),
                             ),
                           ],
                           if (intervention.notes != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow('Notes', intervention.notes!),
                           ],
                           if (intervention.refusalReason != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow(
                               'Motif du refus',
                               intervention.refusalReason!,
@@ -213,9 +210,9 @@ class _HomecareDetailScreenState extends State<HomecareDetailScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'Compte-rendu de la visite',
-                              style: PharmaConnectTypography.heading3,
+                              style: context.text.heading3,
                             ),
                             const SizedBox(height: 8),
                             TextField(
@@ -240,12 +237,11 @@ class _HomecareDetailScreenState extends State<HomecareDetailScreen> {
                               onPressed: () async {
                                 if (_reportController.text.trim().isEmpty) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
+                                    SnackBar(
                                       content: Text(
                                         'Un compte-rendu est obligatoire pour terminer l\'intervention (RG-HOM-03)',
                                       ),
-                                      backgroundColor:
-                                          PharmaConnectColors.accentRed,
+                                      backgroundColor: context.palette.danger,
                                     ),
                                   );
                                   return;
@@ -258,10 +254,9 @@ class _HomecareDetailScreenState extends State<HomecareDetailScreen> {
                                     );
                                 if (success && context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
+                                    SnackBar(
                                       content: Text('Intervention terminée'),
-                                      backgroundColor:
-                                          PharmaConnectColors.accentGreen,
+                                      backgroundColor: context.palette.success,
                                     ),
                                   );
                                   provider.loadIntervention(intervention.id);
@@ -281,9 +276,9 @@ class _HomecareDetailScreenState extends State<HomecareDetailScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'Évaluez l\'intervention',
-                              style: PharmaConnectTypography.heading3,
+                              style: context.text.heading3,
                             ),
                             const SizedBox(height: 8),
                             Row(
@@ -293,7 +288,7 @@ class _HomecareDetailScreenState extends State<HomecareDetailScreen> {
                                     index < _rating
                                         ? Icons.star
                                         : Icons.star_border,
-                                    color: PharmaConnectColors.accentAmber,
+                                    color: context.palette.warningStrong,
                                   ),
                                   onPressed: () =>
                                       setState(() => _rating = index + 1),
@@ -323,12 +318,11 @@ class _HomecareDetailScreenState extends State<HomecareDetailScreen> {
                                     );
                                 if (success && context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
+                                    SnackBar(
                                       content: Text(
                                         'Merci pour votre évaluation',
                                       ),
-                                      backgroundColor:
-                                          PharmaConnectColors.accentGreen,
+                                      backgroundColor: context.palette.success,
                                     ),
                                   );
                                   provider.loadIntervention(intervention.id);
@@ -357,10 +351,10 @@ class _HomecareDetailScreenState extends State<HomecareDetailScreen> {
                                       );
                                   if (success && context.mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
+                                      SnackBar(
                                         content: Text('Intervention confirmée'),
                                         backgroundColor:
-                                            PharmaConnectColors.accentGreen,
+                                            context.palette.success,
                                       ),
                                     );
                                     provider.loadIntervention(intervention.id);
@@ -428,10 +422,9 @@ class _HomecareDetailScreenState extends State<HomecareDetailScreen> {
                                     );
                                 if (success && context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
+                                    SnackBar(
                                       content: Text('Intervention en cours'),
-                                      backgroundColor:
-                                          PharmaConnectColors.accentOrange,
+                                      backgroundColor: context.palette.warning,
                                     ),
                                   );
                                   provider.loadIntervention(intervention.id);
@@ -484,10 +477,8 @@ class _HomecareDetailScreenState extends State<HomecareDetailScreen> {
                         icon: const Icon(Icons.delete_outline),
                         label: const Text('Supprimer'),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: PharmaConnectColors.accentRed,
-                          side: const BorderSide(
-                            color: PharmaConnectColors.accentRed,
-                          ),
+                          foregroundColor: context.palette.danger,
+                          side: BorderSide(color: context.palette.danger),
                         ),
                       ),
                     ],
@@ -507,11 +498,8 @@ class _HomecareDetailScreenState extends State<HomecareDetailScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 120,
-            child: Text(label, style: PharmaConnectTypography.label),
-          ),
-          Expanded(child: Text(value, style: PharmaConnectTypography.body1)),
+          SizedBox(width: 120, child: Text(label, style: context.text.label)),
+          Expanded(child: Text(value, style: context.text.body1)),
         ],
       ),
     );
@@ -524,17 +512,17 @@ class _HomecareDetailScreenState extends State<HomecareDetailScreen> {
   Color _statusColor(HomecareStatus status) {
     switch (status) {
       case HomecareStatus.pending:
-        return PharmaConnectColors.accentOrange;
+        return context.palette.warning;
       case HomecareStatus.confirmed:
-        return PharmaConnectColors.accentGreen;
+        return context.palette.success;
       case HomecareStatus.inProgress:
-        return PharmaConnectColors.accentCyan;
+        return context.palette.primary;
       case HomecareStatus.completed:
-        return PharmaConnectColors.accentPurple;
+        return context.palette.secondary;
       case HomecareStatus.cancelled:
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       case HomecareStatus.missed:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
     }
   }
 
@@ -547,7 +535,7 @@ class _HomecareDetailScreenState extends State<HomecareDetailScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: PharmaConnectColors.primaryDeep,
+        backgroundColor: context.palette.background,
         title: const Text('Refuser la demande'),
         content: TextField(
           controller: reasonController,
@@ -588,8 +576,8 @@ class _HomecareDetailScreenState extends State<HomecareDetailScreen> {
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: PharmaConnectColors.accentRed,
-              foregroundColor: PharmaConnectColors.textPrimary,
+              backgroundColor: context.palette.danger,
+              foregroundColor: context.palette.onDanger,
             ),
             child: const Text('Refuser'),
           ),
@@ -602,7 +590,7 @@ class _HomecareDetailScreenState extends State<HomecareDetailScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: PharmaConnectColors.primaryDeep,
+        backgroundColor: context.palette.background,
         title: const Text('Supprimer l\'intervention'),
         content: const Text(
           'Êtes-vous sûr de vouloir supprimer cette intervention ?',
@@ -623,8 +611,8 @@ class _HomecareDetailScreenState extends State<HomecareDetailScreen> {
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: PharmaConnectColors.accentRed,
-              foregroundColor: PharmaConnectColors.textPrimary,
+              backgroundColor: context.palette.danger,
+              foregroundColor: context.palette.onDanger,
             ),
             child: const Text('Supprimer'),
           ),

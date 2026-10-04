@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/recall_status.dart';
+import '../../../core/theme/palette.dart';
 
 class RecallStatusChip extends StatelessWidget {
   final RecallStatus status;
@@ -19,10 +20,10 @@ class RecallStatusChip extends StatelessWidget {
         vertical: compact ? 2 : 4,
       ),
       decoration: BoxDecoration(
-        color: status.color.withValues(alpha: 0.15),
+        color: status.color.of(context.palette).withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(4),
         border: Border.all(
-          color: status.color.withValues(alpha: 0.3),
+          color: status.color.of(context.palette).withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -31,7 +32,7 @@ class RecallStatusChip extends StatelessWidget {
         style: TextStyle(
           fontSize: compact ? 10 : 11,
           fontWeight: FontWeight.w600,
-          color: status.color,
+          color: status.color.of(context.palette),
         ),
       ),
     );

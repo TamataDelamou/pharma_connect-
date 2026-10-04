@@ -4,8 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
@@ -13,6 +11,7 @@ import '../../../core/widgets/inputs/glass_input.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../models/transaction_status.dart';
 import '../providers/payment_provider.dart';
+import '../../../core/theme/palette.dart';
 
 class DisputeScreen extends StatefulWidget {
   const DisputeScreen({super.key});
@@ -62,18 +61,18 @@ class _DisputeScreenState extends State<DisputeScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Litiges de paiement',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -83,9 +82,9 @@ class _DisputeScreenState extends State<DisputeScreen> {
               trailing: [const KernelBadge()],
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Signalez un problème avec une transaction',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
             ),
             const SizedBox(height: 24),
 
@@ -99,9 +98,9 @@ class _DisputeScreenState extends State<DisputeScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'Transactions récentes',
-                              style: PharmaConnectTypography.heading3,
+                              style: context.text.heading3,
                             ),
                             const SizedBox(height: 8),
                             ...provider.transactions
@@ -115,15 +114,14 @@ class _DisputeScreenState extends State<DisputeScreen> {
                                   (t) => ListTile(
                                     title: Text(
                                       '#${t.id} - ${t.pharmacyName ?? 'Pharmacie'}',
-                                      style: PharmaConnectTypography.body1,
+                                      style: context.text.body1,
                                     ),
                                     subtitle: Text(
                                       '${CurrencyFormatter.format(t.amount)} • ${_formatDate(t.createdAt)}',
-                                      style: PharmaConnectTypography.body2,
+                                      style: context.text.body2,
                                     ),
                                     selected: _selectedTransactionId == t.id,
-                                    selectedColor: PharmaConnectColors
-                                        .accentCyan
+                                    selectedColor: context.palette.primary
                                         .withValues(alpha: 0.1),
                                     onTap: () => setState(
                                       () => _selectedTransactionId = t.id,
@@ -141,9 +139,9 @@ class _DisputeScreenState extends State<DisputeScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Signaler un litige',
-                            style: PharmaConnectTypography.heading3,
+                            style: context.text.heading3,
                           ),
                           const SizedBox(height: 16),
 
@@ -167,30 +165,30 @@ class _DisputeScreenState extends State<DisputeScreen> {
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: PharmaConnectColors.accentOrange
-                                  .withValues(alpha: 0.08),
+                              color: context.palette.warning.withValues(
+                                alpha: 0.08,
+                              ),
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(
-                                color: PharmaConnectColors.accentOrange
-                                    .withValues(alpha: 0.15),
+                                color: context.palette.warning.withValues(
+                                  alpha: 0.15,
+                                ),
                               ),
                             ),
                             child: Row(
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.info_outline,
-                                  color: PharmaConnectColors.accentOrange,
+                                  color: context.palette.warning,
                                   size: 16,
                                 ),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
                                     'Un litige sera traité sous 48h. Vous serez notifié de l\'évolution.',
-                                    style: PharmaConnectTypography.micro
-                                        .copyWith(
-                                          color:
-                                              PharmaConnectColors.textSecondary,
-                                        ),
+                                    style: context.text.micro.copyWith(
+                                      color: context.palette.textSecondary,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -210,12 +208,11 @@ class _DisputeScreenState extends State<DisputeScreen> {
                               if (_reasonController.text.trim().isEmpty ||
                                   _descriptionController.text.trim().isEmpty) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
+                                  SnackBar(
                                     content: Text(
                                       'Veuillez remplir tous les champs',
                                     ),
-                                    backgroundColor:
-                                        PharmaConnectColors.accentRed,
+                                    backgroundColor: context.palette.danger,
                                   ),
                                 );
                                 return;
@@ -236,10 +233,9 @@ class _DisputeScreenState extends State<DisputeScreen> {
 
                               if (success && context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
+                                  SnackBar(
                                     content: Text('Litige soumis avec succès'),
-                                    backgroundColor:
-                                        PharmaConnectColors.accentGreen,
+                                    backgroundColor: context.palette.success,
                                   ),
                                 );
                                 context.pop();

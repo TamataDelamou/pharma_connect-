@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../theme/colors.dart';
 import '../../theme/spacing.dart';
+import '../../theme/palette.dart';
 
 class KernelButton extends StatelessWidget {
   final String label;
@@ -29,16 +29,14 @@ class KernelButton extends StatelessWidget {
       child: OutlinedButton(
         onPressed: isInteractive ? onPressed : null,
         style: OutlinedButton.styleFrom(
-          backgroundColor: PharmaConnectColors.accentPurple.withValues(
-            alpha: 0.10,
-          ),
+          backgroundColor: context.palette.secondary.withValues(alpha: 0.10),
           foregroundColor: isDisabled
-              ? PharmaConnectColors.textSecondary
-              : PharmaConnectColors.accentPurple,
+              ? context.palette.textSecondary
+              : context.palette.secondary,
           side: BorderSide(
             color: isDisabled
-                ? PharmaConnectColors.textSecondary.withValues(alpha: 0.2)
-                : PharmaConnectColors.accentPurple.withValues(alpha: 0.5),
+                ? context.palette.textSecondary.withValues(alpha: 0.2)
+                : context.palette.secondary.withValues(alpha: 0.5),
             width: 1.5,
           ),
           shape: RoundedRectangleBorder(
@@ -49,13 +47,13 @@ class KernelButton extends StatelessWidget {
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 200),
           child: isLoading
-              ? const SizedBox(
+              ? SizedBox(
                   height: 24,
                   width: 24,
                   child: CircularProgressIndicator(
                     strokeWidth: 2.5,
                     valueColor: AlwaysStoppedAnimation<Color>(
-                      PharmaConnectColors.accentPurple,
+                      context.palette.secondary,
                     ),
                   ),
                 )

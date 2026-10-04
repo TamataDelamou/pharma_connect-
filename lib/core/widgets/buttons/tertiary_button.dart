@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../theme/colors.dart';
+import '../../theme/palette.dart';
 
 class TertiaryButton extends StatelessWidget {
   final String label;
@@ -24,8 +24,8 @@ class TertiaryButton extends StatelessWidget {
       onPressed: isInteractive ? onPressed : null,
       style: TextButton.styleFrom(
         foregroundColor: isDisabled
-            ? PharmaConnectColors.textSecondary
-            : PharmaConnectColors.accentCyan,
+            ? context.palette.textSecondary
+            : context.palette.primary,
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         minimumSize: Size.zero,
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,

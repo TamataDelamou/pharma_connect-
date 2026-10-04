@@ -5,8 +5,6 @@ import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../../core/kernel/kernel_badge.dart';
 import '../../../core/services/offline_sync_service.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
@@ -19,6 +17,7 @@ import '../../payments/providers/payment_provider.dart';
 import '../providers/reservation_provider.dart';
 import '../widgets/checkout_step_indicator.dart';
 import '../widgets/timeslot_picker.dart';
+import '../../../core/theme/palette.dart';
 
 enum CheckoutStep { summary, timeslot, details, payment, confirmation }
 
@@ -91,9 +90,9 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () {
                       if (_currentStep != CheckoutStep.summary) {
@@ -108,10 +107,10 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Validation de la commande',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -169,9 +168,9 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Récapitulatif de la commande',
-                  style: PharmaConnectTypography.heading3,
+                  style: context.text.heading3,
                 ),
                 const SizedBox(height: 12),
                 ...provider.cartItems.map(
@@ -181,7 +180,7 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
                       children: [
                         Text(
                           '${item.quantity}x',
-                          style: PharmaConnectTypography.body2.copyWith(
+                          style: context.text.body2.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -189,32 +188,29 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
                         Expanded(
                           child: Text(
                             item.productName,
-                            style: PharmaConnectTypography.body1,
+                            style: context.text.body1,
                           ),
                         ),
                         Text(
                           CurrencyFormatter.format(item.totalPrice),
-                          style: PharmaConnectTypography.body1.copyWith(
+                          style: context.text.body1.copyWith(
                             fontWeight: FontWeight.w600,
-                            color: PharmaConnectColors.accentCyan,
+                            color: context.palette.primary,
                           ),
                         ),
                       ],
                     ),
                   ),
                 ),
-                const Divider(color: Colors.white12),
+                Divider(color: context.palette.veil(0.12)),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'Total',
-                      style: PharmaConnectTypography.heading3,
-                    ),
+                    Text('Total', style: context.text.heading3),
                     Text(
                       CurrencyFormatter.format(provider.cartTotal),
-                      style: PharmaConnectTypography.kpiSmall.copyWith(
-                        color: PharmaConnectColors.accentCyan,
+                      style: context.text.kpiSmall.copyWith(
+                        color: context.palette.primary,
                       ),
                     ),
                   ],
@@ -222,12 +218,12 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
                 const SizedBox(height: 8),
                 Text(
                   'Pharmacie : ${provider.selectedPharmacyName ?? 'Non sélectionnée'}',
-                  style: PharmaConnectTypography.body2,
+                  style: context.text.body2,
                 ),
                 if (provider.selectedPharmacyAddress != null) ...[
                   Text(
                     provider.selectedPharmacyAddress!,
-                    style: PharmaConnectTypography.micro,
+                    style: context.text.micro,
                   ),
                 ],
               ],
@@ -240,7 +236,7 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
                 child: OutlinedButton(
                   onPressed: () => context.pop(),
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.white24),
+                    side: BorderSide(color: context.palette.veil(0.24)),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                   child: const Text('Retour au panier'),
@@ -307,7 +303,7 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
           Text(
             'Le choix d\'un créneau est optionnel : sans sélection, l\'officine '
             'vous contactera pour convenir d\'un horaire de retrait.',
-            style: PharmaConnectTypography.micro,
+            style: context.text.micro,
           ),
           const SizedBox(height: 24),
           Row(
@@ -320,7 +316,7 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
                     });
                   },
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.white24),
+                    side: BorderSide(color: context.palette.veil(0.24)),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                   child: const Text('Retour'),
@@ -356,14 +352,11 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Informations de livraison',
-                  style: PharmaConnectTypography.heading3,
-                ),
+                Text('Informations de livraison', style: context.text.heading3),
                 const SizedBox(height: 8),
-                const Text(
+                Text(
                   'Adresse de livraison (optionnel)',
-                  style: PharmaConnectTypography.label,
+                  style: context.text.label,
                 ),
                 const SizedBox(height: 4),
                 GlassInput(
@@ -373,9 +366,9 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
                   prefixIcon: Icons.location_on,
                 ),
                 const SizedBox(height: 16),
-                const Text(
+                Text(
                   'Instructions particulières (optionnel)',
-                  style: PharmaConnectTypography.label,
+                  style: context.text.label,
                 ),
                 const SizedBox(height: 4),
                 GlassInput(
@@ -391,15 +384,15 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
                       setState(() => _isColdChainRequired = value ?? false),
                   controlAffinity: ListTileControlAffinity.leading,
                   contentPadding: EdgeInsets.zero,
-                  activeColor: PharmaConnectColors.accentCyan,
-                  title: const Text(
+                  activeColor: context.palette.primary,
+                  title: Text(
                     'Livraison chaîne du froid',
-                    style: PharmaConnectTypography.body2,
+                    style: context.text.body2,
                   ),
-                  subtitle: const Text(
+                  subtitle: Text(
                     'Cochez si votre commande contient des produits nécessitant '
                     'un transport réfrigéré (insuline, vaccins, etc.)',
-                    style: PharmaConnectTypography.micro,
+                    style: context.text.micro,
                   ),
                 ),
               ],
@@ -416,7 +409,7 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
                     });
                   },
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.white24),
+                    side: BorderSide(color: context.palette.veil(0.24)),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                   child: const Text('Retour'),
@@ -445,6 +438,7 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
   // ==================== ÉTAPE 4 : PAIEMENT ====================
 
   Widget _buildPaymentStep(ReservationProvider provider) {
+    final palette = context.palette;
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -452,25 +446,19 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Mode de paiement',
-                  style: PharmaConnectTypography.heading3,
-                ),
+                Text('Mode de paiement', style: context.text.heading3),
                 const SizedBox(height: 8),
-                const Text(
-                  'Montant total :',
-                  style: PharmaConnectTypography.label,
-                ),
+                Text('Montant total :', style: context.text.label),
                 Text(
                   CurrencyFormatter.format(provider.cartTotal),
-                  style: PharmaConnectTypography.kpiSmall.copyWith(
-                    color: PharmaConnectColors.accentCyan,
+                  style: context.text.kpiSmall.copyWith(
+                    color: context.palette.primary,
                   ),
                 ),
                 const SizedBox(height: 16),
-                const Text(
+                Text(
                   'Choisissez votre moyen de paiement',
-                  style: PharmaConnectTypography.label,
+                  style: context.text.label,
                 ),
                 const SizedBox(height: 8),
                 ..._paymentMethods.map((method) => _buildPaymentOption(method)),
@@ -488,7 +476,7 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
                     });
                   },
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.white24),
+                    side: BorderSide(color: context.palette.veil(0.24)),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                   child: const Text('Retour'),
@@ -520,22 +508,22 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
                           final pharmacyId = provider.selectedPharmacyId;
                           if (patientId == null) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
+                              SnackBar(
                                 content: Text(
                                   'Vous devez être connecté pour réserver.',
                                 ),
-                                backgroundColor: PharmaConnectColors.accentRed,
+                                backgroundColor: context.palette.danger,
                               ),
                             );
                             return;
                           }
                           if (pharmacyId == null) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
+                              SnackBar(
                                 content: Text(
                                   'Aucune officine sélectionnée pour cette commande.',
                                 ),
-                                backgroundColor: PharmaConnectColors.accentRed,
+                                backgroundColor: context.palette.danger,
                               ),
                             );
                             return;
@@ -574,14 +562,13 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
                             // distinction que Module 5).
                             if (provider.isOffline) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
+                                SnackBar(
                                   content: Text(
                                     'Hors connexion : la commande est enregistrée sur '
                                     'cet appareil et sera envoyée automatiquement au '
                                     'retour du réseau.',
                                   ),
-                                  backgroundColor:
-                                      PharmaConnectColors.accentAmber,
+                                  backgroundColor: palette.warningStrong,
                                 ),
                               );
                             }
@@ -617,14 +604,13 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
                                 !hasInternet &&
                                 context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
+                                SnackBar(
                                   content: Text(
                                     'Commande confirmée, mais le paiement est '
                                     'indisponible hors connexion. Réglez-le '
                                     'depuis l\'historique dès votre retour en ligne.',
                                   ),
-                                  backgroundColor:
-                                      PharmaConnectColors.accentAmber,
+                                  backgroundColor: palette.warningStrong,
                                 ),
                               );
                             } else if (paymentMethod != null &&
@@ -649,8 +635,7 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
                                       '${paymentProvider.error ?? "erreur inconnue"}. '
                                       'Vous pourrez réessayer depuis l\'historique.',
                                     ),
-                                    backgroundColor:
-                                        PharmaConnectColors.accentAmber,
+                                    backgroundColor: palette.warningStrong,
                                   ),
                                 );
                               }
@@ -701,8 +686,7 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
                                       '${deliveryProvider.error ?? "erreur inconnue"}. '
                                       'Contactez l\'officine.',
                                     ),
-                                    backgroundColor:
-                                        PharmaConnectColors.accentAmber,
+                                    backgroundColor: palette.warningStrong,
                                   ),
                                 );
                               }
@@ -718,7 +702,7 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
                                   provider.error ??
                                       'Erreur lors de la création de la commande',
                                 ),
-                                backgroundColor: PharmaConnectColors.accentRed,
+                                backgroundColor: palette.danger,
                               ),
                             );
                           }
@@ -741,13 +725,13 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: isSelected
-              ? PharmaConnectColors.accentCyan.withValues(alpha: 0.1)
-              : Colors.white.withValues(alpha: 0.04),
+              ? context.palette.primary.withValues(alpha: 0.1)
+              : context.palette.surfaceMuted,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected
-                ? PharmaConnectColors.accentCyan
-                : Colors.white.withValues(alpha: 0.06),
+                ? context.palette.primary
+                : context.palette.surface,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -758,16 +742,13 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
             Expanded(
               child: Text(
                 method,
-                style: PharmaConnectTypography.body1.copyWith(
+                style: context.text.body1.copyWith(
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                 ),
               ),
             ),
             if (isSelected) ...[
-              const Icon(
-                Icons.check_circle,
-                color: PharmaConnectColors.accentCyan,
-              ),
+              Icon(Icons.check_circle, color: context.palette.primary),
             ],
           ],
         ),
@@ -830,48 +811,38 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
         children: [
           GlassCard(
             glow: true,
-            glowColor: PharmaConnectColors.accentGreen,
+            glowColor: context.palette.success,
             child: Column(
               children: [
-                const Icon(
+                Icon(
                   Icons.check_circle,
-                  color: PharmaConnectColors.accentGreen,
+                  color: context.palette.success,
                   size: 64,
                 ),
                 const SizedBox(height: 12),
-                const Text(
-                  'Commande confirmée !',
-                  style: PharmaConnectTypography.heading2,
-                ),
+                Text('Commande confirmée !', style: context.text.heading2),
                 const SizedBox(height: 4),
                 Text(
                   'Votre réservation a été prise en compte',
-                  style: PharmaConnectTypography.body2,
+                  style: context.text.body2,
                 ),
                 const SizedBox(height: 16),
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: PharmaConnectColors.accentCyan.withValues(
-                      alpha: 0.1,
-                    ),
+                    color: context.palette.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: PharmaConnectColors.accentCyan.withValues(
-                        alpha: 0.2,
-                      ),
+                      color: context.palette.primary.withValues(alpha: 0.2),
                     ),
                   ),
                   child: Column(
                     children: [
-                      const Text(
-                        'Numéro de commande',
-                        style: PharmaConnectTypography.label,
-                      ),
+                      Text('Numéro de commande', style: context.text.label),
                       Text(
                         reservation.id,
-                        style: PharmaConnectTypography.kpiMedium.copyWith(
-                          color: PharmaConnectColors.accentCyan,
+                        style: context.text.kpiMedium.copyWith(
+                          color: context.palette.primary,
                           fontSize: 20,
                         ),
                       ),
@@ -882,7 +853,7 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.04),
+                    color: context.palette.surfaceMuted,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
@@ -890,26 +861,26 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
                     children: [
                       Column(
                         children: [
-                          const Text(
+                          Text(
                             'Position dans la file',
-                            style: PharmaConnectTypography.label,
+                            style: context.text.label,
                           ),
                           Text(
                             reservation.queueDisplay,
-                            style: PharmaConnectTypography.kpiSmall,
+                            style: context.text.kpiSmall,
                           ),
                         ],
                       ),
                       const SizedBox(width: 16),
                       Column(
                         children: [
-                          const Text(
+                          Text(
                             'Temps d\'attente estimé',
-                            style: PharmaConnectTypography.label,
+                            style: context.text.label,
                           ),
                           Text(
                             reservation.estimatedWaitDisplay,
-                            style: PharmaConnectTypography.kpiSmall,
+                            style: context.text.kpiSmall,
                           ),
                         ],
                       ),
@@ -924,15 +895,12 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
           GlassCard(
             child: Column(
               children: [
-                const Text(
-                  'QR Code de retrait',
-                  style: PharmaConnectTypography.heading3,
-                ),
+                Text('QR Code de retrait', style: context.text.heading3),
                 const SizedBox(height: 8),
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: context.palette.textPrimary,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: QrImageView(
@@ -947,7 +915,7 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
                 const SizedBox(height: 8),
                 Text(
                   'Présentez ce QR code en pharmacie',
-                  style: PharmaConnectTypography.micro,
+                  style: context.text.micro,
                 ),
               ],
             ),
@@ -971,7 +939,7 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
                 child: OutlinedButton(
                   onPressed: () => context.go('/reservations/history'),
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.white24),
+                    side: BorderSide(color: context.palette.veil(0.24)),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                   child: const Text('Voir l\'historique'),

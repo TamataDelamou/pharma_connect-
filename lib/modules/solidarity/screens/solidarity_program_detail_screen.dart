@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/utils/currency_formatter.dart';
 import 'package:pharma_connect/core/widgets/buttons/tertiary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../models/solidarity_program.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/solidarity_provider.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class SolidarityProgramDetailScreen extends StatefulWidget {
   final String programId;
@@ -56,9 +55,9 @@ class _SolidarityProgramDetailScreenState
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text(
+            child: Text(
               'Supprimer',
-              style: TextStyle(color: PharmaConnectColors.accentRed),
+              style: TextStyle(color: context.palette.danger),
             ),
           ),
         ],
@@ -79,7 +78,7 @@ class _SolidarityProgramDetailScreenState
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(provider.error ?? 'Erreur lors de la suppression'),
-          backgroundColor: PharmaConnectColors.accentRed,
+          backgroundColor: context.palette.danger,
         ),
       );
     }
@@ -103,9 +102,7 @@ class _SolidarityProgramDetailScreenState
         body: Center(
           child: Text(
             provider.error ?? 'Programme introuvable',
-            style: PharmaConnectTypography.body2.copyWith(
-              color: PharmaConnectColors.accentRed,
-            ),
+            style: context.text.body2.copyWith(color: context.palette.danger),
           ),
         ),
       );
@@ -120,9 +117,9 @@ class _SolidarityProgramDetailScreenState
             Row(
               children: [
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.arrow_back,
-                    color: PharmaConnectColors.textPrimary,
+                    color: context.palette.textPrimary,
                   ),
                   onPressed: () => context.pop(),
                   padding: EdgeInsets.zero,
@@ -131,7 +128,7 @@ class _SolidarityProgramDetailScreenState
                 Expanded(
                   child: Text(
                     program.name,
-                    style: PharmaConnectTypography.heading2,
+                    style: context.text.heading2,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -146,8 +143,8 @@ class _SolidarityProgramDetailScreenState
                   decoration: BoxDecoration(
                     color:
                         (program.isActive
-                                ? PharmaConnectColors.accentGreen
-                                : PharmaConnectColors.accentRed)
+                                ? context.palette.success
+                                : context.palette.danger)
                             .withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(4),
                   ),
@@ -157,8 +154,8 @@ class _SolidarityProgramDetailScreenState
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                       color: program.isActive
-                          ? PharmaConnectColors.accentGreen
-                          : PharmaConnectColors.accentRed,
+                          ? context.palette.success
+                          : context.palette.danger,
                     ),
                   ),
                 ),
@@ -175,20 +172,20 @@ class _SolidarityProgramDetailScreenState
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildInfoRow('Type', program.typeLabel),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           if (program.description != null) ...[
                             _buildInfoRow('Description', program.description!),
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                           ],
                           if (program.pharmacyName != null) ...[
                             _buildInfoRow('Officine', program.pharmacyName!),
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                           ],
                           _buildInfoRow(
                             'Début',
                             _formatDate(program.startDate),
                           ),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           _buildInfoRow(
                             'Fin',
                             program.endDate != null
@@ -196,24 +193,24 @@ class _SolidarityProgramDetailScreenState
                                 : 'Non définie',
                           ),
                           if (program.budget != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow(
                               'Budget',
                               CurrencyFormatter.format(program.budget!),
                             ),
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow(
                               'Budget utilisé',
                               CurrencyFormatter.format(program.usedBudget),
                             ),
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow(
                               'Budget disponible',
                               CurrencyFormatter.format(program.availableBudget),
                             ),
                           ],
                           if (program.beneficiariesCount != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow(
                               'Bénéficiaires',
                               '${program.beneficiariesCount}',
@@ -249,11 +246,8 @@ class _SolidarityProgramDetailScreenState
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 120,
-            child: Text(label, style: PharmaConnectTypography.label),
-          ),
-          Expanded(child: Text(value, style: PharmaConnectTypography.body1)),
+          SizedBox(width: 120, child: Text(label, style: context.text.label)),
+          Expanded(child: Text(value, style: context.text.body1)),
         ],
       ),
     );

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../models/recall_affected_batch.dart';
 import '../models/batch_recall_status.dart';
+import '../../../core/theme/palette.dart';
 
 class AffectedBatchTile extends StatefulWidget {
   final RecallAffectedBatch batch;
@@ -28,10 +27,10 @@ class _AffectedBatchTileState extends State<AffectedBatchTile> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.04),
+        color: context.palette.surfaceMuted,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: batch.statusColor.withValues(alpha: 0.2),
+          color: batch.statusColor.of(context.palette).withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -47,7 +46,7 @@ class _AffectedBatchTileState extends State<AffectedBatchTile> {
                   width: 4,
                   height: 30,
                   decoration: BoxDecoration(
-                    color: batch.statusColor,
+                    color: batch.statusColor.of(context.palette),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -58,13 +57,13 @@ class _AffectedBatchTileState extends State<AffectedBatchTile> {
                     children: [
                       Text(
                         batch.productName,
-                        style: PharmaConnectTypography.body1.copyWith(
+                        style: context.text.body1.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                       Text(
                         'Lot: ${batch.batchNumber}',
-                        style: PharmaConnectTypography.body2,
+                        style: context.text.body2,
                       ),
                     ],
                   ),
@@ -75,7 +74,9 @@ class _AffectedBatchTileState extends State<AffectedBatchTile> {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: batch.statusColor.withValues(alpha: 0.15),
+                    color: batch.statusColor
+                        .of(context.palette)
+                        .withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
@@ -83,14 +84,14 @@ class _AffectedBatchTileState extends State<AffectedBatchTile> {
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w600,
-                      color: batch.statusColor,
+                      color: batch.statusColor.of(context.palette),
                     ),
                   ),
                 ),
                 const SizedBox(width: 4),
                 Icon(
                   _isExpanded ? Icons.expand_less : Icons.expand_more,
-                  color: PharmaConnectColors.textSecondary,
+                  color: context.palette.textSecondary,
                 ),
               ],
             ),
@@ -99,7 +100,7 @@ class _AffectedBatchTileState extends State<AffectedBatchTile> {
           // Détails
           if (_isExpanded) ...[
             const SizedBox(height: 12),
-            const Divider(color: Colors.white12),
+            Divider(color: context.palette.veil(0.12)),
             const SizedBox(height: 8),
             Row(
               children: [
@@ -107,7 +108,7 @@ class _AffectedBatchTileState extends State<AffectedBatchTile> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Total', style: PharmaConnectTypography.label),
+                      Text('Total', style: context.text.label),
                       Text('${batch.totalUnits} unités'),
                     ],
                   ),
@@ -116,10 +117,7 @@ class _AffectedBatchTileState extends State<AffectedBatchTile> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Retournés',
-                        style: PharmaConnectTypography.label,
-                      ),
+                      Text('Retournés', style: context.text.label),
                       Text('${batch.unitsReturned} unités'),
                     ],
                   ),
@@ -128,10 +126,7 @@ class _AffectedBatchTileState extends State<AffectedBatchTile> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Détruits',
-                        style: PharmaConnectTypography.label,
-                      ),
+                      Text('Détruits', style: context.text.label),
                       Text('${batch.unitsDestroyed} unités'),
                     ],
                   ),
@@ -142,9 +137,9 @@ class _AffectedBatchTileState extends State<AffectedBatchTile> {
             LinearProgressIndicator(
               value: batch.completionRate,
               color: batch.completionRate > 0.8
-                  ? PharmaConnectColors.accentGreen
-                  : PharmaConnectColors.accentOrange,
-              backgroundColor: Colors.white.withValues(alpha: 0.1),
+                  ? context.palette.success
+                  : context.palette.warning,
+              backgroundColor: context.palette.border,
             ),
             if (batch.status != BatchRecallStatus.completed &&
                 batch.status != BatchRecallStatus.cancelled) ...[
@@ -157,7 +152,7 @@ class _AffectedBatchTileState extends State<AffectedBatchTile> {
                         _showUpdateDialog(context);
                       },
                       style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Colors.white24),
+                        side: BorderSide(color: context.palette.veil(0.24)),
                         padding: const EdgeInsets.symmetric(vertical: 8),
                       ),
                       child: const Text('Mettre à jour'),
@@ -180,14 +175,14 @@ class _AffectedBatchTileState extends State<AffectedBatchTile> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: PharmaConnectColors.primaryDeep,
+        backgroundColor: context.palette.background,
         title: const Text('Mettre à jour le lot'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             DropdownButtonFormField<BatchRecallStatus>(
               value: selectedStatus,
-              dropdownColor: PharmaConnectColors.primaryDeep,
+              dropdownColor: context.palette.background,
               decoration: const InputDecoration(
                 labelText: 'Statut',
                 border: OutlineInputBorder(),
@@ -235,8 +230,8 @@ class _AffectedBatchTileState extends State<AffectedBatchTile> {
               Navigator.pop(context);
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: PharmaConnectColors.accentCyan,
-              foregroundColor: PharmaConnectColors.textOnAccent,
+              backgroundColor: context.palette.primary,
+              foregroundColor: context.palette.onPrimary,
             ),
             child: const Text('Mettre à jour'),
           ),

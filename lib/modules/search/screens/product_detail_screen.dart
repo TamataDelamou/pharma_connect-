@@ -3,13 +3,12 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
 import '../../../core/theme/spacing.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../providers/search_provider.dart';
 import '../widgets/pharmacy_list_tile.dart';
+import '../../../core/theme/palette.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final String productId;
@@ -46,18 +45,18 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Détail du produit',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -86,13 +85,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                       width: 64,
                                       height: 64,
                                       decoration: BoxDecoration(
-                                        color: PharmaConnectColors.accentCyan
+                                        color: context.palette.primary
                                             .withValues(alpha: 0.1),
                                         borderRadius: BorderRadius.circular(12),
                                       ),
-                                      child: const Icon(
+                                      child: Icon(
                                         Icons.medication,
-                                        color: PharmaConnectColors.accentCyan,
+                                        color: context.palette.primary,
                                         size: 36,
                                       ),
                                     ),
@@ -104,18 +103,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                         children: [
                                           Text(
                                             availability.product.name,
-                                            style: PharmaConnectTypography
-                                                .heading3,
+                                            style: context.text.heading3,
                                           ),
                                           Text(
                                             availability.product.genericName,
-                                            style:
-                                                PharmaConnectTypography.body2,
+                                            style: context.text.body2,
                                           ),
                                           Text(
                                             '${availability.product.dosage} • ${availability.product.form}',
-                                            style:
-                                                PharmaConnectTypography.micro,
+                                            style: context.text.micro,
                                           ),
                                         ],
                                       ),
@@ -123,14 +119,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   ],
                                 ),
                                 const SizedBox(height: 12),
-                                const Divider(color: Colors.white12),
+                                Divider(color: context.palette.veil(0.12)),
                                 const SizedBox(height: 12),
                                 Row(
                                   children: [
                                     _buildInfoChip(
                                       availability.product.manufacturer,
                                       Icons.business,
-                                      PharmaConnectColors.textSecondary,
+                                      context.palette.textSecondary,
                                     ),
                                     const SizedBox(width: 8),
                                     _buildInfoChip(
@@ -139,8 +135,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                           : 'Princeps',
                                       Icons.local_pharmacy,
                                       availability.product.isGeneric
-                                          ? PharmaConnectColors.accentPurple
-                                          : PharmaConnectColors.accentCyan,
+                                          ? context.palette.secondary
+                                          : context.palette.primary,
                                     ),
                                     const SizedBox(width: 8),
                                     _buildInfoChip(
@@ -153,8 +149,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                       availability
                                               .product
                                               .isPrescriptionRequired
-                                          ? PharmaConnectColors.accentOrange
-                                          : PharmaConnectColors.accentGreen,
+                                          ? context.palette.warning
+                                          : context.palette.success,
                                     ),
                                   ],
                                 ),
@@ -163,7 +159,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   const SizedBox(height: 12),
                                   Text(
                                     availability.product.description!,
-                                    style: PharmaConnectTypography.body2,
+                                    style: context.text.body2,
                                   ),
                                 ],
                               ],
@@ -171,21 +167,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           ),
                           const SizedBox(height: 24),
                           // Disponibilité par pharmacie
-                          const Text(
+                          Text(
                             'Disponibilité en pharmacie',
-                            style: PharmaConnectTypography.heading3,
+                            style: context.text.heading3,
                           ),
                           const SizedBox(height: 8),
                           if (availability.hasAvailableStock) ...[
                             Text(
                               '${availability.availableCount} pharmacie(s) disponible(s)',
-                              style: PharmaConnectTypography.body2,
+                              style: context.text.body2,
                             ),
                           ] else ...[
                             Text(
                               'Aucune disponibilité pour le moment',
-                              style: PharmaConnectTypography.body2.copyWith(
-                                color: PharmaConnectColors.accentRed,
+                              style: context.text.body2.copyWith(
+                                color: context.palette.danger,
                               ),
                             ),
                           ],

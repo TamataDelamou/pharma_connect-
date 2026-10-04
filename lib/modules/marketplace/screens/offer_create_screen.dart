@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/tertiary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
@@ -11,6 +9,7 @@ import 'package:pharma_connect/core/widgets/inputs/glass_input.dart';
 import 'package:pharma_connect/modules/auth/providers/auth_provider.dart';
 import '../providers/marketplace_provider.dart';
 import '../models/b2b_offer.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class OfferCreateScreen extends StatefulWidget {
   // Audit Module 13 (B2B, 29/08/2026) : le bouton « Modifier » de
@@ -86,9 +85,9 @@ class _OfferCreateScreenState extends State<OfferCreateScreen> {
               Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
@@ -99,7 +98,7 @@ class _OfferCreateScreenState extends State<OfferCreateScreen> {
                       _isEditing
                           ? '🛒 Modifier l\'offre B2B'
                           : '🛒 Créer une offre B2B',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                     ),
                   ),
                   const KernelBadge(),
@@ -240,9 +239,8 @@ class _OfferCreateScreenState extends State<OfferCreateScreen> {
                                   builder: (context, child) {
                                     return Theme(
                                       data: ThemeData.dark().copyWith(
-                                        colorScheme: const ColorScheme.dark(
-                                          primary:
-                                              PharmaConnectColors.accentCyan,
+                                        colorScheme: ColorScheme.dark(
+                                          primary: context.palette.primary,
                                         ),
                                       ),
                                       child: child!,
@@ -265,21 +263,21 @@ class _OfferCreateScreenState extends State<OfferCreateScreen> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: PharmaConnectColors.accentPurple.withValues(
+                          color: context.palette.secondary.withValues(
                             alpha: 0.06,
                           ),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: PharmaConnectColors.accentPurple.withValues(
+                            color: context.palette.secondary.withValues(
                               alpha: 0.15,
                             ),
                           ),
                         ),
                         child: Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.info_outline,
-                              color: PharmaConnectColors.accentPurple,
+                              color: context.palette.secondary,
                               size: 16,
                             ),
                             const SizedBox(width: 8),
@@ -287,8 +285,8 @@ class _OfferCreateScreenState extends State<OfferCreateScreen> {
                               child: Text(
                                 'Les offres B2B sont visibles par toutes les pharmacies. '
                                 'Les acheteurs peuvent négocier le prix.',
-                                style: PharmaConnectTypography.micro.copyWith(
-                                  color: PharmaConnectColors.textSecondary,
+                                style: context.text.micro.copyWith(
+                                  color: context.palette.textSecondary,
                                 ),
                               ),
                             ),
@@ -299,9 +297,7 @@ class _OfferCreateScreenState extends State<OfferCreateScreen> {
 
                       PrimaryButton(
                         label: _isLoading
-                            ? (_isEditing
-                                  ? 'Enregistrement...'
-                                  : 'Création...')
+                            ? (_isEditing ? 'Enregistrement...' : 'Création...')
                             : (_isEditing
                                   ? 'Enregistrer les modifications'
                                   : 'Publier l\'offre'),
@@ -336,6 +332,7 @@ class _OfferCreateScreenState extends State<OfferCreateScreen> {
   // `profiles(id)`. Corrigé via `AuthProvider.pharmacyId`, comme dans tous
   // les autres modules du projet.
   Future<void> _submit() async {
+    final palette = context.palette;
     if (!_formKey.currentState!.validate()) return;
 
     final pharmacyId = context.read<AuthProvider>().pharmacyId;
@@ -391,14 +388,14 @@ class _OfferCreateScreenState extends State<OfferCreateScreen> {
           content: Text(
             _isEditing ? 'Offre mise à jour' : 'Offre publiée avec succès',
           ),
-          backgroundColor: PharmaConnectColors.accentGreen,
+          backgroundColor: palette.success,
         ),
       );
     } else if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(context.read<MarketplaceProvider>().error ?? 'Erreur'),
-          backgroundColor: PharmaConnectColors.accentRed,
+          backgroundColor: palette.danger,
         ),
       );
     }

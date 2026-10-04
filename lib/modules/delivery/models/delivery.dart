@@ -1,8 +1,7 @@
-import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
 import 'delivery_status.dart';
 import 'delivery_driver.dart';
 import 'delivery_proof.dart';
+import '../../../core/theme/palette.dart';
 
 class Delivery {
   final String id;
@@ -220,20 +219,20 @@ class Delivery {
     }
   }
 
-  Color get statusColor {
+  ColorRole get statusColor {
     switch (status) {
       case DeliveryStatus.scheduled:
-        return PharmaConnectColors.accentOrange;
+        return ColorRole.warning;
       case DeliveryStatus.preparing:
-        return PharmaConnectColors.accentCyan;
+        return ColorRole.primary;
       case DeliveryStatus.inProgress:
-        return PharmaConnectColors.accentPurple;
+        return ColorRole.secondary;
       case DeliveryStatus.arrived:
-        return PharmaConnectColors.accentGreen;
+        return ColorRole.success;
       case DeliveryStatus.delivered:
-        return PharmaConnectColors.neutralMuted;
+        return ColorRole.textMuted;
       case DeliveryStatus.cancelled:
-        return PharmaConnectColors.accentRed;
+        return ColorRole.danger;
     }
   }
 

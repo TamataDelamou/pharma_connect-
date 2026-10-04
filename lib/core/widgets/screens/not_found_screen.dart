@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../theme/colors.dart';
-import '../../theme/typography.dart';
 import '../buttons/primary_button.dart';
 import '../cards/glass_card.dart';
+import '../../theme/palette.dart';
 
 /// C231 : page affichée pour une route inconnue (errorBuilder du routeur).
 /// Remplace la page par défaut de go_router, dont l'unique bouton menait à
@@ -33,20 +32,17 @@ class NotFoundScreen extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.explore_off,
                     size: 40,
-                    color: PharmaConnectColors.accentCyan,
+                    color: context.palette.primary,
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    'Page introuvable',
-                    style: PharmaConnectTypography.heading2,
-                  ),
+                  Text('Page introuvable', style: context.text.heading2),
                   const SizedBox(height: 8),
-                  const Text(
+                  Text(
                     'Cette page n\'existe pas ou n\'est pas encore disponible.',
-                    style: PharmaConnectTypography.body2,
+                    style: context.text.body2,
                   ),
                   const SizedBox(height: 24),
                   PrimaryButton(

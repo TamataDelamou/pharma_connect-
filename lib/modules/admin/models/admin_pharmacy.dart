@@ -1,7 +1,5 @@
-import 'package:flutter/material.dart';
-
-import '../../../core/theme/colors.dart';
 import 'pharmacy_status.dart';
+import '../../../core/theme/palette.dart';
 
 class AdminPharmacy {
   final String id;
@@ -155,20 +153,20 @@ class AdminPharmacy {
     }
   }
 
-  Color get statusColor {
+  ColorRole get statusColor {
     switch (status) {
       case PharmacyStatus.pending:
-        return PharmaConnectColors.accentOrange;
+        return ColorRole.warning;
       case PharmacyStatus.verified:
-        return PharmaConnectColors.accentCyan;
+        return ColorRole.primary;
       case PharmacyStatus.active:
-        return PharmaConnectColors.accentGreen;
+        return ColorRole.success;
       case PharmacyStatus.suspended:
-        return PharmaConnectColors.accentRed;
+        return ColorRole.danger;
       case PharmacyStatus.underReview:
-        return PharmaConnectColors.accentAmber;
+        return ColorRole.warningStrong;
       case PharmacyStatus.rejected:
-        return PharmaConnectColors.accentRed;
+        return ColorRole.danger;
     }
   }
 

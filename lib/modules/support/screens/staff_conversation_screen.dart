@@ -3,12 +3,11 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/secondary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../models/bot_conversation.dart';
 import '../providers/bot_provider.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class StaffConversationScreen extends StatefulWidget {
   final String conversationId;
@@ -53,18 +52,18 @@ class _StaffConversationScreenState extends State<StaffConversationScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Conversation escaladée',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -81,8 +80,8 @@ class _StaffConversationScreenState extends State<StaffConversationScreen> {
                   ? Center(
                       child: Text(
                         provider.error ?? 'Conversation introuvable',
-                        style: PharmaConnectTypography.body2.copyWith(
-                          color: PharmaConnectColors.accentRed,
+                        style: context.text.body2.copyWith(
+                          color: context.palette.danger,
                         ),
                       ),
                     )
@@ -95,22 +94,19 @@ class _StaffConversationScreenState extends State<StaffConversationScreen> {
                   Expanded(
                     child: TextField(
                       controller: _replyController,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         hintText: 'Répondre au patient...',
                         border: OutlineInputBorder(),
                         contentPadding: EdgeInsets.symmetric(horizontal: 12),
                         filled: true,
-                        fillColor: Colors.white10,
+                        fillColor: context.palette.veil(0.10),
                       ),
                       maxLines: 2,
                     ),
                   ),
                   const SizedBox(width: 8),
                   IconButton(
-                    icon: const Icon(
-                      Icons.send,
-                      color: PharmaConnectColors.accentCyan,
-                    ),
+                    icon: Icon(Icons.send, color: context.palette.primary),
                     onPressed: () => _reply(context),
                   ),
                 ],
@@ -148,15 +144,13 @@ class _StaffConversationScreenState extends State<StaffConversationScreen> {
                 ),
                 decoration: BoxDecoration(
                   color: isStaff
-                      ? PharmaConnectColors.accentOrange.withValues(alpha: 0.15)
-                      : Colors.white.withValues(alpha: 0.04),
+                      ? context.palette.warning.withValues(alpha: 0.15)
+                      : context.palette.surfaceMuted,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: isStaff
-                        ? PharmaConnectColors.accentOrange.withValues(
-                            alpha: 0.2,
-                          )
-                        : Colors.white.withValues(alpha: 0.06),
+                        ? context.palette.warning.withValues(alpha: 0.2)
+                        : context.palette.surface,
                   ),
                 ),
                 child: Column(
@@ -164,12 +158,12 @@ class _StaffConversationScreenState extends State<StaffConversationScreen> {
                   children: [
                     Text(
                       isStaff ? 'Agent' : (isUser ? 'Patient' : 'Assistant'),
-                      style: PharmaConnectTypography.micro.copyWith(
+                      style: context.text.micro.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     const SizedBox(height: 2),
-                    Text(msg.text, style: PharmaConnectTypography.body2),
+                    Text(msg.text, style: context.text.body2),
                   ],
                 ),
               ),
@@ -195,9 +189,9 @@ class _StaffConversationScreenState extends State<StaffConversationScreen> {
     );
     if (success && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Escalade clôturée'),
-          backgroundColor: PharmaConnectColors.accentGreen,
+          backgroundColor: context.palette.success,
         ),
       );
       context.pop();

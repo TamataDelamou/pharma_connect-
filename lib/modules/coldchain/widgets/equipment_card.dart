@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../models/cold_equipment.dart';
 import '../models/equipment_type.dart';
+import '../../../core/theme/palette.dart';
 
 class EquipmentCard extends StatelessWidget {
   final ColdEquipment equipment;
@@ -30,13 +29,13 @@ class EquipmentCard extends StatelessWidget {
               children: [
                 Text(
                   equipment.name,
-                  style: PharmaConnectTypography.body1.copyWith(
+                  style: context.text.body1.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                Text(equipment.model, style: PharmaConnectTypography.body2),
+                Text(equipment.model, style: context.text.body2),
                 const SizedBox(height: 4),
                 Row(
                   children: [
@@ -45,20 +44,20 @@ class EquipmentCard extends StatelessWidget {
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         color: equipment.isTemperatureValid
-                            ? PharmaConnectColors.accentGreen
-                            : PharmaConnectColors.accentRed,
+                            ? context.palette.success
+                            : context.palette.danger,
                       ),
                     ),
                     const SizedBox(width: 8),
                     Text(
                       '• ${equipment.type.label}',
-                      style: PharmaConnectTypography.micro,
+                      style: context.text.micro,
                     ),
                     if (equipment.location != null) ...[
                       const SizedBox(width: 8),
                       Text(
                         '📍 ${equipment.location}',
-                        style: PharmaConnectTypography.micro,
+                        style: context.text.micro,
                       ),
                     ],
                   ],
@@ -69,7 +68,9 @@ class EquipmentCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: equipment.statusColor.withValues(alpha: 0.15),
+              color: equipment.statusColor
+                  .of(context.palette)
+                  .withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -77,7 +78,7 @@ class EquipmentCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w600,
-                color: equipment.statusColor,
+                color: equipment.statusColor.of(context.palette),
               ),
             ),
           ),

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../models/delivery.dart';
 import '../models/delivery_status.dart';
+import '../../../core/theme/palette.dart';
 
 class DeliveryTimeline extends StatelessWidget {
   final Delivery delivery;
@@ -55,7 +54,7 @@ class DeliveryTimeline extends StatelessWidget {
     return Column(
       children: steps.map((step) {
         final isLast = step == steps.last;
-        return _buildTimelineItem(step, isLast);
+        return _buildTimelineItem(context, step, isLast);
       }).toList(),
     );
   }
@@ -76,7 +75,11 @@ class DeliveryTimeline extends StatelessWidget {
     );
   }
 
-  Widget _buildTimelineItem(_TimelineStep step, bool isLast) {
+  Widget _buildTimelineItem(
+    BuildContext context,
+    _TimelineStep step,
+    bool isLast,
+  ) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -89,20 +92,20 @@ class DeliveryTimeline extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: step.isCompleted || step.isActive
-                    ? PharmaConnectColors.accentCyan.withValues(alpha: 0.15)
-                    : Colors.white.withValues(alpha: 0.05),
+                    ? context.palette.primary.withValues(alpha: 0.15)
+                    : context.palette.surfaceMuted,
                 border: Border.all(
                   color: step.isCompleted || step.isActive
-                      ? PharmaConnectColors.accentCyan
-                      : Colors.white.withValues(alpha: 0.1),
+                      ? context.palette.primary
+                      : context.palette.border,
                   width: 2,
                 ),
               ),
               child: Icon(
                 step.icon,
                 color: step.isCompleted || step.isActive
-                    ? PharmaConnectColors.accentCyan
-                    : PharmaConnectColors.textSecondary.withValues(alpha: 0.3),
+                    ? context.palette.primary
+                    : context.palette.textSecondary.withValues(alpha: 0.3),
                 size: 16,
               ),
             ),
@@ -112,8 +115,8 @@ class DeliveryTimeline extends StatelessWidget {
                 width: 2,
                 height: 40,
                 color: step.isCompleted
-                    ? PharmaConnectColors.accentCyan
-                    : Colors.white.withValues(alpha: 0.1),
+                    ? context.palette.primary
+                    : context.palette.border,
               ),
             ],
           ],
@@ -126,25 +129,21 @@ class DeliveryTimeline extends StatelessWidget {
             children: [
               Text(
                 step.label,
-                style: PharmaConnectTypography.body1.copyWith(
+                style: context.text.body1.copyWith(
                   fontWeight: step.isActive ? FontWeight.w600 : FontWeight.w400,
                   color: step.isCompleted || step.isActive
-                      ? PharmaConnectColors.textPrimary
-                      : PharmaConnectColors.textSecondary.withValues(
-                          alpha: 0.3,
-                        ),
+                      ? context.palette.textPrimary
+                      : context.palette.textSecondary.withValues(alpha: 0.3),
                 ),
               ),
               if (step.time != null) ...[
                 const SizedBox(height: 2),
                 Text(
                   _formatTime(step.time!),
-                  style: PharmaConnectTypography.micro.copyWith(
+                  style: context.text.micro.copyWith(
                     color: step.isCompleted || step.isActive
-                        ? PharmaConnectColors.textSecondary
-                        : PharmaConnectColors.textSecondary.withValues(
-                            alpha: 0.3,
-                          ),
+                        ? context.palette.textSecondary
+                        : context.palette.textSecondary.withValues(alpha: 0.3),
                   ),
                 ),
               ],
@@ -156,17 +155,15 @@ class DeliveryTimeline extends StatelessWidget {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: PharmaConnectColors.accentPurple.withValues(
-                      alpha: 0.15,
-                    ),
+                    color: context.palette.secondary.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
                     '⏱ ${delivery.estimatedArrival}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w500,
-                      color: PharmaConnectColors.accentPurple,
+                      color: context.palette.secondary,
                     ),
                   ),
                 ),

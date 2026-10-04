@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../models/family_link.dart';
 import '../models/family_link_status.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class FamilyLinkCard extends StatelessWidget {
   final FamilyLink link;
@@ -23,8 +22,8 @@ class FamilyLinkCard extends StatelessWidget {
             height: 40,
             decoration: BoxDecoration(
               color: link.status.isActive
-                  ? PharmaConnectColors.accentGreen.withValues(alpha: 0.15)
-                  : PharmaConnectColors.textSecondary.withValues(alpha: 0.15),
+                  ? context.palette.success.withValues(alpha: 0.15)
+                  : context.palette.textSecondary.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Center(
@@ -34,8 +33,8 @@ class FamilyLinkCard extends StatelessWidget {
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
                   color: link.status.isActive
-                      ? PharmaConnectColors.accentGreen
-                      : PharmaConnectColors.textSecondary,
+                      ? context.palette.success
+                      : context.palette.textSecondary,
                 ),
               ),
             ),
@@ -50,7 +49,7 @@ class FamilyLinkCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         link.patientName ?? link.patientId,
-                        style: PharmaConnectTypography.body1.copyWith(
+                        style: context.text.body1.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                         maxLines: 1,
@@ -64,6 +63,7 @@ class FamilyLinkCard extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: _statusColor(
+                          context,
                           link.status,
                         ).withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(4),
@@ -73,7 +73,7 @@ class FamilyLinkCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w500,
-                          color: _statusColor(link.status),
+                          color: _statusColor(context, link.status),
                         ),
                       ),
                     ),
@@ -81,31 +81,31 @@ class FamilyLinkCard extends StatelessWidget {
                 ),
                 Text(
                   link.familyMemberName ?? link.familyMemberId,
-                  style: PharmaConnectTypography.body2,
+                  style: context.text.body2,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   'Relation : ${link.relationship}',
-                  style: PharmaConnectTypography.micro,
+                  style: context.text.micro,
                 ),
               ],
             ),
           ),
-          const Icon(Icons.chevron_right, color: Colors.white24),
+          Icon(Icons.chevron_right, color: context.palette.veil(0.24)),
         ],
       ),
     );
   }
 
-  Color _statusColor(FamilyLinkStatus status) {
+  Color _statusColor(BuildContext context, FamilyLinkStatus status) {
     switch (status) {
       case FamilyLinkStatus.pending:
-        return PharmaConnectColors.accentOrange;
+        return context.palette.warning;
       case FamilyLinkStatus.active:
-        return PharmaConnectColors.accentGreen;
+        return context.palette.success;
       case FamilyLinkStatus.revoked:
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
     }
   }
 }

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../models/pharmacy_group.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class GroupCard extends StatelessWidget {
   final PharmacyGroup group;
@@ -22,8 +21,8 @@ class GroupCard extends StatelessWidget {
             height: 40,
             decoration: BoxDecoration(
               color: group.isActive
-                  ? PharmaConnectColors.accentCyan.withValues(alpha: 0.15)
-                  : PharmaConnectColors.textSecondary.withValues(alpha: 0.1),
+                  ? context.palette.primary.withValues(alpha: 0.15)
+                  : context.palette.textSecondary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Center(
@@ -33,8 +32,8 @@ class GroupCard extends StatelessWidget {
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
                   color: group.isActive
-                      ? PharmaConnectColors.accentCyan
-                      : PharmaConnectColors.textSecondary,
+                      ? context.palette.primary
+                      : context.palette.textSecondary,
                 ),
               ),
             ),
@@ -46,24 +45,21 @@ class GroupCard extends StatelessWidget {
               children: [
                 Text(
                   group.name,
-                  style: PharmaConnectTypography.body1.copyWith(
+                  style: context.text.body1.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 if (group.code != null)
-                  Text(
-                    'Code: ${group.code}',
-                    style: PharmaConnectTypography.micro,
-                  ),
+                  Text('Code: ${group.code}', style: context.text.mono),
                 const SizedBox(height: 4),
                 Row(
                   children: [
                     Text(
                       '${group.memberCount ?? 0} officines',
-                      style: PharmaConnectTypography.micro.copyWith(
-                        color: PharmaConnectColors.accentCyan,
+                      style: context.text.micro.copyWith(
+                        color: context.palette.primary,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -74,12 +70,8 @@ class GroupCard extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: group.isActive
-                            ? PharmaConnectColors.accentGreen.withValues(
-                                alpha: 0.15,
-                              )
-                            : PharmaConnectColors.accentRed.withValues(
-                                alpha: 0.15,
-                              ),
+                            ? context.palette.success.withValues(alpha: 0.15)
+                            : context.palette.danger.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -88,8 +80,8 @@ class GroupCard extends StatelessWidget {
                           fontSize: 9,
                           fontWeight: FontWeight.w500,
                           color: group.isActive
-                              ? PharmaConnectColors.accentGreen
-                              : PharmaConnectColors.accentRed,
+                              ? context.palette.success
+                              : context.palette.danger,
                         ),
                       ),
                     ),
@@ -98,7 +90,7 @@ class GroupCard extends StatelessWidget {
               ],
             ),
           ),
-          const Icon(Icons.chevron_right, color: Colors.white24),
+          Icon(Icons.chevron_right, color: context.palette.veil(0.24)),
         ],
       ),
     );

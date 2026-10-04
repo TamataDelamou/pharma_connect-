@@ -3,12 +3,11 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../services/messaging_service.dart';
 import '../models/async_message.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class AsyncMessagingScreen extends StatefulWidget {
   final String patientId;
@@ -117,18 +116,18 @@ class _AsyncMessagingScreenState extends State<AsyncMessagingScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       '💬 Messages',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -138,9 +137,9 @@ class _AsyncMessagingScreenState extends State<AsyncMessagingScreen> {
               trailing: [
                 const KernelBadge(),
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.refresh,
-                    color: PharmaConnectColors.textSecondary,
+                    color: context.palette.textSecondary,
                   ),
                   onPressed: _loadMessages,
                 ),
@@ -156,10 +155,10 @@ class _AsyncMessagingScreenState extends State<AsyncMessagingScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.error_outline,
                             size: 48,
-                            color: PharmaConnectColors.accentRed,
+                            color: context.palette.danger,
                           ),
                           const SizedBox(height: 16),
                           Text(_error!),
@@ -199,11 +198,9 @@ class _AsyncMessagingScreenState extends State<AsyncMessagingScreen> {
                                       ),
                                       decoration: BoxDecoration(
                                         color: isMine
-                                            ? PharmaConnectColors.accentCyan
+                                            ? context.palette.primary
                                                   .withValues(alpha: 0.15)
-                                            : Colors.white.withValues(
-                                                alpha: 0.04,
-                                              ),
+                                            : context.palette.surfaceMuted,
                                         borderRadius: BorderRadius.only(
                                           topLeft: const Radius.circular(12),
                                           topRight: const Radius.circular(12),
@@ -216,11 +213,9 @@ class _AsyncMessagingScreenState extends State<AsyncMessagingScreen> {
                                         ),
                                         border: Border.all(
                                           color: isMine
-                                              ? PharmaConnectColors.accentCyan
+                                              ? context.palette.primary
                                                     .withValues(alpha: 0.2)
-                                              : Colors.white.withValues(
-                                                  alpha: 0.06,
-                                                ),
+                                              : context.palette.surface,
                                         ),
                                       ),
                                       child: Column(
@@ -229,8 +224,7 @@ class _AsyncMessagingScreenState extends State<AsyncMessagingScreen> {
                                         children: [
                                           Text(
                                             msg.message,
-                                            style:
-                                                PharmaConnectTypography.body2,
+                                            style: context.text.body2,
                                           ),
                                           const SizedBox(height: 4),
                                           Row(
@@ -239,16 +233,18 @@ class _AsyncMessagingScreenState extends State<AsyncMessagingScreen> {
                                             children: [
                                               Text(
                                                 msg.senderName ?? msg.senderId,
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                   fontSize: 10,
-                                                  color: Colors.white38,
+                                                  color:
+                                                      context.palette.textMuted,
                                                 ),
                                               ),
                                               Text(
                                                 _formatDate(msg.createdAt),
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                   fontSize: 10,
-                                                  color: Colors.white38,
+                                                  color:
+                                                      context.palette.textMuted,
                                                 ),
                                               ),
                                             ],
@@ -261,7 +257,7 @@ class _AsyncMessagingScreenState extends State<AsyncMessagingScreen> {
                               },
                             ),
                           ),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           // Input
                           Container(
                             padding: const EdgeInsets.symmetric(vertical: 8),
@@ -284,21 +280,20 @@ class _AsyncMessagingScreenState extends State<AsyncMessagingScreen> {
                                 const SizedBox(width: 8),
                                 IconButton(
                                   icon: _isSending
-                                      ? const SizedBox(
+                                      ? SizedBox(
                                           width: 24,
                                           height: 24,
                                           child: CircularProgressIndicator(
                                             strokeWidth: 2,
                                             valueColor:
                                                 AlwaysStoppedAnimation<Color>(
-                                                  PharmaConnectColors
-                                                      .accentCyan,
+                                                  context.palette.primary,
                                                 ),
                                           ),
                                         )
-                                      : const Icon(
+                                      : Icon(
                                           Icons.send,
-                                          color: PharmaConnectColors.accentCyan,
+                                          color: context.palette.primary,
                                         ),
                                   onPressed: _isSending ? null : _sendMessage,
                                 ),

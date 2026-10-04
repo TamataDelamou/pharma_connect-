@@ -3,9 +3,8 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../providers/prescription_provider.dart';
+import '../../../core/theme/palette.dart';
 
 class PatientHistoryScreen extends StatelessWidget {
   final String patientId;
@@ -27,18 +26,18 @@ class PatientHistoryScreen extends StatelessWidget {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Historique du patient',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -48,9 +47,9 @@ class PatientHistoryScreen extends StatelessWidget {
               trailing: [const KernelBadge()],
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Consultez l\'historique des ordonnances du patient',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
             ),
             const SizedBox(height: 24),
             Expanded(
@@ -65,26 +64,26 @@ class PatientHistoryScreen extends StatelessWidget {
                   ? Center(
                       child: Text(
                         'Erreur : ${provider.error}',
-                        style: PharmaConnectTypography.body2.copyWith(
-                          color: PharmaConnectColors.accentRed,
+                        style: context.text.body2.copyWith(
+                          color: context.palette.danger,
                         ),
                         textAlign: TextAlign.center,
                       ),
                     )
                   : provider.prescriptions.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
                             Icons.description_outlined,
                             size: 64,
-                            color: Colors.white24,
+                            color: context.palette.veil(0.24),
                           ),
                           SizedBox(height: 16),
                           Text(
                             'Aucune ordonnance pour ce patient',
-                            style: PharmaConnectTypography.body2,
+                            style: context.text.body2,
                           ),
                         ],
                       ),
@@ -98,9 +97,9 @@ class PatientHistoryScreen extends StatelessWidget {
                             width: 40,
                             height: 40,
                             decoration: BoxDecoration(
-                              color: prescription.statusColor.withValues(
-                                alpha: 0.15,
-                              ),
+                              color: prescription.statusColor
+                                  .of(context.palette)
+                                  .withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Center(
@@ -108,18 +107,20 @@ class PatientHistoryScreen extends StatelessWidget {
                                 prescription.statusLabel[0],
                                 style: TextStyle(
                                   fontWeight: FontWeight.w700,
-                                  color: prescription.statusColor,
+                                  color: prescription.statusColor.of(
+                                    context.palette,
+                                  ),
                                 ),
                               ),
                             ),
                           ),
                           title: Text(
                             '#${prescription.id}',
-                            style: PharmaConnectTypography.body1,
+                            style: context.text.body1,
                           ),
                           subtitle: Text(
                             '${prescription.items.length} médicaments • ${_formatDate(prescription.uploadedAt)}',
-                            style: PharmaConnectTypography.body2,
+                            style: context.text.body2,
                           ),
                           trailing: Container(
                             padding: const EdgeInsets.symmetric(
@@ -127,9 +128,9 @@ class PatientHistoryScreen extends StatelessWidget {
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: prescription.statusColor.withValues(
-                                alpha: 0.15,
-                              ),
+                              color: prescription.statusColor
+                                  .of(context.palette)
+                                  .withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
@@ -137,7 +138,9 @@ class PatientHistoryScreen extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w600,
-                                color: prescription.statusColor,
+                                color: prescription.statusColor.of(
+                                  context.palette,
+                                ),
                               ),
                             ),
                           ),

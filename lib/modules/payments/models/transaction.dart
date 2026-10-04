@@ -1,7 +1,6 @@
-import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
 import 'transaction_status.dart';
 import 'payment_method.dart';
+import '../../../core/theme/palette.dart';
 
 class Transaction {
   final String id;
@@ -179,20 +178,20 @@ class Transaction {
     }
   }
 
-  Color get statusColor {
+  ColorRole get statusColor {
     switch (status) {
       case TransactionStatus.pending:
-        return PharmaConnectColors.accentOrange;
+        return ColorRole.warning;
       case TransactionStatus.processing:
-        return PharmaConnectColors.accentCyan;
+        return ColorRole.primary;
       case TransactionStatus.completed:
-        return PharmaConnectColors.accentGreen;
+        return ColorRole.success;
       case TransactionStatus.failed:
-        return PharmaConnectColors.accentRed;
+        return ColorRole.danger;
       case TransactionStatus.refunded:
-        return PharmaConnectColors.neutralMuted;
+        return ColorRole.textMuted;
       case TransactionStatus.disputed:
-        return PharmaConnectColors.accentAmber;
+        return ColorRole.warningStrong;
     }
   }
 }

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../../../core/widgets/layout/responsive.dart';
 import '../models/dashboard_data.dart';
+import '../../../core/theme/palette.dart';
 
 class QuickActionGrid extends StatelessWidget {
   final List<QuickAction> actions;
@@ -32,16 +32,24 @@ class QuickActionGrid extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(action.icon, color: action.color, size: 32),
+              Icon(
+                action.icon,
+                color: action.color.of(context.palette),
+                size: 32,
+              ),
               const SizedBox(height: 8),
-              Text(
-                action.label,
-                style: PharmaConnectTypography.body2.copyWith(
-                  fontWeight: FontWeight.w500,
+              // Flexible : un libellé sur deux lignes ne déborde pas de la
+              // carte (petit écran, grande taille de texte).
+              Flexible(
+                child: Text(
+                  action.label,
+                  style: context.text.body2.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),

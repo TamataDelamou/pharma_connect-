@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../models/batch_movement.dart';
+import '../../../core/theme/palette.dart';
 
 class MovementTimeline extends StatelessWidget {
   final List<BatchMovement> movements;
@@ -16,12 +15,16 @@ class MovementTimeline extends StatelessWidget {
     return Column(
       children: sortedMovements.map((movement) {
         final isLast = movement == sortedMovements.last;
-        return _buildMovementItem(movement, isLast);
+        return _buildMovementItem(context, movement, isLast);
       }).toList(),
     );
   }
 
-  Widget _buildMovementItem(BatchMovement movement, bool isLast) {
+  Widget _buildMovementItem(
+    BuildContext context,
+    BatchMovement movement,
+    bool isLast,
+  ) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -33,20 +36,16 @@ class MovementTimeline extends StatelessWidget {
               height: 12,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: PharmaConnectColors.accentCyan,
+                color: context.palette.primary,
                 border: Border.all(
-                  color: PharmaConnectColors.accentCyan.withValues(alpha: 0.3),
+                  color: context.palette.primary.withValues(alpha: 0.3),
                   width: 2,
                 ),
               ),
             ),
             if (!isLast) ...[
               const SizedBox(height: 4),
-              Container(
-                width: 2,
-                height: 40,
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
+              Container(width: 2, height: 40, color: context.palette.border),
             ],
           ],
         ),
@@ -58,38 +57,36 @@ class MovementTimeline extends StatelessWidget {
             children: [
               Text(
                 movement.typeLabel,
-                style: PharmaConnectTypography.body1.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+                style: context.text.body1.copyWith(fontWeight: FontWeight.w600),
               ),
               Text(
                 '${movement.fromLocation} → ${movement.toLocation}',
-                style: PharmaConnectTypography.body2,
+                style: context.text.body2,
               ),
               Row(
                 children: [
                   Text(
                     _formatDateTime(movement.timestamp),
-                    style: PharmaConnectTypography.micro,
+                    style: context.text.micro,
                   ),
                   if (movement.temperature != null) ...[
                     const SizedBox(width: 12),
                     Icon(
                       Icons.thermostat,
                       size: 12,
-                      color: PharmaConnectColors.textSecondary,
+                      color: context.palette.textSecondary,
                     ),
                     const SizedBox(width: 2),
                     Text(
                       '${movement.temperature}°C',
-                      style: PharmaConnectTypography.micro,
+                      style: context.text.micro,
                     ),
                   ],
                   if (movement.trackingNumber != null) ...[
                     const SizedBox(width: 12),
                     Text(
                       '📦 ${movement.trackingNumber}',
-                      style: PharmaConnectTypography.micro,
+                      style: context.text.mono,
                     ),
                   ],
                 ],
@@ -98,10 +95,8 @@ class MovementTimeline extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   movement.notes!,
-                  style: PharmaConnectTypography.micro.copyWith(
-                    color: PharmaConnectColors.textSecondary.withValues(
-                      alpha: 0.7,
-                    ),
+                  style: context.text.micro.copyWith(
+                    color: context.palette.textSecondary.withValues(alpha: 0.7),
                   ),
                 ),
               ],

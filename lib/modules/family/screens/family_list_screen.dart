@@ -3,14 +3,13 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import '../providers/family_provider.dart';
 import '../models/family_link_status.dart';
 import '../widgets/family_link_card.dart';
 import '../widgets/family_alert_badge.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class FamilyListScreen extends StatefulWidget {
   const FamilyListScreen({super.key});
@@ -53,19 +52,19 @@ class _FamilyListScreenState extends State<FamilyListScreen>
           children: [
             // C233 : en-tête adaptable (actions sous le titre sur téléphone).
             HeaderRow(
-              leading: const Column(
+              leading: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Famille & Diaspora',
-                    style: PharmaConnectTypography.heading1,
+                    style: context.text.heading1,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(height: 4),
                   Text(
                     'Gérez vos liens familiaux pour le suivi santé',
-                    style: PharmaConnectTypography.body2,
+                    style: context.text.body2,
                   ),
                 ],
               ),
@@ -81,8 +80,8 @@ class _FamilyListScreenState extends State<FamilyListScreen>
                   icon: const Icon(Icons.person_add),
                   label: const Text('Ajouter'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: PharmaConnectColors.accentCyan,
-                    foregroundColor: PharmaConnectColors.textOnAccent,
+                    backgroundColor: context.palette.primary,
+                    foregroundColor: context.palette.onPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -98,27 +97,20 @@ class _FamilyListScreenState extends State<FamilyListScreen>
                 padding: const EdgeInsets.all(12),
                 margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
-                  color: PharmaConnectColors.accentOrange.withValues(
-                    alpha: 0.1,
-                  ),
+                  color: context.palette.warning.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: PharmaConnectColors.accentOrange.withValues(
-                      alpha: 0.3,
-                    ),
+                    color: context.palette.warning.withValues(alpha: 0.3),
                   ),
                 ),
                 child: Row(
                   children: [
-                    const Icon(
-                      Icons.notifications,
-                      color: PharmaConnectColors.accentOrange,
-                    ),
+                    Icon(Icons.notifications, color: context.palette.warning),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         '${provider.incomingRequests.length} demande(s) en attente',
-                        style: PharmaConnectTypography.body1,
+                        style: context.text.body1,
                       ),
                     ),
                     TextButton(
@@ -136,9 +128,9 @@ class _FamilyListScreenState extends State<FamilyListScreen>
                 Tab(text: 'Mes liens'),
                 Tab(text: 'Alertes'),
               ],
-              labelColor: PharmaConnectColors.accentCyan,
-              unselectedLabelColor: PharmaConnectColors.textSecondary,
-              indicatorColor: PharmaConnectColors.accentCyan,
+              labelColor: context.palette.primary,
+              unselectedLabelColor: context.palette.textSecondary,
+              indicatorColor: context.palette.primary,
               indicatorWeight: 3,
               dividerColor: Colors.transparent,
             ),
@@ -161,18 +153,12 @@ class _FamilyListScreenState extends State<FamilyListScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 48,
-              color: PharmaConnectColors.accentRed,
-            ),
+            Icon(Icons.error_outline, size: 48, color: context.palette.danger),
             const SizedBox(height: 16),
             Text(
               provider.error!,
               textAlign: TextAlign.center,
-              style: PharmaConnectTypography.body2.copyWith(
-                color: PharmaConnectColors.accentRed,
-              ),
+              style: context.text.body2.copyWith(color: context.palette.danger),
             ),
             const SizedBox(height: 16),
             PrimaryButton(
@@ -192,20 +178,21 @@ class _FamilyListScreenState extends State<FamilyListScreen>
     if (_tabController.index == 0) {
       // Links tab
       if (provider.links.isEmpty) {
-        return const Center(
+        return Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.group_outlined, size: 64, color: Colors.white24),
-              SizedBox(height: 16),
-              Text(
-                'Aucun lien familial',
-                style: PharmaConnectTypography.heading3,
+              Icon(
+                Icons.group_outlined,
+                size: 64,
+                color: context.palette.veil(0.24),
               ),
+              SizedBox(height: 16),
+              Text('Aucun lien familial', style: context.text.heading3),
               SizedBox(height: 8),
               Text(
                 'Ajoutez un membre de votre famille pour partager vos informations de santé',
-                style: PharmaConnectTypography.body2,
+                style: context.text.body2,
                 textAlign: TextAlign.center,
               ),
             ],
@@ -229,21 +216,21 @@ class _FamilyListScreenState extends State<FamilyListScreen>
     } else {
       // Alerts tab
       if (provider.alerts.isEmpty) {
-        return const Center(
+        return Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
                 Icons.notifications_off_outlined,
                 size: 64,
-                color: Colors.white24,
+                color: context.palette.veil(0.24),
               ),
               SizedBox(height: 16),
-              Text('Aucune alerte', style: PharmaConnectTypography.heading3),
+              Text('Aucune alerte', style: context.text.heading3),
               SizedBox(height: 8),
               Text(
                 'Les alertes de santé de votre famille apparaîtront ici',
-                style: PharmaConnectTypography.body2,
+                style: context.text.body2,
                 textAlign: TextAlign.center,
               ),
             ],
@@ -271,12 +258,12 @@ class _FamilyListScreenState extends State<FamilyListScreen>
                 decoration: BoxDecoration(
                   color: alert.isRead
                       ? Colors.transparent
-                      : PharmaConnectColors.accentCyan.withValues(alpha: 0.06),
+                      : context.palette.primary.withValues(alpha: 0.06),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
                     color: alert.isRead
-                        ? Colors.white.withValues(alpha: 0.06)
-                        : PharmaConnectColors.accentCyan.withValues(alpha: 0.3),
+                        ? context.palette.surface
+                        : context.palette.primary.withValues(alpha: 0.3),
                   ),
                 ),
                 child: Row(
@@ -286,8 +273,8 @@ class _FamilyListScreenState extends State<FamilyListScreen>
                       height: 40,
                       decoration: BoxDecoration(
                         color: alert.isRead
-                            ? PharmaConnectColors.textSecondary
-                            : PharmaConnectColors.accentCyan,
+                            ? context.palette.textSecondary
+                            : context.palette.primary,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -299,22 +286,22 @@ class _FamilyListScreenState extends State<FamilyListScreen>
                           Text(
                             alert.title,
                             style: alert.isRead
-                                ? PharmaConnectTypography.body1.copyWith(
-                                    color: PharmaConnectColors.textSecondary,
+                                ? context.text.body1.copyWith(
+                                    color: context.palette.textSecondary,
                                   )
-                                : PharmaConnectTypography.body1.copyWith(
+                                : context.text.body1.copyWith(
                                     fontWeight: FontWeight.w600,
                                   ),
                           ),
                           Text(
                             alert.message,
-                            style: PharmaConnectTypography.body2,
+                            style: context.text.body2,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
                             _formatDate(alert.createdAt),
-                            style: PharmaConnectTypography.micro,
+                            style: context.text.micro,
                           ),
                         ],
                       ),
@@ -323,9 +310,9 @@ class _FamilyListScreenState extends State<FamilyListScreen>
                       Container(
                         width: 8,
                         height: 8,
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: PharmaConnectColors.accentCyan,
+                          color: context.palette.primary,
                         ),
                       ),
                   ],

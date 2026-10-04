@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../auth/models/user_role.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/alert_provider.dart';
@@ -11,6 +9,7 @@ import '../widgets/alert_card.dart';
 import '../widgets/alert_filter_chips.dart';
 import '../models/alert_type.dart';
 import '../models/alert_severity.dart';
+import '../../../core/theme/palette.dart';
 
 class AlertCenterScreen extends StatefulWidget {
   const AlertCenterScreen({super.key});
@@ -47,9 +46,9 @@ class _AlertCenterScreenState extends State<AlertCenterScreen> {
             Row(
               children: [
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.arrow_back,
-                    color: PharmaConnectColors.textPrimary,
+                    color: context.palette.textPrimary,
                   ),
                   onPressed: () => context.pop(),
                   padding: EdgeInsets.zero,
@@ -59,14 +58,11 @@ class _AlertCenterScreenState extends State<AlertCenterScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Centre d\'alertes',
-                        style: PharmaConnectTypography.heading2,
-                      ),
+                      Text('Centre d\'alertes', style: context.text.heading2),
                       const SizedBox(height: 4),
                       Text(
                         '${provider.unreadCount} notifications non lues',
-                        style: PharmaConnectTypography.body2,
+                        style: context.text.body2,
                       ),
                     ],
                   ),
@@ -79,9 +75,9 @@ class _AlertCenterScreenState extends State<AlertCenterScreen> {
                 // /alerts/thresholds (nouvel écran, arbitrage D15). Ce menu
                 // corrige les deux d'un coup.
                 PopupMenuButton<String>(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.more_vert,
-                    color: PharmaConnectColors.textPrimary,
+                    color: context.palette.textPrimary,
                   ),
                   onSelected: (route) => context.push(route),
                   itemBuilder: (context) => [
@@ -113,7 +109,7 @@ class _AlertCenterScreenState extends State<AlertCenterScreen> {
                     icon: const Icon(Icons.check_circle, size: 18),
                     label: const Text('Tout lire'),
                     style: TextButton.styleFrom(
-                      foregroundColor: PharmaConnectColors.accentCyan,
+                      foregroundColor: context.palette.primary,
                     ),
                   ),
                 ],
@@ -127,17 +123,15 @@ class _AlertCenterScreenState extends State<AlertCenterScreen> {
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: PharmaConnectColors.accentOrange.withValues(
-                    alpha: 0.15,
-                  ),
+                  color: context.palette.warning.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
                     Icon(
                       Icons.wifi_off,
                       size: 16,
-                      color: PharmaConnectColors.accentOrange,
+                      color: context.palette.warning,
                     ),
                     SizedBox(width: 8),
                     Expanded(
@@ -145,7 +139,7 @@ class _AlertCenterScreenState extends State<AlertCenterScreen> {
                         'Hors ligne — dernières alertes connues affichées.',
                         style: TextStyle(
                           fontSize: 12,
-                          color: PharmaConnectColors.accentOrange,
+                          color: context.palette.warning,
                         ),
                       ),
                     ),
@@ -164,25 +158,19 @@ class _AlertCenterScreenState extends State<AlertCenterScreen> {
               child: provider.isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : provider.alerts.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
                             Icons.notifications_off,
                             size: 64,
-                            color: Colors.white24,
+                            color: context.palette.veil(0.24),
                           ),
                           SizedBox(height: 16),
-                          Text(
-                            'Aucune alerte',
-                            style: PharmaConnectTypography.heading2,
-                          ),
+                          Text('Aucune alerte', style: context.text.heading2),
                           SizedBox(height: 8),
-                          Text(
-                            'Vous êtes à jour !',
-                            style: PharmaConnectTypography.body2,
-                          ),
+                          Text('Vous êtes à jour !', style: context.text.body2),
                         ],
                       ),
                     )
@@ -248,7 +236,7 @@ class _AlertCenterScreenState extends State<AlertCenterScreen> {
                 children: [
                   Text(
                     '${type.icon} ${type.label}',
-                    style: PharmaConnectTypography.heading3,
+                    style: context.text.heading3,
                   ),
                   const SizedBox(width: 8),
                   if (criticalCount > 0) ...[
@@ -258,9 +246,7 @@ class _AlertCenterScreenState extends State<AlertCenterScreen> {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: PharmaConnectColors.accentRed.withValues(
-                          alpha: 0.15,
-                        ),
+                        color: context.palette.danger.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -268,7 +254,7 @@ class _AlertCenterScreenState extends State<AlertCenterScreen> {
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
-                          color: PharmaConnectColors.accentRed,
+                          color: context.palette.danger,
                         ),
                       ),
                     ),
@@ -281,9 +267,7 @@ class _AlertCenterScreenState extends State<AlertCenterScreen> {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: PharmaConnectColors.accentOrange.withValues(
-                          alpha: 0.15,
-                        ),
+                        color: context.palette.warning.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -291,7 +275,7 @@ class _AlertCenterScreenState extends State<AlertCenterScreen> {
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
-                          color: PharmaConnectColors.accentOrange,
+                          color: context.palette.warning,
                         ),
                       ),
                     ),

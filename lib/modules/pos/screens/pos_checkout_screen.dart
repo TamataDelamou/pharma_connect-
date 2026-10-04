@@ -5,8 +5,6 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/secondary_button.dart';
@@ -17,6 +15,7 @@ import '../models/pos_sale_item.dart';
 import '../models/stock_product.dart';
 import '../services/pos_service.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../../core/theme/palette.dart';
 
 class POSCheckoutScreen extends StatefulWidget {
   const POSCheckoutScreen({super.key});
@@ -91,11 +90,11 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
   Widget build(BuildContext context) {
     final pharmacyId = context.watch<AuthProvider>().pharmacyId;
     if (pharmacyId == null) {
-      return const Scaffold(
+      return Scaffold(
         body: Center(
           child: Text(
             'Aucune officine rattachée à ce compte pharmacien.',
-            style: PharmaConnectTypography.body2,
+            style: context.text.body2,
             textAlign: TextAlign.center,
           ),
         ),
@@ -115,18 +114,18 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       '🧾 Vente au comptoir',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -142,12 +141,8 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
                   ),
                   decoration: BoxDecoration(
                     color: provider.cart.isNotEmpty
-                        ? PharmaConnectColors.accentGreen.withValues(
-                            alpha: 0.15,
-                          )
-                        : PharmaConnectColors.textSecondary.withValues(
-                            alpha: 0.1,
-                          ),
+                        ? context.palette.success.withValues(alpha: 0.15)
+                        : context.palette.textSecondary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
@@ -156,8 +151,8 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: provider.cart.isNotEmpty
-                          ? PharmaConnectColors.accentGreen
-                          : PharmaConnectColors.textSecondary,
+                          ? context.palette.success
+                          : context.palette.textSecondary,
                     ),
                   ),
                 ),
@@ -224,7 +219,7 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
                                 onChanged: (value) {
                                   provider.setDiscount(value);
                                 },
-                                activeColor: PharmaConnectColors.accentPurple,
+                                activeColor: context.palette.secondary,
                               ),
                             ),
                             Text(
@@ -232,8 +227,8 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
                                 color: provider.discountPercent > 0
-                                    ? PharmaConnectColors.accentPurple
-                                    : PharmaConnectColors.textSecondary,
+                                    ? context.palette.secondary
+                                    : context.palette.textSecondary,
                               ),
                             ),
                           ],
@@ -245,23 +240,23 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
                         // Cart items
                         Expanded(
                           child: provider.cart.isEmpty
-                              ? const Center(
+                              ? Center(
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Icon(
                                         Icons.shopping_cart_outlined,
                                         size: 48,
-                                        color: Colors.white24,
+                                        color: context.palette.veil(0.24),
                                       ),
                                       SizedBox(height: 16),
                                       Text(
                                         'Panier vide',
-                                        style: PharmaConnectTypography.body2,
+                                        style: context.text.body2,
                                       ),
                                       Text(
                                         'Ajoutez des produits pour commencer',
-                                        style: PharmaConnectTypography.micro,
+                                        style: context.text.micro,
                                       ),
                                     ],
                                   ),
@@ -286,25 +281,22 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            '📊 Résumé',
-                            style: PharmaConnectTypography.heading3,
-                          ),
+                          Text('📊 Résumé', style: context.text.heading3),
                           const SizedBox(height: 16),
                           _buildSummaryRow('Total', provider.total),
                           if (provider.discountPercent > 0)
                             _buildSummaryRow(
                               'Remise (${provider.discountPercent.toStringAsFixed(0)}%)',
                               -provider.discountAmount,
-                              color: PharmaConnectColors.accentPurple,
+                              color: context.palette.secondary,
                             ),
                           _buildSummaryRow('TVA (5%)', provider.taxAmount),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           _buildSummaryRow(
                             'À payer',
                             provider.finalTotal,
                             isTotal: true,
-                            color: PharmaConnectColors.accentCyan,
+                            color: context.palette.primary,
                           ),
                           const SizedBox(height: 16),
 
@@ -384,9 +376,9 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
       padding: const EdgeInsets.all(12),
       margin: const EdgeInsets.only(bottom: 4),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.04),
+        color: context.palette.surfaceMuted,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        border: Border.all(color: context.palette.borderSubtle),
       ),
       child: Row(
         children: [
@@ -396,13 +388,13 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
               children: [
                 Text(
                   item.productName,
-                  style: PharmaConnectTypography.body1.copyWith(
+                  style: context.text.body1.copyWith(
                     fontWeight: FontWeight.w500,
                   ),
                 ),
                 Text(
                   '${item.quantity} x ${CurrencyFormatter.format(item.unitPrice)}',
-                  style: PharmaConnectTypography.micro,
+                  style: context.text.micro,
                 ),
                 if (item.prescriptionRequired)
                   InkWell(
@@ -421,18 +413,18 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
                                 : Icons.check_box_outline_blank,
                             size: 18,
                             color: item.prescriptionChecked
-                                ? PharmaConnectColors.accentGreen
-                                : PharmaConnectColors.accentOrange,
+                                ? context.palette.success
+                                : context.palette.warning,
                           ),
                           const SizedBox(width: 6),
                           Text(
                             item.prescriptionChecked
                                 ? 'Ordonnance vue'
                                 : 'Sur ordonnance : confirmer l\'ordonnance',
-                            style: PharmaConnectTypography.micro.copyWith(
+                            style: context.text.micro.copyWith(
                               color: item.prescriptionChecked
-                                  ? PharmaConnectColors.accentGreen
-                                  : PharmaConnectColors.accentOrange,
+                                  ? context.palette.success
+                                  : context.palette.warning,
                             ),
                           ),
                         ],
@@ -446,14 +438,14 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
             CurrencyFormatter.format(item.totalPrice),
             style: TextStyle(
               fontWeight: FontWeight.w600,
-              color: PharmaConnectColors.accentCyan,
+              color: context.palette.primary,
             ),
           ),
           const SizedBox(width: 8),
           IconButton(
             icon: const Icon(Icons.close, size: 16),
             onPressed: () => provider.removeFromCart(item.productId!),
-            color: PharmaConnectColors.accentRed,
+            color: context.palette.danger,
           ),
         ],
       ),
@@ -466,8 +458,7 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
     bool isTotal = false,
     Color? color,
   }) {
-    final textColor =
-        color ?? (isTotal ? PharmaConnectColors.accentCyan : null);
+    final textColor = color ?? (isTotal ? context.palette.primary : null);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -475,17 +466,15 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
           Text(
             label,
             style: isTotal
-                ? PharmaConnectTypography.body1.copyWith(
-                    fontWeight: FontWeight.w600,
-                  )
-                : PharmaConnectTypography.body2,
+                ? context.text.body1.copyWith(fontWeight: FontWeight.w600)
+                : context.text.body2,
           ),
           const Spacer(),
           Text(
             CurrencyFormatter.format(amount),
             style: TextStyle(
               fontWeight: isTotal ? FontWeight.w700 : FontWeight.w400,
-              color: textColor ?? Colors.white,
+              color: textColor ?? context.palette.textPrimary,
             ),
           ),
         ],
@@ -505,9 +494,7 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: Text(
           _searchError!,
-          style: PharmaConnectTypography.body2.copyWith(
-            color: PharmaConnectColors.accentRed,
-          ),
+          style: context.text.body2.copyWith(color: context.palette.danger),
         ),
       );
     }
@@ -518,7 +505,7 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
           _searchController.text.trim().isEmpty
               ? 'Aucun produit dans le stock de l\'officine'
               : 'Aucun produit en stock ne correspond à la recherche',
-          style: PharmaConnectTypography.body2,
+          style: context.text.body2,
         ),
       );
     }
@@ -552,9 +539,9 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         margin: const EdgeInsets.only(bottom: 4),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: canAdd ? 0.05 : 0.02),
+          color: context.palette.veil(canAdd ? 0.05 : 0.02),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+          border: Border.all(color: context.palette.borderSubtle),
         ),
         child: Row(
           children: [
@@ -567,11 +554,11 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
                       Flexible(
                         child: Text(
                           product.displayName,
-                          style: PharmaConnectTypography.body1.copyWith(
+                          style: context.text.body1.copyWith(
                             fontWeight: FontWeight.w500,
                             color: canAdd
                                 ? null
-                                : PharmaConnectColors.textSecondary,
+                                : context.palette.textSecondary,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -584,17 +571,17 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
                             vertical: 1,
                           ),
                           decoration: BoxDecoration(
-                            color: PharmaConnectColors.accentOrange.withValues(
+                            color: context.palette.warning.withValues(
                               alpha: 0.15,
                             ),
                             borderRadius: BorderRadius.circular(4),
                           ),
-                          child: const Text(
+                          child: Text(
                             'Ordonnance',
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w600,
-                              color: PharmaConnectColors.accentOrange,
+                              color: context.palette.warning,
                             ),
                           ),
                         ),
@@ -608,7 +595,7 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
                           ? '${product.availableQuantity} disponible${product.availableQuantity > 1 ? 's' : ''}'
                           : 'Rupture (aucun lot vendable)',
                     ].join(' · '),
-                    style: PharmaConnectTypography.micro,
+                    style: context.text.micro,
                   ),
                 ],
               ),
@@ -621,15 +608,17 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 color: canAdd
-                    ? PharmaConnectColors.accentCyan
-                    : PharmaConnectColors.textSecondary,
+                    ? context.palette.primary
+                    : context.palette.textSecondary,
               ),
             ),
             const SizedBox(width: 4),
             Icon(
               Icons.add_circle_outline,
               size: 20,
-              color: canAdd ? PharmaConnectColors.accentGreen : Colors.white24,
+              color: canAdd
+                  ? context.palette.success
+                  : context.palette.veil(0.24),
             ),
           ],
         ),
@@ -657,7 +646,7 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
                 ? 'Stock insuffisant : $remaining ${product.displayName} encore disponible${remaining > 1 ? 's' : ''}'
                 : 'Tout le stock disponible de ${product.displayName} est déjà dans le panier',
           ),
-          backgroundColor: PharmaConnectColors.accentOrange,
+          backgroundColor: context.palette.warning,
         ),
       );
       return;
@@ -687,26 +676,23 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
     final choice = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: PharmaConnectColors.primaryDeep,
+        backgroundColor: context.palette.background,
         title: const Text('Médicaments sur ordonnance'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Ces produits sont délivrés sur ordonnance :',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
             ),
             const SizedBox(height: 8),
             for (final item in unchecked)
-              Text(
-                '• ${item.productName}',
-                style: PharmaConnectTypography.body1,
-              ),
+              Text('• ${item.productName}', style: context.text.body1),
             const SizedBox(height: 12),
-            const Text(
+            Text(
               'Votre réponse est enregistrée avec la vente.',
-              style: PharmaConnectTypography.micro,
+              style: context.text.micro,
             ),
           ],
         ),
@@ -722,8 +708,8 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, 'checked'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: PharmaConnectColors.accentGreen,
-              foregroundColor: PharmaConnectColors.textPrimary,
+              backgroundColor: context.palette.success,
+              foregroundColor: context.palette.onPrimary,
             ),
             child: const Text('Ordonnance vue'),
           ),
@@ -744,6 +730,7 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
       return;
     }
 
+    final palette = context.palette;
     final pharmacyId = context.read<AuthProvider>().pharmacyId;
     if (pharmacyId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -763,9 +750,9 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
 
     if (success && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Vente finalisée avec succès !'),
-          backgroundColor: PharmaConnectColors.accentGreen,
+          backgroundColor: palette.success,
         ),
       );
       context.push('/pos/receipt/${provider.currentSale?.id}');
@@ -773,7 +760,7 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(provider.error!),
-          backgroundColor: PharmaConnectColors.accentRed,
+          backgroundColor: palette.danger,
         ),
       );
     }

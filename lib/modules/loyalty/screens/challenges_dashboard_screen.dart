@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../providers/loyalty_ai_provider.dart';
 import '../models/health_challenge.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class ChallengesDashboardScreen extends StatefulWidget {
   const ChallengesDashboardScreen({super.key});
@@ -43,19 +42,19 @@ class _ChallengesDashboardScreenState extends State<ChallengesDashboardScreen> {
           children: [
             // C233 : en-tête adaptable (actions sous le titre sur téléphone).
             HeaderRow(
-              leading: const Column(
+              leading: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     '🏆 Défis santé',
-                    style: PharmaConnectTypography.heading1,
+                    style: context.text.heading1,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(height: 4),
                   Text(
                     'Relevez des défis et gagnez des points',
-                    style: PharmaConnectTypography.body2,
+                    style: context.text.body2,
                   ),
                 ],
               ),
@@ -71,13 +70,13 @@ class _ChallengesDashboardScreenState extends State<ChallengesDashboardScreen> {
                           }
                         },
                   icon: provider.isGenerating
-                      ? const SizedBox(
+                      ? SizedBox(
                           width: 16,
                           height: 16,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
                             valueColor: AlwaysStoppedAnimation<Color>(
-                              PharmaConnectColors.textOnAccent,
+                              context.palette.onPrimary,
                             ),
                           ),
                         )
@@ -86,8 +85,8 @@ class _ChallengesDashboardScreenState extends State<ChallengesDashboardScreen> {
                     provider.isGenerating ? 'Génération...' : 'Rafraîchir',
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: PharmaConnectColors.accentCyan,
-                    foregroundColor: PharmaConnectColors.textOnAccent,
+                    backgroundColor: context.palette.primary,
+                    foregroundColor: context.palette.onPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -105,16 +104,16 @@ class _ChallengesDashboardScreenState extends State<ChallengesDashboardScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.error_outline,
                             size: 48,
-                            color: PharmaConnectColors.accentRed,
+                            color: context.palette.danger,
                           ),
                           const SizedBox(height: 16),
                           Text(
                             provider.error!,
-                            style: PharmaConnectTypography.body2.copyWith(
-                              color: PharmaConnectColors.accentRed,
+                            style: context.text.body2.copyWith(
+                              color: context.palette.danger,
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -147,9 +146,9 @@ class _ChallengesDashboardScreenState extends State<ChallengesDashboardScreen> {
 
                           // Recommendations
                           if (provider.recommendations.isNotEmpty) ...[
-                            const Text(
+                            Text(
                               '💡 Recommandations personnalisées',
-                              style: PharmaConnectTypography.heading3,
+                              style: context.text.heading3,
                             ),
                             const SizedBox(height: 8),
                             ...provider.recommendations.map((rec) {
@@ -157,10 +156,10 @@ class _ChallengesDashboardScreenState extends State<ChallengesDashboardScreen> {
                                 padding: const EdgeInsets.all(12),
                                 margin: const EdgeInsets.only(bottom: 6),
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: 0.04),
+                                  color: context.palette.surfaceMuted,
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(
-                                    color: Colors.white.withValues(alpha: 0.06),
+                                    color: context.palette.borderSubtle,
                                   ),
                                 ),
                                 child: Row(
@@ -177,15 +176,13 @@ class _ChallengesDashboardScreenState extends State<ChallengesDashboardScreen> {
                                         children: [
                                           Text(
                                             rec['title'] ?? '',
-                                            style: PharmaConnectTypography.body1
-                                                .copyWith(
-                                                  fontWeight: FontWeight.w600,
-                                                ),
+                                            style: context.text.body1.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                           ),
                                           Text(
                                             rec['description'] ?? '',
-                                            style:
-                                                PharmaConnectTypography.body2,
+                                            style: context.text.body2,
                                           ),
                                         ],
                                       ),
@@ -200,9 +197,9 @@ class _ChallengesDashboardScreenState extends State<ChallengesDashboardScreen> {
 
                           // Other challenges
                           if (provider.challenges.length > 1) ...[
-                            const Text(
+                            Text(
                               '📋 Tous les défis',
-                              style: PharmaConnectTypography.heading3,
+                              style: context.text.heading3,
                             ),
                             const SizedBox(height: 8),
                             ...provider.challenges.skip(1).map((challenge) {
@@ -242,10 +239,8 @@ class _ChallengesDashboardScreenState extends State<ChallengesDashboardScreen> {
               Text(
                 challenge.name,
                 style: compact
-                    ? PharmaConnectTypography.body1.copyWith(
-                        fontWeight: FontWeight.w600,
-                      )
-                    : PharmaConnectTypography.heading3,
+                    ? context.text.body1.copyWith(fontWeight: FontWeight.w600)
+                    : context.text.heading3,
               ),
               const Spacer(),
               Container(
@@ -270,8 +265,8 @@ class _ChallengesDashboardScreenState extends State<ChallengesDashboardScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
                   color: isCompleted
-                      ? PharmaConnectColors.accentGreen.withValues(alpha: 0.15)
-                      : PharmaConnectColors.accentCyan.withValues(alpha: 0.15),
+                      ? context.palette.success.withValues(alpha: 0.15)
+                      : context.palette.primary.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
@@ -280,8 +275,8 @@ class _ChallengesDashboardScreenState extends State<ChallengesDashboardScreen> {
                     fontSize: 10,
                     fontWeight: FontWeight.w500,
                     color: isCompleted
-                        ? PharmaConnectColors.accentGreen
-                        : PharmaConnectColors.accentCyan,
+                        ? context.palette.success
+                        : context.palette.primary,
                   ),
                 ),
               ),
@@ -289,7 +284,7 @@ class _ChallengesDashboardScreenState extends State<ChallengesDashboardScreen> {
           ),
           const SizedBox(height: 4),
           if (!compact && challenge.description != null)
-            Text(challenge.description!, style: PharmaConnectTypography.body2),
+            Text(challenge.description!, style: context.text.body2),
           if (!compact) const SizedBox(height: 8),
 
           // Progress bar
@@ -301,7 +296,7 @@ class _ChallengesDashboardScreenState extends State<ChallengesDashboardScreen> {
                     Container(
                       height: 8,
                       decoration: BoxDecoration(
-                        color: Colors.white24,
+                        color: context.palette.veil(0.24),
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
@@ -311,8 +306,8 @@ class _ChallengesDashboardScreenState extends State<ChallengesDashboardScreen> {
                         height: 8,
                         decoration: BoxDecoration(
                           color: isCompleted
-                              ? PharmaConnectColors.accentGreen
-                              : PharmaConnectColors.accentCyan,
+                              ? context.palette.success
+                              : context.palette.primary,
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
@@ -323,9 +318,7 @@ class _ChallengesDashboardScreenState extends State<ChallengesDashboardScreen> {
               const SizedBox(width: 8),
               Text(
                 '${progress?.progress ?? 0}/${challenge.target}',
-                style: PharmaConnectTypography.micro.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+                style: context.text.micro.copyWith(fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -335,10 +328,7 @@ class _ChallengesDashboardScreenState extends State<ChallengesDashboardScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                '🎯 ${challenge.points} points',
-                style: PharmaConnectTypography.micro,
-              ),
+              Text('🎯 ${challenge.points} points', style: context.text.micro),
               if (!isCompleted)
                 PrimaryButton(
                   label: '🚀 Mettre à jour',
@@ -362,13 +352,13 @@ class _ChallengesDashboardScreenState extends State<ChallengesDashboardScreen> {
   Color _difficultyColor(String difficulty) {
     switch (difficulty) {
       case 'easy':
-        return PharmaConnectColors.accentGreen;
+        return context.palette.success;
       case 'medium':
-        return PharmaConnectColors.accentAmber;
+        return context.palette.warningStrong;
       case 'hard':
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       default:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
     }
   }
 
@@ -382,14 +372,14 @@ class _ChallengesDashboardScreenState extends State<ChallengesDashboardScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: PharmaConnectColors.primaryDeep,
+        backgroundColor: context.palette.background,
         title: Text('Mettre à jour : ${challenge.name}'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               'Progression actuelle : ${provider.getProgressForChallenge(challenge.id)?.progress ?? 0}/${challenge.target}',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
             ),
             const SizedBox(height: 12),
             TextField(
@@ -426,16 +416,16 @@ class _ChallengesDashboardScreenState extends State<ChallengesDashboardScreen> {
               );
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
+                  SnackBar(
                     content: Text('Progression mise à jour !'),
-                    backgroundColor: PharmaConnectColors.accentGreen,
+                    backgroundColor: context.palette.success,
                   ),
                 );
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: PharmaConnectColors.accentCyan,
-              foregroundColor: PharmaConnectColors.textOnAccent,
+              backgroundColor: context.palette.primary,
+              foregroundColor: context.palette.onPrimary,
             ),
             child: const Text('Mettre à jour'),
           ),

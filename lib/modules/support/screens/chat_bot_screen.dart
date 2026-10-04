@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../models/bot_conversation.dart';
 import '../providers/bot_provider.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class ChatBotScreen extends StatefulWidget {
   const ChatBotScreen({super.key});
@@ -65,26 +64,26 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
             Row(
               children: [
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.arrow_back,
-                    color: PharmaConnectColors.textPrimary,
+                    color: context.palette.textPrimary,
                   ),
                   onPressed: () => context.pop(),
                   padding: EdgeInsets.zero,
                 ),
                 const SizedBox(width: 8),
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         '💬 Assistant PharmaConnect',
-                        style: PharmaConnectTypography.heading2,
+                        style: context.text.heading2,
                       ),
                       SizedBox(height: 2),
                       Text(
                         'Je suis là pour vous aider 24h/24',
-                        style: PharmaConnectTypography.micro,
+                        style: context.text.micro,
                       ),
                     ],
                   ),
@@ -98,22 +97,18 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: PharmaConnectColors.accentOrange.withValues(
-                        alpha: 0.15,
-                      ),
+                      color: context.palette.warning.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(4),
                       border: Border.all(
-                        color: PharmaConnectColors.accentOrange.withValues(
-                          alpha: 0.3,
-                        ),
+                        color: context.palette.warning.withValues(alpha: 0.3),
                       ),
                     ),
-                    child: const Text(
+                    child: Text(
                       '👨‍💼 Agent',
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: PharmaConnectColors.accentOrange,
+                        color: context.palette.warning,
                       ),
                     ),
                   ),
@@ -130,16 +125,16 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.error_outline,
                             size: 48,
-                            color: PharmaConnectColors.accentRed,
+                            color: context.palette.danger,
                           ),
                           const SizedBox(height: 16),
                           Text(
                             provider.error!,
-                            style: PharmaConnectTypography.body2.copyWith(
-                              color: PharmaConnectColors.accentRed,
+                            style: context.text.body2.copyWith(
+                              color: context.palette.danger,
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -195,8 +190,8 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
                 ),
                 decoration: BoxDecoration(
                   color: isUser
-                      ? PharmaConnectColors.accentCyan.withValues(alpha: 0.15)
-                      : Colors.white.withValues(alpha: 0.04),
+                      ? context.palette.primary.withValues(alpha: 0.15)
+                      : context.palette.surfaceMuted,
                   borderRadius: BorderRadius.only(
                     topLeft: const Radius.circular(12),
                     topRight: const Radius.circular(12),
@@ -209,8 +204,8 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
                   ),
                   border: Border.all(
                     color: isUser
-                        ? PharmaConnectColors.accentCyan.withValues(alpha: 0.2)
-                        : Colors.white.withValues(alpha: 0.06),
+                        ? context.palette.primary.withValues(alpha: 0.2)
+                        : context.palette.surface,
                   ),
                 ),
                 child: Column(
@@ -218,16 +213,14 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
                   children: [
                     Text(
                       msg.text,
-                      style: isUser
-                          ? PharmaConnectTypography.body1
-                          : PharmaConnectTypography.body2,
+                      style: isUser ? context.text.body1 : context.text.body2,
                     ),
                     const SizedBox(height: 4),
                     Text(
                       '${msg.timestamp.hour}:${msg.timestamp.minute.toString().padLeft(2, '0')}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 10,
-                        color: Colors.white38,
+                        color: context.palette.textMuted,
                       ),
                     ),
                   ],
@@ -248,7 +241,7 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
         child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.04),
+            color: context.palette.surfaceMuted,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
@@ -272,9 +265,9 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
       curve: Curves.easeInOut,
       width: 8,
       height: 8,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: PharmaConnectColors.textSecondary,
+        color: context.palette.textSecondary,
       ),
     );
   }
@@ -287,12 +280,12 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
           Expanded(
             child: TextField(
               controller: _messageController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: 'Écrivez votre message...',
                 border: OutlineInputBorder(),
                 contentPadding: EdgeInsets.symmetric(horizontal: 12),
                 filled: true,
-                fillColor: Colors.white10,
+                fillColor: context.palette.veil(0.10),
               ),
               onSubmitted: (_) => _sendMessage(provider),
               enabled: !provider.isThinking,
@@ -301,26 +294,23 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
           const SizedBox(width: 8),
           IconButton(
             icon: provider.isThinking
-                ? const SizedBox(
+                ? SizedBox(
                     width: 24,
                     height: 24,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        PharmaConnectColors.accentCyan,
+                        context.palette.primary,
                       ),
                     ),
                   )
-                : const Icon(Icons.send, color: PharmaConnectColors.accentCyan),
+                : Icon(Icons.send, color: context.palette.primary),
             onPressed: provider.isThinking
                 ? null
                 : () => _sendMessage(provider),
           ),
           IconButton(
-            icon: const Icon(
-              Icons.more_vert,
-              color: PharmaConnectColors.textSecondary,
-            ),
+            icon: Icon(Icons.more_vert, color: context.palette.textSecondary),
             onPressed: () => _showMenu(provider),
           ),
         ],
@@ -339,7 +329,7 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
   void _showMenu(BotProvider provider) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: PharmaConnectColors.primaryDeep,
+      backgroundColor: context.palette.background,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -348,10 +338,7 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(
-                Icons.person_add,
-                color: PharmaConnectColors.accentCyan,
-              ),
+              leading: Icon(Icons.person_add, color: context.palette.primary),
               title: const Text('Parler à un agent'),
               subtitle: const Text('Un humain prendra le relais'),
               onTap: () {
@@ -360,9 +347,9 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
               },
             ),
             ListTile(
-              leading: const Icon(
+              leading: Icon(
                 Icons.history,
-                color: PharmaConnectColors.textSecondary,
+                color: context.palette.textSecondary,
               ),
               title: const Text('Voir mon historique'),
               onTap: () {
@@ -372,10 +359,7 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
             ),
             if (provider.currentConversation?.status == 'resolved')
               ListTile(
-                leading: const Icon(
-                  Icons.delete,
-                  color: PharmaConnectColors.accentRed,
-                ),
+                leading: Icon(Icons.delete, color: context.palette.danger),
                 title: const Text('Effacer la conversation'),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -389,10 +373,11 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
   }
 
   void _showEscalateDialog(BotProvider provider) {
+    final palette = context.palette;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: PharmaConnectColors.primaryDeep,
+        backgroundColor: context.palette.background,
         title: const Text('Parler à un agent'),
         content: const Text(
           'Un agent humain va prendre le relais de la conversation. '
@@ -408,15 +393,15 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
               Navigator.pop(ctx);
               await provider.escalate();
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
+                SnackBar(
                   content: Text('Demande d\'escalade envoyée'),
-                  backgroundColor: PharmaConnectColors.accentGreen,
+                  backgroundColor: palette.success,
                 ),
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: PharmaConnectColors.accentCyan,
-              foregroundColor: PharmaConnectColors.textOnAccent,
+              backgroundColor: context.palette.primary,
+              foregroundColor: context.palette.onPrimary,
             ),
             child: const Text('Confirmer'),
           ),

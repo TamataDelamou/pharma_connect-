@@ -4,9 +4,9 @@ Infrastructure numérique du circuit pharmaceutique et des soins à domicile en 
 
 Référence produit : *Cahier de Conception PharmaConnect v2.1* (34 modules, 66 règles de gestion). Référence infrastructure : *GSG Platform Kernel — cahier de conception v3.0*. Référence authentification : *Modèle d'authentification Supabase — Migration Firebase vers Supabase*. Ce fichier documente l'état du **code**, pas seulement l'intention du cahier — mets-le à jour à chaque changement structurant plutôt que de laisser le cahier de conception et le dépôt diverger.
 
-## État au 02/10/2026 — à lire en premier
+## État au 04/10/2026 — à lire en premier
 
-Les sections « Mise à jour » et « État du projet » plus bas sont l'historique d'août 2026 : plusieurs constats y sont dépassés (nombre de tests, état de la CI, commandes, chantiers). La référence vivante est le registre `docs/PharmaConnect_Registre_Ecarts_A_Verifier.md` (décisions D1–D67, tickets C1–C225, section A « à prouver avant pilote » A31–A38).
+Les sections « Mise à jour » et « État du projet » plus bas sont l'historique d'août 2026 : plusieurs constats y sont dépassés (nombre de tests, état de la CI, commandes, chantiers). La référence vivante est le registre `docs/PharmaConnect_Registre_Ecarts_A_Verifier.md` (décisions D1–D67, tickets C1–C238, section A « à prouver avant pilote » A31–A39).
 
 **Base de données**
 - 123 migrations dans `supabase/migrations/`, toutes appliquées sur le projet en ligne depuis le 02/10/2026 (`supabase db push`, après sauvegarde dans `..\pharma_connect_backups\20261002_avant_push_22\` et répétition locale). La base en ligne ne contient aucune donnée réelle (catalogue de démonstration de `seed.sql`, 2 comptes d'essai sans profil).
@@ -26,17 +26,26 @@ Les sections « Mise à jour » et « État du projet » plus bas sont l'histori
 - Chaque décision du porteur du projet est inscrite au registre (Dxx), chaque ticket aussi (Cxx : constat, résolution, commits, tests).
 - Commits : fichiers listés explicitement, jamais `git add -A`. Sous Windows, l'index git est en LF et beaucoup de fichiers du poste sont en CRLF : écrire en LF et ne jamais committer un changement de fins de ligne seul.
 
-**Vérifications de référence (02/10/2026)**
+**Couleurs et thème (C234)**
+- Thème clair (blanc cassé) par défaut ; le thème sombre est conservé comme second thème, sans sélecteur tant que l'écran Paramètres (C227) n'existe pas.
+- Les couleurs se lisent uniquement par rôle : `context.palette` (`PharmaConnectPalette`, `lib/core/theme/palette.dart`) et `context.text` pour les styles de texte. Le code sans `BuildContext` (modèles, fournisseurs) nomme un rôle par `ColorRole`, que l'écran traduit par `role.of(context.palette)`.
+- Aucune couleur en dur hors de `lib/core/theme` : ni `Color(0x…)`, ni `Colors.white` / `Colors.black`, ni couleur Material nommée. Sur un fond de couleur pleine, le texte prend `onPrimary` ou `onDanger`. Garde-fou : `scripts/ci/check_no_hardcoded_color.sh`.
+- Couleurs fixes, qui ne dépendent pas du thème : seulement dans `PharmaConnectFixedColors` (marque d'un tiers, métaux des paliers de fidélité, texte sur l'image de la caméra).
+- `PharmaConnectTypography` ne porte pas de couleur ; `mono` (chasse fixe) est réservé aux codes, montants et références.
+- `KernelUi.enabled` (`lib/core/kernel/kernel_ui.dart`) reste à `false` tant que D2 n'est pas levé : le badge et l'indicateur Kernel ne s'affichent sur aucun écran.
+- Contrôle visuel : `flutter test tool/screenshots/c234_contact_sheets_test.dart` (planches de toutes les routes sans paramètre à 360 px, dans `build/c234_screenshots/planches/`).
+
+**Vérifications de référence (04/10/2026)**
 - Tests SQL : 18 fichiers et `concurrency_numbering.sh`, tous OK.
-- `flutter analyze lib/` : 0 erreur, 267 avertissements, 223 infos (490 au total).
-- `flutter test` : 80 réussis, 23 en échec (échecs connus : tests écrits pour les anciennes données factices, voir A33).
+- `flutter analyze lib/` : 0 erreur, 266 avertissements, 224 infos (490 au total).
+- `flutter test` : 104 réussis, 23 en échec (échecs connus : tests écrits pour les anciennes données factices, voir A33).
 - `flutter build apk --debug` : réussi.
 
 **Poste de développement**
 - Ordre imposé par la mémoire disponible : tests SQL d'abord, puis arrêt de Supabase, Docker Desktop et des démons Gradle, puis `flutter analyze`, `flutter test` et `flutter build`.
 - `C:\Users\delam\.wslconfig` : `memory=5GB`, `swap=4GB` ; fichier d'échange Windows : 8 Go ; extensions Java/Gradle désactivées dans l'espace de travail VS Code de ce projet ; arrêter les conteneurs TradeLink (`docker stop tradelink-kyc-worker tradelink-clamav`) en début de session, sans les supprimer.
 
-**Avant tout pilote (registre, section A)** : connexion réelle (SMS/WhatsApp non branchés, e-mail sans code à 6 chiffres) et parcours complets avec de vrais comptes (A31, A32) ; CI rouge (A33) ; paiement opérateur Orange/MTN/Moov non branché (A34) ; mode hors ligne absent (A35) ; fonctions « IA » simulées (A36) ; Kernel GSG différé (A37). Prochaine étape : A31, la connexion réelle.
+**Avant tout pilote (registre, section A)** : la connexion par e-mail avec code à 6 chiffres est prouvée en ligne (A31, SMTP Brevo, expéditeur `no-reply@globalservicegroupe.com`) ; SMS et WhatsApp restent non branchés ; parcours complets avec de vrais comptes jamais joués (A32) ; CI rouge (A33) ; paiement opérateur Orange/MTN/Moov non branché (A34) ; mode hors ligne absent (A35) ; fonctions « IA » simulées (A36) ; Kernel GSG différé (A37). Prochaine étape : A32, les parcours réels.
 
 ## Mise à jour (27/08/2026, suite) — P1 (fin) : test end-to-end avec un vrai compte bloqué par une limite Supabase, pas par le code
 

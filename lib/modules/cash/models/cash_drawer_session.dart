@@ -1,11 +1,7 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
+import '../../../core/theme/palette.dart';
 
-enum CashSessionStatus {
-  open,
-  closed,
-  suspended,
-}
+enum CashSessionStatus { open, closed, suspended }
 
 extension CashSessionStatusExtension on CashSessionStatus {
   String get label {
@@ -201,10 +197,10 @@ class CashDrawerSession extends Equatable {
     return 'Équilibre';
   }
 
-  Color get differenceColor {
-    if (difference == null) return Colors.grey;
-    if (difference! > 0) return Colors.green;
-    if (difference! < 0) return Colors.red;
-    return Colors.white;
+  ColorRole get differenceColor {
+    if (difference == null) return ColorRole.textMuted;
+    if (difference! > 0) return ColorRole.success;
+    if (difference! < 0) return ColorRole.danger;
+    return ColorRole.textPrimary;
   }
 }

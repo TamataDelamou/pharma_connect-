@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart' show Color;
 import 'package:equatable/equatable.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class HospitalWaitTime extends Equatable {
   final String id;
@@ -122,10 +122,10 @@ class HospitalWaitTime extends Equatable {
     return '🔴 Plus de 1h';
   }
 
-  Color get waitTimeColor {
-    if (waitTimeMinutes < 15) return PharmaConnectColors.accentGreen;
-    if (waitTimeMinutes < 30) return PharmaConnectColors.accentOrange;
-    if (waitTimeMinutes < 60) return PharmaConnectColors.accentAmber;
-    return PharmaConnectColors.accentRed;
+  ColorRole get waitTimeColor {
+    if (waitTimeMinutes < 15) return ColorRole.success;
+    if (waitTimeMinutes < 30) return ColorRole.warning;
+    if (waitTimeMinutes < 60) return ColorRole.warningStrong;
+    return ColorRole.danger;
   }
 }

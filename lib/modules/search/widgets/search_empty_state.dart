@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
+import '../../../core/theme/palette.dart';
 
 class SearchEmptyState extends StatelessWidget {
   final String title;
@@ -27,17 +26,17 @@ class SearchEmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 56, color: PharmaConnectColors.textSecondary),
+            Icon(icon, size: 56, color: context.palette.textSecondary),
             const SizedBox(height: 16),
             Text(
               title,
-              style: PharmaConnectTypography.heading3,
+              style: context.text.heading3,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
               subtitle,
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
               textAlign: TextAlign.center,
             ),
             if (hasHistory && history.isNotEmpty) ...[
@@ -49,7 +48,7 @@ class SearchEmptyState extends StatelessWidget {
                 children: history.take(5).map((term) {
                   return ActionChip(
                     label: Text(term),
-                    backgroundColor: Colors.white.withValues(alpha: 0.05),
+                    backgroundColor: context.palette.veil(0.05),
                     onPressed: onHistoryTap == null
                         ? null
                         : () => onHistoryTap!(term),

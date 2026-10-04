@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../models/triage_patient.dart';
 import '../models/triage_status.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class TriagePatientCard extends StatelessWidget {
   final TriagePatient patient;
@@ -26,7 +25,7 @@ class TriagePatientCard extends StatelessWidget {
             width: 4,
             height: 50,
             decoration: BoxDecoration(
-              color: _priorityColor(patient.priorityLevel),
+              color: _priorityColor(context, patient.priorityLevel),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -40,7 +39,7 @@ class TriagePatientCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         patient.patientName ?? patient.patientId,
-                        style: PharmaConnectTypography.body1.copyWith(
+                        style: context.text.body1.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -52,6 +51,7 @@ class TriagePatientCard extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: _priorityColor(
+                          context,
                           patient.priorityLevel,
                         ).withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(4),
@@ -61,7 +61,7 @@ class TriagePatientCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
-                          color: _priorityColor(patient.priorityLevel),
+                          color: _priorityColor(context, patient.priorityLevel),
                         ),
                       ),
                     ),
@@ -70,7 +70,7 @@ class TriagePatientCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   patient.chiefComplaint,
-                  style: PharmaConnectTypography.body2,
+                  style: context.text.body2,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -82,40 +82,37 @@ class TriagePatientCard extends StatelessWidget {
                       style: const TextStyle(fontSize: 12),
                     ),
                     const SizedBox(width: 4),
-                    Text(
-                      patient.status.label,
-                      style: PharmaConnectTypography.micro,
-                    ),
+                    Text(patient.status.label, style: context.text.micro),
                     const Spacer(),
                     Text(
                       'Arrivé à ${patient.arrivalTime.hour}:${patient.arrivalTime.minute.toString().padLeft(2, '0')}',
-                      style: PharmaConnectTypography.micro,
+                      style: context.text.micro,
                     ),
                   ],
                 ),
               ],
             ),
           ),
-          const Icon(Icons.chevron_right, color: Colors.white24),
+          Icon(Icons.chevron_right, color: context.palette.veil(0.24)),
         ],
       ),
     );
   }
 
-  Color _priorityColor(int level) {
+  Color _priorityColor(BuildContext context, int level) {
     switch (level) {
       case 1:
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       case 2:
-        return PharmaConnectColors.accentOrange;
+        return context.palette.warning;
       case 3:
-        return PharmaConnectColors.accentAmber;
+        return context.palette.warningStrong;
       case 4:
-        return PharmaConnectColors.accentCyan;
+        return context.palette.primary;
       case 5:
-        return PharmaConnectColors.accentGreen;
+        return context.palette.success;
       default:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
     }
   }
 }

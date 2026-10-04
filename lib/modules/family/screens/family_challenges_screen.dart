@@ -3,12 +3,11 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import '../providers/family_challenge_provider.dart';
 import '../widgets/family_challenge_card.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class FamilyChallengesScreen extends StatefulWidget {
   final String familyLinkId;
@@ -45,18 +44,18 @@ class _FamilyChallengesScreenState extends State<FamilyChallengesScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       '👨‍👩‍👧‍👦 Défis familiaux',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -88,18 +87,12 @@ class _FamilyChallengesScreenState extends State<FamilyChallengesScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 48,
-              color: PharmaConnectColors.accentRed,
-            ),
+            Icon(Icons.error_outline, size: 48, color: context.palette.danger),
             const SizedBox(height: 16),
             Text(
               provider.error!,
               textAlign: TextAlign.center,
-              style: PharmaConnectTypography.body2.copyWith(
-                color: PharmaConnectColors.accentRed,
-              ),
+              style: context.text.body2.copyWith(color: context.palette.danger),
             ),
             const SizedBox(height: 16),
             PrimaryButton(
@@ -116,20 +109,21 @@ class _FamilyChallengesScreenState extends State<FamilyChallengesScreen> {
     }
 
     if (provider.challenges.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.emoji_events_outlined, size: 64, color: Colors.white24),
-            SizedBox(height: 16),
-            Text(
-              'Aucun défi familial',
-              style: PharmaConnectTypography.heading3,
+            Icon(
+              Icons.emoji_events_outlined,
+              size: 64,
+              color: context.palette.veil(0.24),
             ),
+            SizedBox(height: 16),
+            Text('Aucun défi familial', style: context.text.heading3),
             SizedBox(height: 8),
             Text(
               'Créez votre premier défi pour motiver votre famille',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
               textAlign: TextAlign.center,
             ),
           ],

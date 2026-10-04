@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../providers/hospitals_provider.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class HospitalDetailScreen extends StatefulWidget {
   final String hospitalId;
@@ -40,9 +39,7 @@ class _HospitalDetailScreenState extends State<HospitalDetailScreen> {
         body: Center(
           child: Text(
             provider.error ?? 'Établissement introuvable',
-            style: PharmaConnectTypography.body2.copyWith(
-              color: PharmaConnectColors.accentRed,
-            ),
+            style: context.text.body2.copyWith(color: context.palette.danger),
           ),
         ),
       );
@@ -57,9 +54,9 @@ class _HospitalDetailScreenState extends State<HospitalDetailScreen> {
             Row(
               children: [
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.arrow_back,
-                    color: PharmaConnectColors.textPrimary,
+                    color: context.palette.textPrimary,
                   ),
                   onPressed: () => context.pop(),
                   padding: EdgeInsets.zero,
@@ -68,7 +65,7 @@ class _HospitalDetailScreenState extends State<HospitalDetailScreen> {
                 Expanded(
                   child: Text(
                     hospital.name,
-                    style: PharmaConnectTypography.heading2,
+                    style: context.text.heading2,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -79,10 +76,7 @@ class _HospitalDetailScreenState extends State<HospitalDetailScreen> {
             Row(
               children: [
                 if (hospital.typeName != null)
-                  Text(
-                    hospital.typeName!,
-                    style: PharmaConnectTypography.label,
-                  ),
+                  Text(hospital.typeName!, style: context.text.label),
                 const Spacer(),
                 if (hospital.isEmergencyAvailable)
                   Container(
@@ -91,23 +85,19 @@ class _HospitalDetailScreenState extends State<HospitalDetailScreen> {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: PharmaConnectColors.accentRed.withValues(
-                        alpha: 0.15,
-                      ),
+                      color: context.palette.danger.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(4),
                       border: Border.all(
-                        color: PharmaConnectColors.accentRed.withValues(
-                          alpha: 0.3,
-                        ),
+                        color: context.palette.danger.withValues(alpha: 0.3),
                       ),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
                           Icons.emergency,
                           size: 14,
-                          color: PharmaConnectColors.accentRed,
+                          color: context.palette.danger,
                         ),
                         SizedBox(width: 4),
                         Text(
@@ -115,7 +105,7 @@ class _HospitalDetailScreenState extends State<HospitalDetailScreen> {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: PharmaConnectColors.accentRed,
+                            color: context.palette.danger,
                           ),
                         ),
                       ],
@@ -136,27 +126,27 @@ class _HospitalDetailScreenState extends State<HospitalDetailScreen> {
                         children: [
                           _buildInfoRow('Adresse', hospital.address),
                           if (hospital.city != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow('Ville', hospital.city!),
                           ],
                           if (hospital.country != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow('Pays', hospital.country!),
                           ],
                           if (hospital.phone != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow('Téléphone', hospital.phone!),
                           ],
                           if (hospital.email != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow('Email', hospital.email!),
                           ],
                           if (hospital.emergencyPhone != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow('Urgences', hospital.emergencyPhone!),
                           ],
                           if (hospital.website != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow('Site web', hospital.website!),
                           ],
                         ],
@@ -169,9 +159,9 @@ class _HospitalDetailScreenState extends State<HospitalDetailScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Services disponibles',
-                            style: PharmaConnectTypography.heading3,
+                            style: context.text.heading3,
                           ),
                           const SizedBox(height: 8),
                           Wrap(
@@ -181,22 +171,22 @@ class _HospitalDetailScreenState extends State<HospitalDetailScreen> {
                               if (hospital.isEmergencyAvailable)
                                 _buildServiceChip(
                                   'Urgences',
-                                  PharmaConnectColors.accentRed,
+                                  context.palette.danger,
                                 ),
                               if (hospital.isLabAvailable)
                                 _buildServiceChip(
                                   'Laboratoire',
-                                  PharmaConnectColors.accentPurple,
+                                  context.palette.secondary,
                                 ),
                               if (hospital.isImagingAvailable)
                                 _buildServiceChip(
                                   'Imagerie',
-                                  PharmaConnectColors.accentCyan,
+                                  context.palette.primary,
                                 ),
                               if (hospital.isPharmacyAvailable)
                                 _buildServiceChip(
                                   'Pharmacie',
-                                  PharmaConnectColors.accentGreen,
+                                  context.palette.success,
                                 ),
                             ],
                           ),
@@ -212,9 +202,9 @@ class _HospitalDetailScreenState extends State<HospitalDetailScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'Accréditations',
-                              style: PharmaConnectTypography.heading3,
+                              style: context.text.heading3,
                             ),
                             const SizedBox(height: 8),
                             if (hospital.licenseNumber != null) ...[
@@ -232,7 +222,7 @@ class _HospitalDetailScreenState extends State<HospitalDetailScreen> {
                             ],
                             if (hospital.accreditation != null) ...[
                               if (hospital.licenseNumber != null)
-                                const Divider(color: Colors.white12),
+                                Divider(color: context.palette.veil(0.12)),
                               _buildInfoRow(
                                 'Accréditation',
                                 hospital.accreditation!,
@@ -256,14 +246,11 @@ class _HospitalDetailScreenState extends State<HospitalDetailScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Description',
-                              style: PharmaConnectTypography.heading3,
-                            ),
+                            Text('Description', style: context.text.heading3),
                             const SizedBox(height: 8),
                             Text(
                               hospital.description!,
-                              style: PharmaConnectTypography.body2,
+                              style: context.text.body2,
                             ),
                           ],
                         ),
@@ -325,11 +312,8 @@ class _HospitalDetailScreenState extends State<HospitalDetailScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 120,
-            child: Text(label, style: PharmaConnectTypography.label),
-          ),
-          Expanded(child: Text(value, style: PharmaConnectTypography.body1)),
+          SizedBox(width: 120, child: Text(label, style: context.text.label)),
+          Expanded(child: Text(value, style: context.text.body1)),
         ],
       ),
     );

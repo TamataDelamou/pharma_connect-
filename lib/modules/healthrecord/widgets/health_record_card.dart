@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../models/health_record.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class HealthRecordCard extends StatelessWidget {
   final HealthRecord record;
@@ -24,23 +23,23 @@ class HealthRecordCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.medical_information,
-                color: PharmaConnectColors.accentCyan,
+                color: context.palette.primary,
                 size: 20,
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   'Dossier médical',
-                  style: PharmaConnectTypography.body1.copyWith(
+                  style: context.text.body1.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
               Text(
                 '${record.allergies.length} allergies • ${record.medicalConditions.length} antécédents',
-                style: PharmaConnectTypography.micro,
+                style: context.text.micro,
               ),
             ],
           ),
@@ -52,30 +51,24 @@ class HealthRecordCard extends StatelessWidget {
               if (record.bloodType != null)
                 _buildChip(
                   'Groupe ${record.bloodType}',
-                  PharmaConnectColors.accentPurple,
+                  context.palette.secondary,
                 ),
               if (record.height != null)
-                _buildChip(
-                  '${record.height} cm',
-                  PharmaConnectColors.accentCyan,
-                ),
+                _buildChip('${record.height} cm', context.palette.primary),
               if (record.weight != null)
-                _buildChip(
-                  '${record.weight} kg',
-                  PharmaConnectColors.accentGreen,
-                ),
+                _buildChip('${record.weight} kg', context.palette.success),
               if (record.medications.isNotEmpty)
                 _buildChip(
                   '${record.medications.length} traitements',
-                  PharmaConnectColors.accentOrange,
+                  context.palette.warning,
                 ),
             ],
           ),
           const SizedBox(height: 4),
           Text(
             'Mis à jour : ${_formatDate(record.updatedAt)}',
-            style: PharmaConnectTypography.micro.copyWith(
-              color: PharmaConnectColors.textSecondary,
+            style: context.text.micro.copyWith(
+              color: context.palette.textSecondary,
             ),
           ),
         ],

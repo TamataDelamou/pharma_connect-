@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import '../models/health_record.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class ConditionTile extends StatelessWidget {
   final MedicalCondition condition;
@@ -14,26 +13,27 @@ class ConditionTile extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       margin: const EdgeInsets.only(bottom: 4),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.04),
+        color: context.palette.surfaceMuted,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        border: Border.all(color: context.palette.borderSubtle),
       ),
       child: Row(
         children: [
-          const Icon(
+          Icon(
             Icons.health_and_safety,
-            color: PharmaConnectColors.accentCyan,
+            color: context.palette.primary,
             size: 16,
           ),
           const SizedBox(width: 8),
-          Expanded(
-            child: Text(condition.name, style: PharmaConnectTypography.body1),
-          ),
+          Expanded(child: Text(condition.name, style: context.text.body1)),
           if (condition.status != null)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: _statusColor(condition.status!).withValues(alpha: 0.15),
+                color: _statusColor(
+                  context,
+                  condition.status!,
+                ).withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
@@ -41,7 +41,7 @@ class ConditionTile extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w500,
-                  color: _statusColor(condition.status!),
+                  color: _statusColor(context, condition.status!),
                 ),
               ),
             ),
@@ -50,16 +50,16 @@ class ConditionTile extends StatelessWidget {
     );
   }
 
-  Color _statusColor(String status) {
+  Color _statusColor(BuildContext context, String status) {
     switch (status) {
       case 'active':
-        return PharmaConnectColors.accentOrange;
+        return context.palette.warning;
       case 'resolved':
-        return PharmaConnectColors.accentGreen;
+        return context.palette.success;
       case 'chronic':
-        return PharmaConnectColors.accentPurple;
+        return context.palette.secondary;
       default:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
     }
   }
 }

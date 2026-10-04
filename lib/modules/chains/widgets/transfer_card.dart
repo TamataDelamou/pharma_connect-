@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../models/stock_transfer.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class TransferCard extends StatelessWidget {
   final StockTransfer transfer;
@@ -21,7 +20,7 @@ class TransferCard extends StatelessWidget {
             width: 4,
             height: 40,
             decoration: BoxDecoration(
-              color: _statusColor(transfer.status),
+              color: _statusColor(context, transfer.status),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -35,7 +34,7 @@ class TransferCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         '${transfer.fromPharmacyName ?? '?'} → ${transfer.toPharmacyName ?? '?'}',
-                        style: PharmaConnectTypography.body1.copyWith(
+                        style: context.text.body1.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                         maxLines: 1,
@@ -49,6 +48,7 @@ class TransferCard extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: _statusColor(
+                          context,
                           transfer.status,
                         ).withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(4),
@@ -58,7 +58,7 @@ class TransferCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w500,
-                          color: _statusColor(transfer.status),
+                          color: _statusColor(context, transfer.status),
                         ),
                       ),
                     ),
@@ -69,38 +69,38 @@ class TransferCard extends StatelessWidget {
                   children: [
                     Text(
                       '${transfer.items?.length ?? 0} articles',
-                      style: PharmaConnectTypography.micro,
+                      style: context.text.micro,
                     ),
                     const SizedBox(width: 8),
                     Text(
                       _formatDate(transfer.transferDate),
-                      style: PharmaConnectTypography.micro,
+                      style: context.text.micro,
                     ),
                   ],
                 ),
               ],
             ),
           ),
-          const Icon(Icons.chevron_right, color: Colors.white24),
+          Icon(Icons.chevron_right, color: context.palette.veil(0.24)),
         ],
       ),
     );
   }
 
-  Color _statusColor(String status) {
+  Color _statusColor(BuildContext context, String status) {
     switch (status) {
       case 'pending':
-        return PharmaConnectColors.accentOrange;
+        return context.palette.warning;
       case 'approved':
-        return PharmaConnectColors.accentCyan;
+        return context.palette.primary;
       case 'in_transit':
-        return PharmaConnectColors.accentPurple;
+        return context.palette.secondary;
       case 'received':
-        return PharmaConnectColors.accentGreen;
+        return context.palette.success;
       case 'cancelled':
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       default:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
     }
   }
 

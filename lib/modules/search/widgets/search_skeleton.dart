@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/palette.dart';
 
 class SearchSkeleton extends StatelessWidget {
   const SearchSkeleton({super.key});
@@ -13,7 +14,7 @@ class SearchSkeleton extends StatelessWidget {
           child: Container(
             height: 88,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.05),
+              color: context.palette.veil(0.05),
               borderRadius: BorderRadius.circular(16),
             ),
           ),

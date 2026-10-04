@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../../../shared/models/product.dart';
 import 'product_image.dart';
+import '../../../core/theme/palette.dart';
 
 class ProductGridItem extends StatelessWidget {
   final Product product;
@@ -36,23 +35,21 @@ class ProductGridItem extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             product.name,
-            style: PharmaConnectTypography.body1.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+            style: context.text.body1.copyWith(fontWeight: FontWeight.w600),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 4),
           Text(
             product.genericName,
-            style: PharmaConnectTypography.body2,
+            style: context.text.body2,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 4),
           Text(
             '${product.dosage} • ${product.form}',
-            style: PharmaConnectTypography.micro,
+            style: context.text.micro,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -63,17 +60,17 @@ class ProductGridItem extends StatelessWidget {
             runSpacing: 4,
             children: [
               if (product.isGeneric)
-                _buildBadge('Générique', PharmaConnectColors.accentPurple),
+                _buildBadge('Générique', context.palette.secondary),
               if (product.isPrescriptionRequired)
-                _buildBadge('Ordonnance', PharmaConnectColors.accentOrange),
+                _buildBadge('Ordonnance', context.palette.warning),
               if (!product.isPrescriptionRequired)
-                _buildBadge('Libre', PharmaConnectColors.accentGreen),
+                _buildBadge('Libre', context.palette.success),
               // RG-CAT-02 : ce badge ne peut visuellement apparaître que
               // pour un utilisateur déjà autorisé à voir ce produit (la RLS
               // le retire du flux réseau pour un patient) — il informe le
               // personnel opérationnel du statut réglementaire renforcé.
               if (product.isControlledSubstance)
-                _buildBadge('Stupéfiant/Psychotrope', PharmaConnectColors.accentRed),
+                _buildBadge('Stupéfiant/Psychotrope', context.palette.danger),
             ],
           ),
         ],

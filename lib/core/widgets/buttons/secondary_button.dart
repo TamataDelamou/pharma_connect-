@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../theme/colors.dart';
 import '../../theme/spacing.dart';
+import '../../theme/palette.dart';
 
 class SecondaryButton extends StatelessWidget {
   final String label;
@@ -31,12 +31,12 @@ class SecondaryButton extends StatelessWidget {
         style: OutlinedButton.styleFrom(
           backgroundColor: Colors.transparent,
           foregroundColor: isDisabled
-              ? PharmaConnectColors.textSecondary
-              : PharmaConnectColors.textPrimary,
+              ? context.palette.textSecondary
+              : context.palette.textPrimary,
           side: BorderSide(
             color: isDisabled
-                ? PharmaConnectColors.textSecondary.withValues(alpha: 0.2)
-                : PharmaConnectColors.textPrimary.withValues(alpha: 0.2),
+                ? context.palette.textSecondary.withValues(alpha: 0.2)
+                : context.palette.textPrimary.withValues(alpha: 0.2),
             width: 1,
           ),
           shape: RoundedRectangleBorder(

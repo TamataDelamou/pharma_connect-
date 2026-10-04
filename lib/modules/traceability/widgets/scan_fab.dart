@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/theme/colors.dart';
+import '../../../core/theme/palette.dart';
 
 class ScanFloatingButton extends StatelessWidget {
   const ScanFloatingButton({super.key});
@@ -9,11 +9,8 @@ class ScanFloatingButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return FloatingActionButton(
       onPressed: () => context.push('/traceability/verify'),
-      backgroundColor: PharmaConnectColors.accentCyan,
-      child: const Icon(
-        Icons.qr_code_scanner,
-        color: PharmaConnectColors.textOnAccent,
-      ),
+      backgroundColor: context.palette.primary,
+      child: Icon(Icons.qr_code_scanner, color: context.palette.onPrimary),
     );
   }
 }

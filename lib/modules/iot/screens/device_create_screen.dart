@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/tertiary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
@@ -11,6 +9,7 @@ import 'package:pharma_connect/core/widgets/inputs/glass_input.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/iot_provider.dart';
 import '../models/iot_device.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class DeviceCreateScreen extends StatefulWidget {
   final String? deviceId;
@@ -63,9 +62,9 @@ class _DeviceCreateScreenState extends State<DeviceCreateScreen> {
               Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
@@ -76,7 +75,7 @@ class _DeviceCreateScreenState extends State<DeviceCreateScreen> {
                       widget.deviceId == null
                           ? '📡 Ajouter un appareil'
                           : '📡 Modifier l\'appareil',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                     ),
                   ),
                   const KernelBadge(),
@@ -171,29 +170,29 @@ class _DeviceCreateScreenState extends State<DeviceCreateScreen> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: PharmaConnectColors.accentCyan.withValues(
+                          color: context.palette.primary.withValues(
                             alpha: 0.06,
                           ),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: PharmaConnectColors.accentCyan.withValues(
+                            color: context.palette.primary.withValues(
                               alpha: 0.15,
                             ),
                           ),
                         ),
                         child: Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.info_outline,
-                              color: PharmaConnectColors.accentCyan,
+                              color: context.palette.primary,
                               size: 16,
                             ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 'Une fois connecté, l\'appareil enverra automatiquement ses données.',
-                                style: PharmaConnectTypography.micro.copyWith(
-                                  color: PharmaConnectColors.textSecondary,
+                                style: context.text.micro.copyWith(
+                                  color: context.palette.textSecondary,
                                 ),
                               ),
                             ),
@@ -230,6 +229,7 @@ class _DeviceCreateScreenState extends State<DeviceCreateScreen> {
   }
 
   Future<void> _saveDevice() async {
+    final palette = context.palette;
     if (!_formKey.currentState!.validate()) return;
 
     // Audit Module 21 (IOT), Étape 2 (30/08/2026), C99 : voir le correctif
@@ -279,14 +279,14 @@ class _DeviceCreateScreenState extends State<DeviceCreateScreen> {
                 ? 'Appareil ajouté avec succès'
                 : 'Appareil mis à jour',
           ),
-          backgroundColor: PharmaConnectColors.accentGreen,
+          backgroundColor: palette.success,
         ),
       );
     } else if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(context.read<IotProvider>().error ?? 'Erreur'),
-          backgroundColor: PharmaConnectColors.accentRed,
+          backgroundColor: palette.danger,
         ),
       );
     }

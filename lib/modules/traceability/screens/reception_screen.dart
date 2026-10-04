@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../../../core/widgets/inputs/glass_input.dart';
@@ -11,6 +9,7 @@ import '../../auth/models/user_role.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../models/traceable_batch.dart';
 import '../providers/traceability_provider.dart';
+import '../../../core/theme/palette.dart';
 
 /// Audit Module 12 (TRC), arbitrage D19 (29/08/2026) : écran manquant au
 /// cahier — RG-TRC-01 exige une chaîne de traçabilité continue (fabricant →
@@ -112,10 +111,10 @@ class _ReceptionScreenState extends State<ReceptionScreen> {
           children: [
             _buildHeader(context),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Enregistrez la réception d\'un lot pour maintenir la chaîne '
               'de traçabilité continue (RG-TRC-01).',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
             ),
             const SizedBox(height: 24),
             Expanded(
@@ -141,8 +140,8 @@ class _ReceptionScreenState extends State<ReceptionScreen> {
                       const SizedBox(height: 12),
                       Text(
                         provider.error!,
-                        style: PharmaConnectTypography.body2.copyWith(
-                          color: PharmaConnectColors.accentRed,
+                        style: context.text.body2.copyWith(
+                          color: context.palette.danger,
                         ),
                       ),
                     ],
@@ -160,19 +159,13 @@ class _ReceptionScreenState extends State<ReceptionScreen> {
     return Row(
       children: [
         IconButton(
-          icon: const Icon(
-            Icons.arrow_back,
-            color: PharmaConnectColors.textPrimary,
-          ),
+          icon: Icon(Icons.arrow_back, color: context.palette.textPrimary),
           onPressed: () => context.pop(),
           padding: EdgeInsets.zero,
         ),
         const SizedBox(width: 8),
-        const Expanded(
-          child: Text(
-            'Réceptionner un lot',
-            style: PharmaConnectTypography.heading2,
-          ),
+        Expanded(
+          child: Text('Réceptionner un lot', style: context.text.heading2),
         ),
         const KernelBadge(),
       ],
@@ -187,12 +180,12 @@ class _ReceptionScreenState extends State<ReceptionScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildHeader(context),
-            const Expanded(
+            Expanded(
               child: Center(
                 child: Text(
                   'Cet écran est réservé aux pharmaciens, grossistes et '
                   'régulateurs.',
-                  style: PharmaConnectTypography.body2,
+                  style: context.text.body2,
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -206,10 +199,10 @@ class _ReceptionScreenState extends State<ReceptionScreen> {
   Widget _buildSearchResults(TraceabilityProvider provider) {
     final query = _searchController.text.trim().toLowerCase();
     if (query.isEmpty) {
-      return const Text(
+      return Text(
         'Saisissez au moins un caractère pour rechercher un lot déjà connu '
         'du système.',
-        style: PharmaConnectTypography.micro,
+        style: context.text.micro,
       );
     }
     final results = provider.batches.where((b) {
@@ -219,10 +212,7 @@ class _ReceptionScreenState extends State<ReceptionScreen> {
     }).toList();
 
     if (results.isEmpty) {
-      return const Text(
-        'Aucun lot correspondant.',
-        style: PharmaConnectTypography.body2,
-      );
+      return Text('Aucun lot correspondant.', style: context.text.body2);
     }
 
     return Column(
@@ -240,23 +230,19 @@ class _ReceptionScreenState extends State<ReceptionScreen> {
                     children: [
                       Text(
                         batch.productName,
-                        style: PharmaConnectTypography.body1.copyWith(
+                        style: context.text.body1.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                       Text(
                         'Lot: ${batch.batchNumber} • ${batch.statusLabel}',
-                        style: PharmaConnectTypography.micro,
+                        style: context.text.mono,
                       ),
                     ],
                   ),
                 ),
                 if (batch.isRecalled || batch.isCounterfeit)
-                  const Icon(
-                    Icons.warning,
-                    color: PharmaConnectColors.accentRed,
-                    size: 18,
-                  ),
+                  Icon(Icons.warning, color: context.palette.danger, size: 18),
               ],
             ),
           ),
@@ -289,17 +275,14 @@ class _ReceptionScreenState extends State<ReceptionScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  batch.productName,
-                  style: PharmaConnectTypography.heading3,
-                ),
+                Text(batch.productName, style: context.text.heading3),
                 Text(
                   'Lot: ${batch.batchNumber} • SN: ${batch.serialNumber}',
-                  style: PharmaConnectTypography.body2,
+                  style: context.text.body2,
                 ),
                 Text(
                   'Statut actuel : ${batch.statusLabel}',
-                  style: PharmaConnectTypography.micro,
+                  style: context.text.micro,
                 ),
                 if (batch.isRecalled || batch.isCounterfeit) ...[
                   const SizedBox(height: 4),
@@ -307,8 +290,8 @@ class _ReceptionScreenState extends State<ReceptionScreen> {
                     batch.isRecalled
                         ? '⚠️ Lot rappelé — réception bloquée'
                         : '⚠️ Lot signalé contrefait — réception bloquée',
-                    style: PharmaConnectTypography.body2.copyWith(
-                      color: PharmaConnectColors.accentRed,
+                    style: context.text.body2.copyWith(
+                      color: context.palette.danger,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -374,9 +357,9 @@ class _ReceptionScreenState extends State<ReceptionScreen> {
         CheckboxListTile(
           value: _isColdChainRequired,
           onChanged: (v) => setState(() => _isColdChainRequired = v ?? false),
-          title: const Text(
+          title: Text(
             'Ce lot nécessite la chaîne du froid',
-            style: PharmaConnectTypography.body2,
+            style: context.text.body2,
           ),
           controlAffinity: ListTileControlAffinity.leading,
           contentPadding: EdgeInsets.zero,
@@ -415,21 +398,21 @@ class _ReceptionScreenState extends State<ReceptionScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: PharmaConnectTypography.label),
+        Text(label, style: context.text.label),
         const SizedBox(height: 4),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.04),
+            color: context.palette.surfaceMuted,
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.white24),
+            border: Border.all(color: context.palette.veil(0.24)),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               value: value,
               isExpanded: true,
-              dropdownColor: PharmaConnectColors.primaryDeep,
-              style: PharmaConnectTypography.body2,
+              dropdownColor: context.palette.background,
+              style: context.text.body2,
               items: _locationTypes
                   .map(
                     (t) => DropdownMenuItem(
@@ -453,9 +436,9 @@ class _ReceptionScreenState extends State<ReceptionScreen> {
     if (_fromLocationController.text.trim().isEmpty ||
         _toLocationController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Veuillez renseigner la provenance et la destination'),
-          backgroundColor: PharmaConnectColors.accentRed,
+          backgroundColor: context.palette.danger,
         ),
       );
       return;
@@ -485,9 +468,9 @@ class _ReceptionScreenState extends State<ReceptionScreen> {
 
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Réception enregistrée'),
-          backgroundColor: PharmaConnectColors.accentGreen,
+          backgroundColor: context.palette.success,
         ),
       );
       context.pop();
@@ -495,7 +478,7 @@ class _ReceptionScreenState extends State<ReceptionScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(provider.error ?? 'Échec de la réception'),
-          backgroundColor: PharmaConnectColors.accentRed,
+          backgroundColor: context.palette.danger,
         ),
       );
     }

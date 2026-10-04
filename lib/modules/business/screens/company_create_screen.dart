@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/tertiary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/widgets/inputs/glass_input.dart';
 import '../providers/business_provider.dart';
 import '../models/business_company.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class CompanyCreateScreen extends StatefulWidget {
   final String? companyId;
@@ -120,7 +119,9 @@ class _CompanyCreateScreenState extends State<CompanyCreateScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isEditing && context.watch<BusinessProvider>().isLoading && !_prefilled) {
+    if (_isEditing &&
+        context.watch<BusinessProvider>().isLoading &&
+        !_prefilled) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
@@ -135,9 +136,9 @@ class _CompanyCreateScreenState extends State<CompanyCreateScreen> {
               Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
@@ -148,7 +149,7 @@ class _CompanyCreateScreenState extends State<CompanyCreateScreen> {
                       _isEditing
                           ? '🤝 Modifier le partenaire'
                           : '🤝 Nouveau partenaire',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                     ),
                   ),
                   const KernelBadge(),
@@ -350,6 +351,7 @@ class _CompanyCreateScreenState extends State<CompanyCreateScreen> {
   }
 
   Future<void> _saveCompany() async {
+    final palette = context.palette;
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
@@ -407,9 +409,7 @@ class _CompanyCreateScreenState extends State<CompanyCreateScreen> {
       updatedAt: now,
     );
 
-    final success = await context.read<BusinessProvider>().saveCompany(
-      company,
-    );
+    final success = await context.read<BusinessProvider>().saveCompany(company);
     setState(() => _isLoading = false);
 
     if (success && context.mounted) {
@@ -426,7 +426,7 @@ class _CompanyCreateScreenState extends State<CompanyCreateScreen> {
                 ? 'Partenaire mis à jour avec succès'
                 : 'Partenaire créé avec succès',
           ),
-          backgroundColor: PharmaConnectColors.accentGreen,
+          backgroundColor: palette.success,
         ),
       );
     } else if (context.mounted) {
@@ -436,7 +436,7 @@ class _CompanyCreateScreenState extends State<CompanyCreateScreen> {
             context.read<BusinessProvider>().error ??
                 'Erreur lors de l\'enregistrement',
           ),
-          backgroundColor: PharmaConnectColors.accentRed,
+          backgroundColor: palette.danger,
         ),
       );
     }

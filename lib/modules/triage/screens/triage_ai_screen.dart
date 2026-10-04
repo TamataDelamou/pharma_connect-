@@ -3,11 +3,10 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../providers/triage_ai_provider.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class TriageAIScreen extends StatefulWidget {
   final String triagePatientId;
@@ -54,18 +53,18 @@ class _TriageAIScreenState extends State<TriageAIScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       '🧠 Triage intelligent',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -86,14 +85,14 @@ class _TriageAIScreenState extends State<TriageAIScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               '1️⃣ Décrivez les symptômes',
-                              style: PharmaConnectTypography.heading3,
+                              style: context.text.heading3,
                             ),
                             const SizedBox(height: 8),
                             Text(
                               'Décrivez les symptômes du patient de manière détaillée',
-                              style: PharmaConnectTypography.body2,
+                              style: context.text.body2,
                             ),
                             const SizedBox(height: 12),
                             TextField(
@@ -107,20 +106,18 @@ class _TriageAIScreenState extends State<TriageAIScreen> {
                             const SizedBox(height: 12),
                             Row(
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.info_outline,
                                   size: 16,
-                                  color: Colors.white54,
+                                  color: context.palette.textSecondary,
                                 ),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
                                     'L\'IA analyse les symptômes pour déterminer la priorité et orienter le patient',
-                                    style: PharmaConnectTypography.micro
-                                        .copyWith(
-                                          color:
-                                              PharmaConnectColors.textSecondary,
-                                        ),
+                                    style: context.text.micro.copyWith(
+                                      color: context.palette.textSecondary,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -191,7 +188,7 @@ class _TriageAIScreenState extends State<TriageAIScreen> {
         GlassCard(
           glow: analysis.isCritical,
           glowColor: analysis.isCritical
-              ? PharmaConnectColors.accentRed
+              ? context.palette.danger
               : _priorityColor(analysis.priorityScore),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -222,10 +219,7 @@ class _TriageAIScreenState extends State<TriageAIScreen> {
                     ),
                     const Spacer(),
                     if (analysis.isCritical)
-                      const Icon(
-                        Icons.warning_amber,
-                        color: PharmaConnectColors.accentRed,
-                      ),
+                      Icon(Icons.warning_amber, color: context.palette.danger),
                   ],
                 ),
               ),
@@ -236,11 +230,11 @@ class _TriageAIScreenState extends State<TriageAIScreen> {
                 'Service suggéré',
                 analysis.suggestedDepartment ?? 'Non déterminé',
               ),
-              const Divider(color: Colors.white12),
+              Divider(color: context.palette.veil(0.12)),
               _buildInfoRow('Symptômes analysés', analysis.symptoms),
 
               if (analysis.analysisDetails['matched_keywords'] != null) ...[
-                const Divider(color: Colors.white12),
+                Divider(color: context.palette.veil(0.12)),
                 _buildInfoRow(
                   'Mots-clés détectés',
                   (analysis.analysisDetails['matched_keywords'] as List).join(
@@ -278,7 +272,7 @@ class _TriageAIScreenState extends State<TriageAIScreen> {
                 icon: const Icon(Icons.refresh),
                 label: const Text('Réanalyser'),
                 style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Colors.white24),
+                  side: BorderSide(color: context.palette.veil(0.24)),
                 ),
               ),
             ),
@@ -289,20 +283,21 @@ class _TriageAIScreenState extends State<TriageAIScreen> {
   }
 
   Widget _buildFeedbackSection(TriageAIProvider provider) {
+    final palette = context.palette;
     final analysis = provider.currentAnalysis!;
 
     return GlassCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             '3️⃣ Feedback (pour les médecins)',
-            style: PharmaConnectTypography.heading3,
+            style: context.text.heading3,
           ),
           const SizedBox(height: 8),
           Text(
             'Aidez à améliorer l\'IA en fournissant votre évaluation réelle',
-            style: PharmaConnectTypography.body2,
+            style: context.text.body2,
           ),
           const SizedBox(height: 12),
 
@@ -364,9 +359,9 @@ class _TriageAIScreenState extends State<TriageAIScreen> {
                     );
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
+                        SnackBar(
                           content: Text('Feedback enregistré, merci !'),
-                          backgroundColor: PharmaConnectColors.accentGreen,
+                          backgroundColor: palette.success,
                         ),
                       );
                     }
@@ -384,11 +379,8 @@ class _TriageAIScreenState extends State<TriageAIScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 120,
-            child: Text(label, style: PharmaConnectTypography.label),
-          ),
-          Expanded(child: Text(value, style: PharmaConnectTypography.body1)),
+          SizedBox(width: 120, child: Text(label, style: context.text.label)),
+          Expanded(child: Text(value, style: context.text.body1)),
         ],
       ),
     );
@@ -397,17 +389,17 @@ class _TriageAIScreenState extends State<TriageAIScreen> {
   Color _priorityColor(int score) {
     switch (score) {
       case 1:
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       case 2:
-        return PharmaConnectColors.accentOrange;
+        return context.palette.warning;
       case 3:
-        return PharmaConnectColors.accentAmber;
+        return context.palette.warningStrong;
       case 4:
-        return PharmaConnectColors.accentCyan;
+        return context.palette.primary;
       case 5:
-        return PharmaConnectColors.accentGreen;
+        return context.palette.success;
       default:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
     }
   }
 }

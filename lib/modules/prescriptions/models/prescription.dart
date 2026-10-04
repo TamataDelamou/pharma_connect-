@@ -1,8 +1,6 @@
-import 'package:flutter/material.dart';
-
-import '../../../core/theme/colors.dart';
 import 'prescription_item.dart';
 import 'prescription_status.dart';
+import '../../../core/theme/palette.dart';
 
 class Prescription {
   final String id;
@@ -141,18 +139,18 @@ class Prescription {
     }
   }
 
-  Color get statusColor {
+  ColorRole get statusColor {
     switch (status) {
       case PrescriptionStatus.draft:
-        return PharmaConnectColors.textSecondary;
+        return ColorRole.textSecondary;
       case PrescriptionStatus.pending:
-        return PharmaConnectColors.accentOrange;
+        return ColorRole.warning;
       case PrescriptionStatus.validated:
-        return PharmaConnectColors.accentGreen;
+        return ColorRole.success;
       case PrescriptionStatus.dispensed:
-        return PharmaConnectColors.accentCyan;
+        return ColorRole.primary;
       case PrescriptionStatus.archived:
-        return PharmaConnectColors.neutralMuted;
+        return ColorRole.textMuted;
     }
   }
 }

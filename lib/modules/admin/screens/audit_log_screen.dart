@@ -3,10 +3,9 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../models/audit_log.dart';
 import '../providers/admin_provider.dart';
+import '../../../core/theme/palette.dart';
 
 class AuditLogScreen extends StatefulWidget {
   const AuditLogScreen({super.key});
@@ -48,18 +47,18 @@ class _AuditLogScreenState extends State<AuditLogScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       "Journal d'audit",
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -69,9 +68,9 @@ class _AuditLogScreenState extends State<AuditLogScreen> {
               trailing: [const KernelBadge()],
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Historique centralisé des actions administratives (Kernel)',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
             ),
             const SizedBox(height: 16),
             SizedBox(
@@ -107,8 +106,8 @@ class _AuditLogScreenState extends State<AuditLogScreen> {
                         children: [
                           Text(
                             'Erreur : ${provider.error}',
-                            style: PharmaConnectTypography.body2.copyWith(
-                              color: PharmaConnectColors.accentRed,
+                            style: context.text.body2.copyWith(
+                              color: context.palette.danger,
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -121,10 +120,10 @@ class _AuditLogScreenState extends State<AuditLogScreen> {
                       ),
                     )
                   : provider.auditLogs.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Text(
                         "Aucune entrée dans le journal d'audit",
-                        style: PharmaConnectTypography.body2,
+                        style: context.text.body2,
                       ),
                     )
                   : ListView.separated(
@@ -174,13 +173,13 @@ class _FilterChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
           color: selected
-              ? PharmaConnectColors.accentCyan.withValues(alpha: 0.15)
-              : Colors.white.withValues(alpha: 0.04),
+              ? context.palette.primary.withValues(alpha: 0.15)
+              : context.palette.surfaceMuted,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: selected
-                ? PharmaConnectColors.accentCyan
-                : Colors.white.withValues(alpha: 0.08),
+                ? context.palette.primary
+                : context.palette.surfaceRaised,
           ),
         ),
         child: Center(
@@ -190,8 +189,8 @@ class _FilterChip extends StatelessWidget {
               fontSize: 12,
               fontWeight: FontWeight.w600,
               color: selected
-                  ? PharmaConnectColors.accentCyan
-                  : PharmaConnectColors.textSecondary,
+                  ? context.palette.primary
+                  : context.palette.textSecondary,
             ),
           ),
         ),
@@ -208,15 +207,15 @@ class _AuditLogTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final statusColor = log.isSuccess
-        ? PharmaConnectColors.accentGreen
-        : PharmaConnectColors.accentRed;
+        ? context.palette.success
+        : context.palette.danger;
 
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.04),
+        color: context.palette.surfaceMuted,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        border: Border.all(color: context.palette.borderSubtle),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -233,19 +232,19 @@ class _AuditLogTile extends StatelessWidget {
               children: [
                 Text(
                   '${log.action} • ${log.resource} #${log.resourceId}',
-                  style: PharmaConnectTypography.body1.copyWith(
+                  style: context.text.body1.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 Text(
                   'Par ${log.userName} — ${_formatTimestamp(log.timestamp)}',
-                  style: PharmaConnectTypography.body2,
+                  style: context.text.body2,
                 ),
                 if (log.errorMessage != null)
                   Text(
                     log.errorMessage!,
-                    style: PharmaConnectTypography.micro.copyWith(
-                      color: PharmaConnectColors.accentRed,
+                    style: context.text.micro.copyWith(
+                      color: context.palette.danger,
                     ),
                   ),
               ],

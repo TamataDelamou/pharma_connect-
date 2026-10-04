@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import '../providers/offline_pos_provider.dart';
+import '../../../core/theme/palette.dart';
 
 class OfflinePOSIndicator extends StatelessWidget {
   const OfflinePOSIndicator({super.key});
@@ -15,13 +14,13 @@ class OfflinePOSIndicator extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: provider.isOffline
-            ? PharmaConnectColors.accentOrange.withValues(alpha: 0.15)
-            : PharmaConnectColors.accentGreen.withValues(alpha: 0.15),
+            ? context.palette.warning.withValues(alpha: 0.15)
+            : context.palette.success.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: provider.isOffline
-              ? PharmaConnectColors.accentOrange.withValues(alpha: 0.3)
-              : PharmaConnectColors.accentGreen.withValues(alpha: 0.3),
+              ? context.palette.warning.withValues(alpha: 0.3)
+              : context.palette.success.withValues(alpha: 0.3),
         ),
       ),
       child: Row(
@@ -33,8 +32,8 @@ class OfflinePOSIndicator extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: provider.isOffline
-                  ? PharmaConnectColors.accentOrange
-                  : PharmaConnectColors.accentGreen,
+                  ? context.palette.warning
+                  : context.palette.success,
             ),
           ),
           const SizedBox(width: 8),
@@ -44,8 +43,8 @@ class OfflinePOSIndicator extends StatelessWidget {
               fontSize: 12,
               fontWeight: FontWeight.w600,
               color: provider.isOffline
-                  ? PharmaConnectColors.accentOrange
-                  : PharmaConnectColors.accentGreen,
+                  ? context.palette.warning
+                  : context.palette.success,
             ),
           ),
           if (provider.pendingSales > 0) ...[
@@ -53,7 +52,7 @@ class OfflinePOSIndicator extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: PharmaConnectColors.accentRed.withValues(alpha: 0.15),
+                color: context.palette.danger.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
@@ -61,20 +60,20 @@ class OfflinePOSIndicator extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w500,
-                  color: PharmaConnectColors.accentRed,
+                  color: context.palette.danger,
                 ),
               ),
             ),
           ],
           if (provider.isSyncing) ...[
             const SizedBox(width: 8),
-            const SizedBox(
+            SizedBox(
               width: 16,
               height: 16,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
                 valueColor: AlwaysStoppedAnimation<Color>(
-                  PharmaConnectColors.accentCyan,
+                  context.palette.primary,
                 ),
               ),
             ),

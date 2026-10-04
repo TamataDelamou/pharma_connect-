@@ -3,11 +3,10 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../providers/coldchain_provider.dart';
 import '../widgets/equipment_card.dart';
+import '../../../core/theme/palette.dart';
 
 class ColdChainDashboardScreen extends StatefulWidget {
   const ColdChainDashboardScreen({super.key});
@@ -41,19 +40,19 @@ class _ColdChainDashboardScreenState extends State<ColdChainDashboardScreen> {
             // En-tête
             // C233 : en-tête adaptable (actions sous le titre sur téléphone).
             HeaderRow(
-              leading: const Column(
+              leading: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Chaîne du froid',
-                    style: PharmaConnectTypography.heading1,
+                    style: context.text.heading1,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(height: 4),
                   Text(
                     'Surveillez la température des équipements et des produits',
-                    style: PharmaConnectTypography.body2,
+                    style: context.text.body2,
                   ),
                 ],
               ),
@@ -64,8 +63,8 @@ class _ColdChainDashboardScreenState extends State<ColdChainDashboardScreen> {
                   icon: const Icon(Icons.add),
                   label: const Text('Ajouter'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: PharmaConnectColors.accentCyan,
-                    foregroundColor: PharmaConnectColors.textOnAccent,
+                    backgroundColor: context.palette.primary,
+                    foregroundColor: context.palette.onPrimary,
                   ),
                 ),
               ],
@@ -81,20 +80,20 @@ class _ColdChainDashboardScreenState extends State<ColdChainDashboardScreen> {
                     value:
                         provider.statistics['totalEquipments']?.toString() ??
                         '0',
-                    color: PharmaConnectColors.accentCyan,
+                    color: context.palette.primary,
                   ),
                   const SizedBox(width: 12),
                   _buildStatCard(
                     label: 'Opérationnels',
                     value:
                         provider.statistics['operational']?.toString() ?? '0',
-                    color: PharmaConnectColors.accentGreen,
+                    color: context.palette.success,
                   ),
                   const SizedBox(width: 12),
                   _buildStatCard(
                     label: 'Alertes',
                     value: provider.statistics['alarms']?.toString() ?? '0',
-                    color: PharmaConnectColors.accentRed,
+                    color: context.palette.danger,
                   ),
                   const SizedBox(width: 12),
                   _buildStatCard(
@@ -102,7 +101,7 @@ class _ColdChainDashboardScreenState extends State<ColdChainDashboardScreen> {
                     value:
                         provider.statistics['activeIncidents']?.toString() ??
                         '0',
-                    color: PharmaConnectColors.accentOrange,
+                    color: context.palette.warning,
                   ),
                 ],
               ),
@@ -110,29 +109,26 @@ class _ColdChainDashboardScreenState extends State<ColdChainDashboardScreen> {
             ],
 
             // Liste des équipements
-            const Text(
-              'Équipements de froid',
-              style: PharmaConnectTypography.heading3,
-            ),
+            Text('Équipements de froid', style: context.text.heading3),
             const SizedBox(height: 8),
 
             Expanded(
               child: provider.isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : provider.equipments.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
                             Icons.ac_unit_outlined,
                             size: 64,
-                            color: Colors.white24,
+                            color: context.palette.veil(0.24),
                           ),
                           SizedBox(height: 16),
                           Text(
                             'Aucun équipement enregistré',
-                            style: PharmaConnectTypography.body2,
+                            style: context.text.body2,
                           ),
                         ],
                       ),
@@ -172,14 +168,14 @@ class _ColdChainDashboardScreenState extends State<ColdChainDashboardScreen> {
           children: [
             Text(
               value,
-              style: PharmaConnectTypography.kpiMedium.copyWith(
+              style: context.text.kpiMedium.copyWith(
                 color: color,
                 fontSize: 20,
               ),
             ),
             Text(
               label,
-              style: PharmaConnectTypography.micro,
+              style: context.text.micro,
               overflow: TextOverflow.ellipsis,
             ),
           ],

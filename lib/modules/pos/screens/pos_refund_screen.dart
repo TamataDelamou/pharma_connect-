@@ -3,14 +3,13 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/utils/currency_formatter.dart';
 import '../providers/pos_provider.dart';
 import '../models/pos_sale.dart';
 import '../widgets/refund_confirmation_dialog.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class POSRefundScreen extends StatefulWidget {
   final String? saleId;
@@ -71,18 +70,18 @@ class _POSRefundScreenState extends State<POSRefundScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       '🔄 Remboursement',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -103,9 +102,9 @@ class _POSRefundScreenState extends State<POSRefundScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             '1️⃣ Rechercher la vente',
-                            style: PharmaConnectTypography.heading3,
+                            style: context.text.heading3,
                           ),
                           const SizedBox(height: 8),
                           Row(
@@ -139,21 +138,19 @@ class _POSRefundScreenState extends State<POSRefundScreen> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: PharmaConnectColors.accentRed.withValues(
-                            alpha: 0.1,
-                          ),
+                          color: context.palette.danger.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: PharmaConnectColors.accentRed.withValues(
+                            color: context.palette.danger.withValues(
                               alpha: 0.2,
                             ),
                           ),
                         ),
                         child: Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.error_outline,
-                              color: PharmaConnectColors.accentRed,
+                              color: context.palette.danger,
                             ),
                             const SizedBox(width: 8),
                             Expanded(child: Text(_error!)),
@@ -172,9 +169,9 @@ class _POSRefundScreenState extends State<POSRefundScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               '2️⃣ Confirmer le remboursement',
-                              style: PharmaConnectTypography.heading3,
+                              style: context.text.heading3,
                             ),
                             const SizedBox(height: 8),
                             Text(
@@ -182,7 +179,7 @@ class _POSRefundScreenState extends State<POSRefundScreen> {
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w700,
-                                color: PharmaConnectColors.accentOrange,
+                                color: context.palette.warning,
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -212,28 +209,26 @@ class _POSRefundScreenState extends State<POSRefundScreen> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: PharmaConnectColors.accentGreen.withValues(
-                            alpha: 0.1,
-                          ),
+                          color: context.palette.success.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: PharmaConnectColors.accentGreen.withValues(
+                            color: context.palette.success.withValues(
                               alpha: 0.2,
                             ),
                           ),
                         ),
                         child: Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.check_circle,
-                              color: PharmaConnectColors.accentGreen,
+                              color: context.palette.success,
                             ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 'Cette vente a déjà été remboursée',
                                 style: TextStyle(
-                                  color: PharmaConnectColors.accentGreen,
+                                  color: context.palette.success,
                                 ),
                               ),
                             ),
@@ -258,19 +253,14 @@ class _POSRefundScreenState extends State<POSRefundScreen> {
         children: [
           Row(
             children: [
-              Text(
-                'Vente #${sale.saleNumber}',
-                style: PharmaConnectTypography.heading3,
-              ),
+              Text('Vente #${sale.saleNumber}', style: context.text.heading3),
               const Spacer(),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
                   color: sale.status == 'completed'
-                      ? PharmaConnectColors.accentGreen.withValues(alpha: 0.15)
-                      : PharmaConnectColors.accentOrange.withValues(
-                          alpha: 0.15,
-                        ),
+                      ? context.palette.success.withValues(alpha: 0.15)
+                      : context.palette.warning.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
@@ -279,8 +269,8 @@ class _POSRefundScreenState extends State<POSRefundScreen> {
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: sale.status == 'completed'
-                        ? PharmaConnectColors.accentGreen
-                        : PharmaConnectColors.accentOrange,
+                        ? context.palette.success
+                        : context.palette.warning,
                   ),
                 ),
               ),
@@ -292,30 +282,24 @@ class _POSRefundScreenState extends State<POSRefundScreen> {
           _buildInfoRow('Paiement', sale.paymentLabel),
           if (sale.patientName != null)
             _buildInfoRow('Patient', sale.patientName!),
-          const Divider(color: Colors.white12),
+          Divider(color: context.palette.veil(0.12)),
           _buildInfoRow('Total', CurrencyFormatter.format(sale.finalAmount)),
           const SizedBox(height: 8),
           if (sale.items != null) ...[
-            const Text('Articles:', style: PharmaConnectTypography.label),
+            Text('Articles:', style: context.text.label),
             ...sale.items!.map((item) {
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 2),
                 child: Row(
                   children: [
-                    Text(
-                      '${item.quantity}x',
-                      style: PharmaConnectTypography.micro,
-                    ),
+                    Text('${item.quantity}x', style: context.text.micro),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: Text(
-                        item.productName,
-                        style: PharmaConnectTypography.body2,
-                      ),
+                      child: Text(item.productName, style: context.text.body2),
                     ),
                     Text(
                       CurrencyFormatter.format(item.totalPrice),
-                      style: PharmaConnectTypography.micro,
+                      style: context.text.micro,
                     ),
                   ],
                 ),
@@ -332,11 +316,8 @@ class _POSRefundScreenState extends State<POSRefundScreen> {
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         children: [
-          SizedBox(
-            width: 80,
-            child: Text(label, style: PharmaConnectTypography.micro),
-          ),
-          Expanded(child: Text(value, style: PharmaConnectTypography.body2)),
+          SizedBox(width: 80, child: Text(label, style: context.text.micro)),
+          Expanded(child: Text(value, style: context.text.body2)),
         ],
       ),
     );
@@ -374,8 +355,8 @@ class _POSRefundScreenState extends State<POSRefundScreen> {
               : provider.error ?? 'Remboursement refusé',
         ),
         backgroundColor: success
-            ? PharmaConnectColors.accentGreen
-            : PharmaConnectColors.accentRed,
+            ? context.palette.success
+            : context.palette.danger,
       ),
     );
     if (success) {

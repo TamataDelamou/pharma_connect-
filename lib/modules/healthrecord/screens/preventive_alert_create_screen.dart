@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/tertiary_button.dart';
@@ -11,6 +9,7 @@ import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/widgets/inputs/glass_input.dart';
 import '../providers/preventive_alert_provider.dart';
 import '../models/preventive_alert.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class PreventiveAlertCreateScreen extends StatefulWidget {
   final String? alertId;
@@ -67,9 +66,9 @@ class _PreventiveAlertCreateScreenState
               Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
@@ -80,7 +79,7 @@ class _PreventiveAlertCreateScreenState
                       widget.alertId == null
                           ? '🔔 Nouvelle alerte préventive'
                           : '🔔 Modifier l\'alerte',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                     ),
                   ),
                   const KernelBadge(),
@@ -177,29 +176,29 @@ class _PreventiveAlertCreateScreenState
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: PharmaConnectColors.accentCyan.withValues(
+                          color: context.palette.primary.withValues(
                             alpha: 0.06,
                           ),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: PharmaConnectColors.accentCyan.withValues(
+                            color: context.palette.primary.withValues(
                               alpha: 0.15,
                             ),
                           ),
                         ),
                         child: Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.info_outline,
-                              color: PharmaConnectColors.accentCyan,
+                              color: context.palette.primary,
                               size: 16,
                             ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 'Vous recevrez une notification lorsque le délai sera dépassé depuis le dernier événement.',
-                                style: PharmaConnectTypography.micro.copyWith(
-                                  color: PharmaConnectColors.textSecondary,
+                                style: context.text.micro.copyWith(
+                                  color: context.palette.textSecondary,
                                 ),
                               ),
                             ),
@@ -236,6 +235,7 @@ class _PreventiveAlertCreateScreenState
   }
 
   Future<void> _saveAlert() async {
+    final palette = context.palette;
     if (!_formKey.currentState!.validate()) return;
 
     final userId = SupabaseService().currentUser?.id;
@@ -275,7 +275,7 @@ class _PreventiveAlertCreateScreenState
                 ? 'Alerte créée avec succès'
                 : 'Alerte mise à jour',
           ),
-          backgroundColor: PharmaConnectColors.accentGreen,
+          backgroundColor: palette.success,
         ),
       );
     } else if (context.mounted) {
@@ -284,7 +284,7 @@ class _PreventiveAlertCreateScreenState
           content: Text(
             context.read<PreventiveAlertProvider>().error ?? 'Erreur',
           ),
-          backgroundColor: PharmaConnectColors.accentRed,
+          backgroundColor: palette.danger,
         ),
       );
     }

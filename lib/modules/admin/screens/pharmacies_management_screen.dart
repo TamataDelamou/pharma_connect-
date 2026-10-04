@@ -3,11 +3,10 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../models/admin_pharmacy.dart';
 import '../models/pharmacy_status.dart';
 import '../providers/admin_provider.dart';
+import '../../../core/theme/palette.dart';
 
 class PharmaciesManagementScreen extends StatefulWidget {
   const PharmaciesManagementScreen({super.key});
@@ -50,6 +49,7 @@ class _PharmaciesManagementScreenState
     PharmacyStatus status,
     String successMessage,
   ) async {
+    final palette = context.palette;
     final provider = context.read<AdminProvider>();
     final ok = await provider.updatePharmacyStatus(pharmacy.id, status);
     if (context.mounted) {
@@ -58,9 +58,7 @@ class _PharmaciesManagementScreenState
           content: Text(
             ok ? successMessage : (provider.error ?? 'Échec de la mise à jour'),
           ),
-          backgroundColor: ok
-              ? PharmaConnectColors.accentGreen
-              : PharmaConnectColors.accentRed,
+          backgroundColor: ok ? palette.success : palette.danger,
         ),
       );
     }
@@ -81,18 +79,18 @@ class _PharmaciesManagementScreenState
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Gestion des officines',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -102,9 +100,9 @@ class _PharmaciesManagementScreenState
               trailing: [const KernelBadge()],
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Validation DNPM, statut et licences des officines',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
             ),
             const SizedBox(height: 16),
             SizedBox(
@@ -140,8 +138,8 @@ class _PharmaciesManagementScreenState
                         children: [
                           Text(
                             'Erreur : ${provider.error}',
-                            style: PharmaConnectTypography.body2.copyWith(
-                              color: PharmaConnectColors.accentRed,
+                            style: context.text.body2.copyWith(
+                              color: context.palette.danger,
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -154,11 +152,8 @@ class _PharmaciesManagementScreenState
                       ),
                     )
                   : provider.pharmacies.isEmpty
-                  ? const Center(
-                      child: Text(
-                        'Aucune officine',
-                        style: PharmaConnectTypography.body2,
-                      ),
+                  ? Center(
+                      child: Text('Aucune officine', style: context.text.body2),
                     )
                   : ListView.builder(
                       itemCount: provider.pharmacies.length,
@@ -224,13 +219,13 @@ class _FilterChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
           color: selected
-              ? PharmaConnectColors.accentCyan.withValues(alpha: 0.15)
-              : Colors.white.withValues(alpha: 0.04),
+              ? context.palette.primary.withValues(alpha: 0.15)
+              : context.palette.surfaceMuted,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: selected
-                ? PharmaConnectColors.accentCyan
-                : Colors.white.withValues(alpha: 0.08),
+                ? context.palette.primary
+                : context.palette.surfaceRaised,
           ),
         ),
         child: Center(
@@ -240,8 +235,8 @@ class _FilterChip extends StatelessWidget {
               fontSize: 12,
               fontWeight: FontWeight.w600,
               color: selected
-                  ? PharmaConnectColors.accentCyan
-                  : PharmaConnectColors.textSecondary,
+                  ? context.palette.primary
+                  : context.palette.textSecondary,
             ),
           ),
         ),
@@ -272,9 +267,9 @@ class _PharmacyCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.04),
+        color: context.palette.surfaceMuted,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        border: Border.all(color: context.palette.borderSubtle),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -284,7 +279,7 @@ class _PharmacyCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   pharmacy.name,
-                  style: PharmaConnectTypography.body1.copyWith(
+                  style: context.text.body1.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -292,7 +287,9 @@ class _PharmacyCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: pharmacy.statusColor.withValues(alpha: 0.15),
+                  color: pharmacy.statusColor
+                      .of(context.palette)
+                      .withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
@@ -300,23 +297,20 @@ class _PharmacyCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
-                    color: pharmacy.statusColor,
+                    color: pharmacy.statusColor.of(context.palette),
                   ),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 4),
-          Text(pharmacy.address, style: PharmaConnectTypography.body2),
+          Text(pharmacy.address, style: context.text.body2),
           Text(
             '${pharmacy.phone} • ${pharmacy.licenseNumber ?? 'Sans licence déclarée'}',
-            style: PharmaConnectTypography.micro,
+            style: context.text.mono,
           ),
           if (pharmacy.managerName != null)
-            Text(
-              'Gérant : ${pharmacy.managerName}',
-              style: PharmaConnectTypography.micro,
-            ),
+            Text('Gérant : ${pharmacy.managerName}', style: context.text.micro),
           const SizedBox(height: 12),
           Wrap(
             spacing: 8,
@@ -326,10 +320,8 @@ class _PharmacyCard extends StatelessWidget {
                 OutlinedButton(
                   onPressed: onVerify,
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(
-                      color: PharmaConnectColors.accentCyan,
-                    ),
-                    foregroundColor: PharmaConnectColors.accentCyan,
+                    side: BorderSide(color: context.palette.primary),
+                    foregroundColor: context.palette.primary,
                   ),
                   child: const Text('Vérifier la licence'),
                 ),
@@ -339,18 +331,16 @@ class _PharmacyCard extends StatelessWidget {
                 ElevatedButton(
                   onPressed: onApprove,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: PharmaConnectColors.accentGreen,
-                    foregroundColor: PharmaConnectColors.textOnAccent,
+                    backgroundColor: context.palette.success,
+                    foregroundColor: context.palette.onPrimary,
                   ),
                   child: const Text('Approuver'),
                 ),
                 OutlinedButton(
                   onPressed: onReject,
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(
-                      color: PharmaConnectColors.accentRed,
-                    ),
-                    foregroundColor: PharmaConnectColors.accentRed,
+                    side: BorderSide(color: context.palette.danger),
+                    foregroundColor: context.palette.danger,
                   ),
                   child: const Text('Rejeter'),
                 ),
@@ -359,10 +349,8 @@ class _PharmacyCard extends StatelessWidget {
                 OutlinedButton(
                   onPressed: onSuspend,
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(
-                      color: PharmaConnectColors.accentOrange,
-                    ),
-                    foregroundColor: PharmaConnectColors.accentOrange,
+                    side: BorderSide(color: context.palette.warning),
+                    foregroundColor: context.palette.warning,
                   ),
                   child: const Text('Suspendre'),
                 ),
@@ -371,8 +359,8 @@ class _PharmacyCard extends StatelessWidget {
                 ElevatedButton(
                   onPressed: onReactivate,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: PharmaConnectColors.accentGreen,
-                    foregroundColor: PharmaConnectColors.textOnAccent,
+                    backgroundColor: context.palette.success,
+                    foregroundColor: context.palette.onPrimary,
                   ),
                   child: const Text('Réactiver'),
                 ),

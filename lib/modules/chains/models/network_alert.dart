@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart' show Color;
 import 'package:equatable/equatable.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class NetworkAlert extends Equatable {
   final String id;
@@ -155,18 +155,18 @@ class NetworkAlert extends Equatable {
     }
   }
 
-  Color get severityColor {
+  ColorRole get severityColor {
     switch (severity) {
       case 'critical':
-        return PharmaConnectColors.accentRed;
+        return ColorRole.danger;
       case 'high':
-        return PharmaConnectColors.accentAmber;
+        return ColorRole.warningStrong;
       case 'medium':
-        return PharmaConnectColors.accentOrange;
+        return ColorRole.warning;
       case 'low':
-        return PharmaConnectColors.accentGreen;
+        return ColorRole.success;
       default:
-        return PharmaConnectColors.textSecondary;
+        return ColorRole.textSecondary;
     }
   }
 }

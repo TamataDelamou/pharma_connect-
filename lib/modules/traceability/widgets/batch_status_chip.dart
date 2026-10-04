@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/batch_status.dart';
+import '../../../core/theme/palette.dart';
 
 class BatchStatusChip extends StatelessWidget {
   final BatchStatus status;
@@ -11,10 +12,10 @@ class BatchStatusChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: status.color.withValues(alpha: 0.15),
+        color: status.color.of(context.palette).withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(6),
         border: Border.all(
-          color: status.color.withValues(alpha: 0.3),
+          color: status.color.of(context.palette).withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -28,7 +29,7 @@ class BatchStatusChip extends StatelessWidget {
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: status.color,
+              color: status.color.of(context.palette),
             ),
           ),
         ],

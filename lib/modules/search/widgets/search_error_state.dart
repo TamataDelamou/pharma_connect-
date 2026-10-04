@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
+import '../../../core/theme/palette.dart';
 
 class SearchErrorState extends StatelessWidget {
   final String message;
@@ -19,17 +18,9 @@ class SearchErrorState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(
-            Icons.error_outline,
-            size: 56,
-            color: PharmaConnectColors.accentRed,
-          ),
+          Icon(Icons.error_outline, size: 56, color: context.palette.danger),
           const SizedBox(height: 16),
-          Text(
-            message,
-            style: PharmaConnectTypography.body1,
-            textAlign: TextAlign.center,
-          ),
+          Text(message, style: context.text.body1, textAlign: TextAlign.center),
           const SizedBox(height: 24),
           PrimaryButton(
             label: 'Réessayer',

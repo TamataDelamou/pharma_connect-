@@ -5,8 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../../../core/widgets/inputs/glass_input.dart';
@@ -14,6 +12,7 @@ import '../providers/auth_provider.dart';
 import '../services/pharmacy_service.dart';
 import '../widgets/phone_input_field.dart';
 import '../../pharmacy_staff/widgets/pending_invitations_card.dart';
+import '../../../core/theme/palette.dart';
 
 /// RG-AUT-01 (audit Module 1, 29/08/2026) : soumet réellement la candidature
 /// d'officine à public.pharmacies via PharmacyService, à l'état 'pending'.
@@ -67,13 +66,13 @@ class _LicenseVerificationScreenState extends State<LicenseVerificationScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(
+                  Row(
                     children: [
                       Text(
                         '◈',
                         style: TextStyle(
                           fontSize: 28,
-                          color: PharmaConnectColors.accentCyan,
+                          color: context.palette.primary,
                         ),
                       ),
                       SizedBox(width: 8),
@@ -84,7 +83,7 @@ class _LicenseVerificationScreenState extends State<LicenseVerificationScreen> {
                             fontFamily: 'Inter',
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
-                            color: PharmaConnectColors.textPrimary,
+                            color: context.palette.textPrimary,
                             letterSpacing: 0.5,
                           ),
                         ),
@@ -93,14 +92,11 @@ class _LicenseVerificationScreenState extends State<LicenseVerificationScreen> {
                     ],
                   ),
                   const SizedBox(height: 24),
-                  const Text(
-                    'Vérification de licence',
-                    style: PharmaConnectTypography.heading2,
-                  ),
+                  Text('Vérification de licence', style: context.text.heading2),
                   const SizedBox(height: 8),
-                  const Text(
+                  Text(
                     'Pour activer votre compte pharmacie, veuillez fournir les informations suivantes.',
-                    style: PharmaConnectTypography.body2,
+                    style: context.text.body2,
                   ),
                   const SizedBox(height: 24),
                   // C209 : un employé d'une officine déjà inscrite accepte
@@ -139,9 +135,9 @@ class _LicenseVerificationScreenState extends State<LicenseVerificationScreen> {
                     prefixIcon: Icons.location_on,
                   ),
                   const SizedBox(height: 16),
-                  const Text(
+                  Text(
                     'Photo de la licence (optionnel)',
-                    style: PharmaConnectTypography.label,
+                    style: context.text.label,
                   ),
                   const SizedBox(height: 8),
                   GestureDetector(
@@ -149,10 +145,10 @@ class _LicenseVerificationScreenState extends State<LicenseVerificationScreen> {
                     child: Container(
                       height: 120,
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.04),
+                        color: context.palette.surfaceMuted,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.06),
+                          color: context.palette.borderSubtle,
                           width: 1,
                         ),
                       ),
@@ -161,20 +157,20 @@ class _LicenseVerificationScreenState extends State<LicenseVerificationScreen> {
                               borderRadius: BorderRadius.circular(12),
                               child: Image.file(_licenseImage!),
                             )
-                          : const Center(
+                          : Center(
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(
                                     Icons.upload_file,
-                                    color: Colors.white54,
+                                    color: context.palette.textSecondary,
                                     size: 32,
                                   ),
                                   SizedBox(height: 4),
                                   Text(
                                     'Toucher pour ajouter une photo',
                                     style: TextStyle(
-                                      color: Colors.white54,
+                                      color: context.palette.textSecondary,
                                       fontSize: 12,
                                     ),
                                   ),
@@ -187,28 +183,24 @@ class _LicenseVerificationScreenState extends State<LicenseVerificationScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: PharmaConnectColors.accentOrange.withValues(
-                        alpha: 0.08,
-                      ),
+                      color: context.palette.warning.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: PharmaConnectColors.accentOrange.withValues(
-                          alpha: 0.15,
-                        ),
+                        color: context.palette.warning.withValues(alpha: 0.15),
                       ),
                     ),
                     child: Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.info_outline,
-                          color: PharmaConnectColors.accentOrange,
+                          color: context.palette.warning,
                           size: 16,
                         ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             'La vérification peut prendre jusqu\'à 48h. Vous serez notifié par email.',
-                            style: PharmaConnectTypography.micro,
+                            style: context.text.micro,
                           ),
                         ),
                       ],
@@ -224,11 +216,11 @@ class _LicenseVerificationScreenState extends State<LicenseVerificationScreen> {
                           _addressController.text.trim().isEmpty ||
                           _phoneE164 == null) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
+                          SnackBar(
                             content: Text(
                               'Veuillez remplir tous les champs obligatoires',
                             ),
-                            backgroundColor: PharmaConnectColors.accentRed,
+                            backgroundColor: context.palette.danger,
                           ),
                         );
                         return;
@@ -264,14 +256,14 @@ class _LicenseVerificationScreenState extends State<LicenseVerificationScreen> {
                         await auth.refreshAccountStatus();
                         if (!context.mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
+                          SnackBar(
                             content: Text(
                               'Candidature soumise. Votre compte est actif ; '
                               'les fonctions officine (stock, ventes...) '
                               'seront disponibles après vérification par '
                               'l\'équipe GSG.',
                             ),
-                            backgroundColor: PharmaConnectColors.accentGreen,
+                            backgroundColor: context.palette.success,
                           ),
                         );
                         context.go('/dashboard');
@@ -281,7 +273,7 @@ class _LicenseVerificationScreenState extends State<LicenseVerificationScreen> {
                             content: Text(
                               'Échec de la soumission : $errorMessage',
                             ),
-                            backgroundColor: PharmaConnectColors.accentRed,
+                            backgroundColor: context.palette.danger,
                           ),
                         );
                       }

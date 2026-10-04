@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/inputs/glass_input.dart';
 import '../providers/hospitals_provider.dart';
 import '../widgets/hospital_card.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class HospitalsListScreen extends StatefulWidget {
   final bool isSelectMode;
@@ -65,27 +64,27 @@ class _HospitalsListScreenState extends State<HospitalsListScreen> {
               children: [
                 if (widget.isSelectMode) ...[
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
                 ],
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'Établissements de santé',
-                        style: PharmaConnectTypography.heading1,
+                        style: context.text.heading1,
                       ),
                       SizedBox(height: 4),
                       Text(
                         'Trouvez un hôpital ou une clinique près de chez vous',
-                        style: PharmaConnectTypography.body2,
+                        style: context.text.body2,
                       ),
                     ],
                   ),
@@ -120,10 +119,8 @@ class _HospitalsListScreenState extends State<HospitalsListScreen> {
                     DropdownButton<String>(
                       value: _selectedTypeId,
                       hint: const Text('Type'),
-                      dropdownColor: PharmaConnectColors.primaryDeep,
-                      style: const TextStyle(
-                        color: PharmaConnectColors.textPrimary,
-                      ),
+                      dropdownColor: context.palette.background,
+                      style: TextStyle(color: context.palette.textPrimary),
                       items: [
                         const DropdownMenuItem<String>(
                           value: null,
@@ -147,10 +144,8 @@ class _HospitalsListScreenState extends State<HospitalsListScreen> {
                   DropdownButton<String>(
                     value: _selectedCity,
                     hint: const Text('Ville'),
-                    dropdownColor: PharmaConnectColors.primaryDeep,
-                    style: const TextStyle(
-                      color: PharmaConnectColors.textPrimary,
-                    ),
+                    dropdownColor: context.palette.background,
+                    style: TextStyle(color: context.palette.textPrimary),
                     items: [
                       const DropdownMenuItem<String>(
                         value: null,
@@ -182,14 +177,14 @@ class _HospitalsListScreenState extends State<HospitalsListScreen> {
                       setState(() => _showOnlyEmergency = selected);
                       _loadHospitals();
                     },
-                    selectedColor: PharmaConnectColors.accentRed.withValues(
+                    selectedColor: context.palette.danger.withValues(
                       alpha: 0.2,
                     ),
                     backgroundColor: Colors.transparent,
                     side: BorderSide(
                       color: _showOnlyEmergency
-                          ? PharmaConnectColors.accentRed
-                          : Colors.white24,
+                          ? context.palette.danger
+                          : context.palette.veil(0.24),
                     ),
                   ),
                 ],
@@ -214,18 +209,12 @@ class _HospitalsListScreenState extends State<HospitalsListScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 48,
-              color: PharmaConnectColors.accentRed,
-            ),
+            Icon(Icons.error_outline, size: 48, color: context.palette.danger),
             const SizedBox(height: 16),
             Text(
               provider.error!,
               textAlign: TextAlign.center,
-              style: PharmaConnectTypography.body2.copyWith(
-                color: PharmaConnectColors.accentRed,
-              ),
+              style: context.text.body2.copyWith(color: context.palette.danger),
             ),
             const SizedBox(height: 16),
             PrimaryButton(
@@ -242,24 +231,21 @@ class _HospitalsListScreenState extends State<HospitalsListScreen> {
     }
 
     if (provider.hospitals.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               Icons.local_hospital_outlined,
               size: 64,
-              color: Colors.white24,
+              color: context.palette.veil(0.24),
             ),
             SizedBox(height: 16),
-            Text(
-              'Aucun établissement trouvé',
-              style: PharmaConnectTypography.heading3,
-            ),
+            Text('Aucun établissement trouvé', style: context.text.heading3),
             SizedBox(height: 8),
             Text(
               'Ajustez vos filtres ou recherchez autre chose',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
               textAlign: TextAlign.center,
             ),
           ],

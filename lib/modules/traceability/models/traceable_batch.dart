@@ -1,9 +1,8 @@
-import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
 import 'batch_status.dart';
 import 'batch_movement.dart';
 import 'cold_chain_record.dart';
 import 'certificate.dart';
+import '../../../core/theme/palette.dart';
 
 class TraceableBatch {
   final String id;
@@ -192,26 +191,26 @@ class TraceableBatch {
     }
   }
 
-  Color get statusColor {
+  ColorRole get statusColor {
     switch (status) {
       case BatchStatus.manufactured:
-        return PharmaConnectColors.accentPurple;
+        return ColorRole.secondary;
       case BatchStatus.inTransit:
-        return PharmaConnectColors.accentCyan;
+        return ColorRole.primary;
       case BatchStatus.atDistributor:
-        return PharmaConnectColors.accentGreen;
+        return ColorRole.success;
       case BatchStatus.atPharmacy:
-        return PharmaConnectColors.accentOrange;
+        return ColorRole.warning;
       case BatchStatus.sold:
-        return PharmaConnectColors.neutralMuted;
+        return ColorRole.textMuted;
       case BatchStatus.dispensed:
-        return PharmaConnectColors.accentGreen;
+        return ColorRole.success;
       case BatchStatus.returned:
-        return PharmaConnectColors.textSecondary;
+        return ColorRole.textSecondary;
       case BatchStatus.recalled:
-        return PharmaConnectColors.accentRed;
+        return ColorRole.danger;
       case BatchStatus.destroyed:
-        return PharmaConnectColors.neutralDark;
+        return ColorRole.textMuted;
     }
   }
 

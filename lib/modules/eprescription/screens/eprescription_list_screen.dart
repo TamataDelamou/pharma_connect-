@@ -3,12 +3,11 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import '../providers/eprescription_provider.dart';
 import '../widgets/eprescription_card.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class EPrescriptionListScreen extends StatefulWidget {
   final bool isDoctor;
@@ -88,19 +87,19 @@ class _EPrescriptionListScreenState extends State<EPrescriptionListScreen>
           children: [
             // C233 : en-tête adaptable (actions sous le titre sur téléphone).
             HeaderRow(
-              leading: const Column(
+              leading: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'e-Prescriptions',
-                    style: PharmaConnectTypography.heading1,
+                    style: context.text.heading1,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(height: 4),
                   Text(
                     'Prescriptions électroniques sécurisées',
-                    style: PharmaConnectTypography.body2,
+                    style: context.text.body2,
                   ),
                 ],
               ),
@@ -113,8 +112,8 @@ class _EPrescriptionListScreenState extends State<EPrescriptionListScreen>
                     icon: const Icon(Icons.add),
                     label: const Text('Nouvelle prescription'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: PharmaConnectColors.accentCyan,
-                      foregroundColor: PharmaConnectColors.textOnAccent,
+                      backgroundColor: context.palette.primary,
+                      foregroundColor: context.palette.onPrimary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -132,9 +131,9 @@ class _EPrescriptionListScreenState extends State<EPrescriptionListScreen>
                 Tab(text: 'Envoyées'),
                 Tab(text: 'Validées'),
               ],
-              labelColor: PharmaConnectColors.accentCyan,
-              unselectedLabelColor: PharmaConnectColors.textSecondary,
-              indicatorColor: PharmaConnectColors.accentCyan,
+              labelColor: context.palette.primary,
+              unselectedLabelColor: context.palette.textSecondary,
+              indicatorColor: context.palette.primary,
               indicatorWeight: 3,
               dividerColor: Colors.transparent,
             ),
@@ -157,18 +156,12 @@ class _EPrescriptionListScreenState extends State<EPrescriptionListScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 48,
-              color: PharmaConnectColors.accentRed,
-            ),
+            Icon(Icons.error_outline, size: 48, color: context.palette.danger),
             const SizedBox(height: 16),
             Text(
               provider.error!,
               textAlign: TextAlign.center,
-              style: PharmaConnectTypography.body2.copyWith(
-                color: PharmaConnectColors.accentRed,
-              ),
+              style: context.text.body2.copyWith(color: context.palette.danger),
             ),
             const SizedBox(height: 16),
             PrimaryButton(
@@ -189,16 +182,13 @@ class _EPrescriptionListScreenState extends State<EPrescriptionListScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
+            Icon(
               Icons.description_outlined,
               size: 64,
-              color: Colors.white24,
+              color: context.palette.veil(0.24),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Aucune e-prescription',
-              style: PharmaConnectTypography.heading3,
-            ),
+            Text('Aucune e-prescription', style: context.text.heading3),
             const SizedBox(height: 8),
             Text(
               widget.isDoctor
@@ -206,7 +196,7 @@ class _EPrescriptionListScreenState extends State<EPrescriptionListScreen>
                   : widget.isPharmacy
                   ? 'Aucune prescription reçue'
                   : 'Vous n\'avez pas encore de prescriptions électroniques',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
               textAlign: TextAlign.center,
             ),
           ],

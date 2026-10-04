@@ -3,8 +3,6 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../../auth/models/user_role.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -12,6 +10,7 @@ import '../../recall/models/recall_severity.dart';
 import '../providers/traceability_provider.dart';
 import '../widgets/batch_status_chip.dart';
 import '../widgets/movement_timeline.dart';
+import '../../../core/theme/palette.dart';
 
 class BatchDetailScreen extends StatefulWidget {
   final String batchId;
@@ -52,18 +51,18 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
                 leading: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.arrow_back,
-                        color: PharmaConnectColors.textPrimary,
+                        color: context.palette.textPrimary,
                       ),
                       onPressed: () => context.pop(),
                       padding: EdgeInsets.zero,
                     ),
                     const SizedBox(width: 8),
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         'Détail du lot',
-                        style: PharmaConnectTypography.heading2,
+                        style: context.text.heading2,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -73,12 +72,9 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
                 trailing: [const KernelBadge()],
               ),
               const SizedBox(height: 24),
-              const Expanded(
+              Expanded(
                 child: Center(
-                  child: Text(
-                    'Lot introuvable',
-                    style: PharmaConnectTypography.body2,
-                  ),
+                  child: Text('Lot introuvable', style: context.text.body2),
                 ),
               ),
             ],
@@ -96,28 +92,25 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
             Row(
               children: [
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.arrow_back,
-                    color: PharmaConnectColors.textPrimary,
+                    color: context.palette.textPrimary,
                   ),
                   onPressed: () => context.pop(),
                   padding: EdgeInsets.zero,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text(
-                    'Détail du lot',
-                    style: PharmaConnectTypography.heading2,
-                  ),
+                  child: Text('Détail du lot', style: context.text.heading2),
                 ),
                 const KernelBadge(),
                 if (_canDeclareRecall(context) && !batch.isRecalled) ...[
                   const SizedBox(width: 8),
                   IconButton(
                     tooltip: 'Déclarer un rappel',
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.warning_amber,
-                      color: PharmaConnectColors.accentRed,
+                      color: context.palette.danger,
                     ),
                     onPressed: () => _showRecallDialog(context),
                   ),
@@ -144,15 +137,15 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
                                   children: [
                                     Text(
                                       batch.productName,
-                                      style: PharmaConnectTypography.heading3,
+                                      style: context.text.heading3,
                                     ),
                                     Text(
                                       'Lot: ${batch.batchNumber}',
-                                      style: PharmaConnectTypography.body2,
+                                      style: context.text.body2,
                                     ),
                                     Text(
                                       'SN: ${batch.serialNumber}',
-                                      style: PharmaConnectTypography.micro,
+                                      style: context.text.mono,
                                     ),
                                   ],
                                 ),
@@ -161,7 +154,7 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
                             ],
                           ),
                           const SizedBox(height: 12),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           const SizedBox(height: 12),
                           Row(
                             children: [
@@ -169,9 +162,9 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
+                                    Text(
                                       'Fabricant',
-                                      style: PharmaConnectTypography.label,
+                                      style: context.text.label,
                                     ),
                                     Text(batch.manufacturer),
                                   ],
@@ -181,10 +174,7 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
-                                      'GTIN',
-                                      style: PharmaConnectTypography.label,
-                                    ),
+                                    Text('GTIN', style: context.text.label),
                                     Text(batch.gtin),
                                   ],
                                 ),
@@ -198,9 +188,9 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
+                                    Text(
                                       'Fabrication',
-                                      style: PharmaConnectTypography.label,
+                                      style: context.text.label,
                                     ),
                                     Text(_formatDate(batch.manufacturingDate)),
                                   ],
@@ -210,9 +200,9 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
+                                    Text(
                                       'Péremption',
-                                      style: PharmaConnectTypography.label,
+                                      style: context.text.label,
                                     ),
                                     Text(
                                       _formatDate(batch.expiryDate),
@@ -221,7 +211,7 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
                                             batch.expiryDate.isBefore(
                                               DateTime.now(),
                                             )
-                                            ? PharmaConnectColors.accentRed
+                                            ? context.palette.danger
                                             : null,
                                       ),
                                     ),
@@ -235,31 +225,30 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
                             Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: PharmaConnectColors.accentRed.withValues(
+                                color: context.palette.danger.withValues(
                                   alpha: 0.1,
                                 ),
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(
-                                  color: PharmaConnectColors.accentRed
-                                      .withValues(alpha: 0.2),
+                                  color: context.palette.danger.withValues(
+                                    alpha: 0.2,
+                                  ),
                                 ),
                               ),
                               child: Row(
                                 children: [
-                                  const Icon(
+                                  Icon(
                                     Icons.warning,
-                                    color: PharmaConnectColors.accentRed,
+                                    color: context.palette.danger,
                                   ),
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
                                       'RAPPEL: ${batch.recallReason}',
-                                      style: PharmaConnectTypography.body2
-                                          .copyWith(
-                                            color:
-                                                PharmaConnectColors.accentRed,
-                                            fontWeight: FontWeight.w600,
-                                          ),
+                                      style: context.text.body2.copyWith(
+                                        color: context.palette.danger,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -272,16 +261,13 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
                     const SizedBox(height: 16),
 
                     // Mouvements
-                    const Text(
+                    Text(
                       'Historique des mouvements',
-                      style: PharmaConnectTypography.heading3,
+                      style: context.text.heading3,
                     ),
                     const SizedBox(height: 8),
                     if (provider.movements.isEmpty) ...[
-                      const Text(
-                        'Aucun mouvement',
-                        style: PharmaConnectTypography.body2,
-                      ),
+                      Text('Aucun mouvement', style: context.text.body2),
                     ] else ...[
                       MovementTimeline(movements: provider.movements),
                     ],
@@ -290,24 +276,21 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
 
                     // Chaîne du froid
                     if (provider.coldChainRecords.isNotEmpty) ...[
-                      const Text(
-                        'Chaîne du froid',
-                        style: PharmaConnectTypography.heading3,
-                      ),
+                      Text('Chaîne du froid', style: context.text.heading3),
                       const SizedBox(height: 8),
                       ...provider.coldChainRecords.map(
                         (record) => Container(
                           padding: const EdgeInsets.all(12),
                           margin: const EdgeInsets.only(bottom: 4),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.04),
+                            color: context.palette.surfaceMuted,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
                               color: record.isBreach
-                                  ? PharmaConnectColors.accentRed.withValues(
+                                  ? context.palette.danger.withValues(
                                       alpha: 0.2,
                                     )
-                                  : Colors.white.withValues(alpha: 0.06),
+                                  : context.palette.surface,
                               width: 1,
                             ),
                           ),
@@ -318,8 +301,8 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
                                     ? Icons.error_outline
                                     : Icons.check_circle,
                                 color: record.isBreach
-                                    ? PharmaConnectColors.accentRed
-                                    : PharmaConnectColors.accentGreen,
+                                    ? context.palette.danger
+                                    : context.palette.success,
                                 size: 16,
                               ),
                               const SizedBox(width: 8),
@@ -329,11 +312,11 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
                                   children: [
                                     Text(
                                       '${record.temperature}°C',
-                                      style: PharmaConnectTypography.body1,
+                                      style: context.text.body1,
                                     ),
                                     Text(
                                       _formatDateTime(record.timestamp),
-                                      style: PharmaConnectTypography.micro,
+                                      style: context.text.micro,
                                     ),
                                   ],
                                 ),
@@ -342,8 +325,8 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
                                 record.status,
                                 style: TextStyle(
                                   color: record.isBreach
-                                      ? PharmaConnectColors.accentRed
-                                      : PharmaConnectColors.accentGreen,
+                                      ? context.palette.danger
+                                      : context.palette.success,
                                   fontWeight: FontWeight.w600,
                                   fontSize: 12,
                                 ),
@@ -437,9 +420,9 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
                   value: isPublic,
                   contentPadding: EdgeInsets.zero,
                   controlAffinity: ListTileControlAffinity.leading,
-                  title: const Text(
+                  title: Text(
                     'Avis de rappel public (visible par tous les patients)',
-                    style: PharmaConnectTypography.body2,
+                    style: context.text.body2,
                   ),
                   onChanged: (value) {
                     setDialogState(() => isPublic = value ?? false);
@@ -455,9 +438,9 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
             ),
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, true),
-              child: const Text(
+              child: Text(
                 'Confirmer le rappel',
-                style: TextStyle(color: PharmaConnectColors.accentRed),
+                style: TextStyle(color: context.palette.danger),
               ),
             ),
           ],
@@ -469,9 +452,9 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
     if (reasonController.text.trim().isEmpty) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('Veuillez préciser le motif du rappel'),
-            backgroundColor: PharmaConnectColors.accentRed,
+            backgroundColor: context.palette.danger,
           ),
         );
       }
@@ -502,8 +485,8 @@ class _BatchDetailScreenState extends State<BatchDetailScreen> {
           success ? 'Rappel déclaré' : (provider.error ?? 'Échec du rappel'),
         ),
         backgroundColor: success
-            ? PharmaConnectColors.accentGreen
-            : PharmaConnectColors.accentRed,
+            ? context.palette.success
+            : context.palette.danger,
       ),
     );
   }

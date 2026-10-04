@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
 import '../../../core/theme/spacing.dart';
-import '../../../core/theme/typography.dart';
 import '../models/prescription_item.dart';
+import '../../../core/theme/palette.dart';
 
 class PrescriptionItemTile extends StatelessWidget {
   final PrescriptionItem item;
@@ -36,12 +35,12 @@ class PrescriptionItemTile extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.04),
+        color: context.palette.surfaceMuted,
         borderRadius: BorderRadius.circular(PharmaConnectSpacing.radiusMd),
         border: Border.all(
           color: isExtracted
-              ? PharmaConnectColors.accentCyan.withValues(alpha: 0.2)
-              : Colors.white.withValues(alpha: 0.06),
+              ? context.palette.primary.withValues(alpha: 0.2)
+              : context.palette.surface,
         ),
       ),
       child: Row(
@@ -54,8 +53,8 @@ class PrescriptionItemTile extends StatelessWidget {
               height: 40,
               decoration: BoxDecoration(
                 color: item.ocrConfidence > 0.8
-                    ? PharmaConnectColors.accentGreen
-                    : PharmaConnectColors.accentOrange,
+                    ? context.palette.success
+                    : context.palette.warning,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -75,17 +74,17 @@ class PrescriptionItemTile extends StatelessWidget {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: PharmaConnectColors.accentCyan.withValues(
+                          color: context.palette.primary.withValues(
                             alpha: 0.15,
                           ),
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        child: const Text(
+                        child: Text(
                           'OCR',
                           style: TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.w600,
-                            color: PharmaConnectColors.accentCyan,
+                            color: context.palette.primary,
                           ),
                         ),
                       ),
@@ -94,7 +93,7 @@ class PrescriptionItemTile extends StatelessWidget {
                     Expanded(
                       child: Text(
                         item.medicationName,
-                        style: PharmaConnectTypography.body1.copyWith(
+                        style: context.text.body1.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                         maxLines: 1,
@@ -106,7 +105,7 @@ class PrescriptionItemTile extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   '${item.dosage} • ${item.frequency} • ${item.duration}',
-                  style: PharmaConnectTypography.body2,
+                  style: context.text.body2,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -114,7 +113,7 @@ class PrescriptionItemTile extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     item.instructions!,
-                    style: PharmaConnectTypography.micro,
+                    style: context.text.micro,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -127,18 +126,16 @@ class PrescriptionItemTile extends StatelessWidget {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: PharmaConnectColors.accentRed.withValues(
-                        alpha: 0.15,
-                      ),
+                      color: context.palette.danger.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
                           Icons.warning_amber_rounded,
                           size: 12,
-                          color: PharmaConnectColors.accentRed,
+                          color: context.palette.danger,
                         ),
                         SizedBox(width: 4),
                         Text(
@@ -146,7 +143,7 @@ class PrescriptionItemTile extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
-                            color: PharmaConnectColors.accentRed,
+                            color: context.palette.danger,
                           ),
                         ),
                       ],
@@ -161,12 +158,10 @@ class PrescriptionItemTile extends StatelessWidget {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: PharmaConnectColors.accentPurple.withValues(
-                        alpha: 0.15,
-                      ),
+                      color: context.palette.secondary.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text('💡', style: TextStyle(fontSize: 12)),
@@ -176,7 +171,7 @@ class PrescriptionItemTile extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w500,
-                            color: PharmaConnectColors.accentPurple,
+                            color: context.palette.secondary,
                           ),
                         ),
                       ],
@@ -192,9 +187,9 @@ class PrescriptionItemTile extends StatelessWidget {
               children: [
                 if (onEdit != null) ...[
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.edit,
-                      color: PharmaConnectColors.textSecondary,
+                      color: context.palette.textSecondary,
                       size: 18,
                     ),
                     onPressed: onEdit,
@@ -205,9 +200,9 @@ class PrescriptionItemTile extends StatelessWidget {
                 ],
                 if (onSubstitute != null) ...[
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.swap_horiz,
-                      color: PharmaConnectColors.accentPurple,
+                      color: context.palette.secondary,
                       size: 18,
                     ),
                     onPressed: onSubstitute,

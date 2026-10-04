@@ -4,8 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/tertiary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
@@ -13,6 +11,7 @@ import 'package:pharma_connect/core/widgets/inputs/glass_input.dart';
 import '../providers/homecare_provider.dart';
 import '../models/intervention.dart';
 import '../models/homecare_status.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class HomecareBookingScreen extends StatefulWidget {
   const HomecareBookingScreen({super.key});
@@ -77,18 +76,18 @@ class _HomecareBookingScreenState extends State<HomecareBookingScreen> {
                 leading: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.arrow_back,
-                        color: PharmaConnectColors.textPrimary,
+                        color: context.palette.textPrimary,
                       ),
                       onPressed: () => context.pop(),
                       padding: EdgeInsets.zero,
                     ),
                     const SizedBox(width: 8),
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         'Demander une intervention',
-                        style: PharmaConnectTypography.heading2,
+                        style: context.text.heading2,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -108,9 +107,9 @@ class _HomecareBookingScreenState extends State<HomecareBookingScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'Choisissez un professionnel',
-                              style: PharmaConnectTypography.heading3,
+                              style: context.text.heading3,
                             ),
                             const SizedBox(height: 8),
                             if (provider.isLoading &&
@@ -122,11 +121,11 @@ class _HomecareBookingScreenState extends State<HomecareBookingScreen> {
                                 ),
                               )
                             else if (provider.professionals.isEmpty)
-                              const Padding(
+                              Padding(
                                 padding: EdgeInsets.symmetric(vertical: 12),
                                 child: Text(
                                   'Aucun professionnel disponible pour une visite à domicile actuellement',
-                                  style: PharmaConnectTypography.body2,
+                                  style: context.text.body2,
                                 ),
                               )
                             else
@@ -152,32 +151,31 @@ class _HomecareBookingScreenState extends State<HomecareBookingScreen> {
                                     margin: const EdgeInsets.only(bottom: 6),
                                     decoration: BoxDecoration(
                                       color: isSelected
-                                          ? PharmaConnectColors.accentCyan
-                                                .withValues(alpha: 0.1)
+                                          ? context.palette.primary.withValues(
+                                              alpha: 0.1,
+                                            )
                                           : Colors.transparent,
                                       borderRadius: BorderRadius.circular(8),
                                       border: Border.all(
                                         color: isSelected
-                                            ? PharmaConnectColors.accentCyan
-                                            : Colors.white.withValues(
-                                                alpha: 0.06,
-                                              ),
+                                            ? context.palette.primary
+                                            : context.palette.surface,
                                         width: isSelected ? 2 : 1,
                                       ),
                                     ),
                                     child: Row(
                                       children: [
                                         CircleAvatar(
-                                          backgroundColor: PharmaConnectColors
-                                              .accentGreen
+                                          backgroundColor: context
+                                              .palette
+                                              .success
                                               .withValues(alpha: 0.2),
                                           child: Text(
                                             proName.isNotEmpty
                                                 ? proName[0]
                                                 : '?',
-                                            style: const TextStyle(
-                                              color: PharmaConnectColors
-                                                  .accentGreen,
+                                            style: TextStyle(
+                                              color: context.palette.success,
                                             ),
                                           ),
                                         ),
@@ -189,22 +187,19 @@ class _HomecareBookingScreenState extends State<HomecareBookingScreen> {
                                             children: [
                                               Text(
                                                 proName,
-                                                style: PharmaConnectTypography
-                                                    .body1,
+                                                style: context.text.body1,
                                               ),
                                               Text(
                                                 proSpecialty,
-                                                style: PharmaConnectTypography
-                                                    .body2,
+                                                style: context.text.body2,
                                               ),
                                             ],
                                           ),
                                         ),
                                         if (isSelected)
-                                          const Icon(
+                                          Icon(
                                             Icons.check_circle,
-                                            color:
-                                                PharmaConnectColors.accentCyan,
+                                            color: context.palette.primary,
                                           ),
                                       ],
                                     ),
@@ -221,9 +216,9 @@ class _HomecareBookingScreenState extends State<HomecareBookingScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
+                              Text(
                                 'Choisissez la date et l\'heure',
-                                style: PharmaConnectTypography.heading3,
+                                style: context.text.heading3,
                               ),
                               const SizedBox(height: 12),
                               ListTile(
@@ -247,9 +242,8 @@ class _HomecareBookingScreenState extends State<HomecareBookingScreen> {
                                     builder: (context, child) {
                                       return Theme(
                                         data: ThemeData.dark().copyWith(
-                                          colorScheme: const ColorScheme.dark(
-                                            primary:
-                                                PharmaConnectColors.accentCyan,
+                                          colorScheme: ColorScheme.dark(
+                                            primary: context.palette.primary,
                                           ),
                                         ),
                                         child: child!,
@@ -269,16 +263,16 @@ class _HomecareBookingScreenState extends State<HomecareBookingScreen> {
                                 },
                               ),
                               if (_selectedDate != null) ...[
-                                const Divider(color: Colors.white12),
+                                Divider(color: context.palette.veil(0.12)),
                                 const SizedBox(height: 8),
                                 if (provider.isLoading)
                                   const Center(
                                     child: CircularProgressIndicator(),
                                   )
                                 else if (provider.availableSlotsForDate.isEmpty)
-                                  const Text(
+                                  Text(
                                     'Aucun créneau disponible',
-                                    style: PharmaConnectTypography.body2,
+                                    style: context.text.body2,
                                   )
                                 else
                                   Wrap(
@@ -299,7 +293,7 @@ class _HomecareBookingScreenState extends State<HomecareBookingScreen> {
                                           ),
                                           decoration: BoxDecoration(
                                             color: isSelected
-                                                ? PharmaConnectColors.accentCyan
+                                                ? context.palette.primary
                                                       .withValues(alpha: 0.2)
                                                 : Colors.transparent,
                                             borderRadius: BorderRadius.circular(
@@ -307,19 +301,16 @@ class _HomecareBookingScreenState extends State<HomecareBookingScreen> {
                                             ),
                                             border: Border.all(
                                               color: isSelected
-                                                  ? PharmaConnectColors
-                                                        .accentCyan
-                                                  : Colors.white24,
+                                                  ? context.palette.primary
+                                                  : context.palette.veil(0.24),
                                             ),
                                           ),
                                           child: Text(
                                             '${slot.hour}:${slot.minute.toString().padLeft(2, '0')}',
                                             style: TextStyle(
                                               color: isSelected
-                                                  ? PharmaConnectColors
-                                                        .accentCyan
-                                                  : PharmaConnectColors
-                                                        .textPrimary,
+                                                  ? context.palette.primary
+                                                  : context.palette.textPrimary,
                                             ),
                                           ),
                                         ),
@@ -337,9 +328,9 @@ class _HomecareBookingScreenState extends State<HomecareBookingScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'Détails de l\'intervention',
-                              style: PharmaConnectTypography.heading3,
+                              style: context.text.heading3,
                             ),
                             const SizedBox(height: 12),
                             GlassInput(
@@ -391,6 +382,7 @@ class _HomecareBookingScreenState extends State<HomecareBookingScreen> {
   }
 
   Future<void> _submitBooking() async {
+    final palette = context.palette;
     if (!_formKey.currentState!.validate()) return;
 
     if (_selectedProfessionalId == null ||
@@ -436,16 +428,16 @@ class _HomecareBookingScreenState extends State<HomecareBookingScreen> {
     if (success && context.mounted) {
       context.pop();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Votre demande d\'intervention a été envoyée'),
-          backgroundColor: PharmaConnectColors.accentGreen,
+          backgroundColor: palette.success,
         ),
       );
     } else if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(context.read<HomecareProvider>().error ?? 'Erreur'),
-          backgroundColor: PharmaConnectColors.accentRed,
+          backgroundColor: palette.danger,
         ),
       );
     }

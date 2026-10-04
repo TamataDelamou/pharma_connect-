@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import '../models/professional_profile.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class ProfessionalCard extends StatelessWidget {
   final ProfessionalProfile professional;
@@ -28,16 +27,16 @@ class ProfessionalCard extends StatelessWidget {
           CircleAvatar(
             radius: 30,
             backgroundColor: professional.isVerified
-                ? PharmaConnectColors.accentGreen.withValues(alpha: 0.15)
-                : PharmaConnectColors.textSecondary.withValues(alpha: 0.1),
+                ? context.palette.success.withValues(alpha: 0.15)
+                : context.palette.textSecondary.withValues(alpha: 0.1),
             child: Text(
               professional.fullName?.substring(0, 1) ?? 'P',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w700,
                 color: professional.isVerified
-                    ? PharmaConnectColors.accentGreen
-                    : PharmaConnectColors.textSecondary,
+                    ? context.palette.success
+                    : context.palette.textSecondary,
               ),
             ),
           ),
@@ -52,7 +51,7 @@ class ProfessionalCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         professional.fullName ?? professional.id,
-                        style: PharmaConnectTypography.body1.copyWith(
+                        style: context.text.body1.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                         maxLines: 1,
@@ -60,16 +59,16 @@ class ProfessionalCard extends StatelessWidget {
                       ),
                     ),
                     if (professional.isVerified)
-                      const Icon(
+                      Icon(
                         Icons.verified,
-                        color: PharmaConnectColors.accentGreen,
+                        color: context.palette.success,
                         size: 16,
                       ),
                   ],
                 ),
                 Text(
                   professional.specialty,
-                  style: PharmaConnectTypography.body2,
+                  style: context.text.body2,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -83,17 +82,17 @@ class ProfessionalCard extends StatelessWidget {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: PharmaConnectColors.accentGreen.withValues(
+                          color: context.palette.success.withValues(
                             alpha: 0.15,
                           ),
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        child: const Text(
+                        child: Text(
                           'Disponible',
                           style: TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.w500,
-                            color: PharmaConnectColors.accentGreen,
+                            color: context.palette.success,
                           ),
                         ),
                       ),
@@ -102,7 +101,7 @@ class ProfessionalCard extends StatelessWidget {
                     if (professional.consultationFee != null)
                       Text(
                         '${professional.consultationFee} GNF consultation',
-                        style: PharmaConnectTypography.micro,
+                        style: context.text.micro,
                       ),
                   ],
                 ),
@@ -112,7 +111,7 @@ class ProfessionalCard extends StatelessWidget {
           if (showSelectButton) ...[
             PrimaryButton(label: 'Choisir', onPressed: onTap, width: 100),
           ] else ...[
-            const Icon(Icons.chevron_right, color: Colors.white24),
+            Icon(Icons.chevron_right, color: context.palette.veil(0.24)),
           ],
         ],
       ),

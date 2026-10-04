@@ -3,12 +3,11 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/inputs/glass_input.dart';
 import '../providers/catalog_provider.dart';
 import '../widgets/category_filter.dart';
 import '../widgets/product_grid_item.dart';
+import '../../../core/theme/palette.dart';
 
 class CatalogListScreen extends StatefulWidget {
   const CatalogListScreen({super.key});
@@ -47,20 +46,17 @@ class _CatalogListScreenState extends State<CatalogListScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // En-tête
-            const Row(
+            Row(
               children: [
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Catalogue',
-                        style: PharmaConnectTypography.heading1,
-                      ),
+                      Text('Catalogue', style: context.text.heading1),
                       SizedBox(height: 4),
                       Text(
                         'Parcourez tous les médicaments disponibles',
-                        style: PharmaConnectTypography.body2,
+                        style: context.text.body2,
                       ),
                     ],
                   ),
@@ -120,9 +116,7 @@ class _CatalogListScreenState extends State<CatalogListScreen> {
           children: [
             Text(
               'Erreur : ${provider.error}',
-              style: PharmaConnectTypography.body2.copyWith(
-                color: PharmaConnectColors.accentRed,
-              ),
+              style: context.text.body2.copyWith(color: context.palette.danger),
             ),
             const SizedBox(height: 16),
             ElevatedButton(
@@ -135,21 +129,19 @@ class _CatalogListScreenState extends State<CatalogListScreen> {
     }
 
     if (provider.products.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.inventory_2_outlined, size: 64, color: Colors.white24),
+            Icon(
+              Icons.inventory_2_outlined,
+              size: 64,
+              color: context.palette.veil(0.24),
+            ),
             SizedBox(height: 16),
-            Text(
-              'Aucun produit trouvé',
-              style: PharmaConnectTypography.heading2,
-            ),
+            Text('Aucun produit trouvé', style: context.text.heading2),
             SizedBox(height: 8),
-            Text(
-              'Essayez de modifier vos filtres',
-              style: PharmaConnectTypography.body2,
-            ),
+            Text('Essayez de modifier vos filtres', style: context.text.body2),
           ],
         ),
       );

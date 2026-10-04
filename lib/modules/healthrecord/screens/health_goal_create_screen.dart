@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/tertiary_button.dart';
@@ -11,6 +9,7 @@ import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/widgets/inputs/glass_input.dart';
 import '../providers/health_goal_provider.dart';
 import '../models/health_goal.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class HealthGoalCreateScreen extends StatefulWidget {
   final String? goalId;
@@ -63,9 +62,9 @@ class _HealthGoalCreateScreenState extends State<HealthGoalCreateScreen> {
               Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
@@ -76,7 +75,7 @@ class _HealthGoalCreateScreenState extends State<HealthGoalCreateScreen> {
                       widget.goalId == null
                           ? '🎯 Nouvel objectif'
                           : '🎯 Modifier l\'objectif',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                     ),
                   ),
                   const KernelBadge(),
@@ -182,6 +181,7 @@ class _HealthGoalCreateScreenState extends State<HealthGoalCreateScreen> {
   }
 
   Future<void> _saveGoal() async {
+    final palette = context.palette;
     if (!_formKey.currentState!.validate()) return;
 
     final userId = SupabaseService().currentUser?.id;
@@ -221,14 +221,14 @@ class _HealthGoalCreateScreenState extends State<HealthGoalCreateScreen> {
                 ? 'Objectif créé avec succès'
                 : 'Objectif mis à jour',
           ),
-          backgroundColor: PharmaConnectColors.accentGreen,
+          backgroundColor: palette.success,
         ),
       );
     } else if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(context.read<HealthGoalProvider>().error ?? 'Erreur'),
-          backgroundColor: PharmaConnectColors.accentRed,
+          backgroundColor: palette.danger,
         ),
       );
     }

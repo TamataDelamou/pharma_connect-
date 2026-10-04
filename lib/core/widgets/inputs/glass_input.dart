@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../theme/colors.dart';
 import '../../theme/spacing.dart';
-import '../../theme/typography.dart';
+import '../../theme/palette.dart';
 
 class GlassInput extends StatelessWidget {
   final String label;
@@ -50,7 +49,7 @@ class GlassInput extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: PharmaConnectTypography.label),
+        Text(label, style: context.text.label),
         const SizedBox(height: 6),
         TextFormField(
           controller: controller,
@@ -60,20 +59,20 @@ class GlassInput extends StatelessWidget {
           keyboardType: keyboardType,
           onChanged: onChanged,
           validator: validator,
-          style: PharmaConnectTypography.body1.copyWith(
-            color: isDisabled ? PharmaConnectColors.textSecondary : null,
+          style: context.text.body1.copyWith(
+            color: isDisabled ? context.palette.textSecondary : null,
           ),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: PharmaConnectTypography.body2.copyWith(
-              color: PharmaConnectColors.textSecondary.withValues(alpha: 0.5),
+            hintStyle: context.text.body2.copyWith(
+              color: context.palette.textHint,
             ),
             prefixIcon: prefixIcon != null
                 ? Icon(
                     prefixIcon,
                     color: isError
-                        ? PharmaConnectColors.accentRed
-                        : PharmaConnectColors.textSecondary,
+                        ? context.palette.danger
+                        : context.palette.textSecondary,
                     size: 20,
                   )
                 : null,
@@ -82,8 +81,8 @@ class GlassInput extends StatelessWidget {
                     icon: Icon(
                       suffixIcon,
                       color: isError
-                          ? PharmaConnectColors.accentRed
-                          : PharmaConnectColors.textSecondary,
+                          ? context.palette.danger
+                          : context.palette.textSecondary,
                       size: 20,
                     ),
                     onPressed: onSuffixPressed,
@@ -92,21 +91,21 @@ class GlassInput extends StatelessWidget {
                   )
                 : null,
             errorText: isError ? errorText : null,
-            errorStyle: PharmaConnectTypography.body2.copyWith(
-              color: PharmaConnectColors.accentRed,
+            errorStyle: context.text.body2.copyWith(
+              color: context.palette.danger,
             ),
             filled: true,
             fillColor: isDisabled
-                ? Colors.white.withValues(alpha: 0.03)
-                : Colors.white.withValues(alpha: 0.06),
+                ? context.palette.surfaceDisabled
+                : context.palette.surface,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(
                 PharmaConnectSpacing.radiusMd,
               ),
               borderSide: BorderSide(
                 color: isError
-                    ? PharmaConnectColors.accentRed
-                    : Colors.white.withValues(alpha: 0.10),
+                    ? context.palette.danger
+                    : context.palette.border,
                 width: isError ? 2 : 1,
               ),
             ),
@@ -116,8 +115,8 @@ class GlassInput extends StatelessWidget {
               ),
               borderSide: BorderSide(
                 color: isError
-                    ? PharmaConnectColors.accentRed
-                    : Colors.white.withValues(alpha: 0.10),
+                    ? context.palette.danger
+                    : context.palette.border,
                 width: isError ? 2 : 1,
               ),
             ),
@@ -127,8 +126,8 @@ class GlassInput extends StatelessWidget {
               ),
               borderSide: BorderSide(
                 color: isError
-                    ? PharmaConnectColors.accentRed
-                    : PharmaConnectColors.accentCyan,
+                    ? context.palette.danger
+                    : context.palette.primary,
                 width: 2,
               ),
             ),
@@ -136,19 +135,13 @@ class GlassInput extends StatelessWidget {
               borderRadius: BorderRadius.circular(
                 PharmaConnectSpacing.radiusMd,
               ),
-              borderSide: const BorderSide(
-                color: PharmaConnectColors.accentRed,
-                width: 2,
-              ),
+              borderSide: BorderSide(color: context.palette.danger, width: 2),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(
                 PharmaConnectSpacing.radiusMd,
               ),
-              borderSide: const BorderSide(
-                color: PharmaConnectColors.accentRed,
-                width: 2,
-              ),
+              borderSide: BorderSide(color: context.palette.danger, width: 2),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
@@ -160,9 +153,7 @@ class GlassInput extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             errorText!,
-            style: PharmaConnectTypography.body2.copyWith(
-              color: PharmaConnectColors.accentRed,
-            ),
+            style: context.text.body2.copyWith(color: context.palette.danger),
           ),
         ],
       ],

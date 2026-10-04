@@ -3,8 +3,6 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/tertiary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
@@ -12,6 +10,7 @@ import 'package:pharma_connect/core/widgets/inputs/glass_input.dart';
 import '../providers/chain_provider.dart';
 import '../services/chain_service.dart';
 import '../models/stock_transfer.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 // Audit Module 26 (CHN), Étape 3 (05/09/2026) — CHN-1 : l'import
 // `../models/transfer_item.dart` (fichier inexistant) a été supprimé.
@@ -96,18 +95,18 @@ class _TransferCreateScreenState extends State<TransferCreateScreen> {
                 leading: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.arrow_back,
-                        color: PharmaConnectColors.textPrimary,
+                        color: context.palette.textPrimary,
                       ),
                       onPressed: () => context.pop(),
                       padding: EdgeInsets.zero,
                     ),
                     const SizedBox(width: 8),
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         '🚚 Transfert de stock',
-                        style: PharmaConnectTypography.heading2,
+                        style: context.text.heading2,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -128,17 +127,17 @@ class _TransferCreateScreenState extends State<TransferCreateScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.error_outline,
                           size: 48,
-                          color: PharmaConnectColors.accentRed,
+                          color: context.palette.danger,
                         ),
                         const SizedBox(height: 16),
                         Text(
                           _loadError!,
                           textAlign: TextAlign.center,
-                          style: PharmaConnectTypography.body2.copyWith(
-                            color: PharmaConnectColors.accentRed,
+                          style: context.text.body2.copyWith(
+                            color: context.palette.danger,
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -229,15 +228,15 @@ class _TransferCreateScreenState extends State<TransferCreateScreen> {
                             children: [
                               Row(
                                 children: [
-                                  const Text(
+                                  Text(
                                     '📦 Articles',
-                                    style: PharmaConnectTypography.heading3,
+                                    style: context.text.heading3,
                                   ),
                                   const Spacer(),
                                   IconButton(
-                                    icon: const Icon(
+                                    icon: Icon(
                                       Icons.add_circle,
-                                      color: PharmaConnectColors.accentCyan,
+                                      color: context.palette.primary,
                                     ),
                                     onPressed: _products.isEmpty
                                         ? null
@@ -258,16 +257,16 @@ class _TransferCreateScreenState extends State<TransferCreateScreen> {
                                 ),
                                 child: Text(
                                   'Lot et date de péremption obligatoires (RG-CHN-01) — un lot expiré sera rejeté à la réception.',
-                                  style: PharmaConnectTypography.micro.copyWith(
-                                    color: PharmaConnectColors.textSecondary,
+                                  style: context.text.micro.copyWith(
+                                    color: context.palette.textSecondary,
                                   ),
                                 ),
                               ),
                               if (_items.isEmpty) ...[
                                 const SizedBox(height: 8),
-                                const Text(
+                                Text(
                                   'Aucun article ajouté',
-                                  style: PharmaConnectTypography.body2,
+                                  style: context.text.body2,
                                 ),
                               ] else ...[
                                 const SizedBox(height: 8),
@@ -278,14 +277,10 @@ class _TransferCreateScreenState extends State<TransferCreateScreen> {
                                     padding: const EdgeInsets.all(8),
                                     margin: const EdgeInsets.only(bottom: 4),
                                     decoration: BoxDecoration(
-                                      color: Colors.white.withValues(
-                                        alpha: 0.04,
-                                      ),
+                                      color: context.palette.surfaceMuted,
                                       borderRadius: BorderRadius.circular(6),
                                       border: Border.all(
-                                        color: Colors.white.withValues(
-                                          alpha: 0.06,
-                                        ),
+                                        color: context.palette.borderSubtle,
                                       ),
                                     ),
                                     child: Row(
@@ -297,8 +292,7 @@ class _TransferCreateScreenState extends State<TransferCreateScreen> {
                                             children: [
                                               Text(
                                                 item.productName,
-                                                style: PharmaConnectTypography
-                                                    .body2
+                                                style: context.text.body2
                                                     .copyWith(
                                                       fontWeight:
                                                           FontWeight.w500,
@@ -306,8 +300,7 @@ class _TransferCreateScreenState extends State<TransferCreateScreen> {
                                               ),
                                               Text(
                                                 'Qté: ${item.quantity} • Lot ${item.batchNumber} • Péremption ${_formatDate(item.expiryDate!)}',
-                                                style: PharmaConnectTypography
-                                                    .micro,
+                                                style: context.text.mono,
                                               ),
                                             ],
                                           ),
@@ -383,7 +376,7 @@ class _TransferCreateScreenState extends State<TransferCreateScreen> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          backgroundColor: PharmaConnectColors.primaryDeep,
+          backgroundColor: context.palette.background,
           title: const Text('Ajouter un article'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -449,10 +442,7 @@ class _TransferCreateScreenState extends State<TransferCreateScreen> {
                 const SizedBox(height: 8),
                 Text(
                   dialogError!,
-                  style: const TextStyle(
-                    color: PharmaConnectColors.accentRed,
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: context.palette.danger, fontSize: 12),
                 ),
               ],
             ],
@@ -525,8 +515,8 @@ class _TransferCreateScreenState extends State<TransferCreateScreen> {
                 Navigator.pop(ctx);
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: PharmaConnectColors.accentCyan,
-                foregroundColor: PharmaConnectColors.textOnAccent,
+                backgroundColor: context.palette.primary,
+                foregroundColor: context.palette.onPrimary,
               ),
               child: const Text('Ajouter'),
             ),
@@ -537,6 +527,7 @@ class _TransferCreateScreenState extends State<TransferCreateScreen> {
   }
 
   Future<void> _createTransfer() async {
+    final palette = context.palette;
     if (!_formKey.currentState!.validate()) return;
     if (_items.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -566,16 +557,16 @@ class _TransferCreateScreenState extends State<TransferCreateScreen> {
     if (success && context.mounted) {
       context.pop();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Transfert créé avec succès'),
-          backgroundColor: PharmaConnectColors.accentGreen,
+          backgroundColor: palette.success,
         ),
       );
     } else if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(context.read<ChainProvider>().error ?? 'Erreur'),
-          backgroundColor: PharmaConnectColors.accentRed,
+          backgroundColor: palette.danger,
         ),
       );
     }

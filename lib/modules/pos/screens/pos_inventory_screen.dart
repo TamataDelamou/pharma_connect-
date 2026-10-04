@@ -3,13 +3,12 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/utils/currency_formatter.dart';
 import '../providers/pos_provider.dart';
 import '../../stock/providers/stock_provider.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class POSInventoryScreen extends StatefulWidget {
   const POSInventoryScreen({super.key});
@@ -43,18 +42,18 @@ class _POSInventoryScreenState extends State<POSInventoryScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       '📦 Inventaire',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -70,8 +69,8 @@ class _POSInventoryScreenState extends State<POSInventoryScreen> {
                   icon: const Icon(Icons.file_download),
                   label: const Text('Exporter'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: PharmaConnectColors.accentPurple,
-                    foregroundColor: PharmaConnectColors.textPrimary,
+                    backgroundColor: context.palette.primary,
+                    foregroundColor: context.palette.onPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -106,13 +105,13 @@ class _POSInventoryScreenState extends State<POSInventoryScreen> {
             padding: const EdgeInsets.all(12),
             child: Column(
               children: [
-                Text('Total produits', style: PharmaConnectTypography.micro),
+                Text('Total produits', style: context.text.micro),
                 Text(
                   '156',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
-                    color: PharmaConnectColors.accentCyan,
+                    color: context.palette.primary,
                   ),
                 ),
               ],
@@ -125,13 +124,13 @@ class _POSInventoryScreenState extends State<POSInventoryScreen> {
             padding: const EdgeInsets.all(12),
             child: Column(
               children: [
-                Text('Valeur stock', style: PharmaConnectTypography.micro),
+                Text('Valeur stock', style: context.text.micro),
                 Text(
                   CurrencyFormatter.format(2450000),
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
-                    color: PharmaConnectColors.accentGreen,
+                    color: context.palette.success,
                   ),
                 ),
               ],
@@ -144,13 +143,13 @@ class _POSInventoryScreenState extends State<POSInventoryScreen> {
             padding: const EdgeInsets.all(12),
             child: Column(
               children: [
-                Text('Alerte stock bas', style: PharmaConnectTypography.micro),
+                Text('Alerte stock bas', style: context.text.micro),
                 Text(
                   '12',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
-                    color: PharmaConnectColors.accentOrange,
+                    color: context.palette.warning,
                   ),
                 ),
               ],
@@ -180,8 +179,8 @@ class _POSInventoryScreenState extends State<POSInventoryScreen> {
           const SizedBox(width: 8),
           DropdownButton<String>(
             value: _filterType,
-            dropdownColor: PharmaConnectColors.primaryDeep,
-            style: const TextStyle(color: PharmaConnectColors.textPrimary),
+            dropdownColor: context.palette.background,
+            style: TextStyle(color: context.palette.textPrimary),
             items: const [
               DropdownMenuItem(value: 'all', child: Text('Tous')),
               DropdownMenuItem(value: 'low_stock', child: Text('Stock bas')),
@@ -267,11 +266,8 @@ class _POSInventoryScreenState extends State<POSInventoryScreen> {
     }
 
     if (filtered.isEmpty) {
-      return const Center(
-        child: Text(
-          'Aucun produit trouvé',
-          style: PharmaConnectTypography.body2,
-        ),
+      return Center(
+        child: Text('Aucun produit trouvé', style: context.text.body2),
       );
     }
 
@@ -293,10 +289,10 @@ class _POSInventoryScreenState extends State<POSInventoryScreen> {
                   height: 30,
                   decoration: BoxDecoration(
                     color: status == 'in_stock'
-                        ? PharmaConnectColors.accentGreen
+                        ? context.palette.success
                         : status == 'low_stock'
-                        ? PharmaConnectColors.accentOrange
-                        : PharmaConnectColors.accentRed,
+                        ? context.palette.warning
+                        : context.palette.danger,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -307,7 +303,7 @@ class _POSInventoryScreenState extends State<POSInventoryScreen> {
                     children: [
                       Text(
                         item['name']?.toString() ?? '',
-                        style: PharmaConnectTypography.body1.copyWith(
+                        style: context.text.body1.copyWith(
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -317,16 +313,16 @@ class _POSInventoryScreenState extends State<POSInventoryScreen> {
                             'Stock: $stock',
                             style: TextStyle(
                               color: status == 'in_stock'
-                                  ? PharmaConnectColors.accentGreen
+                                  ? context.palette.success
                                   : status == 'low_stock'
-                                  ? PharmaConnectColors.accentOrange
-                                  : PharmaConnectColors.accentRed,
+                                  ? context.palette.warning
+                                  : context.palette.danger,
                             ),
                           ),
                           const SizedBox(width: 8),
                           Text(
                             CurrencyFormatter.format(item['price'] as int),
-                            style: PharmaConnectTypography.micro,
+                            style: context.text.micro,
                           ),
                         ],
                       ),
@@ -340,14 +336,10 @@ class _POSInventoryScreenState extends State<POSInventoryScreen> {
                   ),
                   decoration: BoxDecoration(
                     color: status == 'in_stock'
-                        ? PharmaConnectColors.accentGreen.withValues(
-                            alpha: 0.15,
-                          )
+                        ? context.palette.success.withValues(alpha: 0.15)
                         : status == 'low_stock'
-                        ? PharmaConnectColors.accentOrange.withValues(
-                            alpha: 0.15,
-                          )
-                        : PharmaConnectColors.accentRed.withValues(alpha: 0.15),
+                        ? context.palette.warning.withValues(alpha: 0.15)
+                        : context.palette.danger.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
@@ -360,10 +352,10 @@ class _POSInventoryScreenState extends State<POSInventoryScreen> {
                       fontSize: 10,
                       fontWeight: FontWeight.w500,
                       color: status == 'in_stock'
-                          ? PharmaConnectColors.accentGreen
+                          ? context.palette.success
                           : status == 'low_stock'
-                          ? PharmaConnectColors.accentOrange
-                          : PharmaConnectColors.accentRed,
+                          ? context.palette.warning
+                          : context.palette.danger,
                     ),
                   ),
                 ),

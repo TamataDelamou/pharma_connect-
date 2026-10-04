@@ -1,5 +1,4 @@
-import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
+import '../../../core/theme/palette.dart';
 
 class VerificationResult {
   final String batchId;
@@ -84,18 +83,18 @@ class VerificationResult {
     }
   }
 
-  Color get statusColor {
+  ColorRole get statusColor {
     switch (status) {
       case VerificationStatus.authentic:
-        return PharmaConnectColors.accentGreen;
+        return ColorRole.success;
       case VerificationStatus.counterfeit:
-        return PharmaConnectColors.accentRed;
+        return ColorRole.danger;
       case VerificationStatus.recalled:
-        return PharmaConnectColors.accentOrange;
+        return ColorRole.warning;
       case VerificationStatus.unknown:
-        return PharmaConnectColors.neutralMuted;
+        return ColorRole.textMuted;
       case VerificationStatus.invalid:
-        return PharmaConnectColors.accentRed;
+        return ColorRole.danger;
     }
   }
 }

@@ -4,13 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/secondary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../models/family_link.dart';
 import '../providers/family_provider.dart';
 import '../models/family_link_status.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class FamilyDetailScreen extends StatefulWidget {
   final String linkId;
@@ -44,9 +43,7 @@ class _FamilyDetailScreenState extends State<FamilyDetailScreen> {
         body: Center(
           child: Text(
             provider.error ?? 'Lien introuvable',
-            style: PharmaConnectTypography.body2.copyWith(
-              color: PharmaConnectColors.accentRed,
-            ),
+            style: context.text.body2.copyWith(color: context.palette.danger),
           ),
         ),
       );
@@ -67,18 +64,18 @@ class _FamilyDetailScreenState extends State<FamilyDetailScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Détail du lien familial',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -95,8 +92,8 @@ class _FamilyDetailScreenState extends State<FamilyDetailScreen> {
                     icon: const Icon(Icons.check),
                     label: const Text('Accepter'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: PharmaConnectColors.accentGreen,
-                      foregroundColor: PharmaConnectColors.textPrimary,
+                      backgroundColor: context.palette.success,
+                      foregroundColor: context.palette.onPrimary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -115,8 +112,8 @@ class _FamilyDetailScreenState extends State<FamilyDetailScreen> {
                     GlassCard(
                       glow: link.status.isActive,
                       glowColor: link.status.isActive
-                          ? PharmaConnectColors.accentGreen
-                          : PharmaConnectColors.textSecondary,
+                          ? context.palette.success
+                          : context.palette.textSecondary,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -127,8 +124,8 @@ class _FamilyDetailScreenState extends State<FamilyDetailScreen> {
                                 height: 40,
                                 decoration: BoxDecoration(
                                   color: link.status.isActive
-                                      ? PharmaConnectColors.accentGreen
-                                      : PharmaConnectColors.textSecondary,
+                                      ? context.palette.success
+                                      : context.palette.textSecondary,
                                   borderRadius: BorderRadius.circular(2),
                                 ),
                               ),
@@ -139,11 +136,11 @@ class _FamilyDetailScreenState extends State<FamilyDetailScreen> {
                                   children: [
                                     Text(
                                       link.patientName ?? link.patientId,
-                                      style: PharmaConnectTypography.heading3,
+                                      style: context.text.heading3,
                                     ),
                                     Text(
                                       'Lien avec ${link.familyMemberName ?? link.familyMemberId}',
-                                      style: PharmaConnectTypography.body2,
+                                      style: context.text.body2,
                                     ),
                                   ],
                                 ),
@@ -180,27 +177,27 @@ class _FamilyDetailScreenState extends State<FamilyDetailScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildInfoRow('Relation', link.relationship),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           _buildInfoRow(
                             'Invité le',
                             _formatDate(link.invitedAt),
                           ),
                           if (link.activatedAt != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow(
                               'Activé le',
                               _formatDate(link.activatedAt!),
                             ),
                           ],
                           if (link.revokedAt != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow(
                               'Révoqué le',
                               _formatDate(link.revokedAt!),
                             ),
                           ],
                           if (link.notes != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow('Notes', link.notes!),
                           ],
                         ],
@@ -213,10 +210,7 @@ class _FamilyDetailScreenState extends State<FamilyDetailScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Permissions',
-                            style: PharmaConnectTypography.heading3,
-                          ),
+                          Text('Permissions', style: context.text.heading3),
                           const SizedBox(height: 8),
                           _buildPermissionRow(
                             'Voir les dossiers de santé',
@@ -277,10 +271,8 @@ class _FamilyDetailScreenState extends State<FamilyDetailScreen> {
                         icon: const Icon(Icons.delete_outline),
                         label: const Text('Supprimer'),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: PharmaConnectColors.accentRed,
-                          side: const BorderSide(
-                            color: PharmaConnectColors.accentRed,
-                          ),
+                          foregroundColor: context.palette.danger,
+                          side: BorderSide(color: context.palette.danger),
                         ),
                       ),
                     ],
@@ -299,11 +291,8 @@ class _FamilyDetailScreenState extends State<FamilyDetailScreen> {
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          SizedBox(
-            width: 120,
-            child: Text(label, style: PharmaConnectTypography.label),
-          ),
-          Expanded(child: Text(value, style: PharmaConnectTypography.body1)),
+          SizedBox(width: 120, child: Text(label, style: context.text.label)),
+          Expanded(child: Text(value, style: context.text.body1)),
         ],
       ),
     );
@@ -317,12 +306,12 @@ class _FamilyDetailScreenState extends State<FamilyDetailScreen> {
           Icon(
             enabled ? Icons.check_circle : Icons.block,
             color: enabled
-                ? PharmaConnectColors.accentGreen
-                : PharmaConnectColors.textSecondary,
+                ? context.palette.success
+                : context.palette.textSecondary,
             size: 18,
           ),
           const SizedBox(width: 8),
-          Expanded(child: Text(label, style: PharmaConnectTypography.body2)),
+          Expanded(child: Text(label, style: context.text.body2)),
         ],
       ),
     );
@@ -335,11 +324,11 @@ class _FamilyDetailScreenState extends State<FamilyDetailScreen> {
   Color _statusColor(FamilyLinkStatus status) {
     switch (status) {
       case FamilyLinkStatus.pending:
-        return PharmaConnectColors.accentOrange;
+        return context.palette.warning;
       case FamilyLinkStatus.active:
-        return PharmaConnectColors.accentGreen;
+        return context.palette.success;
       case FamilyLinkStatus.revoked:
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
     }
   }
 
@@ -350,9 +339,9 @@ class _FamilyDetailScreenState extends State<FamilyDetailScreen> {
     );
     if (success && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Lien familial accepté !'),
-          backgroundColor: PharmaConnectColors.accentGreen,
+          backgroundColor: context.palette.success,
         ),
       );
       context.read<FamilyProvider>().loadLink(id);
@@ -369,7 +358,7 @@ class _FamilyDetailScreenState extends State<FamilyDetailScreen> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setState) => AlertDialog(
-          backgroundColor: PharmaConnectColors.primaryDeep,
+          backgroundColor: context.palette.background,
           title: const Text('Modifier les permissions'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -421,17 +410,17 @@ class _FamilyDetailScreenState extends State<FamilyDetailScreen> {
                 );
                 if (success && context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
+                    SnackBar(
                       content: Text('Permissions mises à jour'),
-                      backgroundColor: PharmaConnectColors.accentGreen,
+                      backgroundColor: context.palette.success,
                     ),
                   );
                   context.read<FamilyProvider>().loadLink(link.id);
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: PharmaConnectColors.accentCyan,
-                foregroundColor: PharmaConnectColors.textOnAccent,
+                backgroundColor: context.palette.primary,
+                foregroundColor: context.palette.onPrimary,
               ),
               child: const Text('Enregistrer'),
             ),
@@ -445,7 +434,7 @@ class _FamilyDetailScreenState extends State<FamilyDetailScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: PharmaConnectColors.primaryDeep,
+        backgroundColor: context.palette.background,
         title: const Text('Révoquer le lien'),
         content: const Text(
           'Êtes-vous sûr de vouloir révoquer ce lien familial ? Cette action est réversible.',
@@ -469,8 +458,8 @@ class _FamilyDetailScreenState extends State<FamilyDetailScreen> {
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: PharmaConnectColors.accentRed,
-              foregroundColor: PharmaConnectColors.textPrimary,
+              backgroundColor: context.palette.danger,
+              foregroundColor: context.palette.onDanger,
             ),
             child: const Text('Révoquer'),
           ),
@@ -483,7 +472,7 @@ class _FamilyDetailScreenState extends State<FamilyDetailScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: PharmaConnectColors.primaryDeep,
+        backgroundColor: context.palette.background,
         title: const Text('Supprimer'),
         content: const Text('Supprimer ce lien familial ?'),
         actions: [
@@ -502,8 +491,8 @@ class _FamilyDetailScreenState extends State<FamilyDetailScreen> {
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: PharmaConnectColors.accentRed,
-              foregroundColor: PharmaConnectColors.textPrimary,
+              backgroundColor: context.palette.danger,
+              foregroundColor: context.palette.onDanger,
             ),
             child: const Text('Supprimer'),
           ),

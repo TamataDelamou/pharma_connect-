@@ -3,13 +3,12 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/financing_provider.dart';
 import '../widgets/financing_card.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class FinancingDashboardScreen extends StatefulWidget {
   const FinancingDashboardScreen({super.key});
@@ -91,19 +90,19 @@ class _FinancingDashboardScreenState extends State<FinancingDashboardScreen>
           children: [
             // C233 : en-tête adaptable (actions sous le titre sur téléphone).
             HeaderRow(
-              leading: const Column(
+              leading: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     '💰 Financement',
-                    style: PharmaConnectTypography.heading1,
+                    style: context.text.heading1,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(height: 4),
                   Text(
                     'Financement pour grossistes et pharmacies',
-                    style: PharmaConnectTypography.body2,
+                    style: context.text.body2,
                   ),
                 ],
               ),
@@ -114,8 +113,8 @@ class _FinancingDashboardScreenState extends State<FinancingDashboardScreen>
                   icon: const Icon(Icons.add),
                   label: const Text('Demander'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: PharmaConnectColors.accentCyan,
-                    foregroundColor: PharmaConnectColors.textOnAccent,
+                    backgroundColor: context.palette.primary,
+                    foregroundColor: context.palette.onPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -156,10 +155,7 @@ class _FinancingDashboardScreenState extends State<FinancingDashboardScreen>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Score de crédit',
-                            style: PharmaConnectTypography.body2,
-                          ),
+                          Text('Score de crédit', style: context.text.body2),
                           Text(
                             credit.ratingLabel,
                             style: TextStyle(
@@ -172,7 +168,7 @@ class _FinancingDashboardScreenState extends State<FinancingDashboardScreen>
                             children: [
                               Text(
                                 'Dernière mise à jour: ${_formatDate(credit.lastUpdated)}',
-                                style: PharmaConnectTypography.micro,
+                                style: context.text.micro,
                               ),
                               const SizedBox(width: 8),
                               TextButton(
@@ -188,8 +184,7 @@ class _FinancingDashboardScreenState extends State<FinancingDashboardScreen>
                                 },
                                 child: const Text('Rafraîchir'),
                                 style: TextButton.styleFrom(
-                                  foregroundColor:
-                                      PharmaConnectColors.accentCyan,
+                                  foregroundColor: context.palette.primary,
                                   padding: EdgeInsets.zero,
                                   minimumSize: const Size(0, 0),
                                   tapTargetSize:
@@ -214,9 +209,9 @@ class _FinancingDashboardScreenState extends State<FinancingDashboardScreen>
                 Tab(text: 'En attente'),
                 Tab(text: 'Actives'),
               ],
-              labelColor: PharmaConnectColors.accentCyan,
-              unselectedLabelColor: PharmaConnectColors.textSecondary,
-              indicatorColor: PharmaConnectColors.accentCyan,
+              labelColor: context.palette.primary,
+              unselectedLabelColor: context.palette.textSecondary,
+              indicatorColor: context.palette.primary,
               indicatorWeight: 3,
               dividerColor: Colors.transparent,
             ),
@@ -239,18 +234,12 @@ class _FinancingDashboardScreenState extends State<FinancingDashboardScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 48,
-              color: PharmaConnectColors.accentRed,
-            ),
+            Icon(Icons.error_outline, size: 48, color: context.palette.danger),
             const SizedBox(height: 16),
             Text(
               provider.error!,
               textAlign: TextAlign.center,
-              style: PharmaConnectTypography.body2.copyWith(
-                color: PharmaConnectColors.accentRed,
-              ),
+              style: context.text.body2.copyWith(color: context.palette.danger),
             ),
             const SizedBox(height: 16),
             PrimaryButton(
@@ -267,20 +256,21 @@ class _FinancingDashboardScreenState extends State<FinancingDashboardScreen>
     }
 
     if (provider.requests.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.attach_money_outlined, size: 64, color: Colors.white24),
-            SizedBox(height: 16),
-            Text(
-              'Aucune demande de financement',
-              style: PharmaConnectTypography.heading3,
+            Icon(
+              Icons.attach_money_outlined,
+              size: 64,
+              color: context.palette.veil(0.24),
             ),
+            SizedBox(height: 16),
+            Text('Aucune demande de financement', style: context.text.heading3),
             SizedBox(height: 8),
             Text(
               'Demandez un financement pour votre activité',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
               textAlign: TextAlign.center,
             ),
           ],
@@ -304,11 +294,11 @@ class _FinancingDashboardScreenState extends State<FinancingDashboardScreen>
   }
 
   Color _scoreColor(int score) {
-    if (score >= 800) return PharmaConnectColors.accentGreen;
-    if (score >= 700) return PharmaConnectColors.accentCyan;
-    if (score >= 600) return PharmaConnectColors.accentAmber;
-    if (score >= 500) return PharmaConnectColors.accentOrange;
-    return PharmaConnectColors.accentRed;
+    if (score >= 800) return context.palette.success;
+    if (score >= 700) return context.palette.primary;
+    if (score >= 600) return context.palette.warningStrong;
+    if (score >= 500) return context.palette.warning;
+    return context.palette.danger;
   }
 
   String _formatDate(DateTime date) {

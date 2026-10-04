@@ -3,13 +3,12 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../providers/insurance_provider.dart';
 import '../widgets/enrollment_card.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class InsuranceEnrollmentsScreen extends StatefulWidget {
   final bool isStaff;
@@ -80,19 +79,19 @@ class _InsuranceEnrollmentsScreenState extends State<InsuranceEnrollmentsScreen>
           children: [
             // C233 : en-tête adaptable (actions sous le titre sur téléphone).
             HeaderRow(
-              leading: const Column(
+              leading: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Assurance & Tiers-payant',
-                    style: PharmaConnectTypography.heading1,
+                    style: context.text.heading1,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(height: 4),
                   Text(
                     'Gérez vos contrats d\'assurance et prises en charge',
-                    style: PharmaConnectTypography.body2,
+                    style: context.text.body2,
                   ),
                 ],
               ),
@@ -105,8 +104,8 @@ class _InsuranceEnrollmentsScreenState extends State<InsuranceEnrollmentsScreen>
                     icon: const Icon(Icons.add),
                     label: const Text('Nouveau contrat'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: PharmaConnectColors.accentCyan,
-                      foregroundColor: PharmaConnectColors.textOnAccent,
+                      backgroundColor: context.palette.primary,
+                      foregroundColor: context.palette.onPrimary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -124,9 +123,9 @@ class _InsuranceEnrollmentsScreenState extends State<InsuranceEnrollmentsScreen>
                 Tab(text: 'Actifs'),
                 Tab(text: 'Expirés'),
               ],
-              labelColor: PharmaConnectColors.accentCyan,
-              unselectedLabelColor: PharmaConnectColors.textSecondary,
-              indicatorColor: PharmaConnectColors.accentCyan,
+              labelColor: context.palette.primary,
+              unselectedLabelColor: context.palette.textSecondary,
+              indicatorColor: context.palette.primary,
               indicatorWeight: 3,
               dividerColor: Colors.transparent,
             ),
@@ -149,18 +148,12 @@ class _InsuranceEnrollmentsScreenState extends State<InsuranceEnrollmentsScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 48,
-              color: PharmaConnectColors.accentRed,
-            ),
+            Icon(Icons.error_outline, size: 48, color: context.palette.danger),
             const SizedBox(height: 16),
             Text(
               provider.error!,
               textAlign: TextAlign.center,
-              style: PharmaConnectTypography.body2.copyWith(
-                color: PharmaConnectColors.accentRed,
-              ),
+              style: context.text.body2.copyWith(color: context.palette.danger),
             ),
             const SizedBox(height: 16),
             PrimaryButton(
@@ -183,24 +176,21 @@ class _InsuranceEnrollmentsScreenState extends State<InsuranceEnrollmentsScreen>
     }
 
     if (filtered.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               Icons.assignment_ind_outlined,
               size: 64,
-              color: Colors.white24,
+              color: context.palette.veil(0.24),
             ),
             SizedBox(height: 16),
-            Text(
-              'Aucun contrat d\'assurance',
-              style: PharmaConnectTypography.heading3,
-            ),
+            Text('Aucun contrat d\'assurance', style: context.text.heading3),
             SizedBox(height: 8),
             Text(
               'Vous n\'avez pas encore de contrat d\'assurance lié à votre compte',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
               textAlign: TextAlign.center,
             ),
           ],

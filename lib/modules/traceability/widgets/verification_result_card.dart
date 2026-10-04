@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:confetti/confetti.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../models/verification_result.dart';
+import '../../../core/theme/palette.dart';
 
 class VerificationResultCard extends StatefulWidget {
   final VerificationResult result;
@@ -68,17 +67,17 @@ class _VerificationResultCardState extends State<VerificationResultCard>
                   gradient: LinearGradient(
                     colors: isAuthentic
                         ? [
-                            Colors.green.withValues(alpha: 0.2),
-                            Colors.green.withValues(alpha: 0.05),
+                            context.palette.success.withValues(alpha: 0.2),
+                            context.palette.success.withValues(alpha: 0.05),
                           ]
                         : isRecalled
                         ? [
-                            Colors.orange.withValues(alpha: 0.2),
-                            Colors.orange.withValues(alpha: 0.05),
+                            context.palette.warning.withValues(alpha: 0.2),
+                            context.palette.warning.withValues(alpha: 0.05),
                           ]
                         : [
-                            Colors.red.withValues(alpha: 0.2),
-                            Colors.red.withValues(alpha: 0.05),
+                            context.palette.danger.withValues(alpha: 0.2),
+                            context.palette.danger.withValues(alpha: 0.05),
                           ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -86,20 +85,20 @@ class _VerificationResultCardState extends State<VerificationResultCard>
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: isAuthentic
-                        ? PharmaConnectColors.accentGreen
+                        ? context.palette.success
                         : isRecalled
-                        ? PharmaConnectColors.accentOrange
-                        : PharmaConnectColors.accentRed,
+                        ? context.palette.warning
+                        : context.palette.danger,
                     width: 2,
                   ),
                   boxShadow: [
                     BoxShadow(
                       color:
                           (isAuthentic
-                                  ? PharmaConnectColors.accentGreen
+                                  ? context.palette.success
                                   : isRecalled
-                                  ? PharmaConnectColors.accentOrange
-                                  : PharmaConnectColors.accentRed)
+                                  ? context.palette.warning
+                                  : context.palette.danger)
                               .withValues(alpha: 0.3),
                       blurRadius: 20,
                       spreadRadius: 5,
@@ -140,19 +139,19 @@ class _VerificationResultCardState extends State<VerificationResultCard>
                       children: [
                         Text(
                           widget.result.statusLabel,
-                          style: PharmaConnectTypography.heading3.copyWith(
+                          style: context.text.heading3.copyWith(
                             color: isAuthentic
-                                ? PharmaConnectColors.accentGreen
+                                ? context.palette.success
                                 : isRecalled
-                                ? PharmaConnectColors.accentOrange
-                                : PharmaConnectColors.accentRed,
+                                ? context.palette.warning
+                                : context.palette.danger,
                           ),
                         ),
                         if (widget.result.message != null) ...[
                           const SizedBox(height: 2),
                           Text(
                             widget.result.message!,
-                            style: PharmaConnectTypography.body2,
+                            style: context.text.body2,
                           ),
                         ],
                       ],
@@ -162,7 +161,7 @@ class _VerificationResultCardState extends State<VerificationResultCard>
               ),
               const SizedBox(height: 12),
               if (widget.result.productName != null) ...[
-                const Divider(color: Colors.white12),
+                Divider(color: context.palette.veil(0.12)),
                 const SizedBox(height: 8),
                 Row(
                   children: [
@@ -170,10 +169,7 @@ class _VerificationResultCardState extends State<VerificationResultCard>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Produit',
-                            style: PharmaConnectTypography.label,
-                          ),
+                          Text('Produit', style: context.text.label),
                           Text(widget.result.productName!),
                         ],
                       ),
@@ -182,10 +178,7 @@ class _VerificationResultCardState extends State<VerificationResultCard>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Lot',
-                            style: PharmaConnectTypography.label,
-                          ),
+                          Text('Lot', style: context.text.label),
                           Text(widget.result.batchNumber ?? ''),
                         ],
                       ),
@@ -200,10 +193,7 @@ class _VerificationResultCardState extends State<VerificationResultCard>
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Fabricant',
-                              style: PharmaConnectTypography.label,
-                            ),
+                            Text('Fabricant', style: context.text.label),
                             Text(widget.result.manufacturer!),
                           ],
                         ),
@@ -212,10 +202,7 @@ class _VerificationResultCardState extends State<VerificationResultCard>
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Péremption',
-                              style: PharmaConnectTypography.label,
-                            ),
+                            Text('Péremption', style: context.text.label),
                             Text(
                               widget.result.expiryDate != null
                                   ? '${widget.result.expiryDate!.day}/${widget.result.expiryDate!.month}/${widget.result.expiryDate!.year}'
@@ -232,28 +219,21 @@ class _VerificationResultCardState extends State<VerificationResultCard>
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: PharmaConnectColors.accentOrange.withValues(
-                        alpha: 0.1,
-                      ),
+                      color: context.palette.warning.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: PharmaConnectColors.accentOrange.withValues(
-                          alpha: 0.2,
-                        ),
+                        color: context.palette.warning.withValues(alpha: 0.2),
                       ),
                     ),
                     child: Row(
                       children: [
-                        const Icon(
-                          Icons.warning,
-                          color: PharmaConnectColors.accentOrange,
-                        ),
+                        Icon(Icons.warning, color: context.palette.warning),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             '⚠️ Ce produit fait l\'objet d\'un rappel. Consultez les détails.',
-                            style: PharmaConnectTypography.body2.copyWith(
-                              color: PharmaConnectColors.accentOrange,
+                            style: context.text.body2.copyWith(
+                              color: context.palette.warning,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -272,7 +252,7 @@ class _VerificationResultCardState extends State<VerificationResultCard>
               const SizedBox(height: 8),
               Text(
                 'Vérifié le ${_formatDateTime(widget.result.timestamp)}',
-                style: PharmaConnectTypography.micro,
+                style: context.text.micro,
               ),
               const SizedBox(height: 8),
               Row(
@@ -297,12 +277,12 @@ class _VerificationResultCardState extends State<VerificationResultCard>
               confettiController: _confettiController,
               blastDirectionality: BlastDirectionality.explosive,
               shouldLoop: false,
-              colors: const [
-                Colors.green,
-                Colors.blue,
-                Colors.yellow,
-                Colors.red,
-                Colors.purple,
+              colors: [
+                context.palette.success,
+                context.palette.info,
+                context.palette.warningStrong,
+                context.palette.danger,
+                context.palette.secondary,
               ],
               numberOfParticles: 20,
               gravity: 0.1,

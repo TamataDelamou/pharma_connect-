@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/kernel/kernel_badge.dart';
-import '../../core/theme/colors.dart';
-import '../../core/theme/typography.dart';
 import '../../core/widgets/cards/glass_card.dart';
 import '../../core/widgets/layout/responsive.dart';
 import '../auth/models/user_role.dart';
@@ -13,6 +11,7 @@ import 'widgets/quick_action_grid.dart';
 import 'widgets/activity_timeline.dart';
 import 'widgets/alert_center.dart';
 import 'models/dashboard_data.dart';
+import '../../core/theme/palette.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -74,20 +73,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   // En-tête
                   Row(
                     children: [
-                      const Expanded(
+                      Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               'Tableau de bord',
-                              style: PharmaConnectTypography.heading1,
+                              style: context.text.heading1,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
                             SizedBox(height: 4),
                             Text(
                               'Bienvenue sur PharmaConnect — Infrastructure numérique du circuit pharmaceutique',
-                              style: PharmaConnectTypography.body2,
+                              style: context.text.body2,
                             ),
                           ],
                         ),
@@ -96,11 +95,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       const KernelBadge(),
                       const SizedBox(width: 16),
                       CircleAvatar(
-                        backgroundColor: PharmaConnectColors.accentCyan
-                            .withValues(alpha: 0.2),
-                        child: const Icon(
+                        backgroundColor: context.palette.primary.withValues(
+                          alpha: 0.2,
+                        ),
+                        child: Icon(
                           Icons.person,
-                          color: PharmaConnectColors.accentCyan,
+                          color: context.palette.primary,
                         ),
                       ),
                     ],
@@ -182,12 +182,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: [
           Row(
             children: [
-              Icon(stat.icon, color: stat.color, size: 28),
+              Icon(stat.icon, color: stat.color.of(context.palette), size: 28),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   stat.title,
-                  style: PharmaConnectTypography.body2,
+                  style: context.text.body2,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -200,7 +200,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Flexible(
                 child: Text(
                   stat.value,
-                  style: PharmaConnectTypography.kpiMedium,
+                  style: context.text.kpiMedium,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -208,8 +208,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Flexible(
                 child: Text(
                   stat.change,
-                  style: PharmaConnectTypography.body2.copyWith(
-                    color: stat.color,
+                  style: context.text.body2.copyWith(
+                    color: stat.color.of(context.palette),
                     fontWeight: FontWeight.w600,
                   ),
                   overflow: TextOverflow.ellipsis,

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../core/theme/colors.dart';
 import '../providers/alert_provider.dart';
 import '../models/alert_severity.dart';
 import '../models/alert_status.dart';
+import '../../../core/theme/palette.dart';
 
 class AlertFilterChips extends StatefulWidget {
   const AlertFilterChips({super.key});
@@ -23,13 +23,13 @@ class _AlertFilterChipsState extends State<AlertFilterChips> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Filtres',
           style: TextStyle(
             fontFamily: 'Inter',
             fontSize: 13,
             fontWeight: FontWeight.w500,
-            color: PharmaConnectColors.textSecondary,
+            color: context.palette.textSecondary,
           ),
         ),
         const SizedBox(height: 8),
@@ -85,13 +85,15 @@ class _AlertFilterChipsState extends State<AlertFilterChips> {
       label: Text(label),
       selected: selected,
       onSelected: (_) => onTap(),
-      selectedColor: PharmaConnectColors.accentCyan.withValues(alpha: 0.2),
+      selectedColor: context.palette.primary.withValues(alpha: 0.2),
       backgroundColor: Colors.transparent,
       side: BorderSide(
-        color: selected ? PharmaConnectColors.accentCyan : Colors.white24,
+        color: selected ? context.palette.primary : context.palette.veil(0.24),
       ),
       labelStyle: TextStyle(
-        color: selected ? PharmaConnectColors.accentCyan : Colors.white70,
+        color: selected
+            ? context.palette.primary
+            : context.palette.textSecondary,
         fontSize: 12,
       ),
     );

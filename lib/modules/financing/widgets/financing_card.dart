@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/utils/currency_formatter.dart';
 import '../models/financing_request.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class FinancingCard extends StatelessWidget {
   final FinancingRequest request;
@@ -22,7 +21,7 @@ class FinancingCard extends StatelessWidget {
             width: 4,
             height: 50,
             decoration: BoxDecoration(
-              color: _statusColor(request.status),
+              color: _statusColor(context, request.status),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -44,9 +43,9 @@ class FinancingCard extends StatelessWidget {
                       flex: 4,
                       child: Text(
                         CurrencyFormatter.format(request.amount),
-                        style: PharmaConnectTypography.body1.copyWith(
+                        style: context.text.body1.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: PharmaConnectColors.accentCyan,
+                          color: context.palette.primary,
                         ),
                       ),
                     ),
@@ -57,6 +56,7 @@ class FinancingCard extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: _statusColor(
+                          context,
                           request.status,
                         ).withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(4),
@@ -66,7 +66,7 @@ class FinancingCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w500,
-                          color: _statusColor(request.status),
+                          color: _statusColor(context, request.status),
                         ),
                       ),
                     ),
@@ -75,7 +75,7 @@ class FinancingCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   request.pharmacyName ?? request.pharmacyId,
-                  style: PharmaConnectTypography.body2,
+                  style: context.text.body2,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -83,19 +83,19 @@ class FinancingCard extends StatelessWidget {
                   children: [
                     Text(
                       '${request.repaymentPeriodMonths} mois',
-                      style: PharmaConnectTypography.micro,
+                      style: context.text.micro,
                     ),
                     const SizedBox(width: 8),
                     Text(
                       '${request.totalRepayments ?? 0} paiements',
-                      style: PharmaConnectTypography.micro,
+                      style: context.text.micro,
                     ),
                     if (request.paidRepayments != null) ...[
                       const SizedBox(width: 8),
                       Text(
                         'Payés: ${request.paidRepayments}',
-                        style: PharmaConnectTypography.micro.copyWith(
-                          color: PharmaConnectColors.accentGreen,
+                        style: context.text.micro.copyWith(
+                          color: context.palette.success,
                         ),
                       ),
                     ],
@@ -104,28 +104,28 @@ class FinancingCard extends StatelessWidget {
               ],
             ),
           ),
-          const Icon(Icons.chevron_right, color: Colors.white24),
+          Icon(Icons.chevron_right, color: context.palette.veil(0.24)),
         ],
       ),
     );
   }
 
-  Color _statusColor(String status) {
+  Color _statusColor(BuildContext context, String status) {
     switch (status) {
       case 'pending':
-        return PharmaConnectColors.accentOrange;
+        return context.palette.warning;
       case 'approved':
-        return PharmaConnectColors.accentCyan;
+        return context.palette.primary;
       case 'rejected':
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       case 'active':
-        return PharmaConnectColors.accentPurple;
+        return context.palette.secondary;
       case 'completed':
-        return PharmaConnectColors.accentGreen;
+        return context.palette.success;
       case 'defaulted':
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       default:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
     }
   }
 }

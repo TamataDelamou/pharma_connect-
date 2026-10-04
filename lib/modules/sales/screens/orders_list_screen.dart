@@ -3,14 +3,13 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/utils/currency_formatter.dart';
 import '../providers/sales_provider.dart';
 import '../models/customer_order.dart';
 import '../../auth/providers/auth_provider.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class OrdersListScreen extends StatefulWidget {
   const OrdersListScreen({super.key});
@@ -36,11 +35,11 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
   Widget build(BuildContext context) {
     final pharmacyId = context.watch<AuthProvider>().pharmacyId;
     if (pharmacyId == null) {
-      return const Scaffold(
+      return Scaffold(
         body: Center(
           child: Text(
             'Aucune officine rattachée à ce compte pharmacien.',
-            style: PharmaConnectTypography.body2,
+            style: context.text.body2,
             textAlign: TextAlign.center,
           ),
         ),
@@ -60,18 +59,18 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       '📦 Commandes clients',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -98,17 +97,11 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 48,
-              color: PharmaConnectColors.accentRed,
-            ),
+            Icon(Icons.error_outline, size: 48, color: context.palette.danger),
             const SizedBox(height: 16),
             Text(
               provider.error!,
-              style: PharmaConnectTypography.body2.copyWith(
-                color: PharmaConnectColors.accentRed,
-              ),
+              style: context.text.body2.copyWith(color: context.palette.danger),
             ),
             const SizedBox(height: 16),
             PrimaryButton(
@@ -125,20 +118,21 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
     }
 
     if (provider.customerOrders.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.inventory_2_outlined, size: 64, color: Colors.white24),
-            SizedBox(height: 16),
-            Text(
-              'Aucune commande client',
-              style: PharmaConnectTypography.heading3,
+            Icon(
+              Icons.inventory_2_outlined,
+              size: 64,
+              color: context.palette.veil(0.24),
             ),
+            SizedBox(height: 16),
+            Text('Aucune commande client', style: context.text.heading3),
             SizedBox(height: 8),
             Text(
               'Les commandes de vos clients apparaîtront ici',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
               textAlign: TextAlign.center,
             ),
           ],
@@ -173,7 +167,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                         children: [
                           Text(
                             order.orderNumber,
-                            style: PharmaConnectTypography.body1.copyWith(
+                            style: context.text.body1.copyWith(
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -202,21 +196,21 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                       ),
                       Text(
                         order.customerName ?? 'Client',
-                        style: PharmaConnectTypography.body2,
+                        style: context.text.body2,
                       ),
                       Text(
                         CurrencyFormatter.format(order.totalAmount),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w600,
-                          color: PharmaConnectColors.accentCyan,
+                          color: context.palette.primary,
                         ),
                       ),
                       if (order.remainingAmount > 0)
                         Text(
                           'Reste dû : ${CurrencyFormatter.format(order.remainingAmount)}',
-                          style: PharmaConnectTypography.body2.copyWith(
+                          style: context.text.body2.copyWith(
                             fontSize: 12,
-                            color: PharmaConnectColors.textSecondary,
+                            color: context.palette.textSecondary,
                           ),
                         ),
                     ],
@@ -233,17 +227,17 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
   Color _statusColor(CustomerOrderStatus status) {
     switch (status) {
       case CustomerOrderStatus.draft:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
       case CustomerOrderStatus.confirmed:
-        return PharmaConnectColors.accentCyan;
+        return context.palette.primary;
       case CustomerOrderStatus.preparing:
-        return PharmaConnectColors.accentOrange;
+        return context.palette.warning;
       case CustomerOrderStatus.ready:
-        return PharmaConnectColors.accentPurple;
+        return context.palette.secondary;
       case CustomerOrderStatus.delivered:
-        return PharmaConnectColors.accentGreen;
+        return context.palette.success;
       case CustomerOrderStatus.cancelled:
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
     }
   }
 }

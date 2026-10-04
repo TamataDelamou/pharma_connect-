@@ -3,12 +3,11 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../providers/network_admin_provider.dart';
 import '../widgets/network_alert_card.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class NetworkDashboardScreen extends StatefulWidget {
   final String? groupId;
@@ -53,19 +52,19 @@ class _NetworkDashboardScreenState extends State<NetworkDashboardScreen> {
           children: [
             // C233 : en-tête adaptable (actions sous le titre sur téléphone).
             HeaderRow(
-              leading: const Column(
+              leading: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     '🌐 Administration réseau',
-                    style: PharmaConnectTypography.heading1,
+                    style: context.text.heading1,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(height: 4),
                   Text(
                     'Supervision centralisée du réseau d\'officines',
-                    style: PharmaConnectTypography.body2,
+                    style: context.text.body2,
                   ),
                 ],
               ),
@@ -78,9 +77,7 @@ class _NetworkDashboardScreenState extends State<NetworkDashboardScreen> {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: PharmaConnectColors.accentRed.withValues(
-                        alpha: 0.15,
-                      ),
+                      color: context.palette.danger.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
@@ -88,7 +85,7 @@ class _NetworkDashboardScreenState extends State<NetworkDashboardScreen> {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: PharmaConnectColors.accentRed,
+                        color: context.palette.danger,
                       ),
                     ),
                   ),
@@ -104,16 +101,16 @@ class _NetworkDashboardScreenState extends State<NetworkDashboardScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.error_outline,
                             size: 48,
-                            color: PharmaConnectColors.accentRed,
+                            color: context.palette.danger,
                           ),
                           const SizedBox(height: 16),
                           Text(
                             provider.error!,
-                            style: PharmaConnectTypography.body2.copyWith(
-                              color: PharmaConnectColors.accentRed,
+                            style: context.text.body2.copyWith(
+                              color: context.palette.danger,
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -149,28 +146,28 @@ class _NetworkDashboardScreenState extends State<NetworkDashboardScreen> {
                 child: _buildKPICard(
                   '🏥 Officines',
                   '${dashboard.pharmacyCount}',
-                  PharmaConnectColors.accentCyan,
+                  context.palette.primary,
                 ),
               ),
               Expanded(
                 child: _buildKPICard(
                   '💰 CA total',
                   dashboard.formattedRevenue,
-                  PharmaConnectColors.accentGreen,
+                  context.palette.success,
                 ),
               ),
               Expanded(
                 child: _buildKPICard(
                   '📦 Stock',
                   '${dashboard.totalStockItems} articles',
-                  PharmaConnectColors.accentPurple,
+                  context.palette.secondary,
                 ),
               ),
               Expanded(
                 child: _buildKPICard(
                   '📋 Ventes',
                   '${dashboard.totalSales}',
-                  PharmaConnectColors.accentOrange,
+                  context.palette.warning,
                 ),
               ),
             ],
@@ -179,10 +176,7 @@ class _NetworkDashboardScreenState extends State<NetworkDashboardScreen> {
 
           // Alerts
           if (provider.alerts.isNotEmpty) ...[
-            const Text(
-              '🚨 Alertes réseau',
-              style: PharmaConnectTypography.heading3,
-            ),
+            Text('🚨 Alertes réseau', style: context.text.heading3),
             const SizedBox(height: 8),
             ...provider.alerts.take(3).map((alert) {
               return Padding(
@@ -205,11 +199,8 @@ class _NetworkDashboardScreenState extends State<NetworkDashboardScreen> {
 
   Widget _buildAllDashboards(NetworkAdminProvider provider) {
     if (provider.dashboards.isEmpty) {
-      return const Center(
-        child: Text(
-          'Aucun groupe configuré',
-          style: PharmaConnectTypography.body2,
-        ),
+      return Center(
+        child: Text('Aucun groupe configuré', style: context.text.body2),
       );
     }
 
@@ -228,14 +219,11 @@ class _NetworkDashboardScreenState extends State<NetworkDashboardScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        d.groupName,
-                        style: PharmaConnectTypography.heading3,
-                      ),
+                      Text(d.groupName, style: context.text.heading3),
                       const SizedBox(height: 4),
                       Text(
                         '${d.pharmacyCount} officines • ${d.totalSales} ventes',
-                        style: PharmaConnectTypography.body2,
+                        style: context.text.body2,
                       ),
                     ],
                   ),
@@ -245,11 +233,11 @@ class _NetworkDashboardScreenState extends State<NetworkDashboardScreen> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: PharmaConnectColors.accentCyan,
+                    color: context.palette.primary,
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Icon(Icons.chevron_right, color: Colors.white24),
+                Icon(Icons.chevron_right, color: context.palette.veil(0.24)),
               ],
             ),
           ),
@@ -266,7 +254,7 @@ class _NetworkDashboardScreenState extends State<NetworkDashboardScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(label, style: PharmaConnectTypography.micro),
+            Text(label, style: context.text.micro),
             const SizedBox(height: 4),
             Text(
               value,

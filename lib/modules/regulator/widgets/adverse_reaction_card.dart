@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../models/adverse_reaction.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class AdverseReactionCard extends StatelessWidget {
   final AdverseReaction reaction;
@@ -25,7 +24,7 @@ class AdverseReactionCard extends StatelessWidget {
             width: 4,
             height: 50,
             decoration: BoxDecoration(
-              color: _severityColor(reaction.severity),
+              color: _severityColor(context, reaction.severity),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -39,7 +38,7 @@ class AdverseReactionCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         reaction.medicationName,
-                        style: PharmaConnectTypography.body1.copyWith(
+                        style: context.text.body1.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                         maxLines: 1,
@@ -53,6 +52,7 @@ class AdverseReactionCard extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: _severityColor(
+                          context,
                           reaction.severity,
                         ).withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(4),
@@ -62,7 +62,7 @@ class AdverseReactionCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w500,
-                          color: _severityColor(reaction.severity),
+                          color: _severityColor(context, reaction.severity),
                         ),
                       ),
                     ),
@@ -70,7 +70,7 @@ class AdverseReactionCard extends StatelessWidget {
                 ),
                 Text(
                   reaction.symptoms,
-                  style: PharmaConnectTypography.body2,
+                  style: context.text.body2,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -84,6 +84,7 @@ class AdverseReactionCard extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: _statusColor(
+                          context,
                           reaction.status,
                         ).withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(4),
@@ -93,55 +94,55 @@ class AdverseReactionCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w500,
-                          color: _statusColor(reaction.status),
+                          color: _statusColor(context, reaction.status),
                         ),
                       ),
                     ),
                     const SizedBox(width: 8),
                     Text(
                       _formatDate(reaction.reportedAt),
-                      style: PharmaConnectTypography.micro,
+                      style: context.text.micro,
                     ),
                   ],
                 ),
               ],
             ),
           ),
-          const Icon(Icons.chevron_right, color: Colors.white24),
+          Icon(Icons.chevron_right, color: context.palette.veil(0.24)),
         ],
       ),
     );
   }
 
-  Color _severityColor(String severity) {
+  Color _severityColor(BuildContext context, String severity) {
     switch (severity) {
       case 'mild':
-        return PharmaConnectColors.accentCyan;
+        return context.palette.primary;
       case 'moderate':
-        return PharmaConnectColors.accentOrange;
+        return context.palette.warning;
       case 'severe':
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       case 'life_threatening':
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       default:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
     }
   }
 
-  Color _statusColor(String status) {
+  Color _statusColor(BuildContext context, String status) {
     switch (status) {
       case 'pending':
-        return PharmaConnectColors.accentOrange;
+        return context.palette.warning;
       case 'under_review':
-        return PharmaConnectColors.accentCyan;
+        return context.palette.primary;
       case 'investigating':
-        return PharmaConnectColors.accentAmber;
+        return context.palette.warningStrong;
       case 'closed':
-        return PharmaConnectColors.accentGreen;
+        return context.palette.success;
       case 'rejected':
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       default:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
     }
   }
 

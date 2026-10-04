@@ -3,12 +3,11 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/regulator_provider.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class AdverseReactionDetailScreen extends StatefulWidget {
   final String reactionId;
@@ -44,9 +43,7 @@ class _AdverseReactionDetailScreenState
         body: Center(
           child: Text(
             provider.error ?? 'Signalement introuvable',
-            style: PharmaConnectTypography.body2.copyWith(
-              color: PharmaConnectColors.accentRed,
-            ),
+            style: context.text.body2.copyWith(color: context.palette.danger),
           ),
         ),
       );
@@ -74,18 +71,18 @@ class _AdverseReactionDetailScreenState
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Signalement d\'effet indésirable',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -123,7 +120,7 @@ class _AdverseReactionDetailScreenState
                                   children: [
                                     Text(
                                       reaction.medicationName,
-                                      style: PharmaConnectTypography.heading3,
+                                      style: context.text.heading3,
                                     ),
                                     const Spacer(),
                                     Container(
@@ -152,7 +149,7 @@ class _AdverseReactionDetailScreenState
                                 ),
                                 Text(
                                   'Signalé le ${_formatDate(reaction.reportedAt)}',
-                                  style: PharmaConnectTypography.body2,
+                                  style: context.text.body2,
                                 ),
                               ],
                             ),
@@ -167,36 +164,36 @@ class _AdverseReactionDetailScreenState
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildInfoRow('Médicament', reaction.medicationName),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           _buildInfoRow(
                             'Date de la réaction',
                             _formatDate(reaction.reactionDate),
                           ),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           _buildInfoRow('Symptômes', reaction.symptoms),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           _buildInfoRow(
                             'Signalé par',
                             reaction.reporterName ?? reaction.reporterId,
                           ),
                           if (reaction.patientName != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow('Patient', reaction.patientName!),
                           ],
                           if (reaction.outcome != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow('Évolution', reaction.outcome!),
                           ],
                           if (reaction.notes != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow('Notes', reaction.notes!),
                           ],
                           if (reaction.followUpNotes != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow('Suivi', reaction.followUpNotes!),
                           ],
                           if (reaction.regulatoryAction != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow(
                               'Action réglementaire',
                               reaction.regulatoryAction!,
@@ -213,9 +210,9 @@ class _AdverseReactionDetailScreenState
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'Gestion du signalement',
-                              style: PharmaConnectTypography.heading3,
+                              style: context.text.heading3,
                             ),
                             const SizedBox(height: 12),
                             Wrap(
@@ -226,14 +223,14 @@ class _AdverseReactionDetailScreenState
                                   _buildActionChip(
                                     'Prendre en charge',
                                     'under_review',
-                                    PharmaConnectColors.accentCyan,
+                                    context.palette.primary,
                                   ),
                                 ],
                                 if (reaction.status == 'under_review') ...[
                                   _buildActionChip(
                                     'En investigation',
                                     'investigating',
-                                    PharmaConnectColors.accentOrange,
+                                    context.palette.warning,
                                   ),
                                 ],
                                 if (reaction.status == 'under_review' ||
@@ -241,12 +238,12 @@ class _AdverseReactionDetailScreenState
                                   _buildActionChip(
                                     'Clore',
                                     'closed',
-                                    PharmaConnectColors.accentGreen,
+                                    context.palette.success,
                                   ),
                                   _buildActionChip(
                                     'Rejeter',
                                     'rejected',
-                                    PharmaConnectColors.accentRed,
+                                    context.palette.danger,
                                   ),
                                 ],
                               ],
@@ -262,21 +259,13 @@ class _AdverseReactionDetailScreenState
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           color: reaction.status == 'closed'
-                              ? PharmaConnectColors.accentGreen.withValues(
-                                  alpha: 0.1,
-                                )
-                              : PharmaConnectColors.accentRed.withValues(
-                                  alpha: 0.1,
-                                ),
+                              ? context.palette.success.withValues(alpha: 0.1)
+                              : context.palette.danger.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: reaction.status == 'closed'
-                                ? PharmaConnectColors.accentGreen.withValues(
-                                    alpha: 0.2,
-                                  )
-                                : PharmaConnectColors.accentRed.withValues(
-                                    alpha: 0.2,
-                                  ),
+                                ? context.palette.success.withValues(alpha: 0.2)
+                                : context.palette.danger.withValues(alpha: 0.2),
                           ),
                         ),
                         child: Row(
@@ -286,8 +275,8 @@ class _AdverseReactionDetailScreenState
                                   ? Icons.check_circle
                                   : Icons.block,
                               color: reaction.status == 'closed'
-                                  ? PharmaConnectColors.accentGreen
-                                  : PharmaConnectColors.accentRed,
+                                  ? context.palette.success
+                                  : context.palette.danger,
                             ),
                             const SizedBox(width: 8),
                             Expanded(
@@ -295,8 +284,8 @@ class _AdverseReactionDetailScreenState
                                 'Signalement ${reaction.status == 'closed' ? 'clos' : 'rejeté'}',
                                 style: TextStyle(
                                   color: reaction.status == 'closed'
-                                      ? PharmaConnectColors.accentGreen
-                                      : PharmaConnectColors.accentRed,
+                                      ? context.palette.success
+                                      : context.palette.danger,
                                 ),
                               ),
                             ),
@@ -318,10 +307,8 @@ class _AdverseReactionDetailScreenState
                         icon: const Icon(Icons.delete_outline),
                         label: const Text('Supprimer'),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: PharmaConnectColors.accentRed,
-                          side: const BorderSide(
-                            color: PharmaConnectColors.accentRed,
-                          ),
+                          foregroundColor: context.palette.danger,
+                          side: BorderSide(color: context.palette.danger),
                         ),
                       ),
                     ],
@@ -341,11 +328,8 @@ class _AdverseReactionDetailScreenState
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 140,
-            child: Text(label, style: PharmaConnectTypography.label),
-          ),
-          Expanded(child: Text(value, style: PharmaConnectTypography.body1)),
+          SizedBox(width: 140, child: Text(label, style: context.text.label)),
+          Expanded(child: Text(value, style: context.text.body1)),
         ],
       ),
     );
@@ -394,15 +378,15 @@ class _AdverseReactionDetailScreenState
   Color _severityColor(String severity) {
     switch (severity) {
       case 'mild':
-        return PharmaConnectColors.accentCyan;
+        return context.palette.primary;
       case 'moderate':
-        return PharmaConnectColors.accentOrange;
+        return context.palette.warning;
       case 'severe':
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       case 'life_threatening':
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       default:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
     }
   }
 
@@ -410,7 +394,7 @@ class _AdverseReactionDetailScreenState
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: PharmaConnectColors.primaryDeep,
+        backgroundColor: context.palette.background,
         title: const Text('Supprimer'),
         content: const Text('Supprimer ce signalement ?'),
         actions: [
@@ -427,8 +411,8 @@ class _AdverseReactionDetailScreenState
               if (success && context.mounted) context.pop();
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: PharmaConnectColors.accentRed,
-              foregroundColor: PharmaConnectColors.textPrimary,
+              backgroundColor: context.palette.danger,
+              foregroundColor: context.palette.onDanger,
             ),
             child: const Text('Supprimer'),
           ),

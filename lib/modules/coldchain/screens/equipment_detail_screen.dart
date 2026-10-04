@@ -4,8 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../models/cold_equipment.dart';
@@ -14,6 +12,7 @@ import '../models/temperature_record.dart';
 import '../providers/coldchain_provider.dart';
 import '../widgets/temperature_record_tile.dart';
 import '../widgets/incident_tile.dart';
+import '../../../core/theme/palette.dart';
 
 class EquipmentDetailScreen extends StatefulWidget {
   final String equipmentId;
@@ -54,18 +53,18 @@ class _EquipmentDetailScreenState extends State<EquipmentDetailScreen> {
                 leading: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.arrow_back,
-                        color: PharmaConnectColors.textPrimary,
+                        color: context.palette.textPrimary,
                       ),
                       onPressed: () => context.pop(),
                       padding: EdgeInsets.zero,
                     ),
                     const SizedBox(width: 8),
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         'Détail de l\'équipement',
-                        style: PharmaConnectTypography.heading2,
+                        style: context.text.heading2,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -75,11 +74,11 @@ class _EquipmentDetailScreenState extends State<EquipmentDetailScreen> {
                 trailing: [const KernelBadge()],
               ),
               const SizedBox(height: 24),
-              const Expanded(
+              Expanded(
                 child: Center(
                   child: Text(
                     'Équipement introuvable',
-                    style: PharmaConnectTypography.body2,
+                    style: context.text.body2,
                   ),
                 ),
               ),
@@ -98,9 +97,9 @@ class _EquipmentDetailScreenState extends State<EquipmentDetailScreen> {
             Row(
               children: [
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.arrow_back,
-                    color: PharmaConnectColors.textPrimary,
+                    color: context.palette.textPrimary,
                   ),
                   onPressed: () => context.pop(),
                   padding: EdgeInsets.zero,
@@ -109,7 +108,7 @@ class _EquipmentDetailScreenState extends State<EquipmentDetailScreen> {
                 Expanded(
                   child: Text(
                     'Détail de l\'équipement',
-                    style: PharmaConnectTypography.heading2,
+                    style: context.text.heading2,
                   ),
                 ),
                 const KernelBadge(),
@@ -140,11 +139,11 @@ class _EquipmentDetailScreenState extends State<EquipmentDetailScreen> {
                                   children: [
                                     Text(
                                       equipment.name,
-                                      style: PharmaConnectTypography.heading3,
+                                      style: context.text.heading3,
                                     ),
                                     Text(
                                       '${equipment.type.label} • ${equipment.model}',
-                                      style: PharmaConnectTypography.body2,
+                                      style: context.text.body2,
                                     ),
                                   ],
                                 ),
@@ -153,7 +152,7 @@ class _EquipmentDetailScreenState extends State<EquipmentDetailScreen> {
                             ],
                           ),
                           const SizedBox(height: 12),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           const SizedBox(height: 12),
                           Row(
                             children: [
@@ -161,9 +160,9 @@ class _EquipmentDetailScreenState extends State<EquipmentDetailScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
+                                    Text(
                                       'Température actuelle',
-                                      style: PharmaConnectTypography.label,
+                                      style: context.text.label,
                                     ),
                                     Text(
                                       '${equipment.currentTemperature.toStringAsFixed(1)}°C',
@@ -171,8 +170,8 @@ class _EquipmentDetailScreenState extends State<EquipmentDetailScreen> {
                                         fontSize: 24,
                                         fontWeight: FontWeight.w700,
                                         color: equipment.isTemperatureValid
-                                            ? PharmaConnectColors.accentGreen
-                                            : PharmaConnectColors.accentRed,
+                                            ? context.palette.success
+                                            : context.palette.danger,
                                       ),
                                     ),
                                     Text(
@@ -180,8 +179,8 @@ class _EquipmentDetailScreenState extends State<EquipmentDetailScreen> {
                                       style: TextStyle(
                                         fontSize: 12,
                                         color: equipment.isTemperatureValid
-                                            ? PharmaConnectColors.accentGreen
-                                            : PharmaConnectColors.accentRed,
+                                            ? context.palette.success
+                                            : context.palette.danger,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -192,13 +191,13 @@ class _EquipmentDetailScreenState extends State<EquipmentDetailScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
+                                    Text(
                                       'Plage de température',
-                                      style: PharmaConnectTypography.label,
+                                      style: context.text.label,
                                     ),
                                     Text(
                                       '${equipment.minTemperature}°C - ${equipment.maxTemperature}°C',
-                                      style: PharmaConnectTypography.body1,
+                                      style: context.text.body1,
                                     ),
                                   ],
                                 ),
@@ -207,13 +206,10 @@ class _EquipmentDetailScreenState extends State<EquipmentDetailScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
-                                      'SN',
-                                      style: PharmaConnectTypography.label,
-                                    ),
+                                    Text('SN', style: context.text.label),
                                     Text(
                                       equipment.serialNumber,
-                                      style: PharmaConnectTypography.body1,
+                                      style: context.text.body1,
                                     ),
                                   ],
                                 ),
@@ -224,14 +220,14 @@ class _EquipmentDetailScreenState extends State<EquipmentDetailScreen> {
                             const SizedBox(height: 8),
                             Text(
                               '📍 ${equipment.location}',
-                              style: PharmaConnectTypography.body2,
+                              style: context.text.body2,
                             ),
                           ],
                           if (equipment.notes != null) ...[
                             const SizedBox(height: 8),
                             Text(
                               '📝 ${equipment.notes}',
-                              style: PharmaConnectTypography.micro,
+                              style: context.text.micro,
                             ),
                           ],
                         ],
@@ -241,9 +237,9 @@ class _EquipmentDetailScreenState extends State<EquipmentDetailScreen> {
 
                     // Graphique des températures
                     if (provider.temperatureRecords.isNotEmpty) ...[
-                      const Text(
+                      Text(
                         'Historique des températures',
-                        style: PharmaConnectTypography.heading3,
+                        style: context.text.heading3,
                       ),
                       const SizedBox(height: 8),
                       GlassCard(
@@ -267,10 +263,7 @@ class _EquipmentDetailScreenState extends State<EquipmentDetailScreen> {
 
                     // Derniers relevés
                     if (provider.temperatureRecords.isNotEmpty) ...[
-                      const Text(
-                        'Derniers relevés',
-                        style: PharmaConnectTypography.heading3,
-                      ),
+                      Text('Derniers relevés', style: context.text.heading3),
                       const SizedBox(height: 8),
                       ...provider.temperatureRecords
                           .take(5)
@@ -285,9 +278,9 @@ class _EquipmentDetailScreenState extends State<EquipmentDetailScreen> {
 
                     // Incidents
                     if (provider.incidents.isNotEmpty) ...[
-                      const Text(
+                      Text(
                         'Incidents de température',
-                        style: PharmaConnectTypography.heading3,
+                        style: context.text.heading3,
                       ),
                       const SizedBox(height: 8),
                       ...provider.incidents.map(
@@ -302,10 +295,9 @@ class _EquipmentDetailScreenState extends State<EquipmentDetailScreen> {
                               );
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
+                                  SnackBar(
                                     content: Text('Incident résolu'),
-                                    backgroundColor:
-                                        PharmaConnectColors.accentGreen,
+                                    backgroundColor: context.palette.success,
                                   ),
                                 );
                               }
@@ -328,10 +320,14 @@ class _EquipmentDetailScreenState extends State<EquipmentDetailScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: equipment.statusColor.withValues(alpha: 0.15),
+        color: equipment.statusColor
+            .of(context.palette)
+            .withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(6),
         border: Border.all(
-          color: equipment.statusColor.withValues(alpha: 0.3),
+          color: equipment.statusColor
+              .of(context.palette)
+              .withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -340,7 +336,7 @@ class _EquipmentDetailScreenState extends State<EquipmentDetailScreen> {
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w600,
-          color: equipment.statusColor,
+          color: equipment.statusColor.of(context.palette),
         ),
       ),
     );
@@ -393,9 +389,7 @@ class _EquipmentDetailScreenState extends State<EquipmentDetailScreen> {
 
   Color _getChartColor(List<TemperatureRecord> records) {
     final hasAlert = records.any((r) => r.isAlert);
-    return hasAlert
-        ? PharmaConnectColors.accentRed
-        : PharmaConnectColors.accentCyan;
+    return hasAlert ? context.palette.danger : context.palette.primary;
   }
 
   void _showAddTemperatureDialog(BuildContext context) {
@@ -404,7 +398,7 @@ class _EquipmentDetailScreenState extends State<EquipmentDetailScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: PharmaConnectColors.primaryDeep,
+        backgroundColor: context.palette.background,
         title: const Text('Ajouter un relevé manuel'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -429,9 +423,9 @@ class _EquipmentDetailScreenState extends State<EquipmentDetailScreen> {
               final temp = double.tryParse(controller.text);
               if (temp == null) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
+                  SnackBar(
                     content: Text('Température invalide'),
-                    backgroundColor: PharmaConnectColors.accentRed,
+                    backgroundColor: context.palette.danger,
                   ),
                 );
                 return;
@@ -449,16 +443,16 @@ class _EquipmentDetailScreenState extends State<EquipmentDetailScreen> {
 
               if (success && context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
+                  SnackBar(
                     content: Text('Relevé enregistré'),
-                    backgroundColor: PharmaConnectColors.accentGreen,
+                    backgroundColor: context.palette.success,
                   ),
                 );
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: PharmaConnectColors.accentCyan,
-              foregroundColor: PharmaConnectColors.textOnAccent,
+              backgroundColor: context.palette.primary,
+              foregroundColor: context.palette.onPrimary,
             ),
             child: const Text('Enregistrer'),
           ),

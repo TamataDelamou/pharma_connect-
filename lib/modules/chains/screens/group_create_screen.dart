@@ -3,8 +3,6 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/tertiary_button.dart';
@@ -12,6 +10,7 @@ import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/widgets/inputs/glass_input.dart';
 import '../providers/chain_provider.dart';
 import '../models/pharmacy_group.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class GroupCreateScreen extends StatefulWidget {
   const GroupCreateScreen({super.key});
@@ -51,18 +50,18 @@ class _GroupCreateScreenState extends State<GroupCreateScreen> {
                 leading: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.arrow_back,
-                        color: PharmaConnectColors.textPrimary,
+                        color: context.palette.textPrimary,
                       ),
                       onPressed: () => context.pop(),
                       padding: EdgeInsets.zero,
                     ),
                     const SizedBox(width: 8),
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         'Créer un groupe d\'officines',
-                        style: PharmaConnectTypography.heading2,
+                        style: context.text.heading2,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -119,29 +118,29 @@ class _GroupCreateScreenState extends State<GroupCreateScreen> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: PharmaConnectColors.accentCyan.withValues(
+                          color: context.palette.primary.withValues(
                             alpha: 0.06,
                           ),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: PharmaConnectColors.accentCyan.withValues(
+                            color: context.palette.primary.withValues(
                               alpha: 0.15,
                             ),
                           ),
                         ),
                         child: Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.info_outline,
-                              color: PharmaConnectColors.accentCyan,
+                              color: context.palette.primary,
                               size: 16,
                             ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 'Vous serez automatiquement l\'administrateur de ce groupe.',
-                                style: PharmaConnectTypography.micro.copyWith(
-                                  color: PharmaConnectColors.textSecondary,
+                                style: context.text.micro.copyWith(
+                                  color: context.palette.textSecondary,
                                 ),
                               ),
                             ),
@@ -172,6 +171,7 @@ class _GroupCreateScreenState extends State<GroupCreateScreen> {
   }
 
   Future<void> _createGroup() async {
+    final palette = context.palette;
     if (!_formKey.currentState!.validate()) return;
 
     final userId = SupabaseService().currentUser?.id;
@@ -205,9 +205,9 @@ class _GroupCreateScreenState extends State<GroupCreateScreen> {
     if (success && context.mounted) {
       context.pop();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Groupe créé avec succès'),
-          backgroundColor: PharmaConnectColors.accentGreen,
+          backgroundColor: palette.success,
         ),
       );
     } else if (context.mounted) {
@@ -216,7 +216,7 @@ class _GroupCreateScreenState extends State<GroupCreateScreen> {
           content: Text(
             context.read<ChainProvider>().error ?? 'Erreur lors de la création',
           ),
-          backgroundColor: PharmaConnectColors.accentRed,
+          backgroundColor: palette.danger,
         ),
       );
     }

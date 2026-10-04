@@ -3,9 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
 import '../../../core/theme/spacing.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/buttons/tertiary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
@@ -13,6 +11,7 @@ import '../../../core/widgets/inputs/glass_input.dart';
 import '../models/user_role.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/phone_input_field.dart';
+import '../../../core/theme/palette.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -73,13 +72,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(
+                  Row(
                     children: [
                       Text(
                         '◈',
                         style: TextStyle(
                           fontSize: 28,
-                          color: PharmaConnectColors.accentCyan,
+                          color: context.palette.primary,
                         ),
                       ),
                       SizedBox(width: 8),
@@ -90,7 +89,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             fontFamily: 'Inter',
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
-                            color: PharmaConnectColors.textPrimary,
+                            color: context.palette.textPrimary,
                             letterSpacing: 0.5,
                           ),
                         ),
@@ -99,14 +98,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ],
                   ),
                   const SizedBox(height: 24),
-                  const Text(
-                    'Créer un compte',
-                    style: PharmaConnectTypography.heading2,
-                  ),
+                  Text('Créer un compte', style: context.text.heading2),
                   const SizedBox(height: 8),
-                  const Text(
+                  Text(
                     'Rejoignez l\'infrastructure numérique de la santé',
-                    style: PharmaConnectTypography.body2,
+                    style: context.text.body2,
                   ),
                   const SizedBox(height: 24),
 
@@ -122,19 +118,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   // Rôle
                   DropdownButtonFormField<UserRole>(
                     initialValue: _selectedRole,
-                    dropdownColor: PharmaConnectColors.primaryDeep,
-                    style: PharmaConnectTypography.body1,
+                    dropdownColor: context.palette.background,
+                    style: context.text.body1,
                     decoration: InputDecoration(
                       labelText: 'Je suis un(e) :',
-                      labelStyle: PharmaConnectTypography.label,
+                      labelStyle: context.text.label,
                       filled: true,
-                      fillColor: Colors.white.withValues(alpha: 0.06),
+                      fillColor: context.palette.surface,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(
                           PharmaConnectSpacing.radiusMd,
                         ),
                         borderSide: BorderSide(
-                          color: Colors.white.withValues(alpha: 0.10),
+                          color: context.palette.border,
                           width: 1,
                         ),
                       ),
@@ -143,7 +139,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           PharmaConnectSpacing.radiusMd,
                         ),
                         borderSide: BorderSide(
-                          color: Colors.white.withValues(alpha: 0.10),
+                          color: context.palette.border,
                           width: 1,
                         ),
                       ),
@@ -151,8 +147,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         borderRadius: BorderRadius.circular(
                           PharmaConnectSpacing.radiusMd,
                         ),
-                        borderSide: const BorderSide(
-                          color: PharmaConnectColors.accentCyan,
+                        borderSide: BorderSide(
+                          color: context.palette.primary,
                           width: 2,
                         ),
                       ),
@@ -164,10 +160,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     items: _roles.map((role) {
                       return DropdownMenuItem<UserRole>(
                         value: role['value'],
-                        child: Text(
-                          role['label'],
-                          style: PharmaConnectTypography.body1,
-                        ),
+                        child: Text(role['label'], style: context.text.body1),
                       );
                     }).toList(),
                     onChanged: (value) {
@@ -176,19 +169,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   if (_rolesNeedingVerification.contains(_selectedRole)) ...[
                     const SizedBox(height: 8),
-                    const Row(
+                    Row(
                       children: [
                         Icon(
                           Icons.verified_user_outlined,
                           size: 16,
-                          color: PharmaConnectColors.textSecondary,
+                          color: context.palette.textSecondary,
                         ),
                         SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             'Votre compte professionnel sera activé après '
                             'vérification par GSG.',
-                            style: PharmaConnectTypography.micro,
+                            style: context.text.micro,
                           ),
                         ),
                       ],
@@ -226,32 +219,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: PharmaConnectColors.accentOrange.withValues(
-                        alpha: 0.08,
-                      ),
+                      color: context.palette.warning.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(
                         PharmaConnectSpacing.radiusSm,
                       ),
                       border: Border.all(
-                        color: PharmaConnectColors.accentOrange.withValues(
-                          alpha: 0.2,
-                        ),
+                        color: context.palette.warning.withValues(alpha: 0.2),
                         width: 1,
                       ),
                     ),
                     child: Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.info_outline,
-                          color: PharmaConnectColors.accentOrange,
+                          color: context.palette.warning,
                           size: 16,
                         ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             'Les comptes professionnels nécessitent une vérification de licence après activation.',
-                            style: PharmaConnectTypography.micro.copyWith(
-                              color: PharmaConnectColors.textSecondary,
+                            style: context.text.micro.copyWith(
+                              color: context.palette.textSecondary,
                             ),
                           ),
                         ),
@@ -304,9 +293,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         );
                       } else if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
+                          SnackBar(
                             content: Text('Erreur lors de l\'envoi.'),
-                            backgroundColor: PharmaConnectColors.accentRed,
+                            backgroundColor: context.palette.danger,
                           ),
                         );
                       }
@@ -316,10 +305,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
-                        'Déjà un compte ?',
-                        style: PharmaConnectTypography.body2,
-                      ),
+                      Text('Déjà un compte ?', style: context.text.body2),
                       TertiaryButton(
                         label: 'Se connecter',
                         onPressed: () => context.go('/login'),
@@ -342,12 +328,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
       onSelected: (selected) {
         if (selected) setState(() => _selectedMethod = method);
       },
-      selectedColor: PharmaConnectColors.accentCyan.withValues(alpha: 0.2),
+      selectedColor: context.palette.primary.withValues(alpha: 0.2),
       backgroundColor: Colors.transparent,
       side: BorderSide(
         color: _selectedMethod == method
-            ? PharmaConnectColors.accentCyan
-            : Colors.white24,
+            ? context.palette.primary
+            : context.palette.veil(0.24),
       ),
     );
   }

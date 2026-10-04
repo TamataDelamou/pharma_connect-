@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import '../services/emergency_access_service.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 /// C219 / D63 : déclaration d'une urgence depuis un dossier de triage.
 /// Demande un motif écrit, appelle le serveur et retourne `true` si l'accès
@@ -77,15 +76,15 @@ class _EmergencyAccessDialogState extends State<_EmergencyAccessDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: PharmaConnectColors.primaryDeep,
-      title: const Row(
+      backgroundColor: context.palette.background,
+      title: Row(
         children: [
-          Icon(Icons.emergency, color: PharmaConnectColors.accentRed),
+          Icon(Icons.emergency, color: context.palette.danger),
           SizedBox(width: 8),
           Expanded(
             child: Text(
               'Accès d\'urgence au dossier',
-              style: PharmaConnectTypography.heading3,
+              style: context.text.heading3,
             ),
           ),
         ],
@@ -96,12 +95,12 @@ class _EmergencyAccessDialogState extends State<_EmergencyAccessDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Vous allez ouvrir le dossier de santé de ce patient sans son '
               'rendez-vous. L\'accès dure 24 heures. Votre nom, votre hôpital '
               'et le motif sont enregistrés et visibles par le patient et par '
               'GSG.',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
             ),
             const SizedBox(height: 16),
             TextField(
@@ -119,8 +118,8 @@ class _EmergencyAccessDialogState extends State<_EmergencyAccessDialog> {
               const SizedBox(height: 8),
               Text(
                 _error!,
-                style: PharmaConnectTypography.body2.copyWith(
-                  color: PharmaConnectColors.accentRed,
+                style: context.text.body2.copyWith(
+                  color: context.palette.danger,
                 ),
               ),
             ],
@@ -145,8 +144,8 @@ class _EmergencyAccessDialogState extends State<_EmergencyAccessDialog> {
               : const Icon(Icons.lock_open),
           label: const Text('Déclarer l\'urgence'),
           style: ElevatedButton.styleFrom(
-            backgroundColor: PharmaConnectColors.accentRed,
-            foregroundColor: PharmaConnectColors.textPrimary,
+            backgroundColor: context.palette.danger,
+            foregroundColor: context.palette.onDanger,
           ),
         ),
       ],

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
+import '../../../core/theme/palette.dart';
 
 class AdminPagination extends StatelessWidget {
   final int currentPage;
@@ -26,12 +26,12 @@ class AdminPagination extends StatelessWidget {
               ? () => onPageChanged(currentPage - 1)
               : null,
           color: currentPage > 0
-              ? PharmaConnectColors.textPrimary
-              : PharmaConnectColors.textSecondary,
+              ? context.palette.textPrimary
+              : context.palette.textSecondary,
         ),
         Text(
           'Page ${currentPage + 1} / $totalPages',
-          style: const TextStyle(color: PharmaConnectColors.textSecondary),
+          style: TextStyle(color: context.palette.textSecondary),
         ),
         IconButton(
           icon: const Icon(Icons.chevron_right),
@@ -39,8 +39,8 @@ class AdminPagination extends StatelessWidget {
               ? () => onPageChanged(currentPage + 1)
               : null,
           color: currentPage < totalPages - 1
-              ? PharmaConnectColors.textPrimary
-              : PharmaConnectColors.textSecondary,
+              ? context.palette.textPrimary
+              : context.palette.textSecondary,
         ),
       ],
     );

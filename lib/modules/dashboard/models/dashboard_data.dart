@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/palette.dart';
 
 class DashboardData {
   final List<StatCardData> stats;
@@ -19,7 +20,7 @@ class StatCardData {
   final String value;
   final String change;
   final IconData icon;
-  final Color color;
+  final ColorRole color;
 
   const StatCardData({
     required this.title,
@@ -34,7 +35,7 @@ class QuickAction {
   final String label;
   final IconData icon;
   final String route;
-  final Color color;
+  final ColorRole color;
 
   const QuickAction({
     required this.label,
@@ -49,7 +50,7 @@ class ActivityItem {
   final String subtitle;
   final DateTime time;
   final IconData icon;
-  final Color color;
+  final ColorRole color;
 
   const ActivityItem({
     required this.title,

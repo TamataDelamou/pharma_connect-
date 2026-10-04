@@ -3,11 +3,11 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
+import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import '../providers/health_record_provider.dart';
 import '../widgets/health_record_card.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class HealthRecordListScreen extends StatefulWidget {
   final String? patientId; // if null, use current user
@@ -50,33 +50,31 @@ class _HealthRecordListScreenState extends State<HealthRecordListScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        isOwnRecord
-                            ? 'Dossier de santé'
-                            : 'Dossier de santé du patient',
-                        style: PharmaConnectTypography.heading1,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        isOwnRecord
-                            ? 'Consultez et gérez vos informations médicales'
-                            : 'Consultation en lecture seule, enregistrée et '
-                                  'visible par le patient',
-                        style: PharmaConnectTypography.body2,
-                      ),
-                    ],
+            // Header. C233 : sur téléphone, le titre prend toute la largeur
+            // et les actions passent en dessous (HeaderRow).
+            HeaderRow(
+              leading: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    isOwnRecord
+                        ? 'Dossier de santé'
+                        : 'Dossier de santé du patient',
+                    style: context.text.heading1,
                   ),
-                ),
+                  const SizedBox(height: 4),
+                  Text(
+                    isOwnRecord
+                        ? 'Consultez et gérez vos informations médicales'
+                        : 'Consultation en lecture seule, enregistrée et '
+                              'visible par le patient',
+                    style: context.text.body2,
+                  ),
+                ],
+              ),
+              trailing: [
                 const KernelBadge(),
                 if (isOwnRecord) ...[
-                  const SizedBox(width: 16),
                   // C219 / D63 : le patient voit qui a ouvert son dossier en
                   // urgence et peut mettre fin à un accès en cours.
                   OutlinedButton.icon(
@@ -85,20 +83,17 @@ class _HealthRecordListScreenState extends State<HealthRecordListScreen> {
                     icon: const Icon(Icons.emergency),
                     label: const Text('Accès d\'urgence'),
                     style: OutlinedButton.styleFrom(
-                      side: const BorderSide(
-                        color: PharmaConnectColors.accentCyan,
-                      ),
-                      foregroundColor: PharmaConnectColors.accentCyan,
+                      side: BorderSide(color: context.palette.primary),
+                      foregroundColor: context.palette.primary,
                     ),
                   ),
-                  const SizedBox(width: 8),
                   ElevatedButton.icon(
                     onPressed: () => context.push('/healthrecord/edit'),
                     icon: const Icon(Icons.add),
                     label: const Text('Nouveau'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: PharmaConnectColors.accentCyan,
-                      foregroundColor: PharmaConnectColors.textOnAccent,
+                      backgroundColor: context.palette.primary,
+                      foregroundColor: context.palette.onPrimary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -127,18 +122,12 @@ class _HealthRecordListScreenState extends State<HealthRecordListScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 48,
-              color: PharmaConnectColors.accentRed,
-            ),
+            Icon(Icons.error_outline, size: 48, color: context.palette.danger),
             const SizedBox(height: 16),
             Text(
               provider.error!,
               textAlign: TextAlign.center,
-              style: PharmaConnectTypography.body2.copyWith(
-                color: PharmaConnectColors.accentRed,
-              ),
+              style: context.text.body2.copyWith(color: context.palette.danger),
             ),
             const SizedBox(height: 16),
             PrimaryButton(
@@ -161,23 +150,20 @@ class _HealthRecordListScreenState extends State<HealthRecordListScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
+            Icon(
               Icons.medical_information_outlined,
               size: 64,
-              color: Colors.white24,
+              color: context.palette.veil(0.24),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Aucun dossier de santé',
-              style: PharmaConnectTypography.heading3,
-            ),
+            Text('Aucun dossier de santé', style: context.text.heading3),
             const SizedBox(height: 8),
             Text(
               _isOwnRecord
                   ? 'Créez votre premier dossier pour suivre vos informations médicales'
                   : 'Aucun dossier accessible pour ce patient (lien de soin '
                         'ou accès d\'urgence requis)',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
               textAlign: TextAlign.center,
             ),
           ],

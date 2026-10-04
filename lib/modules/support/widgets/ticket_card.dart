@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../models/ticket.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class TicketCard extends StatelessWidget {
   final SupportTicket ticket;
@@ -21,7 +20,7 @@ class TicketCard extends StatelessWidget {
             width: 4,
             height: 50,
             decoration: BoxDecoration(
-              color: _priorityColor(ticket.priority),
+              color: _priorityColor(context, ticket.priority),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -35,7 +34,7 @@ class TicketCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         ticket.subject,
-                        style: PharmaConnectTypography.body1.copyWith(
+                        style: context.text.body1.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                         maxLines: 1,
@@ -43,10 +42,10 @@ class TicketCard extends StatelessWidget {
                       ),
                     ),
                     if (ticket.isSlaBreached) ...[
-                      const Icon(
+                      Icon(
                         Icons.warning_amber_rounded,
                         size: 14,
-                        color: PharmaConnectColors.accentRed,
+                        color: context.palette.danger,
                       ),
                       const SizedBox(width: 4),
                     ],
@@ -57,6 +56,7 @@ class TicketCard extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: _statusColor(
+                          context,
                           ticket.status,
                         ).withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(4),
@@ -66,19 +66,19 @@ class TicketCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w500,
-                          color: _statusColor(ticket.status),
+                          color: _statusColor(context, ticket.status),
                         ),
                       ),
                     ),
                   ],
                 ),
-                Text(ticket.ticketNumber, style: PharmaConnectTypography.micro),
+                Text(ticket.ticketNumber, style: context.text.mono),
                 const SizedBox(height: 4),
                 Row(
                   children: [
                     Text(
                       ticket.patientName ?? ticket.patientId,
-                      style: PharmaConnectTypography.body2,
+                      style: context.text.body2,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -90,61 +90,61 @@ class TicketCard extends StatelessWidget {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.06),
+                          color: context.palette.surface,
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
                           ticket.categoryName!,
-                          style: PharmaConnectTypography.micro,
+                          style: context.text.micro,
                         ),
                       ),
                     const SizedBox(width: 8),
                     Text(
                       _formatDate(ticket.createdAt),
-                      style: PharmaConnectTypography.micro,
+                      style: context.text.micro,
                     ),
                   ],
                 ),
               ],
             ),
           ),
-          const Icon(Icons.chevron_right, color: Colors.white24),
+          Icon(Icons.chevron_right, color: context.palette.veil(0.24)),
         ],
       ),
     );
   }
 
-  Color _priorityColor(String priority) {
+  Color _priorityColor(BuildContext context, String priority) {
     switch (priority) {
       case 'critical':
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       case 'high':
-        return PharmaConnectColors.accentOrange;
+        return context.palette.warning;
       case 'medium':
-        return PharmaConnectColors.accentCyan;
+        return context.palette.primary;
       case 'low':
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
       default:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
     }
   }
 
-  Color _statusColor(String status) {
+  Color _statusColor(BuildContext context, String status) {
     switch (status) {
       case 'new':
-        return PharmaConnectColors.accentOrange;
+        return context.palette.warning;
       case 'in_progress':
-        return PharmaConnectColors.accentCyan;
+        return context.palette.primary;
       case 'waiting_for_patient':
-        return PharmaConnectColors.accentPurple;
+        return context.palette.secondary;
       case 'resolved':
-        return PharmaConnectColors.accentGreen;
+        return context.palette.success;
       case 'closed':
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
       case 'cancelled':
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       default:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
     }
   }
 

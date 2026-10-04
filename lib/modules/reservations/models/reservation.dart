@@ -1,7 +1,6 @@
-import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
 import 'reservation_item.dart';
 import 'reservation_status.dart';
+import '../../../core/theme/palette.dart';
 
 class Reservation {
   final String id;
@@ -225,20 +224,20 @@ class Reservation {
     }
   }
 
-  Color get statusColor {
+  ColorRole get statusColor {
     switch (status) {
       case ReservationStatus.pending:
-        return PharmaConnectColors.accentOrange;
+        return ColorRole.warning;
       case ReservationStatus.confirmed:
-        return PharmaConnectColors.accentCyan;
+        return ColorRole.primary;
       case ReservationStatus.ready:
-        return PharmaConnectColors.accentGreen;
+        return ColorRole.success;
       case ReservationStatus.pickedUp:
-        return PharmaConnectColors.neutralMuted;
+        return ColorRole.textMuted;
       case ReservationStatus.cancelled:
-        return PharmaConnectColors.accentRed;
+        return ColorRole.danger;
       case ReservationStatus.expired:
-        return PharmaConnectColors.textSecondary;
+        return ColorRole.textSecondary;
     }
   }
 

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/utils/currency_formatter.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 /// C204 : choix fait dans le dialogue de remboursement.
 class RefundDecision {
@@ -75,23 +74,20 @@ class _RefundConfirmationDialogState extends State<RefundConfirmationDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: PharmaConnectColors.primaryDeep,
+      backgroundColor: context.palette.background,
       title: const Text('🔄 Rembourser la vente'),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Vente #${widget.saleNumber}',
-              style: PharmaConnectTypography.heading3,
-            ),
+            Text('Vente #${widget.saleNumber}', style: context.text.heading3),
             const SizedBox(height: 4),
             Text(
               'Montant : ${CurrencyFormatter.format(widget.finalAmount)}',
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w700,
-                color: PharmaConnectColors.accentOrange,
+                color: context.palette.warning,
               ),
             ),
             const SizedBox(height: 16),
@@ -106,10 +102,7 @@ class _RefundConfirmationDialogState extends State<RefundConfirmationDialog> {
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Destination du stock rendu',
-              style: PharmaConnectTypography.label,
-            ),
+            Text('Destination du stock rendu', style: context.text.label),
             const SizedBox(height: 8),
             _buildDispositionOption(
               value: 'restock',
@@ -126,10 +119,10 @@ class _RefundConfirmationDialogState extends State<RefundConfirmationDialog> {
               icon: Icons.block,
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'Au-delà du jour de la vente ou du plafond de l\'officine, '
               'seul le titulaire peut rembourser.',
-              style: PharmaConnectTypography.micro,
+              style: context.text.micro,
             ),
           ],
         ),
@@ -150,8 +143,8 @@ class _RefundConfirmationDialogState extends State<RefundConfirmationDialog> {
                 )
               : null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: PharmaConnectColors.accentOrange,
-            foregroundColor: PharmaConnectColors.textPrimary,
+            backgroundColor: context.palette.warning,
+            foregroundColor: context.palette.onPrimary,
           ),
           child: const Text('Rembourser'),
         ),
@@ -174,10 +167,12 @@ class _RefundConfirmationDialogState extends State<RefundConfirmationDialog> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: selected ? PharmaConnectColors.accentCyan : Colors.white24,
+            color: selected
+                ? context.palette.primary
+                : context.palette.veil(0.24),
           ),
           color: selected
-              ? PharmaConnectColors.accentCyan.withValues(alpha: 0.1)
+              ? context.palette.primary.withValues(alpha: 0.1)
               : Colors.transparent,
         ),
         child: Row(
@@ -185,11 +180,11 @@ class _RefundConfirmationDialogState extends State<RefundConfirmationDialog> {
             Icon(
               selected ? Icons.radio_button_checked : Icons.radio_button_off,
               color: selected
-                  ? PharmaConnectColors.accentCyan
-                  : PharmaConnectColors.textSecondary,
+                  ? context.palette.primary
+                  : context.palette.textSecondary,
             ),
             const SizedBox(width: 12),
-            Icon(icon, color: PharmaConnectColors.textSecondary, size: 20),
+            Icon(icon, color: context.palette.textSecondary, size: 20),
             const SizedBox(width: 8),
             Expanded(
               child: Column(
@@ -199,7 +194,7 @@ class _RefundConfirmationDialogState extends State<RefundConfirmationDialog> {
                     title,
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
-                  Text(subtitle, style: PharmaConnectTypography.micro),
+                  Text(subtitle, style: context.text.micro),
                 ],
               ),
             ),

@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../core/theme/colors.dart';
-import '../core/theme/typography.dart';
 import '../core/widgets/confirm_dialog.dart';
 import '../core/widgets/navigation/sidebar_navigation.dart';
 import '../modules/auth/providers/auth_provider.dart';
 import 'app_back.dart';
 import 'app_menu.dart';
 import 'route_titles.dart';
+import '../core/theme/palette.dart';
 
 /// C226 : cadre de navigation commun à toutes les routes connectées
 /// (ShellRoute de app_router.dart).
@@ -124,8 +123,8 @@ class _AppShellState extends State<AppShell> {
   }) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: PharmaConnectColors.primaryDeep,
-        foregroundColor: PharmaConnectColors.textPrimary,
+        backgroundColor: context.palette.background,
+        foregroundColor: context.palette.textPrimary,
         automaticallyImplyLeading: false,
         leading: showBack
             ? IconButton(
@@ -136,7 +135,7 @@ class _AppShellState extends State<AppShell> {
             : null,
         title: Text(
           title,
-          style: PharmaConnectTypography.heading3,
+          style: context.text.heading3,
           maxLines: 1, // C233 : une seule ligne, coupée avec « … ».
           softWrap: false,
           overflow: TextOverflow.ellipsis,
@@ -153,7 +152,7 @@ class _AppShellState extends State<AppShell> {
       ),
       endDrawer: Builder(
         builder: (context) => Drawer(
-          backgroundColor: PharmaConnectColors.primaryDeep,
+          backgroundColor: context.palette.background,
           child: SafeArea(
             child: _menu(
               path,

@@ -3,14 +3,13 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/utils/currency_formatter.dart';
 import '../providers/sales_provider.dart';
 import '../../auth/providers/auth_provider.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class CustomersListScreen extends StatefulWidget {
   const CustomersListScreen({super.key});
@@ -39,11 +38,11 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
   Widget build(BuildContext context) {
     final pharmacyId = context.watch<AuthProvider>().pharmacyId;
     if (pharmacyId == null) {
-      return const Scaffold(
+      return Scaffold(
         body: Center(
           child: Text(
             'Aucune officine rattachée à ce compte pharmacien.',
-            style: PharmaConnectTypography.body2,
+            style: context.text.body2,
             textAlign: TextAlign.center,
           ),
         ),
@@ -63,18 +62,18 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       '👤 Clients',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -115,11 +114,8 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                   : provider.error != null
                   ? Center(child: Text(provider.error!))
                   : provider.customers.isEmpty
-                  ? const Center(
-                      child: Text(
-                        'Aucun client',
-                        style: PharmaConnectTypography.body2,
-                      ),
+                  ? Center(
+                      child: Text('Aucun client', style: context.text.body2),
                     )
                   : ListView.builder(
                       itemCount: provider.customers.length,
@@ -134,13 +130,12 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                             child: Row(
                               children: [
                                 CircleAvatar(
-                                  backgroundColor: PharmaConnectColors
-                                      .accentCyan
+                                  backgroundColor: context.palette.primary
                                       .withValues(alpha: 0.15),
                                   child: Text(
                                     customer.firstName[0],
                                     style: TextStyle(
-                                      color: PharmaConnectColors.accentCyan,
+                                      color: context.palette.primary,
                                       fontWeight: FontWeight.w700,
                                     ),
                                   ),
@@ -153,14 +148,13 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                                     children: [
                                       Text(
                                         customer.fullName,
-                                        style: PharmaConnectTypography.body1
-                                            .copyWith(
-                                              fontWeight: FontWeight.w600,
-                                            ),
+                                        style: context.text.body1.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                       ),
                                       Text(
                                         customer.code,
-                                        style: PharmaConnectTypography.micro,
+                                        style: context.text.mono,
                                       ),
                                     ],
                                   ),
@@ -174,22 +168,22 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                                         fontSize: 12,
                                         fontWeight: FontWeight.w600,
                                         color: customer.balance > 0
-                                            ? PharmaConnectColors.accentGreen
+                                            ? context.palette.success
                                             : customer.balance < 0
-                                            ? PharmaConnectColors.accentRed
-                                            : PharmaConnectColors.textSecondary,
+                                            ? context.palette.danger
+                                            : context.palette.textSecondary,
                                       ),
                                     ),
                                     if (customer.phone != null)
                                       Text(
                                         customer.phone!,
-                                        style: PharmaConnectTypography.micro,
+                                        style: context.text.micro,
                                       ),
                                   ],
                                 ),
-                                const Icon(
+                                Icon(
                                   Icons.chevron_right,
-                                  color: Colors.white24,
+                                  color: context.palette.veil(0.24),
                                 ),
                               ],
                             ),

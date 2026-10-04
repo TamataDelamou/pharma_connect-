@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import '../models/family_activity.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class FamilyActivityTile extends StatelessWidget {
   final FamilyActivity activity;
@@ -14,9 +13,9 @@ class FamilyActivityTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.04),
+        color: context.palette.surfaceMuted,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        border: Border.all(color: context.palette.borderSubtle),
       ),
       child: Row(
         children: [
@@ -33,26 +32,23 @@ class FamilyActivityTile extends StatelessWidget {
                   children: [
                     Text(
                       activity.patientName ?? activity.patientId,
-                      style: PharmaConnectTypography.body2.copyWith(
+                      style: context.text.body2.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     const Spacer(),
                     Text(
                       _formatDate(activity.recordedAt),
-                      style: PharmaConnectTypography.micro,
+                      style: context.text.micro,
                     ),
                   ],
                 ),
                 Text(
                   activity.note ?? activity.typeLabel,
-                  style: PharmaConnectTypography.body2,
+                  style: context.text.body2,
                 ),
                 if (activity.value != null)
-                  Text(
-                    'Valeur: ${activity.value}',
-                    style: PharmaConnectTypography.micro,
-                  ),
+                  Text('Valeur: ${activity.value}', style: context.text.micro),
               ],
             ),
           ),

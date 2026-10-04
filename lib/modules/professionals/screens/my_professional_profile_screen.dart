@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show PostgrestException;
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../services/professionals_service.dart';
+import '../../../core/theme/palette.dart';
 
 /// C222 / D66 : fiche du professionnel de santé connecté. Il la crée ou la
 /// corrige lui-même (spécialité, numéro d'ordre, organisme, date
@@ -94,6 +93,7 @@ class _MyProfessionalProfileScreenState
   }
 
   Future<void> _save() async {
+    final palette = context.palette;
     if (!_formKey.currentState!.validate()) return;
     setState(() {
       _isSaving = true;
@@ -114,11 +114,11 @@ class _MyProfessionalProfileScreenState
       );
       await auth.refreshAccountStatus();
       messenger.showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
             'Fiche enregistrée. L\'équipe GSG vérifiera votre numéro d\'ordre.',
           ),
-          backgroundColor: PharmaConnectColors.accentGreen,
+          backgroundColor: palette.success,
         ),
       );
       router.go('/dashboard');
@@ -175,10 +175,7 @@ class _MyProfessionalProfileScreenState
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            _statusLabel(),
-                            style: PharmaConnectTypography.body2,
-                          ),
+                          Text(_statusLabel(), style: context.text.body2),
                           const SizedBox(height: 24),
                           TextFormField(
                             controller: _specialty,
@@ -240,8 +237,8 @@ class _MyProfessionalProfileScreenState
                             const SizedBox(height: 16),
                             Text(
                               _error!,
-                              style: PharmaConnectTypography.body2.copyWith(
-                                color: PharmaConnectColors.accentRed,
+                              style: context.text.body2.copyWith(
+                                color: context.palette.danger,
                               ),
                             ),
                           ],
@@ -251,9 +248,8 @@ class _MyProfessionalProfileScreenState
                             child: ElevatedButton(
                               onPressed: _isSaving ? null : _save,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: PharmaConnectColors.accentCyan,
-                                foregroundColor:
-                                    PharmaConnectColors.textOnAccent,
+                                backgroundColor: context.palette.primary,
+                                foregroundColor: context.palette.onPrimary,
                               ),
                               child: _isSaving
                                   ? const SizedBox(

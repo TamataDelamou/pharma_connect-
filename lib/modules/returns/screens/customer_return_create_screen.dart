@@ -4,8 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/tertiary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
@@ -17,6 +15,7 @@ import '../providers/returns_provider.dart';
 import '../models/customer_return.dart';
 import '../models/customer_return_item.dart';
 import '../../auth/providers/auth_provider.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class CustomerReturnCreateScreen extends StatefulWidget {
   const CustomerReturnCreateScreen({super.key});
@@ -68,11 +67,11 @@ class _CustomerReturnCreateScreenState
   Widget build(BuildContext context) {
     final pharmacyId = context.watch<AuthProvider>().pharmacyId;
     if (pharmacyId == null) {
-      return const Scaffold(
+      return Scaffold(
         body: Center(
           child: Text(
             'Aucune officine rattachée à ce compte pharmacien.',
-            style: PharmaConnectTypography.body2,
+            style: context.text.body2,
             textAlign: TextAlign.center,
           ),
         ),
@@ -94,18 +93,18 @@ class _CustomerReturnCreateScreenState
                 leading: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.arrow_back,
-                        color: PharmaConnectColors.textPrimary,
+                        color: context.palette.textPrimary,
                       ),
                       onPressed: () => context.pop(),
                       padding: EdgeInsets.zero,
                     ),
                     const SizedBox(width: 8),
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         '🔄 Nouveau retour client',
-                        style: PharmaConnectTypography.heading2,
+                        style: context.text.heading2,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -185,10 +184,7 @@ class _CustomerReturnCreateScreenState
                       ),
                       const SizedBox(height: 16),
 
-                      const Text(
-                        'Articles retournés',
-                        style: PharmaConnectTypography.heading3,
-                      ),
+                      Text('Articles retournés', style: context.text.heading3),
                       const SizedBox(height: 8),
                       GlassInput(
                         label: '',
@@ -205,7 +201,7 @@ class _CustomerReturnCreateScreenState
 
                       if (_items.isNotEmpty) ...[
                         ..._items.map(_buildItemTile),
-                        const Divider(color: Colors.white12),
+                        Divider(color: context.palette.veil(0.12)),
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 4),
                           child: Row(
@@ -229,8 +225,8 @@ class _CustomerReturnCreateScreenState
                           padding: const EdgeInsets.symmetric(vertical: 8),
                           child: Text(
                             'Aucun article ajouté pour l\'instant',
-                            style: PharmaConnectTypography.body2.copyWith(
-                              color: PharmaConnectColors.textSecondary,
+                            style: context.text.body2.copyWith(
+                              color: context.palette.textSecondary,
                             ),
                           ),
                         ),
@@ -239,29 +235,29 @@ class _CustomerReturnCreateScreenState
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: PharmaConnectColors.accentCyan.withValues(
+                          color: context.palette.primary.withValues(
                             alpha: 0.06,
                           ),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: PharmaConnectColors.accentCyan.withValues(
+                            color: context.palette.primary.withValues(
                               alpha: 0.15,
                             ),
                           ),
                         ),
                         child: Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.info_outline,
-                              color: PharmaConnectColors.accentCyan,
+                              color: context.palette.primary,
                               size: 16,
                             ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 'Le retour est créé en attente ; il devra être approuvé pour déclencher le remboursement.',
-                                style: PharmaConnectTypography.micro.copyWith(
-                                  color: PharmaConnectColors.textSecondary,
+                                style: context.text.micro.copyWith(
+                                  color: context.palette.textSecondary,
                                 ),
                               ),
                             ),
@@ -305,18 +301,15 @@ class _CustomerReturnCreateScreenState
     if (provider.products.isEmpty) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Text(
-          'Aucun produit trouvé',
-          style: PharmaConnectTypography.body2,
-        ),
+        child: Text('Aucun produit trouvé', style: context.text.body2),
       );
     }
     return Container(
       constraints: const BoxConstraints(maxHeight: 200),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.04),
+        color: context.palette.surfaceMuted,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        border: Border.all(color: context.palette.border),
       ),
       child: ListView.builder(
         shrinkWrap: true,
@@ -325,10 +318,10 @@ class _CustomerReturnCreateScreenState
           final product = provider.products[index];
           return ListTile(
             dense: true,
-            title: Text(product.name, style: PharmaConnectTypography.body2),
+            title: Text(product.name, style: context.text.body2),
             subtitle: Text(
               '${product.genericName} • ${product.dosage} • ${product.form}',
-              style: PharmaConnectTypography.micro,
+              style: context.text.micro,
             ),
             trailing: const Icon(Icons.add_circle_outline),
             onTap: () => _addProduct(product),
@@ -390,9 +383,9 @@ class _CustomerReturnCreateScreenState
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.04),
+          color: context.palette.surfaceMuted,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+          border: Border.all(color: context.palette.borderSubtle),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -402,15 +395,15 @@ class _CustomerReturnCreateScreenState
                 Expanded(
                   child: Text(
                     item.productName,
-                    style: PharmaConnectTypography.body1.copyWith(
+                    style: context.text.body1.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.delete_outline,
-                    color: PharmaConnectColors.accentRed,
+                    color: context.palette.danger,
                   ),
                   onPressed: () => _removeItem(item.id),
                 ),
@@ -482,6 +475,7 @@ class _CustomerReturnCreateScreenState
   }
 
   Future<void> _createReturn() async {
+    final palette = context.palette;
     if (!_formKey.currentState!.validate()) return;
 
     final pharmacyId = context.read<AuthProvider>().pharmacyId;
@@ -533,9 +527,9 @@ class _CustomerReturnCreateScreenState
         context.pop();
       }
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Retour créé avec succès'),
-          backgroundColor: PharmaConnectColors.accentGreen,
+          backgroundColor: palette.success,
         ),
       );
     } else if (context.mounted) {
@@ -545,7 +539,7 @@ class _CustomerReturnCreateScreenState
             context.read<ReturnsProvider>().error ??
                 'Erreur lors de la création',
           ),
-          backgroundColor: PharmaConnectColors.accentRed,
+          backgroundColor: palette.danger,
         ),
       );
     }

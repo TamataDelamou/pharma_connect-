@@ -5,8 +5,6 @@ import 'package:provider/provider.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/buttons/tertiary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
@@ -17,6 +15,7 @@ import '../providers/delivery_provider.dart';
 import '../widgets/delivery_status_badge.dart';
 import '../widgets/delivery_timeline.dart';
 import '../widgets/driver_info_card.dart';
+import '../../../core/theme/palette.dart';
 
 class DeliveryTrackingScreen extends StatefulWidget {
   final String? deliveryId;
@@ -91,18 +90,18 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen>
                 leading: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.arrow_back,
-                        color: PharmaConnectColors.textPrimary,
+                        color: context.palette.textPrimary,
                       ),
                       onPressed: () => context.pop(),
                       padding: EdgeInsets.zero,
                     ),
                     const SizedBox(width: 8),
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         'Suivi des livraisons',
-                        style: PharmaConnectTypography.heading2,
+                        style: context.text.heading2,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -117,20 +116,20 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen>
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.local_shipping_outlined,
                         size: 64,
-                        color: Colors.white24,
+                        color: context.palette.veil(0.24),
                       ),
                       const SizedBox(height: 16),
-                      const Text(
+                      Text(
                         'Aucune livraison en cours',
-                        style: PharmaConnectTypography.heading3,
+                        style: context.text.heading3,
                       ),
                       const SizedBox(height: 8),
-                      const Text(
+                      Text(
                         'Vos livraisons apparaîtront ici',
-                        style: PharmaConnectTypography.body2,
+                        style: context.text.body2,
                       ),
                       const SizedBox(height: 24),
                       PrimaryButton(
@@ -161,9 +160,9 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen>
             Row(
               children: [
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.arrow_back,
-                    color: PharmaConnectColors.textPrimary,
+                    color: context.palette.textPrimary,
                   ),
                   onPressed: () => context.pop(),
                   padding: EdgeInsets.zero,
@@ -172,7 +171,7 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen>
                 Expanded(
                   child: Text(
                     'Suivi de livraison',
-                    style: PharmaConnectTypography.heading2,
+                    style: context.text.heading2,
                   ),
                 ),
                 const KernelBadge(),
@@ -181,7 +180,7 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen>
             const SizedBox(height: 8),
             Row(
               children: [
-                Text('#${delivery.id}', style: PharmaConnectTypography.body2),
+                Text('#${delivery.id}', style: context.text.body2),
                 const Spacer(),
                 DeliveryStatusBadge(status: delivery.status),
               ],
@@ -194,29 +193,25 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen>
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: PharmaConnectColors.accentOrange.withValues(
-                    alpha: 0.15,
-                  ),
+                  color: context.palette.warning.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: PharmaConnectColors.accentOrange.withValues(
-                      alpha: 0.4,
-                    ),
+                    color: context.palette.warning.withValues(alpha: 0.4),
                   ),
                 ),
                 child: Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.cloud_off,
                       size: 16,
-                      color: PharmaConnectColors.accentOrange,
+                      color: context.palette.warning,
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         provider.error ??
                             'Hors connexion — dernière position connue affichée.',
-                        style: PharmaConnectTypography.body2,
+                        style: context.text.body2,
                       ),
                     ),
                   ],
@@ -274,8 +269,7 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen>
                                             48 + 20 * _pulseController.value,
                                         decoration: BoxDecoration(
                                           shape: BoxShape.circle,
-                                          color: PharmaConnectColors
-                                              .accentPurple
+                                          color: context.palette.secondary
                                               .withValues(
                                                 alpha:
                                                     0.3 -
@@ -287,14 +281,13 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen>
                                       Container(
                                         width: 40,
                                         height: 40,
-                                        decoration: const BoxDecoration(
+                                        decoration: BoxDecoration(
                                           shape: BoxShape.circle,
-                                          color:
-                                              PharmaConnectColors.accentPurple,
+                                          color: context.palette.secondary,
                                         ),
-                                        child: const Icon(
+                                        child: Icon(
                                           Icons.delivery_dining,
-                                          color: Colors.white,
+                                          color: context.palette.onPrimary,
                                           size: 24,
                                         ),
                                       ),
@@ -317,9 +310,9 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen>
                               ),
                               width: 32,
                               height: 32,
-                              child: const Icon(
+                              child: Icon(
                                 Icons.location_on,
-                                color: PharmaConnectColors.accentRed,
+                                color: context.palette.danger,
                                 size: 32,
                               ),
                             ),
@@ -366,23 +359,21 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen>
                         padding: const EdgeInsets.all(12),
                         child: Row(
                           children: [
-                            const Icon(
-                              Icons.vpn_key,
-                              color: PharmaConnectColors.accentCyan,
-                            ),
+                            Icon(Icons.vpn_key, color: context.palette.primary),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text(
+                                  Text(
                                     'Votre code de remise',
-                                    style: PharmaConnectTypography.body2,
+                                    style: context.text.body2,
                                   ),
                                   Text(
                                     delivery.confirmationCode!,
-                                    style: PharmaConnectTypography.heading2
-                                        .copyWith(letterSpacing: 4),
+                                    style: context.text.heading2.copyWith(
+                                      letterSpacing: 4,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -418,17 +409,14 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen>
                         padding: const EdgeInsets.all(12),
                         child: Row(
                           children: [
-                            const Icon(
-                              Icons.timer,
-                              color: PharmaConnectColors.accentCyan,
-                            ),
+                            Icon(Icons.timer, color: context.palette.primary),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 'Arrivée estimée : ${delivery.estimatedArrival}',
-                                style: PharmaConnectTypography.body1.copyWith(
+                                style: context.text.body1.copyWith(
                                   fontWeight: FontWeight.w600,
-                                  color: PharmaConnectColors.accentCyan,
+                                  color: context.palette.primary,
                                 ),
                               ),
                             ),
@@ -467,11 +455,11 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: PharmaConnectColors.primaryDeep,
+        backgroundColor: context.palette.background,
         title: const Text('Confirmer la réception'),
-        content: const Text(
+        content: Text(
           'Avez-vous bien reçu votre colis en bon état ?',
-          style: PharmaConnectTypography.body1,
+          style: context.text.body1,
         ),
         actions: [
           TextButton(
@@ -489,9 +477,9 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen>
               if (!context.mounted) return;
               if (success) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
+                  SnackBar(
                     content: Text('Livraison confirmée avec succès !'),
-                    backgroundColor: PharmaConnectColors.accentGreen,
+                    backgroundColor: context.palette.success,
                   ),
                 );
               } else {
@@ -500,14 +488,14 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen>
                     content: Text(
                       provider.error ?? 'Impossible de confirmer la réception.',
                     ),
-                    backgroundColor: PharmaConnectColors.accentRed,
+                    backgroundColor: context.palette.danger,
                   ),
                 );
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: PharmaConnectColors.accentGreen,
-              foregroundColor: PharmaConnectColors.textPrimary,
+              backgroundColor: context.palette.success,
+              foregroundColor: context.palette.onPrimary,
             ),
             child: const Text('Oui, confirmer'),
           ),
@@ -520,21 +508,19 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: PharmaConnectColors.primaryDeep,
+        backgroundColor: context.palette.background,
         title: const Text('Annuler la livraison'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
+            Text(
               'Êtes-vous sûr de vouloir annuler cette livraison ?',
-              style: PharmaConnectTypography.body1,
+              style: context.text.body1,
             ),
             const SizedBox(height: 8),
             Text(
               'Cette action est irréversible.',
-              style: PharmaConnectTypography.body2.copyWith(
-                color: PharmaConnectColors.accentRed,
-              ),
+              style: context.text.body2.copyWith(color: context.palette.danger),
             ),
           ],
         ),
@@ -554,16 +540,16 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen>
                   );
               if (success && context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
+                  SnackBar(
                     content: Text('Livraison annulée'),
-                    backgroundColor: PharmaConnectColors.accentRed,
+                    backgroundColor: context.palette.danger,
                   ),
                 );
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: PharmaConnectColors.accentRed,
-              foregroundColor: PharmaConnectColors.textPrimary,
+              backgroundColor: context.palette.danger,
+              foregroundColor: context.palette.onDanger,
             ),
             child: const Text('Confirmer l\'annulation'),
           ),

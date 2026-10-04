@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'kernel_ui.dart';
 
-import '../theme/colors.dart';
 import '../theme/spacing.dart';
 import '../theme/typography.dart';
+import '../theme/palette.dart';
 
 class KernelBadge extends StatelessWidget {
   final bool showIcon;
@@ -18,6 +19,8 @@ class KernelBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!KernelUi.enabled) return const SizedBox.shrink();
+
     // C233 : en largeur téléphone, le badge se réduit à son icône. Il est
     // posé dans l'en-tête de la plupart des écrans, à côté du titre, auquel
     // il ne laissait presque plus de place.
@@ -28,15 +31,15 @@ class KernelBadge extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: compact ? 6 : 10, vertical: 4),
       decoration: BoxDecoration(
-        color: PharmaConnectColors.accentPurple.withValues(alpha: 0.15),
+        color: context.palette.secondary.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(PharmaConnectSpacing.radiusSm),
         border: Border.all(
-          color: PharmaConnectColors.accentPurple.withValues(alpha: 0.3),
+          color: context.palette.secondary.withValues(alpha: 0.3),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: PharmaConnectColors.accentPurple.withValues(alpha: 0.15),
+            color: context.palette.secondary.withValues(alpha: 0.15),
             blurRadius: 12,
             spreadRadius: 0,
           ),
@@ -50,13 +53,13 @@ class KernelBadge extends StatelessWidget {
             if (showLabel) const SizedBox(width: 4),
           ],
           if (showLabel) ...[
-            const Text(
+            Text(
               'Kernel',
               style: TextStyle(
                 fontFamily: 'Inter',
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
-                color: PharmaConnectColors.accentPurple,
+                color: context.palette.secondary,
                 letterSpacing: 0.5,
               ),
             ),

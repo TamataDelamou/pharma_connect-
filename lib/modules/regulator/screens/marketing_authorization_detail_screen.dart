@@ -3,12 +3,11 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../auth/models/user_role.dart';
 import '../providers/marketing_authorization_provider.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 // Audit Module 27 (REG), Étape 3 (05/09/2026) — REG-4.
 class MarketingAuthorizationDetailScreen extends StatefulWidget {
@@ -53,9 +52,7 @@ class _MarketingAuthorizationDetailScreenState
         body: Center(
           child: Text(
             provider.error ?? 'AMM introuvable',
-            style: PharmaConnectTypography.body2.copyWith(
-              color: PharmaConnectColors.accentRed,
-            ),
+            style: context.text.body2.copyWith(color: context.palette.danger),
           ),
         ),
       );
@@ -72,18 +69,18 @@ class _MarketingAuthorizationDetailScreenState
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Détail de l\'AMM',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -106,39 +103,39 @@ class _MarketingAuthorizationDetailScreenState
                             'Médicament',
                             authorization.productName,
                           ),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           _buildInfoRow(
                             'Fabricant',
                             authorization.manufacturer,
                           ),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           _buildInfoRow(
                             'Numéro d\'AMM',
                             authorization.authorizationNumber,
                           ),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           _buildInfoRow(
                             'Organisme émetteur',
                             authorization.issuingBody,
                           ),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           _buildInfoRow('Statut', authorization.statusLabel),
                           if (authorization.expiryDate != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow(
                               'Date d\'expiration',
                               _formatDate(authorization.expiryDate!),
                             ),
                           ],
                           if (authorization.indications != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow(
                               'Indications',
                               authorization.indications!,
                             ),
                           ],
                           if (authorization.contraindications != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow(
                               'Contre-indications',
                               authorization.contraindications!,
@@ -154,9 +151,9 @@ class _MarketingAuthorizationDetailScreenState
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'Mettre à jour le statut',
-                              style: PharmaConnectTypography.heading3,
+                              style: context.text.heading3,
                             ),
                             const SizedBox(height: 12),
                             Wrap(
@@ -167,31 +164,31 @@ class _MarketingAuthorizationDetailScreenState
                                   _buildActionChip(
                                     'Approuver',
                                     'approved',
-                                    PharmaConnectColors.accentGreen,
+                                    context.palette.success,
                                   ),
                                 ],
                                 if (authorization.status == 'approved') ...[
                                   _buildActionChip(
                                     'Suspendre',
                                     'suspended',
-                                    PharmaConnectColors.accentAmber,
+                                    context.palette.warningStrong,
                                   ),
                                   _buildActionChip(
                                     'Révoquer',
                                     'revoked',
-                                    PharmaConnectColors.accentRed,
+                                    context.palette.danger,
                                   ),
                                 ],
                                 if (authorization.status == 'suspended') ...[
                                   _buildActionChip(
                                     'Réactiver',
                                     'approved',
-                                    PharmaConnectColors.accentGreen,
+                                    context.palette.success,
                                   ),
                                   _buildActionChip(
                                     'Révoquer',
                                     'revoked',
-                                    PharmaConnectColors.accentRed,
+                                    context.palette.danger,
                                   ),
                                 ],
                               ],
@@ -216,11 +213,8 @@ class _MarketingAuthorizationDetailScreenState
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 160,
-            child: Text(label, style: PharmaConnectTypography.label),
-          ),
-          Expanded(child: Text(value, style: PharmaConnectTypography.body1)),
+          SizedBox(width: 160, child: Text(label, style: context.text.label)),
+          Expanded(child: Text(value, style: context.text.body1)),
         ],
       ),
     );

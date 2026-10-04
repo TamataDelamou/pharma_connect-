@@ -3,14 +3,13 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/tertiary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/widgets/inputs/glass_input.dart';
 import '../providers/chain_provider.dart';
 import '../models/pharmacy_group.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class GroupEditScreen extends StatefulWidget {
   final String groupId;
@@ -84,9 +83,7 @@ class _GroupEditScreenState extends State<GroupEditScreen> {
         body: Center(
           child: Text(
             provider.error ?? 'Groupe introuvable',
-            style: PharmaConnectTypography.body2.copyWith(
-              color: PharmaConnectColors.accentRed,
-            ),
+            style: context.text.body2.copyWith(color: context.palette.danger),
           ),
         ),
       );
@@ -105,18 +102,18 @@ class _GroupEditScreenState extends State<GroupEditScreen> {
                 leading: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.arrow_back,
-                        color: PharmaConnectColors.textPrimary,
+                        color: context.palette.textPrimary,
                       ),
                       onPressed: () => context.pop(),
                       padding: EdgeInsets.zero,
                     ),
                     const SizedBox(width: 8),
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         'Modifier le groupe',
-                        style: PharmaConnectTypography.heading2,
+                        style: context.text.heading2,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -170,16 +167,13 @@ class _GroupEditScreenState extends State<GroupEditScreen> {
                             // Status toggle
                             Row(
                               children: [
-                                const Text(
-                                  'Groupe actif',
-                                  style: PharmaConnectTypography.label,
-                                ),
+                                Text('Groupe actif', style: context.text.label),
                                 const SizedBox(width: 12),
                                 Switch(
                                   value: _isActive,
                                   onChanged: (value) =>
                                       setState(() => _isActive = value),
-                                  activeColor: PharmaConnectColors.accentGreen,
+                                  activeColor: context.palette.success,
                                 ),
                               ],
                             ),
@@ -204,24 +198,22 @@ class _GroupEditScreenState extends State<GroupEditScreen> {
                             child: OutlinedButton.icon(
                               onPressed: _isDeleting ? null : _confirmDelete,
                               icon: _isDeleting
-                                  ? const SizedBox(
+                                  ? SizedBox(
                                       width: 16,
                                       height: 16,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
                                         valueColor:
                                             AlwaysStoppedAnimation<Color>(
-                                              PharmaConnectColors.accentRed,
+                                              context.palette.danger,
                                             ),
                                       ),
                                     )
                                   : const Icon(Icons.delete_outline),
                               label: const Text('Supprimer'),
                               style: OutlinedButton.styleFrom(
-                                foregroundColor: PharmaConnectColors.accentRed,
-                                side: const BorderSide(
-                                  color: PharmaConnectColors.accentRed,
-                                ),
+                                foregroundColor: context.palette.danger,
+                                side: BorderSide(color: context.palette.danger),
                               ),
                             ),
                           ),
@@ -244,6 +236,7 @@ class _GroupEditScreenState extends State<GroupEditScreen> {
   }
 
   Future<void> _saveGroup() async {
+    final palette = context.palette;
     if (!_formKey.currentState!.validate()) return;
 
     final currentGroup = context.read<ChainProvider>().selectedGroup;
@@ -268,26 +261,27 @@ class _GroupEditScreenState extends State<GroupEditScreen> {
     if (success && context.mounted) {
       context.pop();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Groupe mis à jour'),
-          backgroundColor: PharmaConnectColors.accentGreen,
+          backgroundColor: palette.success,
         ),
       );
     } else if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(context.read<ChainProvider>().error ?? 'Erreur'),
-          backgroundColor: PharmaConnectColors.accentRed,
+          backgroundColor: palette.danger,
         ),
       );
     }
   }
 
   void _confirmDelete() {
+    final palette = context.palette;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: PharmaConnectColors.primaryDeep,
+        backgroundColor: context.palette.background,
         title: const Text('Supprimer le groupe'),
         content: const Text(
           'Cette action supprimera le groupe et tous ses membres. '
@@ -310,16 +304,16 @@ class _GroupEditScreenState extends State<GroupEditScreen> {
               if (success && context.mounted) {
                 context.pop();
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
+                  SnackBar(
                     content: Text('Groupe supprimé'),
-                    backgroundColor: PharmaConnectColors.accentRed,
+                    backgroundColor: palette.danger,
                   ),
                 );
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: PharmaConnectColors.accentRed,
-              foregroundColor: PharmaConnectColors.textPrimary,
+              backgroundColor: context.palette.danger,
+              foregroundColor: context.palette.onDanger,
             ),
             child: const Text('Supprimer'),
           ),

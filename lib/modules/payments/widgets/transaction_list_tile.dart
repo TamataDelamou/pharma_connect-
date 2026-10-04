@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../models/transaction.dart';
 import '../models/payment_method.dart';
+import '../../../core/theme/palette.dart';
 
 class TransactionListTile extends StatelessWidget {
   final Transaction transaction;
@@ -26,12 +25,9 @@ class TransactionListTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.04),
+          color: context.palette.surfaceMuted,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: Colors.white.withValues(alpha: 0.04),
-            width: 1,
-          ),
+          border: Border.all(color: context.palette.surfaceMuted, width: 1),
         ),
         child: Row(
           children: [
@@ -39,7 +35,9 @@ class TransactionListTile extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: transaction.statusColor.withValues(alpha: 0.15),
+                color: transaction.statusColor
+                    .of(context.palette)
+                    .withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
@@ -50,7 +48,7 @@ class TransactionListTile extends StatelessWidget {
                     : transaction.method == PaymentMethod.bankCard
                     ? Icons.credit_card
                     : Icons.payments,
-                color: transaction.statusColor,
+                color: transaction.statusColor.of(context.palette),
                 size: 20,
               ),
             ),
@@ -61,7 +59,7 @@ class TransactionListTile extends StatelessWidget {
                 children: [
                   Text(
                     transaction.pharmacyName ?? 'Transaction',
-                    style: PharmaConnectTypography.body1.copyWith(
+                    style: context.text.body1.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                     maxLines: 1,
@@ -69,11 +67,11 @@ class TransactionListTile extends StatelessWidget {
                   ),
                   Text(
                     '#${transaction.id} • ${transaction.method.label}',
-                    style: PharmaConnectTypography.body2,
+                    style: context.text.body2,
                   ),
                   Text(
                     _formatDate(transaction.createdAt),
-                    style: PharmaConnectTypography.micro,
+                    style: context.text.micro,
                   ),
                 ],
               ),
@@ -83,13 +81,13 @@ class TransactionListTile extends StatelessWidget {
               children: [
                 Text(
                   '${transaction.finalAmount > 0 ? "+" : ""}${CurrencyFormatter.format(transaction.finalAmount)}',
-                  style: PharmaConnectTypography.body1.copyWith(
+                  style: context.text.body1.copyWith(
                     fontWeight: FontWeight.w700,
                     color: transaction.isCompleted
-                        ? PharmaConnectColors.accentGreen
+                        ? context.palette.success
                         : transaction.isFailed
-                        ? PharmaConnectColors.accentRed
-                        : PharmaConnectColors.textPrimary,
+                        ? context.palette.danger
+                        : context.palette.textPrimary,
                   ),
                 ),
                 if (showStatus) ...[
@@ -99,7 +97,9 @@ class TransactionListTile extends StatelessWidget {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: transaction.statusColor.withValues(alpha: 0.15),
+                      color: transaction.statusColor
+                          .of(context.palette)
+                          .withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
@@ -107,7 +107,7 @@ class TransactionListTile extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w600,
-                        color: transaction.statusColor,
+                        color: transaction.statusColor.of(context.palette),
                       ),
                     ),
                   ),

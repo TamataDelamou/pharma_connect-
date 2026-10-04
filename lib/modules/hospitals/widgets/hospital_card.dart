@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import '../models/hospital.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class HospitalCard extends StatelessWidget {
   final Hospital hospital;
@@ -29,8 +28,8 @@ class HospitalCard extends StatelessWidget {
             height: 40,
             decoration: BoxDecoration(
               color: hospital.isEmergencyAvailable
-                  ? PharmaConnectColors.accentRed.withValues(alpha: 0.15)
-                  : PharmaConnectColors.accentCyan.withValues(alpha: 0.1),
+                  ? context.palette.danger.withValues(alpha: 0.15)
+                  : context.palette.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
@@ -38,8 +37,8 @@ class HospitalCard extends StatelessWidget {
                   ? Icons.local_hospital
                   : Icons.medical_services,
               color: hospital.isEmergencyAvailable
-                  ? PharmaConnectColors.accentRed
-                  : PharmaConnectColors.accentCyan,
+                  ? context.palette.danger
+                  : context.palette.primary,
             ),
           ),
           const SizedBox(width: 12),
@@ -52,7 +51,7 @@ class HospitalCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         hospital.name,
-                        style: PharmaConnectTypography.body1.copyWith(
+                        style: context.text.body1.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                         maxLines: 1,
@@ -66,17 +65,15 @@ class HospitalCard extends StatelessWidget {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: PharmaConnectColors.accentRed.withValues(
-                            alpha: 0.15,
-                          ),
+                          color: context.palette.danger.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        child: const Text(
+                        child: Text(
                           'Urgences',
                           style: TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.w600,
-                            color: PharmaConnectColors.accentRed,
+                            color: context.palette.danger,
                           ),
                         ),
                       ),
@@ -84,23 +81,23 @@ class HospitalCard extends StatelessWidget {
                 ),
                 Text(
                   hospital.typeName ?? 'Établissement de santé',
-                  style: PharmaConnectTypography.body2,
+                  style: context.text.body2,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.location_on,
                       size: 14,
-                      color: Colors.white54,
+                      color: context.palette.textSecondary,
                     ),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
                         '${hospital.city ?? ''}${hospital.city != null && hospital.country != null ? ', ' : ''}${hospital.country ?? ''}',
-                        style: PharmaConnectTypography.micro,
+                        style: context.text.micro,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -113,7 +110,7 @@ class HospitalCard extends StatelessWidget {
           if (showSelectButton) ...[
             PrimaryButton(label: 'Choisir', onPressed: onTap, width: 100),
           ] else ...[
-            const Icon(Icons.chevron_right, color: Colors.white24),
+            Icon(Icons.chevron_right, color: context.palette.veil(0.24)),
           ],
         ],
       ),

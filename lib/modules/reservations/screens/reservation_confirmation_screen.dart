@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../providers/reservation_provider.dart';
 import '../widgets/queue_position_widget.dart';
+import '../../../core/theme/palette.dart';
 
 class ReservationConfirmationScreen extends StatelessWidget {
   const ReservationConfirmationScreen({super.key});
@@ -22,16 +21,13 @@ class ReservationConfirmationScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
+              Icon(
                 Icons.receipt_long_outlined,
                 size: 64,
-                color: Colors.white24,
+                color: context.palette.veil(0.24),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Aucune réservation à confirmer',
-                style: PharmaConnectTypography.body2,
-              ),
+              Text('Aucune réservation à confirmer', style: context.text.body2),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () => context.go('/dashboard'),
@@ -54,52 +50,49 @@ class ReservationConfirmationScreen extends StatelessWidget {
                 const SizedBox(height: 24),
                 GlassCard(
                   glow: true,
-                  glowColor: PharmaConnectColors.accentGreen,
+                  glowColor: context.palette.success,
                   child: Column(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.check_circle,
-                        color: PharmaConnectColors.accentGreen,
+                        color: context.palette.success,
                         size: 64,
                       ),
                       const SizedBox(height: 12),
-                      const Text(
+                      Text(
                         'Commande confirmée !',
-                        style: PharmaConnectTypography.heading2,
+                        style: context.text.heading2,
                       ),
                       const SizedBox(height: 4),
                       Text(
                         'Votre réservation chez ${reservation.pharmacyName} a été prise en compte',
-                        style: PharmaConnectTypography.body2,
+                        style: context.text.body2,
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 16),
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: PharmaConnectColors.accentCyan.withValues(
-                            alpha: 0.1,
-                          ),
+                          color: context.palette.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: PharmaConnectColors.accentCyan.withValues(
+                            color: context.palette.primary.withValues(
                               alpha: 0.2,
                             ),
                           ),
                         ),
                         child: Column(
                           children: [
-                            const Text(
+                            Text(
                               'Numéro de commande',
-                              style: PharmaConnectTypography.label,
+                              style: context.text.label,
                             ),
                             Text(
                               reservation.id,
-                              style: PharmaConnectTypography.kpiMedium
-                                  .copyWith(
-                                    color: PharmaConnectColors.accentCyan,
-                                    fontSize: 20,
-                                  ),
+                              style: context.text.kpiMedium.copyWith(
+                                color: context.palette.primary,
+                                fontSize: 20,
+                              ),
                             ),
                           ],
                         ),
@@ -117,15 +110,12 @@ class ReservationConfirmationScreen extends StatelessWidget {
                 GlassCard(
                   child: Column(
                     children: [
-                      const Text(
-                        'QR Code de retrait',
-                        style: PharmaConnectTypography.heading3,
-                      ),
+                      Text('QR Code de retrait', style: context.text.heading3),
                       const SizedBox(height: 8),
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: context.palette.textPrimary,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: QrImageView(
@@ -140,7 +130,7 @@ class ReservationConfirmationScreen extends StatelessWidget {
                       const SizedBox(height: 8),
                       Text(
                         'Présentez ce QR code en pharmacie',
-                        style: PharmaConnectTypography.micro,
+                        style: context.text.micro,
                       ),
                     ],
                   ),
@@ -152,7 +142,7 @@ class ReservationConfirmationScreen extends StatelessWidget {
                       child: OutlinedButton(
                         onPressed: () => context.push('/reservations/qr'),
                         style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Colors.white24),
+                          side: BorderSide(color: context.palette.veil(0.24)),
                           padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
                         child: const Text('Voir mon QR code'),
@@ -161,11 +151,10 @@ class ReservationConfirmationScreen extends StatelessWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: () =>
-                            context.go('/reservations/history'),
+                        onPressed: () => context.go('/reservations/history'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: PharmaConnectColors.accentCyan,
-                          foregroundColor: PharmaConnectColors.textOnAccent,
+                          backgroundColor: context.palette.primary,
+                          foregroundColor: context.palette.onPrimary,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
                         child: const Text('Voir l\'historique'),

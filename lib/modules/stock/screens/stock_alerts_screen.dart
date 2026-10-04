@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../../auth/models/user_role.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/stock_provider.dart';
 import '../widgets/stock_status_chip.dart';
+import '../../../core/theme/palette.dart';
 
 class StockAlertsScreen extends StatefulWidget {
   const StockAlertsScreen({super.key});
@@ -40,19 +39,16 @@ class _StockAlertsScreenState extends State<StockAlertsScreen> {
             Row(
               children: [
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.arrow_back,
-                    color: PharmaConnectColors.textPrimary,
+                    color: context.palette.textPrimary,
                   ),
                   onPressed: () => context.pop(),
                   padding: EdgeInsets.zero,
                 ),
                 const SizedBox(width: 8),
-                const Expanded(
-                  child: Text(
-                    'Alertes de stock',
-                    style: PharmaConnectTypography.heading2,
-                  ),
+                Expanded(
+                  child: Text('Alertes de stock', style: context.text.heading2),
                 ),
                 // Audit Module 11 (29/08/2026) : /stock/forecast et le
                 // nouvel écran /stock/forecast/orders (arbitrage D17)
@@ -63,9 +59,9 @@ class _StockAlertsScreenState extends State<StockAlertsScreen> {
                 if (context.watch<AuthProvider>().effectiveRole ==
                     UserRole.pharmacien)
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.insights_outlined,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     tooltip: 'Prévision de la demande',
                     onPressed: () => context.push('/stock/forecast'),
@@ -74,9 +70,9 @@ class _StockAlertsScreenState extends State<StockAlertsScreen> {
               ],
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Produits nécessitant une attention immédiate',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
             ),
             const SizedBox(height: 24),
 
@@ -90,7 +86,7 @@ class _StockAlertsScreenState extends State<StockAlertsScreen> {
                           _buildAlertSection(
                             title: '🔴 Ruptures de stock',
                             items: provider.outOfStockItems,
-                            color: PharmaConnectColors.accentRed,
+                            color: context.palette.danger,
                             emptyMessage: 'Aucune rupture de stock',
                           ),
                           const SizedBox(height: 16),
@@ -99,7 +95,7 @@ class _StockAlertsScreenState extends State<StockAlertsScreen> {
                           _buildAlertSection(
                             title: '🟠 Stock critique',
                             items: provider.criticalStockItems,
-                            color: PharmaConnectColors.accentAmber,
+                            color: context.palette.warningStrong,
                             emptyMessage: 'Aucun stock critique',
                           ),
                           const SizedBox(height: 16),
@@ -108,7 +104,7 @@ class _StockAlertsScreenState extends State<StockAlertsScreen> {
                           _buildAlertSection(
                             title: '🟡 Stock faible',
                             items: provider.lowStockItems,
-                            color: PharmaConnectColors.accentOrange,
+                            color: context.palette.warning,
                             emptyMessage: 'Aucun stock faible',
                           ),
                         ],
@@ -132,11 +128,9 @@ class _StockAlertsScreenState extends State<StockAlertsScreen> {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            Icon(Icons.check_circle, color: PharmaConnectColors.accentGreen),
+            Icon(Icons.check_circle, color: context.palette.success),
             const SizedBox(width: 12),
-            Expanded(
-              child: Text(emptyMessage, style: PharmaConnectTypography.body2),
-            ),
+            Expanded(child: Text(emptyMessage, style: context.text.body2)),
           ],
         ),
       );
@@ -147,7 +141,7 @@ class _StockAlertsScreenState extends State<StockAlertsScreen> {
       children: [
         Text(
           '$title (${items.length})',
-          style: PharmaConnectTypography.heading3.copyWith(color: color),
+          style: context.text.heading3.copyWith(color: color),
         ),
         const SizedBox(height: 8),
         ...items.map(
@@ -164,13 +158,13 @@ class _StockAlertsScreenState extends State<StockAlertsScreen> {
                       children: [
                         Text(
                           item.product.name,
-                          style: PharmaConnectTypography.body1.copyWith(
+                          style: context.text.body1.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                         Text(
                           'Stock : ${item.availableQuantity}',
-                          style: PharmaConnectTypography.body2,
+                          style: context.text.body2,
                         ),
                       ],
                     ),
