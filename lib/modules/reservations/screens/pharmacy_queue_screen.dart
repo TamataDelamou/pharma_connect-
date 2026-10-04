@@ -3,12 +3,14 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
+import '../../../core/utils/currency_formatter.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../../auth/models/user_role.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../models/reservation.dart';
 import '../models/reservation_status.dart';
 import '../providers/reservation_provider.dart';
+import '../widgets/reservation_status_card.dart';
 import '../../../core/theme/palette.dart';
 
 class PharmacyQueueScreen extends StatefulWidget {
@@ -34,6 +36,63 @@ class _PharmacyQueueScreenState extends State<PharmacyQueueScreen> {
     final pharmacyId = context.read<AuthProvider>().pharmacyId;
     if (pharmacyId == null) return;
     await context.read<ReservationProvider>().refreshQueue(pharmacyId);
+  }
+
+  void _showResult(bool ok, String success) {
+    if (!mounted) return;
+    final provider = context.read<ReservationProvider>();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(ok ? success : provider.error ?? 'Action impossible.'),
+        backgroundColor: ok ? null : context.palette.danger,
+      ),
+    );
+  }
+
+  Future<void> _markReady(Reservation reservation) async {
+    final ok = await context.read<ReservationProvider>().markAsReady(
+      reservation.id,
+    );
+    _showResult(ok, 'Réservation prête.');
+  }
+
+  /// C243 : annulation par l'officine, motif obligatoire ; les boîtes
+  /// retenues sont libérées par le serveur.
+  Future<void> _cancel(Reservation reservation) async {
+    final controller = TextEditingController();
+    final reason = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: context.palette.background,
+        title: const Text('Annuler la réservation'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: const InputDecoration(
+            labelText: 'Motif (obligatoire)',
+            border: OutlineInputBorder(),
+          ),
+          maxLines: 2,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Garder'),
+          ),
+          TextButton(
+            onPressed: () =>
+                Navigator.of(dialogContext).pop(controller.text.trim()),
+            child: const Text('Annuler la réservation'),
+          ),
+        ],
+      ),
+    );
+    if (reason == null || !mounted) return;
+    final ok = await context.read<ReservationProvider>().cancelReservation(
+      reservation.id,
+      reason: reason,
+    );
+    _showResult(ok, 'Réservation annulée, produits remis en vente.');
   }
 
   @override
@@ -150,7 +209,7 @@ class _PharmacyQueueScreenState extends State<PharmacyQueueScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                '${queue.length} client(s) en attente de retrait',
+                '${queue.length} réservation(s) à retirer',
                 style: context.text.body2,
               ),
               if (provider.isOffline && provider.reservations.isNotEmpty) ...[
@@ -243,12 +302,18 @@ class _PharmacyQueueScreenState extends State<PharmacyQueueScreen> {
                             child: _QueueEntryCard(
                               position: index + 1,
                               reservation: reservation,
-                              onMarkReady: () => context
-                                  .read<ReservationProvider>()
-                                  .markAsReady(reservation.id),
-                              onMarkPickedUp: () => context
-                                  .read<ReservationProvider>()
-                                  .markAsPickedUp(reservation.id),
+                              unavailableProducts: provider
+                                  .unavailableProductsOf(reservation.id),
+                              onMarkReady: () => _markReady(reservation),
+                              // C243 : le retrait passe par l'écran de
+                              // retrait, qui crée la vente au comptoir.
+                              onPickup: () async {
+                                await context.push(
+                                  '/pharmacy/queue/pickup/${reservation.id}',
+                                );
+                                if (context.mounted) await _refresh();
+                              },
+                              onCancel: () => _cancel(reservation),
                             ),
                           );
                         },
@@ -265,77 +330,145 @@ class _PharmacyQueueScreenState extends State<PharmacyQueueScreen> {
 class _QueueEntryCard extends StatelessWidget {
   final int position;
   final Reservation reservation;
+  final List<String> unavailableProducts;
   final VoidCallback onMarkReady;
-  final VoidCallback onMarkPickedUp;
+  final VoidCallback onPickup;
+  final VoidCallback onCancel;
 
   const _QueueEntryCard({
     required this.position,
     required this.reservation,
+    required this.unavailableProducts,
     required this.onMarkReady,
-    required this.onMarkPickedUp,
+    required this.onPickup,
+    required this.onCancel,
   });
 
   @override
   Widget build(BuildContext context) {
+    final overdue = reservation.isOverdue;
+    final statusColor = overdue
+        ? context.palette.textSecondary
+        : reservation.statusColor.of(context.palette);
+    final deadline = reservation.pickupDeadline;
+    final needsPrescription = reservation.items.any(
+      (item) => item.prescriptionRequired && !item.isRemoved,
+    );
+
     return GlassCard(
       padding: const EdgeInsets.all(16),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 36,
-            height: 36,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: reservation.statusColor
-                  .of(context.palette)
-                  .withValues(alpha: 0.15),
-              shape: BoxShape.circle,
-            ),
-            child: Text(
-              '#$position',
-              style: TextStyle(
-                fontWeight: FontWeight.w700,
-                color: reservation.statusColor.of(context.palette),
-                fontSize: 12,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  reservation.patientName,
-                  style: context.text.body1.copyWith(
-                    fontWeight: FontWeight.w600,
+          Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: Text(
+                  '#$position',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: statusColor,
+                    fontSize: 12,
                   ),
                 ),
-                Text(
-                  '${reservation.items.length} article(s) • ${reservation.statusLabel}',
-                  style: context.text.body2,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      reservation.patientName,
+                      style: context.text.body1.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      '${reservation.items.length} article(s) • '
+                      '${CurrencyFormatter.format(reservation.totalPrice)} • '
+                      '${overdue ? 'Expirée' : reservation.status.label}',
+                      style: context.text.body2,
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-          if (reservation.status == ReservationStatus.confirmed)
-            ElevatedButton(
-              onPressed: onMarkReady,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: context.palette.success,
-                foregroundColor: context.palette.onPrimary,
-              ),
-              child: const Text('Prêt'),
-            )
-          else if (reservation.status == ReservationStatus.ready)
-            ElevatedButton(
-              onPressed: onMarkPickedUp,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: context.palette.primary,
-                foregroundColor: context.palette.onPrimary,
-              ),
-              child: const Text('Retiré'),
+          if (deadline != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              overdue
+                  ? 'Délai de retrait dépassé depuis le '
+                        '${formatReservationDateTime(deadline)}'
+                  : 'À retirer avant le ${formatReservationDateTime(deadline)}',
+              style: context.text.micro,
             ),
+          ],
+          if (needsPrescription) ...[
+            const SizedBox(height: 4),
+            Text(
+              'Ordonnance à présenter au retrait',
+              style: context.text.micro,
+            ),
+          ],
+          if (unavailableProducts.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: context.palette.danger.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: context.palette.danger.withValues(alpha: 0.2),
+                ),
+              ),
+              child: Text(
+                'Lot rappelé ou périmé : ${unavailableProducts.join(', ')}',
+                style: context.text.body2.copyWith(
+                  color: context.palette.textPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              if (!overdue && !reservation.isReady)
+                OutlinedButton(
+                  onPressed: onMarkReady,
+                  child: const Text('Prête'),
+                ),
+              if (!overdue)
+                ElevatedButton(
+                  onPressed: onPickup,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: context.palette.primary,
+                    foregroundColor: context.palette.onPrimary,
+                  ),
+                  child: const Text('Retrait'),
+                ),
+              TextButton(
+                onPressed: onCancel,
+                style: TextButton.styleFrom(
+                  foregroundColor: context.palette.danger,
+                ),
+                child: const Text('Annuler'),
+              ),
+            ],
+          ),
         ],
       ),
     );

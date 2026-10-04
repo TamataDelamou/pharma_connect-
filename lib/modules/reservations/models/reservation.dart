@@ -28,6 +28,10 @@ class Reservation {
   final String? paymentMethod;
   final int? queuePosition;
   final int? estimatedWaitMinutes;
+  // C243 : annulation (auteur, motif) et vente créée au retrait.
+  final String? cancelledBy;
+  final String? cancelReason;
+  final String? posSaleId;
 
   Reservation({
     required this.id,
@@ -55,6 +59,9 @@ class Reservation {
     this.paymentMethod,
     this.queuePosition,
     this.estimatedWaitMinutes,
+    this.cancelledBy,
+    this.cancelReason,
+    this.posSaleId,
   });
 
   factory Reservation.fromJson(Map<String, dynamic> json) => Reservation(
@@ -97,6 +104,9 @@ class Reservation {
     paymentMethod: json['payment_method'] as String?,
     queuePosition: json['queue_position'] as int?,
     estimatedWaitMinutes: json['estimated_wait_minutes'] as int?,
+    cancelledBy: json['cancelled_by'] as String?,
+    cancelReason: json['cancel_reason'] as String?,
+    posSaleId: json['pos_sale_id'] as String?,
   );
 
   // items n'est jamais écrit ici : reservation_items est une table séparée.
@@ -125,6 +135,9 @@ class Reservation {
     'payment_method': paymentMethod,
     'queue_position': queuePosition,
     'estimated_wait_minutes': estimatedWaitMinutes,
+    'cancelled_by': cancelledBy,
+    'cancel_reason': cancelReason,
+    'pos_sale_id': posSaleId,
   };
 
   Reservation copyWith({
@@ -180,6 +193,9 @@ class Reservation {
       paymentMethod: paymentMethod ?? this.paymentMethod,
       queuePosition: queuePosition ?? this.queuePosition,
       estimatedWaitMinutes: estimatedWaitMinutes ?? this.estimatedWaitMinutes,
+      cancelledBy: cancelledBy,
+      cancelReason: cancelReason,
+      posSaleId: posSaleId,
     );
   }
 
@@ -189,8 +205,10 @@ class Reservation {
   bool get isPickedUp => status == ReservationStatus.pickedUp;
   bool get isCancelled => status == ReservationStatus.cancelled;
   bool get isExpired => status == ReservationStatus.expired;
-  bool get isCancelable => isPending || isConfirmed;
-  bool get canBePickedUp => isReady || isConfirmed;
+  // C243 : une réservation active (réservée ou prête) reste annulable.
+  bool get isActive => isPending || isConfirmed || isReady;
+  bool get isCancelable => isActive;
+  bool get canBePickedUp => isActive && !isOverdue;
 
   Duration get timeRemaining {
     if (pickupDeadline == null) return Duration.zero;
@@ -210,7 +228,7 @@ class Reservation {
   String get statusLabel {
     switch (status) {
       case ReservationStatus.pending:
-        return 'En attente de confirmation';
+        return 'Réservée';
       case ReservationStatus.confirmed:
         return 'Confirmée';
       case ReservationStatus.ready:

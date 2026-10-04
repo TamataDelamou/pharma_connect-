@@ -172,6 +172,49 @@ class _ReservationHistoryScreenState extends State<ReservationHistoryScreen>
     );
   }
 
+  /// C243 : annulation par le patient ; les boîtes retenues sont libérées
+  /// par le serveur.
+  Future<void> _confirmCancel(
+    BuildContext context,
+    Reservation reservation,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: context.palette.background,
+        title: const Text('Annuler la réservation ?'),
+        content: const Text(
+          'Les produits réservés seront remis en vente. Cette action est '
+          'définitive.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Garder'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Annuler la réservation'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+    final provider = context.read<ReservationProvider>();
+    final ok = await provider.cancelReservation(reservation.id);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          ok
+              ? 'Réservation annulée.'
+              : provider.error ?? 'Annulation impossible.',
+        ),
+        backgroundColor: ok ? null : context.palette.danger,
+      ),
+    );
+  }
+
   Widget _buildList(BuildContext context, List<Reservation> reservations) {
     if (reservations.isEmpty) {
       return Center(
@@ -198,6 +241,11 @@ class _ReservationHistoryScreenState extends State<ReservationHistoryScreen>
           padding: const EdgeInsets.only(bottom: 12),
           child: ReservationStatusCard(
             reservation: reservation,
+            // C243 : produit devenu indisponible, annulation par le patient.
+            unavailableProducts: context
+                .read<ReservationProvider>()
+                .unavailableProductsOf(reservation.id),
+            onCancel: () => _confirmCancel(context, reservation),
             onTap: () async {
               await context.read<ReservationProvider>().loadReservation(
                 reservation.id,

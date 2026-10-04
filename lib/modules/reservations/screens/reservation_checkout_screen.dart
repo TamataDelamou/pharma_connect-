@@ -18,6 +18,7 @@ import '../../payments/widgets/pay_at_pickup_notice.dart';
 import '../../../core/pilot/pilot_config.dart';
 import '../providers/reservation_provider.dart';
 import '../widgets/checkout_step_indicator.dart';
+import '../widgets/reservation_status_card.dart';
 import '../widgets/timeslot_picker.dart';
 import '../../../core/theme/palette.dart';
 
@@ -253,6 +254,12 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
                       ),
                     ),
                   ],
+                ),
+                const SizedBox(height: 8),
+                // C243 : le prix payé est celui du jour du retrait.
+                Text(
+                  'Prix indicatif, le prix du jour s\'applique au retrait.',
+                  style: context.text.micro,
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -538,41 +545,19 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
                           auth.userEmail ??
                           auth.userPhone ??
                           'Patient';
+                      // C243 : la réservation est créée par le serveur, qui
+                      // retient les boîtes et fixe le patient, le prix
+                      // (indicatif), l'échéance de retrait et le code de
+                      // retrait. Sans réseau, rien n'est mis en attente sur
+                      // l'appareil. (Créneau, adresse de livraison et moyen
+                      // de paiement en ligne, masqués pendant le pilote, ne
+                      // sont pas transmis.)
                       final reservation = await provider.createReservation(
-                        patientId: patientId,
-                        patientName: patientName,
-                        patientPhone: auth.userPhone ?? '',
-                        patientEmail: auth.userEmail,
                         pharmacyId: pharmacyId,
-                        pharmacyName:
-                            provider.selectedPharmacyName ?? 'Pharmacie',
-                        pharmacyAddress:
-                            provider.selectedPharmacyAddress ?? 'Adresse',
-                        pharmacyPhone: provider.selectedPharmacyPhone,
-                        preferredPickupTime: provider.selectedSlot?.start,
-                        deliveryAddress: _addressController.text.trim(),
-                        paymentMethod: _selectedPaymentMethod,
                         notes: _notesController.text.trim(),
                       );
                       setState(() => _isSubmitting = false);
                       if (reservation != null && context.mounted) {
-                        // Mode hors-ligne (directive standing) : la
-                        // commande est prise en compte localement et
-                        // sera envoyée automatiquement au retour du
-                        // réseau — informatif, non bloquant (même
-                        // distinction que Module 5).
-                        if (provider.isOffline) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Hors connexion : la commande est enregistrée sur '
-                                'cet appareil et sera envoyée automatiquement au '
-                                'retour du réseau.',
-                              ),
-                              backgroundColor: palette.warningStrong,
-                            ),
-                          );
-                        }
                         // Bug corrigé (audit Module 8, 29/08/2026) :
                         // cet écran ne faisait que stocker un libellé
                         // libre paymentMethod sur la réservation elle-
@@ -841,9 +826,46 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
                   style: context.text.body2,
                 ),
                 const SizedBox(height: 16),
+                // C243 : échéance fixée par le serveur (24 h), prix indicatif,
+                // ordonnance à présenter.
+                if (reservation.pickupDeadline != null) ...[
+                  Text(
+                    'À retirer avant le '
+                    '${formatReservationDateTime(reservation.pickupDeadline!)}',
+                    style: context.text.body1.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Passé ce délai, la réservation expire et les produits '
+                    'sont remis en vente.',
+                    style: context.text.micro,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                ],
+                if (reservation.items.any((i) => i.prescriptionRequired)) ...[
+                  Text(
+                    'Ordonnance à présenter au retrait',
+                    style: context.text.body2.copyWith(
+                      color: context.palette.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                ],
                 // C239 : pas de paiement en ligne pendant le pilote.
                 if (_payAtPickup) ...[
                   const PayAtPickupNotice(),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Prix indicatif, le prix du jour s\'applique au retrait.',
+                    style: context.text.micro,
+                    textAlign: TextAlign.center,
+                  ),
                   const SizedBox(height: 16),
                 ],
                 Container(

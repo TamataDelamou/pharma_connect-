@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:uuid/uuid.dart';
+import '../models/pickup_line.dart';
 import '../models/reservation.dart';
 import '../models/reservation_item.dart';
 import '../models/reservation_status.dart';
@@ -26,10 +26,16 @@ class ReservationProvider extends ChangeNotifier {
   int? _queuePosition;
   int? _estimatedWaitMinutes;
   // Directive standing (approuvée après Module 3) : « implementation du mode
-  // offline » — même patron que PrescriptionProvider (Module 5) : en cas
-  // d'échec réseau, on conserve les dernières données connues (cache local)
-  // plutôt que de basculer sur un état d'erreur bloquant.
+  // offline » — en cas d'échec réseau, on conserve les dernières données
+  // connues (cache local) plutôt que de basculer sur un état d'erreur
+  // bloquant. C243 : lecture seulement ; réserver, annuler et retirer
+  // exigent le réseau.
   bool _isOffline = false;
+  // C243 : réservations actives dont un produit n'est plus disponible (lot
+  // rappelé ou périmé depuis la réservation), avec les produits concernés.
+  Map<String, List<String>> _unavailableItems = {};
+  // C243 : aperçu du retrait en cours (écran de retrait de l'officine).
+  List<PickupLine> _pickupLines = [];
 
   // Getters
   List<Reservation> get reservations => _reservations;
@@ -46,6 +52,11 @@ class ReservationProvider extends ChangeNotifier {
   int? get queuePosition => _queuePosition;
   int? get estimatedWaitMinutes => _estimatedWaitMinutes;
   bool get isOffline => _isOffline;
+  List<PickupLine> get pickupLines => _pickupLines;
+
+  /// Produits d'une réservation active qui ne sont plus disponibles.
+  List<String> unavailableProductsOf(String reservationId) =>
+      _unavailableItems[reservationId] ?? const [];
 
   int get cartTotal {
     return _cartItems.fold(0, (sum, item) => sum + item.totalPrice);
@@ -58,25 +69,11 @@ class ReservationProvider extends ChangeNotifier {
   bool get hasItemsInCart => _cartItems.isNotEmpty;
 
   List<Reservation> get activeReservations {
-    return _reservations
-        .where(
-          (r) =>
-              r.status == ReservationStatus.pending ||
-              r.status == ReservationStatus.confirmed ||
-              r.status == ReservationStatus.ready,
-        )
-        .toList();
+    return _reservations.where((r) => r.isActive && !r.isOverdue).toList();
   }
 
   List<Reservation> get completedReservations {
-    return _reservations
-        .where(
-          (r) =>
-              r.status == ReservationStatus.pickedUp ||
-              r.status == ReservationStatus.cancelled ||
-              r.status == ReservationStatus.expired,
-        )
-        .toList();
+    return _reservations.where((r) => !r.isActive || r.isOverdue).toList();
   }
 
   // ==================== LOAD ====================
@@ -87,7 +84,9 @@ class ReservationProvider extends ChangeNotifier {
   /// hors-ligne.
   Map<String, dynamic> _toCacheJson(Reservation r) => {
     ...r.toJson(),
-    'reservation_items': r.items.map((i) => i.toJson(reservationId: r.id)).toList(),
+    'reservation_items': r.items
+        .map((i) => i.toJson(reservationId: r.id))
+        .toList(),
   };
 
   Future<void> loadReservations({ReservationStatus? status}) async {
@@ -109,10 +108,12 @@ class ReservationProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
     try {
-      // RG-RES-02, best-effort et silencieux — voir
-      // ReservationService.expireOverdueReservations.
-      await _service.expireOverdueReservations();
+      // C243 : plus d'expiration faite par l'application. Le serveur expire
+      // les réservations dépassées (tâche planifiée) ; d'ici là, une
+      // réservation dont l'échéance est passée est affichée « expirée »
+      // (Reservation.isOverdue).
       _reservations = await _service.getReservationsForPatient(patientId);
+      _unavailableItems = await _service.getUnavailableItems();
       _isOffline = false;
       unawaited(
         _offlineSync.cacheReservations(
@@ -210,18 +211,11 @@ class ReservationProvider extends ChangeNotifier {
 
   // ==================== CHECKOUT ====================
 
+  /// C243 : la réservation est créée par le serveur, qui retient les boîtes.
+  /// Sans réseau, rien n'est mis en attente sur l'appareil : une réservation
+  /// qui ne retient aucun stock ne garantit rien au patient.
   Future<Reservation?> createReservation({
-    required String patientId,
-    required String patientName,
-    required String patientPhone,
-    String? patientEmail,
     required String pharmacyId,
-    required String pharmacyName,
-    required String pharmacyAddress,
-    String? pharmacyPhone,
-    DateTime? preferredPickupTime,
-    String? deliveryAddress,
-    String? paymentMethod,
     String? notes,
   }) async {
     _isLoading = true;
@@ -229,65 +223,18 @@ class ReservationProvider extends ChangeNotifier {
     _isOffline = false;
     notifyListeners();
     try {
-      Reservation reservation;
-      if (await _offlineSync.hasInternet()) {
-        try {
-          reservation = await _service.createReservation(
-            patientId: patientId,
-            patientName: patientName,
-            patientPhone: patientPhone,
-            patientEmail: patientEmail,
-            pharmacyId: pharmacyId,
-            pharmacyName: pharmacyName,
-            pharmacyAddress: pharmacyAddress,
-            pharmacyPhone: pharmacyPhone,
-            items: _cartItems,
-            preferredPickupTime: preferredPickupTime,
-            deliveryAddress: deliveryAddress,
-            paymentMethod: paymentMethod,
-            notes: notes,
-          );
-        } on StateError {
-          // Refus métier réel (stock insuffisant, vérifié en ligne) — ne
-          // jamais le masquer derrière une mise en file d'attente hors-ligne,
-          // qui échouerait de la même façon (ou pire, réserverait à tort)
-          // une fois synchronisée.
-          rethrow;
-        } catch (e) {
-          // Le réseau semblait disponible (checkConnectivity) mais l'appel
-          // Supabase a tout de même échoué (DNS, backend injoignable,
-          // timeout) : même repli que l'absence de réseau ci-dessous.
-          reservation = await _queueOfflineReservation(
-            patientId: patientId,
-            patientName: patientName,
-            patientPhone: patientPhone,
-            patientEmail: patientEmail,
-            pharmacyId: pharmacyId,
-            pharmacyName: pharmacyName,
-            pharmacyAddress: pharmacyAddress,
-            pharmacyPhone: pharmacyPhone,
-            preferredPickupTime: preferredPickupTime,
-            deliveryAddress: deliveryAddress,
-            paymentMethod: paymentMethod,
-            notes: notes,
-          );
-        }
-      } else {
-        reservation = await _queueOfflineReservation(
-          patientId: patientId,
-          patientName: patientName,
-          patientPhone: patientPhone,
-          patientEmail: patientEmail,
-          pharmacyId: pharmacyId,
-          pharmacyName: pharmacyName,
-          pharmacyAddress: pharmacyAddress,
-          pharmacyPhone: pharmacyPhone,
-          preferredPickupTime: preferredPickupTime,
-          deliveryAddress: deliveryAddress,
-          paymentMethod: paymentMethod,
-          notes: notes,
+      if (!await _offlineSync.hasInternet()) {
+        _isOffline = true;
+        throw const ReservationException(
+          'Réservation impossible hors connexion. Reconnectez-vous pour '
+          'réserver : vos produits sont retenus dès la confirmation.',
         );
       }
+      final reservation = await _service.createReservation(
+        pharmacyId: pharmacyId,
+        items: _cartItems,
+        notes: notes,
+      );
       _selectedReservation = reservation;
       _reservations.add(reservation);
       _cartItems.clear();
@@ -297,129 +244,19 @@ class ReservationProvider extends ChangeNotifier {
       notifyListeners();
       return reservation;
     } catch (e) {
-      _error = e is StateError ? e.message : e.toString();
+      _error = e.toString();
       _isLoading = false;
       notifyListeners();
       return null;
     }
   }
 
-  /// Directive standing « privilégier le mode hors-ligne » : la réservation
-  /// est enregistrée localement et rejouée par OfflineSyncService.syncAll()
-  /// dès le retour du réseau, même patron que
-  /// PrescriptionProvider._queueOfflinePrescription (Module 5).
-  ///
-  /// Limite documentée (registre des écarts, item ajouté à la clôture de ce
-  /// module) : contrairement à une création en ligne,
-  /// StockService.reserveStock() n'est PAS appelé ici — c'est un appel
-  /// réseau à part entière, qui ne peut pas être simplement mis en file
-  /// d'attente comme un insert de données. Le stock n'est donc pas
-  /// réellement bloqué tant que cette réservation n'a pas été synchronisée :
-  /// deux patients hors-ligne réservant simultanément le même dernier
-  /// exemplaire ne seront départagés qu'à la synchronisation (l'un des deux
-  /// syncAll() échouera alors silencieusement côté "reservations", à
-  /// réconcilier manuellement — aucun mécanisme de notification de ce cas
-  /// n'existe aujourd'hui).
-  Future<Reservation> _queueOfflineReservation({
-    required String patientId,
-    required String patientName,
-    required String patientPhone,
-    String? patientEmail,
-    required String pharmacyId,
-    required String pharmacyName,
-    required String pharmacyAddress,
-    String? pharmacyPhone,
-    DateTime? preferredPickupTime,
-    String? deliveryAddress,
-    String? paymentMethod,
-    String? notes,
-  }) async {
-    _isOffline = true;
-    final id = const Uuid().v4();
-    final now = DateTime.now();
-
-    final reservation = Reservation(
-      id: id,
-      patientId: patientId,
-      patientName: patientName,
-      patientPhone: patientPhone,
-      patientEmail: patientEmail,
-      pharmacyId: pharmacyId,
-      pharmacyName: pharmacyName,
-      pharmacyAddress: pharmacyAddress,
-      pharmacyPhone: pharmacyPhone,
-      items: List.of(_cartItems),
-      reservedAt: now,
-      pickupTime: preferredPickupTime,
-      pickupDeadline: now.add(const Duration(hours: 2)),
-      status: ReservationStatus.pending,
-      totalPrice: cartTotal,
-      qrCodeToken: 'qr_${const Uuid().v4().substring(0, 8)}',
-      notes: notes,
-      deliveryAddress: deliveryAddress,
-      paymentMethod: paymentMethod,
-      queuePosition: null,
-      estimatedWaitMinutes: null,
-    );
-
-    await _offlineSync.queueOperation(
-      table: 'reservations',
-      recordId: id,
-      operation: 'insert',
-      data: reservation.toJson(),
-    );
-    for (final item in reservation.items) {
-      await _offlineSync.queueOperation(
-        table: 'reservation_items',
-        recordId: '${id}_${item.productId.isEmpty ? item.productName : item.productId}',
-        operation: 'insert',
-        data: item.toJson(reservationId: id),
-      );
-    }
-    await _offlineSync.upsertCachedReservation(
-      patientId,
-      _toCacheJson(reservation),
-    );
-    return reservation;
-  }
-
   // ==================== ACTIONS SUR RÉSERVATION ====================
-
-  Future<bool> confirmReservation(String id) async {
-    try {
-      final updated = await _service.confirmReservation(id);
-      _updateReservation(updated);
-      _queuePosition = updated.queuePosition;
-      _estimatedWaitMinutes = updated.estimatedWaitMinutes;
-      notifyListeners();
-      return true;
-    } catch (e) {
-      _error = e.toString();
-      notifyListeners();
-      return false;
-    }
-  }
 
   Future<bool> markAsReady(String id) async {
     try {
       final updated = await _service.markAsReady(id);
       _updateReservation(updated);
-      _queuePosition = 0;
-      _estimatedWaitMinutes = 0;
-      notifyListeners();
-      return true;
-    } catch (e) {
-      _error = e.toString();
-      notifyListeners();
-      return false;
-    }
-  }
-
-  Future<bool> markAsPickedUp(String id) async {
-    try {
-      final updated = await _service.markAsPickedUp(id);
-      _updateReservation(updated);
-      notifyListeners();
       return true;
     } catch (e) {
       _error = e.toString();
@@ -431,13 +268,58 @@ class ReservationProvider extends ChangeNotifier {
   Future<bool> cancelReservation(String id, {String? reason}) async {
     try {
       final updated = await _service.cancelReservation(id, reason: reason);
+      _unavailableItems.remove(id);
       _updateReservation(updated);
-      notifyListeners();
       return true;
     } catch (e) {
       _error = e.toString();
       notifyListeners();
       return false;
+    }
+  }
+
+  // ==================== RETRAIT (OFFICINE) ====================
+
+  /// Charge la réservation et l'aperçu du retrait (prix du jour, ordonnance,
+  /// produits qui ne peuvent plus être remis).
+  Future<void> loadPickup(String id) async {
+    _isLoading = true;
+    _error = null;
+    _pickupLines = [];
+    notifyListeners();
+    try {
+      _selectedReservation = await _service.getReservation(id);
+      _pickupLines = await _service.getPickupPreview(id);
+    } catch (e) {
+      _error = e.toString();
+    }
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  /// Retrait : la réservation devient une vente au comptoir en espèces.
+  /// Rend l'identifiant de la vente, ou `null` en cas de refus ([error]).
+  Future<String?> pickUp(
+    String id, {
+    bool prescriptionChecked = false,
+    bool allowPartial = false,
+    String? partialReason,
+  }) async {
+    _error = null;
+    try {
+      final saleId = await _service.pickUp(
+        id,
+        prescriptionChecked: prescriptionChecked,
+        allowPartial: allowPartial,
+        partialReason: partialReason,
+      );
+      _unavailableItems.remove(id);
+      _updateReservation(await _service.getReservation(id));
+      return saleId;
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return null;
     }
   }
 
@@ -449,21 +331,20 @@ class ReservationProvider extends ChangeNotifier {
     notifyListeners();
     final cacheKey = 'staff_queue_$pharmacyId';
     try {
-      // RG-RES-02, best-effort et silencieux — voir
-      // ReservationService.expireOverdueReservations.
-      await _service.expireOverdueReservations(pharmacyId: pharmacyId);
+      // C243 : expiration à l'usage, faite par le serveur ; les réservations
+      // dépassées libèrent leurs boîtes avant l'affichage de la file.
+      await _service.expireOverdueForPharmacy(pharmacyId);
 
       final reservations = await _service.getReservationsForPharmacy(
         pharmacyId,
       );
       // Bug corrigé (audit Module 6, 29/08/2026) : cette méthode ne
-      // réassignait jamais `_reservations` — elle ne faisait que tenter de
-      // patcher, par id, des entrées dans l'ancienne liste en mémoire
-      // (peuplée uniquement par loadReservations/loadPatientReservations,
-      // jamais appelées par pharmacy_queue_screen.dart). En pratique, la
-      // file d'attente pharmacien était donc TOUJOURS vide à l'écran, quel
-      // que soit le nombre réel de réservations en attente.
+      // réassignait jamais `_reservations` — la file d'attente pharmacien
+      // était toujours vide à l'écran.
       _reservations = reservations;
+      _unavailableItems = await _service.getUnavailableItems(
+        pharmacyId: pharmacyId,
+      );
       _isOffline = false;
       unawaited(
         _offlineSync.cacheReservations(
@@ -472,36 +353,18 @@ class ReservationProvider extends ChangeNotifier {
         ),
       );
 
-      final pending = _reservations
-          .where(
-            (r) =>
-                r.status == ReservationStatus.pending ||
-                r.status == ReservationStatus.confirmed,
-          )
-          .toList();
-
-      // Mettre à jour les positions dans la file, et les persister côté
-      // serveur (audit Module 6 : jusqu'ici recalculées seulement en
-      // mémoire locale, jamais réécrites — voir
-      // ReservationService.updateQueuePosition). Best-effort : un échec
-      // isolé sur une ligne ne doit pas interrompre le rafraîchissement.
-      for (int i = 0; i < pending.length; i++) {
-        final index = _reservations.indexWhere((r) => r.id == pending[i].id);
+      // Position dans la file, par ordre de réservation. C243 : calculée à
+      // l'affichage, plus réécrite sur le serveur par l'application.
+      final active = _reservations.where((r) => r.isActive).toList();
+      for (int i = 0; i < active.length; i++) {
+        final index = _reservations.indexWhere((r) => r.id == active[i].id);
         if (index != -1) {
           _reservations[index] = _reservations[index].copyWith(
             queuePosition: i + 1,
             estimatedWaitMinutes: 5 + i * 3,
           );
         }
-        try {
-          await _service.updateQueuePosition(
-            pending[i].id,
-            position: i + 1,
-            estimatedWaitMinutes: 5 + i * 3,
-          );
-        } catch (_) {}
       }
-      notifyListeners();
     } catch (e) {
       final cached = await _offlineSync.getCachedReservations(cacheKey);
       if (cached.isNotEmpty) {
@@ -512,7 +375,6 @@ class ReservationProvider extends ChangeNotifier {
       } else {
         _error = e.toString();
       }
-      notifyListeners();
     }
     _isLoading = false;
     notifyListeners();
@@ -560,6 +422,31 @@ class ReservationProvider extends ChangeNotifier {
     if (_selectedReservation?.id == updated.id) {
       _selectedReservation = updated;
     }
+    notifyListeners();
+  }
+
+  /// Données injectées par l'outil de captures d'écran
+  /// (tool/screenshots) : les écrans sont montés hors ligne.
+  @visibleForTesting
+  void setStateForTesting({
+    List<Reservation>? reservations,
+    Reservation? selected,
+    List<PickupLine>? pickupLines,
+    Map<String, List<String>>? unavailableItems,
+    List<ReservationItem>? cartItems,
+  }) {
+    if (reservations != null) _reservations = reservations;
+    if (selected != null) _selectedReservation = selected;
+    if (pickupLines != null) _pickupLines = pickupLines;
+    if (unavailableItems != null) _unavailableItems = unavailableItems;
+    if (cartItems != null) {
+      _cartItems
+        ..clear()
+        ..addAll(cartItems);
+    }
+    _isLoading = false;
+    _error = null;
+    _isOffline = false;
     notifyListeners();
   }
 }

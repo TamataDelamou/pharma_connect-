@@ -43,6 +43,7 @@ import '../modules/prescriptions/screens/prescription_upload_screen.dart';
 // Reservations
 import '../modules/reservations/screens/cart_screen.dart';
 import '../modules/reservations/screens/pharmacy_queue_screen.dart';
+import '../modules/reservations/screens/reservation_pickup_screen.dart'; // C243
 import '../modules/reservations/screens/reservation_checkout_screen.dart';
 import '../modules/reservations/screens/reservation_confirmation_screen.dart';
 import '../modules/reservations/screens/reservation_history_screen.dart';
@@ -457,6 +458,15 @@ class AppRouter {
             path: '/pharmacy/queue',
             name: 'pharmacy-queue',
             builder: (context, state) => const PharmacyQueueScreen(),
+          ),
+          // C243 : retrait d'une réservation, transformée en vente au comptoir.
+          GoRoute(
+            path: '/pharmacy/queue/pickup/:id',
+            name: 'pharmacy-queue-pickup',
+            builder: (context, state) {
+              final id = state.pathParameters['id']!;
+              return ReservationPickupScreen(reservationId: id);
+            },
           ),
 
           // ==================== DELIVERY ====================
