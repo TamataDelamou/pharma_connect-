@@ -5,8 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/buttons/tertiary_button.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -14,6 +12,7 @@ import '../../auth/services/profile_service.dart';
 import '../providers/prescription_provider.dart';
 import '../widgets/destination_pharmacy_picker.dart';
 import '../widgets/upload_guidance_overlay.dart';
+import '../../../core/theme/palette.dart';
 
 class PrescriptionUploadScreen extends StatefulWidget {
   const PrescriptionUploadScreen({super.key});
@@ -54,18 +53,18 @@ class _PrescriptionUploadScreenState extends State<PrescriptionUploadScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Nouvelle ordonnance',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -92,16 +91,13 @@ class _PrescriptionUploadScreenState extends State<PrescriptionUploadScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.upload_file, size: 80, color: Colors.white24),
+          Icon(Icons.upload_file, size: 80, color: context.palette.veil(0.24)),
           const SizedBox(height: 24),
-          const Text(
-            'Téléchargez votre ordonnance',
-            style: PharmaConnectTypography.heading3,
-          ),
+          Text('Téléchargez votre ordonnance', style: context.text.heading3),
           const SizedBox(height: 8),
-          const Text(
+          Text(
             'Prenez une photo ou sélectionnez une image',
-            style: PharmaConnectTypography.body2,
+            style: context.text.body2,
           ),
           const SizedBox(height: 32),
           Row(
@@ -112,8 +108,8 @@ class _PrescriptionUploadScreenState extends State<PrescriptionUploadScreen> {
                 icon: const Icon(Icons.camera_alt),
                 label: const Text('Appareil photo'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: PharmaConnectColors.accentCyan,
-                  foregroundColor: PharmaConnectColors.textOnAccent,
+                  backgroundColor: context.palette.primary,
+                  foregroundColor: context.palette.onPrimary,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 24,
                     vertical: 12,
@@ -126,7 +122,7 @@ class _PrescriptionUploadScreenState extends State<PrescriptionUploadScreen> {
                 icon: const Icon(Icons.photo_library),
                 label: const Text('Galerie'),
                 style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Colors.white24),
+                  side: BorderSide(color: context.palette.veil(0.24)),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 24,
                     vertical: 12,
@@ -176,7 +172,7 @@ class _PrescriptionUploadScreenState extends State<PrescriptionUploadScreen> {
                   icon: const Icon(Icons.refresh),
                   label: const Text('Reprendre'),
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.white24),
+                    side: BorderSide(color: context.palette.veil(0.24)),
                   ),
                 ),
               ),
@@ -204,11 +200,11 @@ class _PrescriptionUploadScreenState extends State<PrescriptionUploadScreen> {
                     final pharmacyId = _pharmacyId;
                     if (pharmacyId == null) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
+                        SnackBar(
                           content: Text(
                             'Choisissez l\'officine qui recevra l\'ordonnance.',
                           ),
-                          backgroundColor: PharmaConnectColors.accentOrange,
+                          backgroundColor: context.palette.warning,
                         ),
                       );
                       return;
@@ -217,11 +213,11 @@ class _PrescriptionUploadScreenState extends State<PrescriptionUploadScreen> {
                     final patientId = auth.userId;
                     if (patientId == null) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
+                        SnackBar(
                           content: Text(
                             'Vous devez être connecté pour déposer une ordonnance.',
                           ),
-                          backgroundColor: PharmaConnectColors.accentRed,
+                          backgroundColor: context.palette.danger,
                         ),
                       );
                       return;
@@ -256,8 +252,8 @@ class _PrescriptionUploadScreenState extends State<PrescriptionUploadScreen> {
             const SizedBox(height: 8),
             Text(
               'Analyse en cours...',
-              style: PharmaConnectTypography.body2.copyWith(
-                color: PharmaConnectColors.textSecondary,
+              style: context.text.body2.copyWith(
+                color: context.palette.textSecondary,
               ),
             ),
           ],
@@ -272,15 +268,15 @@ class _PrescriptionUploadScreenState extends State<PrescriptionUploadScreen> {
               decoration: BoxDecoration(
                 color:
                     (provider.isOffline
-                            ? PharmaConnectColors.accentAmber
-                            : PharmaConnectColors.accentRed)
+                            ? context.palette.warningStrong
+                            : context.palette.danger)
                         .withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color:
                       (provider.isOffline
-                              ? PharmaConnectColors.accentAmber
-                              : PharmaConnectColors.accentRed)
+                              ? context.palette.warningStrong
+                              : context.palette.danger)
                           .withValues(alpha: 0.2),
                 ),
               ),
@@ -291,17 +287,17 @@ class _PrescriptionUploadScreenState extends State<PrescriptionUploadScreen> {
                     provider.isOffline ? Icons.cloud_off : Icons.error_outline,
                     size: 18,
                     color: provider.isOffline
-                        ? PharmaConnectColors.accentAmber
-                        : PharmaConnectColors.accentRed,
+                        ? context.palette.warningStrong
+                        : context.palette.danger,
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       provider.uploadError!,
-                      style: PharmaConnectTypography.body2.copyWith(
+                      style: context.text.body2.copyWith(
                         color: provider.isOffline
-                            ? PharmaConnectColors.accentAmber
-                            : PharmaConnectColors.accentRed,
+                            ? context.palette.warningStrong
+                            : context.palette.danger,
                       ),
                     ),
                   ),
@@ -358,7 +354,7 @@ class _PrescriptionUploadScreenState extends State<PrescriptionUploadScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Impossible d\'accéder à l\'image : $e'),
-            backgroundColor: PharmaConnectColors.accentRed,
+            backgroundColor: context.palette.danger,
           ),
         );
       }

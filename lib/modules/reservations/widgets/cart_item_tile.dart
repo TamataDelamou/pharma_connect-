@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
 import '../../../core/theme/spacing.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../models/reservation_item.dart';
+import '../../../core/theme/palette.dart';
 
 class CartItemTile extends StatelessWidget {
   final ReservationItem item;
@@ -23,12 +22,12 @@ class CartItemTile extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.04),
+        color: context.palette.surfaceMuted,
         borderRadius: BorderRadius.circular(PharmaConnectSpacing.radiusMd),
         border: Border.all(
           color: item.isSubstitution
-              ? PharmaConnectColors.accentPurple.withValues(alpha: 0.2)
-              : Colors.white.withValues(alpha: 0.06),
+              ? context.palette.secondary.withValues(alpha: 0.2)
+              : context.palette.surface,
         ),
       ),
       child: Row(
@@ -38,12 +37,12 @@ class CartItemTile extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: PharmaConnectColors.accentCyan.withValues(alpha: 0.1),
+              color: context.palette.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.medication,
-              color: PharmaConnectColors.accentCyan,
+              color: context.palette.primary,
               size: 20,
             ),
           ),
@@ -55,7 +54,7 @@ class CartItemTile extends StatelessWidget {
               children: [
                 Text(
                   item.productName,
-                  style: PharmaConnectTypography.body1.copyWith(
+                  style: context.text.body1.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                   maxLines: 1,
@@ -63,7 +62,7 @@ class CartItemTile extends StatelessWidget {
                 ),
                 Text(
                   '${item.dosage} • ${CurrencyFormatter.format(item.pricePerUnit)}',
-                  style: PharmaConnectTypography.body2,
+                  style: context.text.body2,
                 ),
                 if (item.isSubstitution) ...[
                   Container(
@@ -72,15 +71,15 @@ class CartItemTile extends StatelessWidget {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: PharmaConnectColors.accentPurple.withValues(alpha: 0.15),
+                      color: context.palette.secondary.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: const Text(
+                    child: Text(
                       'Générique',
                       style: TextStyle(
                         fontSize: 9,
                         fontWeight: FontWeight.w500,
-                        color: PharmaConnectColors.accentPurple,
+                        color: context.palette.secondary,
                       ),
                     ),
                   ),
@@ -101,7 +100,7 @@ class CartItemTile extends StatelessWidget {
                 width: 30,
                 child: Text(
                   '${item.quantity}',
-                  style: PharmaConnectTypography.body1.copyWith(
+                  style: context.text.body1.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                   textAlign: TextAlign.center,
@@ -121,9 +120,9 @@ class CartItemTile extends StatelessWidget {
             children: [
               Text(
                 CurrencyFormatter.format(item.totalPrice),
-                style: PharmaConnectTypography.body1.copyWith(
+                style: context.text.body1.copyWith(
                   fontWeight: FontWeight.w700,
-                  color: PharmaConnectColors.accentCyan,
+                  color: context.palette.primary,
                 ),
               ),
               IconButton(

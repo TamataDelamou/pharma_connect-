@@ -3,12 +3,11 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../providers/reservation_provider.dart';
 import '../widgets/cart_item_tile.dart';
+import '../../../core/theme/palette.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
@@ -29,18 +28,18 @@ class CartScreen extends StatelessWidget {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Panier',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -55,7 +54,7 @@ class CartScreen extends StatelessWidget {
                     icon: const Icon(Icons.delete_outline, size: 18),
                     label: const Text('Vider'),
                     style: TextButton.styleFrom(
-                      foregroundColor: PharmaConnectColors.accentRed,
+                      foregroundColor: context.palette.danger,
                     ),
                   ),
                 ],
@@ -87,20 +86,20 @@ class CartScreen extends StatelessWidget {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.shopping_cart_outlined,
                             size: 64,
-                            color: Colors.white24,
+                            color: context.palette.veil(0.24),
                           ),
                           const SizedBox(height: 16),
-                          const Text(
+                          Text(
                             'Votre panier est vide',
-                            style: PharmaConnectTypography.heading3,
+                            style: context.text.heading3,
                           ),
                           const SizedBox(height: 8),
-                          const Text(
+                          Text(
                             'Ajoutez des médicaments depuis la recherche',
-                            style: PharmaConnectTypography.body2,
+                            style: context.text.body2,
                           ),
                           const SizedBox(height: 24),
                           PrimaryButton(
@@ -115,7 +114,7 @@ class CartScreen extends StatelessWidget {
 
             // Total et checkout
             if (provider.hasItemsInCart) ...[
-              const Divider(color: Colors.white12),
+              Divider(color: context.palette.veil(0.12)),
               const SizedBox(height: 16),
               Row(
                 children: [
@@ -123,14 +122,11 @@ class CartScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Total du panier',
-                          style: PharmaConnectTypography.label,
-                        ),
+                        Text('Total du panier', style: context.text.label),
                         Text(
                           CurrencyFormatter.format(provider.cartTotal),
-                          style: PharmaConnectTypography.kpiSmall.copyWith(
-                            color: PharmaConnectColors.accentCyan,
+                          style: context.text.kpiSmall.copyWith(
+                            color: context.palette.primary,
                           ),
                         ),
                       ],

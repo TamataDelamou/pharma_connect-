@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../models/reservation.dart';
 import '../models/reservation_status.dart';
+import '../../../core/theme/palette.dart';
 
 class ReservationStatusCard extends StatelessWidget {
   final Reservation reservation;
@@ -29,7 +28,7 @@ class ReservationStatusCard extends StatelessWidget {
                 width: 4,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: reservation.statusColor,
+                  color: reservation.statusColor.of(context.palette),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -40,13 +39,13 @@ class ReservationStatusCard extends StatelessWidget {
                   children: [
                     Text(
                       '#${reservation.id}',
-                      style: PharmaConnectTypography.body1.copyWith(
+                      style: context.text.body1.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     Text(
                       '${reservation.items.length} article(s)',
-                      style: PharmaConnectTypography.body2,
+                      style: context.text.body2,
                     ),
                   ],
                 ),
@@ -57,10 +56,14 @@ class ReservationStatusCard extends StatelessWidget {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: reservation.statusColor.withValues(alpha: 0.15),
+                  color: reservation.statusColor
+                      .of(context.palette)
+                      .withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(6),
                   border: Border.all(
-                    color: reservation.statusColor.withValues(alpha: 0.3),
+                    color: reservation.statusColor
+                        .of(context.palette)
+                        .withValues(alpha: 0.3),
                     width: 1,
                   ),
                 ),
@@ -76,7 +79,7 @@ class ReservationStatusCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
-                        color: reservation.statusColor,
+                        color: reservation.statusColor.of(context.palette),
                       ),
                     ),
                   ],
@@ -85,27 +88,29 @@ class ReservationStatusCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          Text(
-            '${reservation.pharmacyName}',
-            style: PharmaConnectTypography.body2,
-          ),
+          Text('${reservation.pharmacyName}', style: context.text.body2),
           if (reservation.queuePosition != null &&
               reservation.queuePosition! > 0) ...[
             const SizedBox(height: 4),
             Row(
               children: [
-                const Icon(Icons.people, size: 16, color: Colors.white54),
-                const SizedBox(width: 4),
-                Text(
-                  reservation.queueDisplay,
-                  style: PharmaConnectTypography.micro,
+                Icon(
+                  Icons.people,
+                  size: 16,
+                  color: context.palette.textSecondary,
                 ),
+                const SizedBox(width: 4),
+                Text(reservation.queueDisplay, style: context.text.micro),
                 const SizedBox(width: 12),
-                const Icon(Icons.timer, size: 16, color: Colors.white54),
+                Icon(
+                  Icons.timer,
+                  size: 16,
+                  color: context.palette.textSecondary,
+                ),
                 const SizedBox(width: 4),
                 Text(
                   reservation.estimatedWaitDisplay,
-                  style: PharmaConnectTypography.micro,
+                  style: context.text.micro,
                 ),
               ],
             ),
@@ -115,25 +120,25 @@ class ReservationStatusCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: PharmaConnectColors.accentGreen.withValues(alpha: 0.1),
+                color: context.palette.success.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: PharmaConnectColors.accentGreen.withValues(alpha: 0.2),
+                  color: context.palette.success.withValues(alpha: 0.2),
                 ),
               ),
               child: Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.check_circle,
-                    color: PharmaConnectColors.accentGreen,
+                    color: context.palette.success,
                     size: 16,
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Prêt à être retiré !',
-                      style: PharmaConnectTypography.body2.copyWith(
-                        color: PharmaConnectColors.accentGreen,
+                      style: context.text.body2.copyWith(
+                        color: context.palette.success,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -147,27 +152,25 @@ class ReservationStatusCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: PharmaConnectColors.accentOrange.withValues(alpha: 0.1),
+                color: context.palette.warning.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: PharmaConnectColors.accentOrange.withValues(
-                    alpha: 0.2,
-                  ),
+                  color: context.palette.warning.withValues(alpha: 0.2),
                 ),
               ),
               child: Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.warning_amber,
-                    color: PharmaConnectColors.accentOrange,
+                    color: context.palette.warning,
                     size: 16,
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Attention : délai de retrait bientôt dépassé',
-                      style: PharmaConnectTypography.body2.copyWith(
-                        color: PharmaConnectColors.accentOrange,
+                      style: context.text.body2.copyWith(
+                        color: context.palette.warning,
                         fontWeight: FontWeight.w600,
                       ),
                     ),

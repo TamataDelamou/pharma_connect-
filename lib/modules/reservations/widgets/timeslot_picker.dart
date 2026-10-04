@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../models/timeslot.dart';
+import '../../../core/theme/palette.dart';
 
 class TimeslotPicker extends StatelessWidget {
   final List<TimeSlot> slots;
@@ -27,10 +26,7 @@ class TimeslotPicker extends StatelessWidget {
         // Sélecteur de date
         Row(
           children: [
-            const Text(
-              'Choisissez un créneau',
-              style: PharmaConnectTypography.heading3,
-            ),
+            Text('Choisissez un créneau', style: context.text.heading3),
             const Spacer(),
             // Navigation date
             IconButton(
@@ -39,10 +35,7 @@ class TimeslotPicker extends StatelessWidget {
                 onDateChanged(selectedDate.subtract(const Duration(days: 1)));
               },
             ),
-            Text(
-              _formatDate(selectedDate),
-              style: PharmaConnectTypography.body1,
-            ),
+            Text(_formatDate(selectedDate), style: context.text.body1),
             IconButton(
               icon: const Icon(Icons.chevron_right),
               onPressed: () {
@@ -54,11 +47,11 @@ class TimeslotPicker extends StatelessWidget {
         const SizedBox(height: 12),
         // Grille de créneaux
         if (slots.isEmpty) ...[
-          const Padding(
+          Padding(
             padding: EdgeInsets.all(16),
             child: Text(
               'Aucun créneau disponible pour cette date',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
               textAlign: TextAlign.center,
             ),
           ),
@@ -80,16 +73,16 @@ class TimeslotPicker extends StatelessWidget {
               if (!slot.isAvailable) {
                 return Container(
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.03),
+                    color: context.palette.surfaceDisabled,
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+                    border: Border.all(color: context.palette.borderSubtle),
                   ),
                   child: Center(
                     child: Text(
                       slot.displayTime,
-                      style: PharmaConnectTypography.body2.copyWith(
-                        color: PharmaConnectColors.textSecondary.withValues(alpha: 
-                          0.5,
+                      style: context.text.body2.copyWith(
+                        color: context.palette.textSecondary.withValues(
+                          alpha: 0.5,
                         ),
                       ),
                     ),
@@ -102,13 +95,13 @@ class TimeslotPicker extends StatelessWidget {
                 child: Container(
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? PharmaConnectColors.accentCyan.withValues(alpha: 0.15)
-                        : Colors.white.withValues(alpha: 0.04),
+                        ? context.palette.primary.withValues(alpha: 0.15)
+                        : context.palette.surfaceMuted,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: isSelected
-                          ? PharmaConnectColors.accentCyan
-                          : Colors.white.withValues(alpha: 0.06),
+                          ? context.palette.primary
+                          : context.palette.surface,
                       width: isSelected ? 2 : 1,
                     ),
                   ),
@@ -122,27 +115,27 @@ class TimeslotPicker extends StatelessWidget {
                               ? FontWeight.w600
                               : FontWeight.w400,
                           color: isSelected
-                              ? PharmaConnectColors.accentCyan
-                              : PharmaConnectColors.textPrimary,
+                              ? context.palette.primary
+                              : context.palette.textPrimary,
                         ),
                       ),
                       if (slot.estimatedWaitMinutes != null) ...[
                         const SizedBox(height: 2),
                         Text(
                           '⏱ ${slot.estimatedWaitMinutes} min',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 10,
-                            color: PharmaConnectColors.textSecondary,
+                            color: context.palette.textSecondary,
                           ),
                         ),
                       ],
                       if (slot.isPeak && isSelected) ...[
                         const SizedBox(height: 2),
-                        const Text(
+                        Text(
                           '⚠️ Heure de pointe',
                           style: TextStyle(
                             fontSize: 9,
-                            color: PharmaConnectColors.accentOrange,
+                            color: context.palette.warning,
                           ),
                         ),
                       ],

@@ -3,12 +3,11 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../models/delivery.dart';
 import '../providers/delivery_provider.dart';
 import '../widgets/delivery_card.dart';
+import '../../../core/theme/palette.dart';
 
 class DeliveryHistoryScreen extends StatefulWidget {
   const DeliveryHistoryScreen({super.key});
@@ -65,18 +64,18 @@ class _DeliveryHistoryScreenState extends State<DeliveryHistoryScreen>
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Mes livraisons',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -92,9 +91,9 @@ class _DeliveryHistoryScreenState extends State<DeliveryHistoryScreen>
                 Tab(text: 'En cours'),
                 Tab(text: 'Passées'),
               ],
-              labelColor: PharmaConnectColors.accentCyan,
-              unselectedLabelColor: PharmaConnectColors.textSecondary,
-              indicatorColor: PharmaConnectColors.accentCyan,
+              labelColor: context.palette.primary,
+              unselectedLabelColor: context.palette.textSecondary,
+              indicatorColor: context.palette.primary,
               indicatorWeight: 3,
               dividerColor: Colors.transparent,
             ),
@@ -112,29 +111,25 @@ class _DeliveryHistoryScreenState extends State<DeliveryHistoryScreen>
                 ),
                 margin: const EdgeInsets.only(bottom: 12),
                 decoration: BoxDecoration(
-                  color: PharmaConnectColors.accentOrange.withValues(
-                    alpha: 0.15,
-                  ),
+                  color: context.palette.warning.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: PharmaConnectColors.accentOrange.withValues(
-                      alpha: 0.4,
-                    ),
+                    color: context.palette.warning.withValues(alpha: 0.4),
                   ),
                 ),
                 child: Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.cloud_off,
                       size: 16,
-                      color: PharmaConnectColors.accentOrange,
+                      color: context.palette.warning,
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         provider.error ??
                             'Hors connexion — dernières livraisons synchronisées affichées.',
-                        style: PharmaConnectTypography.body2,
+                        style: context.text.body2,
                       ),
                     ),
                   ],
@@ -152,8 +147,8 @@ class _DeliveryHistoryScreenState extends State<DeliveryHistoryScreen>
                         children: [
                           Text(
                             'Erreur : ${provider.error}',
-                            style: PharmaConnectTypography.body2.copyWith(
-                              color: PharmaConnectColors.accentRed,
+                            style: context.text.body2.copyWith(
+                              color: context.palette.danger,
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -181,17 +176,17 @@ class _DeliveryHistoryScreenState extends State<DeliveryHistoryScreen>
 
   Widget _buildList(BuildContext context, List<Delivery> deliveries) {
     if (deliveries.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               Icons.local_shipping_outlined,
               size: 64,
-              color: Colors.white24,
+              color: context.palette.veil(0.24),
             ),
             SizedBox(height: 16),
-            Text('Aucune livraison', style: PharmaConnectTypography.body2),
+            Text('Aucune livraison', style: context.text.body2),
           ],
         ),
       );

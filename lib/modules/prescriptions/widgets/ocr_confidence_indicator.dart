@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
+import '../../../core/theme/palette.dart';
 
 class OcrConfidenceIndicator extends StatelessWidget {
   final double confidence;
@@ -14,7 +13,7 @@ class OcrConfidenceIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = _getColor(confidence);
+    final color = _getColor(context, confidence);
 
     return Column(
       children: [
@@ -26,7 +25,7 @@ class OcrConfidenceIndicator extends StatelessWidget {
               height: size,
               child: CircularProgressIndicator(
                 value: confidence,
-                backgroundColor: Colors.white.withValues(alpha: 0.1),
+                backgroundColor: context.palette.border,
                 valueColor: AlwaysStoppedAnimation<Color>(color),
                 strokeWidth: 6,
               ),
@@ -41,24 +40,21 @@ class OcrConfidenceIndicator extends StatelessWidget {
                     color: color,
                   ),
                 ),
-                Text(
-                  _getLabel(confidence),
-                  style: PharmaConnectTypography.micro,
-                ),
+                Text(_getLabel(confidence), style: context.text.micro),
               ],
             ),
           ],
         ),
         const SizedBox(height: 8),
-        const Text('Confiance OCR', style: PharmaConnectTypography.label),
+        Text('Confiance OCR', style: context.text.label),
       ],
     );
   }
 
-  Color _getColor(double confidence) {
-    if (confidence >= 0.8) return PharmaConnectColors.accentGreen;
-    if (confidence >= 0.6) return PharmaConnectColors.accentOrange;
-    return PharmaConnectColors.accentRed;
+  Color _getColor(BuildContext context, double confidence) {
+    if (confidence >= 0.8) return context.palette.success;
+    if (confidence >= 0.6) return context.palette.warning;
+    return context.palette.danger;
   }
 
   String _getLabel(double confidence) {

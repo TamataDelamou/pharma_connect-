@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../models/eprescription.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class EPrescriptionCard extends StatelessWidget {
   final EPrescription prescription;
@@ -25,7 +24,7 @@ class EPrescriptionCard extends StatelessWidget {
             width: 4,
             height: 50,
             decoration: BoxDecoration(
-              color: _statusColor(prescription.status),
+              color: _statusColor(context, prescription.status),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -39,7 +38,7 @@ class EPrescriptionCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         '#${prescription.prescriptionNumber}',
-                        style: PharmaConnectTypography.body1.copyWith(
+                        style: context.text.body1.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                         maxLines: 1,
@@ -53,6 +52,7 @@ class EPrescriptionCard extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: _statusColor(
+                          context,
                           prescription.status,
                         ).withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(4),
@@ -62,7 +62,7 @@ class EPrescriptionCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w500,
-                          color: _statusColor(prescription.status),
+                          color: _statusColor(context, prescription.status),
                         ),
                       ),
                     ),
@@ -70,7 +70,7 @@ class EPrescriptionCard extends StatelessWidget {
                 ),
                 Text(
                   prescription.patientName ?? prescription.patientId,
-                  style: PharmaConnectTypography.body2,
+                  style: context.text.body2,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -79,42 +79,42 @@ class EPrescriptionCard extends StatelessWidget {
                   children: [
                     Text(
                       'Dr. ${prescription.doctorName ?? prescription.doctorId}',
-                      style: PharmaConnectTypography.micro,
+                      style: context.text.micro,
                     ),
                     const Spacer(),
                     Text(
                       _formatDate(prescription.prescribedAt),
-                      style: PharmaConnectTypography.micro,
+                      style: context.text.micro,
                     ),
                   ],
                 ),
               ],
             ),
           ),
-          const Icon(Icons.chevron_right, color: Colors.white24),
+          Icon(Icons.chevron_right, color: context.palette.veil(0.24)),
         ],
       ),
     );
   }
 
-  Color _statusColor(String status) {
+  Color _statusColor(BuildContext context, String status) {
     switch (status) {
       case 'draft':
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
       case 'sent':
-        return PharmaConnectColors.accentCyan;
+        return context.palette.primary;
       case 'received':
-        return PharmaConnectColors.accentOrange;
+        return context.palette.warning;
       case 'validated':
-        return PharmaConnectColors.accentGreen;
+        return context.palette.success;
       case 'dispensed':
-        return PharmaConnectColors.accentPurple;
+        return context.palette.secondary;
       case 'expired':
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       case 'cancelled':
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       default:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
     }
   }
 

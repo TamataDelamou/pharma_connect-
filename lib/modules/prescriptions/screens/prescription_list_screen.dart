@@ -3,11 +3,10 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../models/prescription_status.dart';
 import '../providers/prescription_provider.dart';
 import '../widgets/prescription_card.dart';
+import '../../../core/theme/palette.dart';
 
 class PrescriptionListScreen extends StatefulWidget {
   const PrescriptionListScreen({super.key});
@@ -73,19 +72,19 @@ class _PrescriptionListScreenState extends State<PrescriptionListScreen>
             // En-tête
             // C233 : en-tête adaptable (actions sous le titre sur téléphone).
             HeaderRow(
-              leading: const Column(
+              leading: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Ordonnances',
-                    style: PharmaConnectTypography.heading1,
+                    style: context.text.heading1,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(height: 4),
                   Text(
                     'Gérez vos ordonnances numériques',
-                    style: PharmaConnectTypography.body2,
+                    style: context.text.body2,
                   ),
                 ],
               ),
@@ -96,8 +95,8 @@ class _PrescriptionListScreenState extends State<PrescriptionListScreen>
                   icon: const Icon(Icons.add),
                   label: const Text('Nouvelle'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: PharmaConnectColors.accentCyan,
-                    foregroundColor: PharmaConnectColors.textOnAccent,
+                    backgroundColor: context.palette.primary,
+                    foregroundColor: context.palette.onPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -117,29 +116,25 @@ class _PrescriptionListScreenState extends State<PrescriptionListScreen>
                   vertical: 10,
                 ),
                 decoration: BoxDecoration(
-                  color: PharmaConnectColors.accentAmber.withValues(
-                    alpha: 0.12,
-                  ),
+                  color: context.palette.warningStrong.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: PharmaConnectColors.accentAmber.withValues(
-                      alpha: 0.3,
-                    ),
+                    color: context.palette.warningStrong.withValues(alpha: 0.3),
                   ),
                 ),
                 child: Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.cloud_off,
                       size: 18,
-                      color: PharmaConnectColors.accentAmber,
+                      color: context.palette.warningStrong,
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         provider.error ??
                             'Hors-ligne — dernière liste synchronisée affichée.',
-                        style: PharmaConnectTypography.micro,
+                        style: context.text.micro,
                       ),
                     ),
                   ],
@@ -157,9 +152,9 @@ class _PrescriptionListScreenState extends State<PrescriptionListScreen>
                 Tab(text: 'Validées'),
                 Tab(text: 'Dispensées'),
               ],
-              labelColor: PharmaConnectColors.accentCyan,
-              unselectedLabelColor: PharmaConnectColors.textSecondary,
-              indicatorColor: PharmaConnectColors.accentCyan,
+              labelColor: context.palette.primary,
+              unselectedLabelColor: context.palette.textSecondary,
+              indicatorColor: context.palette.primary,
               indicatorWeight: 3,
               dividerColor: Colors.transparent,
             ),
@@ -183,8 +178,8 @@ class _PrescriptionListScreenState extends State<PrescriptionListScreen>
                         children: [
                           Text(
                             'Erreur : ${provider.error}',
-                            style: PharmaConnectTypography.body2.copyWith(
-                              color: PharmaConnectColors.accentRed,
+                            style: context.text.body2.copyWith(
+                              color: context.palette.danger,
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -199,24 +194,24 @@ class _PrescriptionListScreenState extends State<PrescriptionListScreen>
                       ),
                     )
                   : provider.prescriptions.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
                             Icons.description_outlined,
                             size: 64,
-                            color: Colors.white24,
+                            color: context.palette.veil(0.24),
                           ),
                           SizedBox(height: 16),
                           Text(
                             'Aucune ordonnance',
-                            style: PharmaConnectTypography.heading2,
+                            style: context.text.heading2,
                           ),
                           SizedBox(height: 8),
                           Text(
                             'Importez votre première ordonnance numérique',
-                            style: PharmaConnectTypography.body2,
+                            style: context.text.body2,
                           ),
                         ],
                       ),

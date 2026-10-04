@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../models/delivery.dart';
 import '../models/delivery_status.dart';
 import 'delivery_status_badge.dart';
+import '../../../core/theme/palette.dart';
 
 class DeliveryCard extends StatelessWidget {
   final Delivery delivery;
@@ -32,7 +31,7 @@ class DeliveryCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   delivery.patientName,
-                  style: PharmaConnectTypography.body1.copyWith(
+                  style: context.text.body1.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                   maxLines: 1,
@@ -46,12 +45,16 @@ class DeliveryCard extends StatelessWidget {
           // Adresse
           Row(
             children: [
-              const Icon(Icons.location_on, size: 16, color: Colors.white54),
+              Icon(
+                Icons.location_on,
+                size: 16,
+                color: context.palette.textSecondary,
+              ),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
                   delivery.deliveryAddress,
-                  style: PharmaConnectTypography.body2,
+                  style: context.text.body2,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -66,35 +69,28 @@ class DeliveryCard extends StatelessWidget {
                 delivery.isExpress ? Icons.flash_on : Icons.schedule,
                 size: 14,
                 color: delivery.isExpress
-                    ? PharmaConnectColors.accentOrange
-                    : Colors.white54,
+                    ? context.palette.warning
+                    : context.palette.textSecondary,
               ),
               const SizedBox(width: 4),
               Text(
                 delivery.isExpress ? 'Express' : 'Standard',
-                style: PharmaConnectTypography.micro,
+                style: context.text.micro,
               ),
               const SizedBox(width: 12),
               if (delivery.isColdChainRequired) ...[
-                const Icon(
-                  Icons.ac_unit,
-                  size: 14,
-                  color: PharmaConnectColors.accentCyan,
-                ),
+                Icon(Icons.ac_unit, size: 14, color: context.palette.primary),
                 const SizedBox(width: 4),
                 Text(
                   'Chaîne du froid',
-                  style: PharmaConnectTypography.micro.copyWith(
-                    color: PharmaConnectColors.accentCyan,
+                  style: context.text.micro.copyWith(
+                    color: context.palette.primary,
                   ),
                 ),
               ],
               const Spacer(),
               if (delivery.driver != null) ...[
-                Text(
-                  '👤 ${delivery.driver!.name}',
-                  style: PharmaConnectTypography.micro,
-                ),
+                Text('👤 ${delivery.driver!.name}', style: context.text.micro),
               ],
             ],
           ),
@@ -103,22 +99,18 @@ class DeliveryCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: PharmaConnectColors.accentPurple.withValues(alpha: 0.1),
+                color: context.palette.secondary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
                 children: [
-                  const Icon(
-                    Icons.timer,
-                    size: 16,
-                    color: PharmaConnectColors.accentPurple,
-                  ),
+                  Icon(Icons.timer, size: 16, color: context.palette.secondary),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       '⏱ ${delivery.estimatedArrival}',
-                      style: PharmaConnectTypography.body2.copyWith(
-                        color: PharmaConnectColors.accentPurple,
+                      style: context.text.body2.copyWith(
+                        color: context.palette.secondary,
                       ),
                     ),
                   ),

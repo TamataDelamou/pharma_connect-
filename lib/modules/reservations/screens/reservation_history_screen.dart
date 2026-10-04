@@ -3,12 +3,11 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../models/reservation.dart';
 import '../providers/reservation_provider.dart';
 import '../widgets/reservation_status_card.dart';
+import '../../../core/theme/palette.dart';
 
 class ReservationHistoryScreen extends StatefulWidget {
   const ReservationHistoryScreen({super.key});
@@ -60,18 +59,18 @@ class _ReservationHistoryScreenState extends State<ReservationHistoryScreen>
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Mes réservations',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -87,9 +86,9 @@ class _ReservationHistoryScreenState extends State<ReservationHistoryScreen>
                 Tab(text: 'En cours'),
                 Tab(text: 'Terminées'),
               ],
-              labelColor: PharmaConnectColors.accentCyan,
-              unselectedLabelColor: PharmaConnectColors.textSecondary,
-              indicatorColor: PharmaConnectColors.accentCyan,
+              labelColor: context.palette.primary,
+              unselectedLabelColor: context.palette.textSecondary,
+              indicatorColor: context.palette.primary,
               indicatorWeight: 3,
               dividerColor: Colors.transparent,
             ),
@@ -102,28 +101,26 @@ class _ReservationHistoryScreenState extends State<ReservationHistoryScreen>
                 padding: const EdgeInsets.all(10),
                 margin: const EdgeInsets.only(bottom: 12),
                 decoration: BoxDecoration(
-                  color: PharmaConnectColors.accentAmber.withValues(alpha: 0.1),
+                  color: context.palette.warningStrong.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: PharmaConnectColors.accentAmber.withValues(
-                      alpha: 0.2,
-                    ),
+                    color: context.palette.warningStrong.withValues(alpha: 0.2),
                   ),
                 ),
                 child: Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.cloud_off,
                       size: 16,
-                      color: PharmaConnectColors.accentAmber,
+                      color: context.palette.warningStrong,
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         provider.error ??
                             'Hors connexion — dernières données synchronisées.',
-                        style: PharmaConnectTypography.micro.copyWith(
-                          color: PharmaConnectColors.accentAmber,
+                        style: context.text.micro.copyWith(
+                          color: context.palette.warningStrong,
                         ),
                       ),
                     ),
@@ -148,8 +145,8 @@ class _ReservationHistoryScreenState extends State<ReservationHistoryScreen>
                         children: [
                           Text(
                             'Erreur : ${provider.error}',
-                            style: PharmaConnectTypography.body2.copyWith(
-                              color: PharmaConnectColors.accentRed,
+                            style: context.text.body2.copyWith(
+                              color: context.palette.danger,
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -177,13 +174,17 @@ class _ReservationHistoryScreenState extends State<ReservationHistoryScreen>
 
   Widget _buildList(BuildContext context, List<Reservation> reservations) {
     if (reservations.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.receipt_long_outlined, size: 64, color: Colors.white24),
+            Icon(
+              Icons.receipt_long_outlined,
+              size: 64,
+              color: context.palette.veil(0.24),
+            ),
             SizedBox(height: 16),
-            Text('Aucune réservation', style: PharmaConnectTypography.body2),
+            Text('Aucune réservation', style: context.text.body2),
           ],
         ),
       );

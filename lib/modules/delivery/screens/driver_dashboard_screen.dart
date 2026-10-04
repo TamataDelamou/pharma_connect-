@@ -5,8 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
@@ -17,6 +15,7 @@ import '../models/delivery.dart';
 import '../models/delivery_status.dart';
 import '../providers/delivery_provider.dart';
 import '../widgets/delivery_status_badge.dart';
+import '../../../core/theme/palette.dart';
 
 class DriverDashboardScreen extends StatefulWidget {
   const DriverDashboardScreen({super.key});
@@ -115,11 +114,15 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.lock_outline, size: 48, color: Colors.white24),
+                Icon(
+                  Icons.lock_outline,
+                  size: 48,
+                  color: context.palette.veil(0.24),
+                ),
                 const SizedBox(height: 16),
                 Text(
                   'Réservé aux comptes livreur.',
-                  style: PharmaConnectTypography.body2,
+                  style: context.text.body2,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16),
@@ -140,7 +143,7 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
             padding: const EdgeInsets.all(24),
             child: Text(
               'Aucune fiche livreur associée à ce compte.',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
               textAlign: TextAlign.center,
             ),
           ),
@@ -168,18 +171,18 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Tableau de bord livreur',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -189,9 +192,9 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
               trailing: [const KernelBadge()],
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Gérez vos livraisons en temps réel',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
             ),
             // Bannière hors-ligne (audit Module 7, 29/08/2026) : même patron
             // que les autres écrans déjà audités — n'affiche jamais ce
@@ -206,29 +209,25 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: PharmaConnectColors.accentOrange.withValues(
-                    alpha: 0.15,
-                  ),
+                  color: context.palette.warning.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: PharmaConnectColors.accentOrange.withValues(
-                      alpha: 0.4,
-                    ),
+                    color: context.palette.warning.withValues(alpha: 0.4),
                   ),
                 ),
                 child: Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.cloud_off,
                       size: 16,
-                      color: PharmaConnectColors.accentOrange,
+                      color: context.palette.warning,
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         provider.error ??
                             'Hors connexion — dernières courses synchronisées affichées.',
-                        style: PharmaConnectTypography.body2,
+                        style: context.text.body2,
                       ),
                     ),
                   ],
@@ -243,14 +242,14 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
                 _buildStatCard(
                   label: 'En cours',
                   value: '${activeDeliveries.length}',
-                  color: PharmaConnectColors.accentPurple,
+                  color: context.palette.secondary,
                   icon: Icons.delivery_dining,
                 ),
                 const SizedBox(width: 12),
                 _buildStatCard(
                   label: 'Terminées',
                   value: '${completedDeliveries.length}',
-                  color: PharmaConnectColors.accentGreen,
+                  color: context.palette.success,
                   icon: Icons.check_circle,
                 ),
                 const SizedBox(width: 12),
@@ -259,7 +258,7 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
                   value: CurrencyFormatter.format(
                     completedDeliveries.length * 5000,
                   ),
-                  color: PharmaConnectColors.accentCyan,
+                  color: context.palette.primary,
                   icon: Icons.attach_money,
                 ),
               ],
@@ -267,34 +266,31 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
             const SizedBox(height: 24),
 
             // Livraisons actives
-            const Text(
-              'Livraisons en cours',
-              style: PharmaConnectTypography.heading3,
-            ),
+            Text('Livraisons en cours', style: context.text.heading3),
             const SizedBox(height: 12),
 
             Expanded(
               child: provider.isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : activeDeliveries.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
                             Icons.local_shipping_outlined,
                             size: 64,
-                            color: Colors.white24,
+                            color: context.palette.veil(0.24),
                           ),
                           SizedBox(height: 16),
                           Text(
                             'Aucune livraison en cours',
-                            style: PharmaConnectTypography.heading3,
+                            style: context.text.heading3,
                           ),
                           SizedBox(height: 8),
                           Text(
                             'En attente de nouvelles missions',
-                            style: PharmaConnectTypography.body2,
+                            style: context.text.body2,
                           ),
                         ],
                       ),
@@ -335,7 +331,7 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
                 Expanded(
                   child: Text(
                     label,
-                    style: PharmaConnectTypography.micro,
+                    style: context.text.micro,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -344,7 +340,7 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
             const SizedBox(height: 4),
             Text(
               value,
-              style: PharmaConnectTypography.kpiMedium.copyWith(
+              style: context.text.kpiMedium.copyWith(
                 color: color,
                 fontSize: 20,
               ),
@@ -369,7 +365,7 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
               Expanded(
                 child: Text(
                   delivery.patientName,
-                  style: PharmaConnectTypography.body1.copyWith(
+                  style: context.text.body1.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                   overflow: TextOverflow.ellipsis,
@@ -381,19 +377,16 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
           const SizedBox(height: 4),
           Text(
             delivery.deliveryAddress,
-            style: PharmaConnectTypography.body2,
+            style: context.text.body2,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 8),
           Row(
             children: [
-              const Icon(Icons.timer, size: 14, color: Colors.white54),
+              Icon(Icons.timer, size: 14, color: context.palette.textSecondary),
               const SizedBox(width: 4),
-              Text(
-                delivery.estimatedArrival,
-                style: PharmaConnectTypography.micro,
-              ),
+              Text(delivery.estimatedArrival, style: context.text.micro),
               const Spacer(),
               if (delivery.isExpress) ...[
                 Container(
@@ -402,17 +395,15 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: PharmaConnectColors.accentOrange.withValues(
-                      alpha: 0.15,
-                    ),
+                    color: context.palette.warning.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(4),
                   ),
-                  child: const Text(
+                  child: Text(
                     '⚡ Express',
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w600,
-                      color: PharmaConnectColors.accentOrange,
+                      color: context.palette.warning,
                     ),
                   ),
                 ),
@@ -425,17 +416,15 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: PharmaConnectColors.accentCyan.withValues(
-                      alpha: 0.15,
-                    ),
+                    color: context.palette.primary.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(4),
                   ),
-                  child: const Text(
+                  child: Text(
                     '❄️ Froid',
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w600,
-                      color: PharmaConnectColors.accentCyan,
+                      color: context.palette.primary,
                     ),
                   ),
                 ),
@@ -461,7 +450,7 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
               icon: const Icon(Icons.location_on),
               label: const Text('Je suis arrivé'),
               style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: Colors.white24),
+                side: BorderSide(color: context.palette.veil(0.24)),
                 padding: const EdgeInsets.symmetric(vertical: 10),
               ),
             ),
@@ -476,9 +465,9 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
                 );
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
+                    SnackBar(
                       content: Text('Livraison démarrée !'),
-                      backgroundColor: PharmaConnectColors.accentGreen,
+                      backgroundColor: context.palette.success,
                     ),
                   );
                 }
@@ -506,16 +495,16 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
         builder: (dialogContext, setState) {
           String? errorText;
           return AlertDialog(
-            backgroundColor: PharmaConnectColors.primaryDeep,
+            backgroundColor: context.palette.background,
             title: const Text('Confirmer la livraison'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Demandez au patient le code de remise à 6 chiffres qui lui '
                   'a été communiqué et saisissez-le ci-dessous.',
-                  style: PharmaConnectTypography.body2,
+                  style: context.text.body2,
                 ),
                 const SizedBox(height: 12),
                 TextField(
@@ -523,7 +512,7 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
                   keyboardType: TextInputType.number,
                   maxLength: 6,
                   autofocus: true,
-                  style: PharmaConnectTypography.body1,
+                  style: context.text.body1,
                   decoration: InputDecoration(
                     labelText: 'Code de remise',
                     counterText: '',
@@ -556,9 +545,9 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
                     Navigator.pop(dialogContext);
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
+                        SnackBar(
                           content: Text('Livraison confirmée !'),
-                          backgroundColor: PharmaConnectColors.accentGreen,
+                          backgroundColor: context.palette.success,
                         ),
                       );
                     }
@@ -570,8 +559,8 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: PharmaConnectColors.accentGreen,
-                  foregroundColor: PharmaConnectColors.textPrimary,
+                  backgroundColor: context.palette.success,
+                  foregroundColor: context.palette.textPrimary,
                 ),
                 child: const Text('Confirmer'),
               ),

@@ -3,8 +3,6 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../../auth/models/user_role.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -13,6 +11,7 @@ import '../models/delivery_driver.dart';
 import '../models/delivery_status.dart';
 import '../providers/delivery_provider.dart';
 import '../widgets/delivery_status_badge.dart';
+import '../../../core/theme/palette.dart';
 
 class DeliveryScheduleScreen extends StatefulWidget {
   const DeliveryScheduleScreen({super.key});
@@ -37,7 +36,7 @@ class _DeliveryScheduleScreenState extends State<DeliveryScheduleScreen> {
     final provider = context.read<DeliveryProvider>();
     final driver = await showModalBottomSheet<DeliveryDriver>(
       context: context,
-      backgroundColor: PharmaConnectColors.primaryDeep,
+      backgroundColor: context.palette.background,
       isScrollControlled: true,
       builder: (context) => _DriverPickerSheet(
         drivers: provider.availableDrivers,
@@ -55,8 +54,8 @@ class _DeliveryScheduleScreenState extends State<DeliveryScheduleScreen> {
                   : (provider.error ?? 'Échec de l\'assignation'),
             ),
             backgroundColor: ok
-                ? PharmaConnectColors.accentGreen
-                : PharmaConnectColors.accentRed,
+                ? context.palette.success
+                : context.palette.danger,
           ),
         );
       }
@@ -83,11 +82,15 @@ class _DeliveryScheduleScreenState extends State<DeliveryScheduleScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.lock_outline, size: 48, color: Colors.white24),
+                Icon(
+                  Icons.lock_outline,
+                  size: 48,
+                  color: context.palette.veil(0.24),
+                ),
                 const SizedBox(height: 16),
                 Text(
                   'Réservé aux pharmaciens de l\'officine.',
-                  style: PharmaConnectTypography.body2,
+                  style: context.text.body2,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16),
@@ -117,18 +120,18 @@ class _DeliveryScheduleScreenState extends State<DeliveryScheduleScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Planification des livraisons',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -140,7 +143,7 @@ class _DeliveryScheduleScreenState extends State<DeliveryScheduleScreen> {
             const SizedBox(height: 8),
             Text(
               '${scheduled.length} livraison(s) à assigner',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
             ),
             const SizedBox(height: 24),
             Expanded(
@@ -159,8 +162,8 @@ class _DeliveryScheduleScreenState extends State<DeliveryScheduleScreen> {
                         children: [
                           Text(
                             'Erreur : ${provider.error}',
-                            style: PharmaConnectTypography.body2.copyWith(
-                              color: PharmaConnectColors.accentRed,
+                            style: context.text.body2.copyWith(
+                              color: context.palette.danger,
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -176,19 +179,19 @@ class _DeliveryScheduleScreenState extends State<DeliveryScheduleScreen> {
                       ),
                     )
                   : scheduled.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
                             Icons.event_available_outlined,
                             size: 64,
-                            color: Colors.white24,
+                            color: context.palette.veil(0.24),
                           ),
                           SizedBox(height: 16),
                           Text(
                             'Aucune livraison à planifier',
-                            style: PharmaConnectTypography.body2,
+                            style: context.text.body2,
                           ),
                         ],
                       ),
@@ -209,10 +212,9 @@ class _DeliveryScheduleScreenState extends State<DeliveryScheduleScreen> {
                                     Expanded(
                                       child: Text(
                                         delivery.patientName,
-                                        style: PharmaConnectTypography.body1
-                                            .copyWith(
-                                              fontWeight: FontWeight.w600,
-                                            ),
+                                        style: context.text.body1.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                       ),
                                     ),
                                     DeliveryStatusBadge(
@@ -223,13 +225,13 @@ class _DeliveryScheduleScreenState extends State<DeliveryScheduleScreen> {
                                 const SizedBox(height: 4),
                                 Text(
                                   delivery.deliveryAddress,
-                                  style: PharmaConnectTypography.body2,
+                                  style: context.text.body2,
                                 ),
                                 Text(
                                   'Prévue le ${delivery.scheduledAt.day}/${delivery.scheduledAt.month} '
                                   'à ${delivery.scheduledAt.hour.toString().padLeft(2, '0')}h'
                                   '${delivery.scheduledAt.minute.toString().padLeft(2, '0')}',
-                                  style: PharmaConnectTypography.micro,
+                                  style: context.text.micro,
                                 ),
                                 const SizedBox(height: 12),
                                 if (delivery.driver == null)
@@ -240,27 +242,27 @@ class _DeliveryScheduleScreenState extends State<DeliveryScheduleScreen> {
                                       icon: const Icon(Icons.person_add_alt),
                                       label: const Text('Assigner un livreur'),
                                       style: OutlinedButton.styleFrom(
-                                        side: const BorderSide(
-                                          color: PharmaConnectColors.accentCyan,
+                                        side: BorderSide(
+                                          color: context.palette.primary,
                                         ),
                                         foregroundColor:
-                                            PharmaConnectColors.accentCyan,
+                                            context.palette.primary,
                                       ),
                                     ),
                                   )
                                 else
                                   Row(
                                     children: [
-                                      const Icon(
+                                      Icon(
                                         Icons.person,
                                         size: 16,
-                                        color: PharmaConnectColors.accentGreen,
+                                        color: context.palette.success,
                                       ),
                                       const SizedBox(width: 6),
                                       Expanded(
                                         child: Text(
                                           '${delivery.driver!.name} • ${delivery.driver!.vehicleType ?? 'véhicule'}',
-                                          style: PharmaConnectTypography.body2,
+                                          style: context.text.body2,
                                         ),
                                       ),
                                       ElevatedButton(
@@ -269,9 +271,9 @@ class _DeliveryScheduleScreenState extends State<DeliveryScheduleScreen> {
                                             .startDelivery(delivery.id),
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor:
-                                              PharmaConnectColors.accentCyan,
+                                              context.palette.primary,
                                           foregroundColor:
-                                              PharmaConnectColors.textOnAccent,
+                                              context.palette.onPrimary,
                                         ),
                                         child: const Text('Démarrer'),
                                       ),
@@ -314,24 +316,21 @@ class _DriverPickerSheet extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Choisir un livreur',
-              style: PharmaConnectTypography.heading3,
-            ),
+            Text('Choisir un livreur', style: context.text.heading3),
             if (requiresColdChain) ...[
               const SizedBox(height: 4),
-              const Text(
+              Text(
                 'Livraison chaîne du froid : seuls les livreurs certifiés sont proposés',
-                style: PharmaConnectTypography.micro,
+                style: context.text.micro,
               ),
             ],
             const SizedBox(height: 16),
             if (eligible.isEmpty)
-              const Padding(
+              Padding(
                 padding: EdgeInsets.symmetric(vertical: 24),
                 child: Text(
                   'Aucun livreur disponible pour le moment',
-                  style: PharmaConnectTypography.body2,
+                  style: context.text.body2,
                 ),
               )
             else
@@ -346,12 +345,13 @@ class _DriverPickerSheet extends StatelessWidget {
                     return ListTile(
                       contentPadding: EdgeInsets.zero,
                       leading: CircleAvatar(
-                        backgroundColor: PharmaConnectColors.accentCyan
-                            .withValues(alpha: 0.2),
+                        backgroundColor: context.palette.primary.withValues(
+                          alpha: 0.2,
+                        ),
                         child: Text(
                           driver.name[0].toUpperCase(),
-                          style: const TextStyle(
-                            color: PharmaConnectColors.accentCyan,
+                          style: TextStyle(
+                            color: context.palette.primary,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -363,9 +363,9 @@ class _DriverPickerSheet extends StatelessWidget {
                         '${driver.rating != null ? ' • ⭐ ${driver.rating!.toStringAsFixed(1)}' : ''}',
                       ),
                       trailing: driver.isColdChainCertified
-                          ? const Icon(
+                          ? Icon(
                               Icons.ac_unit,
-                              color: PharmaConnectColors.accentCyan,
+                              color: context.palette.primary,
                               size: 18,
                             )
                           : null,

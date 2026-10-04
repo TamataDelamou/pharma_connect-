@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
 import '../models/delivery_status.dart';
+import '../../../core/theme/palette.dart';
 
 class DeliveryStatusBadge extends StatelessWidget {
   final DeliveryStatus status;
@@ -9,7 +9,7 @@ class DeliveryStatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = _getColor(status);
+    final color = _getColor(context, status);
     final label = status.label;
 
     return Container(
@@ -37,20 +37,20 @@ class DeliveryStatusBadge extends StatelessWidget {
     );
   }
 
-  Color _getColor(DeliveryStatus status) {
+  Color _getColor(BuildContext context, DeliveryStatus status) {
     switch (status) {
       case DeliveryStatus.scheduled:
-        return PharmaConnectColors.accentOrange;
+        return context.palette.warning;
       case DeliveryStatus.preparing:
-        return PharmaConnectColors.accentCyan;
+        return context.palette.primary;
       case DeliveryStatus.inProgress:
-        return PharmaConnectColors.accentPurple;
+        return context.palette.secondary;
       case DeliveryStatus.arrived:
-        return PharmaConnectColors.accentGreen;
+        return context.palette.success;
       case DeliveryStatus.delivered:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
       case DeliveryStatus.cancelled:
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
     }
   }
 }

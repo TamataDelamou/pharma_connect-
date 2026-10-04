@@ -3,14 +3,13 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/buttons/tertiary_button.dart';
 import '../models/prescription_item.dart';
 import '../providers/prescription_provider.dart';
 import '../widgets/prescription_item_tile.dart';
 import '../widgets/ocr_confidence_indicator.dart';
+import '../../../core/theme/palette.dart';
 
 class PrescriptionPreviewScreen extends StatefulWidget {
   const PrescriptionPreviewScreen({super.key});
@@ -42,9 +41,9 @@ class _PrescriptionPreviewScreenState extends State<PrescriptionPreviewScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () {
                       provider.resetUpload();
@@ -53,10 +52,10 @@ class _PrescriptionPreviewScreenState extends State<PrescriptionPreviewScreen> {
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Vérification de l\'ordonnance',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -79,15 +78,12 @@ class _PrescriptionPreviewScreenState extends State<PrescriptionPreviewScreen> {
                     const SizedBox(height: 24),
 
                     // Liste des médicaments extraits
-                    const Text(
-                      'Médicaments détectés',
-                      style: PharmaConnectTypography.heading3,
-                    ),
+                    Text('Médicaments détectés', style: context.text.heading3),
                     const SizedBox(height: 8),
                     if (items.isEmpty) ...[
-                      const Text(
+                      Text(
                         'Aucun médicament détecté',
-                        style: PharmaConnectTypography.body2,
+                        style: context.text.body2,
                       ),
                     ] else ...[
                       ...items.asMap().entries.map((entry) {
@@ -116,11 +112,11 @@ class _PrescriptionPreviewScreenState extends State<PrescriptionPreviewScreen> {
 
                     // Disponibilité des produits
                     if (availabilityMap.isNotEmpty) ...[
-                      const Divider(color: Colors.white12),
+                      Divider(color: context.palette.veil(0.12)),
                       const SizedBox(height: 8),
-                      const Text(
+                      Text(
                         'Disponibilité en pharmacie',
-                        style: PharmaConnectTypography.heading3,
+                        style: context.text.heading3,
                       ),
                       const SizedBox(height: 8),
                       ...availabilityMap.entries.map((entry) {
@@ -134,23 +130,23 @@ class _PrescriptionPreviewScreenState extends State<PrescriptionPreviewScreen> {
                                     ? Icons.check_circle
                                     : Icons.error_outline,
                                 color: isAvailable
-                                    ? PharmaConnectColors.accentGreen
-                                    : PharmaConnectColors.accentRed,
+                                    ? context.palette.success
+                                    : context.palette.danger,
                                 size: 18,
                               ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   entry.key,
-                                  style: PharmaConnectTypography.body1,
+                                  style: context.text.body1,
                                 ),
                               ),
                               Text(
                                 isAvailable ? 'Disponible' : 'Rupture',
-                                style: PharmaConnectTypography.body2.copyWith(
+                                style: context.text.body2.copyWith(
                                   color: isAvailable
-                                      ? PharmaConnectColors.accentGreen
-                                      : PharmaConnectColors.accentRed,
+                                      ? context.palette.success
+                                      : context.palette.danger,
                                 ),
                               ),
                             ],
@@ -221,7 +217,7 @@ class _PrescriptionPreviewScreenState extends State<PrescriptionPreviewScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: PharmaConnectColors.primaryDeep,
+        backgroundColor: context.palette.background,
         title: const Text('Modifier le médicament'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -270,8 +266,8 @@ class _PrescriptionPreviewScreenState extends State<PrescriptionPreviewScreen> {
               Navigator.pop(context);
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: PharmaConnectColors.accentCyan,
-              foregroundColor: PharmaConnectColors.textOnAccent,
+              backgroundColor: context.palette.primary,
+              foregroundColor: context.palette.onPrimary,
             ),
             child: const Text('Modifier'),
           ),
@@ -291,14 +287,14 @@ class _PrescriptionPreviewScreenState extends State<PrescriptionPreviewScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: PharmaConnectColors.primaryDeep,
+        backgroundColor: context.palette.background,
         title: const Text('Substitution générique'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               'Souhaitez-vous substituer "${item.medicationName}" par un générique ?',
-              style: PharmaConnectTypography.body1,
+              style: context.text.body1,
             ),
             const SizedBox(height: 12),
             ...suggestions.map((suggestion) {
@@ -315,11 +311,11 @@ class _PrescriptionPreviewScreenState extends State<PrescriptionPreviewScreen> {
                   );
                   Navigator.pop(context);
                 },
-                leading: const Icon(
+                leading: Icon(
                   Icons.medication,
-                  color: PharmaConnectColors.accentPurple,
+                  color: context.palette.secondary,
                 ),
-                tileColor: Colors.white.withValues(alpha: 0.04),
+                tileColor: context.palette.surfaceMuted,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),

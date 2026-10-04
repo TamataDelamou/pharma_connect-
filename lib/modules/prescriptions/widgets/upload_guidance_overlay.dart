@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
 import '../../../core/theme/spacing.dart';
-import '../../../core/theme/typography.dart';
+import '../../../core/theme/palette.dart';
 
 class UploadGuidanceOverlay extends StatelessWidget {
   final VoidCallback onContinue;
@@ -18,10 +17,10 @@ class UploadGuidanceOverlay extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: PharmaConnectColors.primaryDeep.withValues(alpha: 0.95),
+        color: context.palette.background.withValues(alpha: 0.95),
         borderRadius: BorderRadius.circular(PharmaConnectSpacing.radiusLg),
         border: Border.all(
-          color: PharmaConnectColors.accentCyan.withValues(alpha: 0.2),
+          color: context.palette.primary.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -29,39 +28,43 @@ class UploadGuidanceOverlay extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.photo_camera, color: PharmaConnectColors.accentCyan),
+              Icon(Icons.photo_camera, color: context.palette.primary),
               SizedBox(width: 12),
               Text(
                 'Conseils pour une bonne photo',
-                style: PharmaConnectTypography.heading3,
+                style: context.text.heading3,
               ),
             ],
           ),
           const SizedBox(height: 16),
           _buildTip(
+            context,
             icon: Icons.lightbulb,
             text: 'Choisissez un endroit bien éclairé',
-            color: PharmaConnectColors.accentOrange,
+            color: context.palette.warning,
           ),
           const SizedBox(height: 8),
           _buildTip(
+            context,
             icon: Icons.center_focus_strong,
             text: 'Cadrez toute l\'ordonnance dans le viseur',
-            color: PharmaConnectColors.accentCyan,
+            color: context.palette.primary,
           ),
           const SizedBox(height: 8),
           _buildTip(
+            context,
             icon: Icons.camera_alt,
             text: 'Assurez-vous que le texte est net et lisible',
-            color: PharmaConnectColors.accentGreen,
+            color: context.palette.success,
           ),
           const SizedBox(height: 8),
           _buildTip(
+            context,
             icon: Icons.photo_size_select_actual,
             text: 'Évitez les ombres et les reflets sur le document',
-            color: PharmaConnectColors.accentPurple,
+            color: context.palette.secondary,
           ),
           const SizedBox(height: 24),
           Row(
@@ -70,7 +73,7 @@ class UploadGuidanceOverlay extends StatelessWidget {
                 child: OutlinedButton(
                   onPressed: onCancel,
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.white24),
+                    side: BorderSide(color: context.palette.veil(0.24)),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(
                         PharmaConnectSpacing.radiusMd,
@@ -85,8 +88,8 @@ class UploadGuidanceOverlay extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: onContinue,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: PharmaConnectColors.accentCyan,
-                    foregroundColor: PharmaConnectColors.textOnAccent,
+                    backgroundColor: context.palette.primary,
+                    foregroundColor: context.palette.onPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(
                         PharmaConnectSpacing.radiusMd,
@@ -103,7 +106,8 @@ class UploadGuidanceOverlay extends StatelessWidget {
     );
   }
 
-  Widget _buildTip({
+  Widget _buildTip(
+    BuildContext context, {
     required IconData icon,
     required String text,
     required Color color,
@@ -112,7 +116,7 @@ class UploadGuidanceOverlay extends StatelessWidget {
       children: [
         Icon(icon, color: color, size: 20),
         const SizedBox(width: 12),
-        Expanded(child: Text(text, style: PharmaConnectTypography.body2)),
+        Expanded(child: Text(text, style: context.text.body2)),
       ],
     );
   }

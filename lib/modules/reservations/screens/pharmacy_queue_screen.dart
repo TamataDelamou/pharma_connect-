@@ -3,14 +3,13 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../../auth/models/user_role.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../models/reservation.dart';
 import '../models/reservation_status.dart';
 import '../providers/reservation_provider.dart';
+import '../../../core/theme/palette.dart';
 
 class PharmacyQueueScreen extends StatefulWidget {
   const PharmacyQueueScreen({super.key});
@@ -57,11 +56,15 @@ class _PharmacyQueueScreenState extends State<PharmacyQueueScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.lock_outline, size: 48, color: Colors.white24),
+                Icon(
+                  Icons.lock_outline,
+                  size: 48,
+                  color: context.palette.veil(0.24),
+                ),
                 const SizedBox(height: 16),
                 Text(
                   'Réservé aux pharmaciens de l\'officine.',
-                  style: PharmaConnectTypography.body2,
+                  style: context.text.body2,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16),
@@ -82,7 +85,7 @@ class _PharmacyQueueScreenState extends State<PharmacyQueueScreen> {
             padding: const EdgeInsets.all(24),
             child: Text(
               'Aucune officine rattachée à ce compte pharmacien.',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
               textAlign: TextAlign.center,
             ),
           ),
@@ -116,18 +119,18 @@ class _PharmacyQueueScreenState extends State<PharmacyQueueScreen> {
                 leading: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.arrow_back,
-                        color: PharmaConnectColors.textPrimary,
+                        color: context.palette.textPrimary,
                       ),
                       onPressed: () => context.pop(),
                       padding: EdgeInsets.zero,
                     ),
                     const SizedBox(width: 8),
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         "File d'attente pharmacie",
-                        style: PharmaConnectTypography.heading2,
+                        style: context.text.heading2,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -137,9 +140,9 @@ class _PharmacyQueueScreenState extends State<PharmacyQueueScreen> {
                 trailing: [
                   const KernelBadge(),
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.refresh,
-                      color: PharmaConnectColors.textSecondary,
+                      color: context.palette.textSecondary,
                     ),
                     onPressed: _refresh,
                   ),
@@ -148,7 +151,7 @@ class _PharmacyQueueScreenState extends State<PharmacyQueueScreen> {
               const SizedBox(height: 8),
               Text(
                 '${queue.length} client(s) en attente de retrait',
-                style: PharmaConnectTypography.body2,
+                style: context.text.body2,
               ),
               if (provider.isOffline && provider.reservations.isNotEmpty) ...[
                 const SizedBox(height: 8),
@@ -156,30 +159,28 @@ class _PharmacyQueueScreenState extends State<PharmacyQueueScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: PharmaConnectColors.accentAmber.withValues(
-                      alpha: 0.1,
-                    ),
+                    color: context.palette.warningStrong.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: PharmaConnectColors.accentAmber.withValues(
+                      color: context.palette.warningStrong.withValues(
                         alpha: 0.2,
                       ),
                     ),
                   ),
                   child: Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.cloud_off,
                         size: 16,
-                        color: PharmaConnectColors.accentAmber,
+                        color: context.palette.warningStrong,
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           provider.error ??
                               'Hors connexion — dernière file synchronisée.',
-                          style: PharmaConnectTypography.micro.copyWith(
-                            color: PharmaConnectColors.accentAmber,
+                          style: context.text.micro.copyWith(
+                            color: context.palette.warningStrong,
                           ),
                         ),
                       ),
@@ -202,8 +203,8 @@ class _PharmacyQueueScreenState extends State<PharmacyQueueScreen> {
                           children: [
                             Text(
                               'Erreur : ${provider.error}',
-                              style: PharmaConnectTypography.body2.copyWith(
-                                color: PharmaConnectColors.accentRed,
+                              style: context.text.body2.copyWith(
+                                color: context.palette.danger,
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -216,19 +217,19 @@ class _PharmacyQueueScreenState extends State<PharmacyQueueScreen> {
                         ),
                       )
                     : queue.isEmpty
-                    ? const Center(
+                    ? Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(
                               Icons.people_outline,
                               size: 64,
-                              color: Colors.white24,
+                              color: context.palette.veil(0.24),
                             ),
                             SizedBox(height: 16),
                             Text(
                               "Aucun client en file d'attente",
-                              style: PharmaConnectTypography.body2,
+                              style: context.text.body2,
                             ),
                           ],
                         ),
@@ -285,14 +286,16 @@ class _QueueEntryCard extends StatelessWidget {
             height: 36,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: reservation.statusColor.withValues(alpha: 0.15),
+              color: reservation.statusColor
+                  .of(context.palette)
+                  .withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
             child: Text(
               '#$position',
               style: TextStyle(
                 fontWeight: FontWeight.w700,
-                color: reservation.statusColor,
+                color: reservation.statusColor.of(context.palette),
                 fontSize: 12,
               ),
             ),
@@ -304,13 +307,13 @@ class _QueueEntryCard extends StatelessWidget {
               children: [
                 Text(
                   reservation.patientName,
-                  style: PharmaConnectTypography.body1.copyWith(
+                  style: context.text.body1.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 Text(
                   '${reservation.items.length} article(s) • ${reservation.statusLabel}',
-                  style: PharmaConnectTypography.body2,
+                  style: context.text.body2,
                 ),
               ],
             ),
@@ -319,8 +322,8 @@ class _QueueEntryCard extends StatelessWidget {
             ElevatedButton(
               onPressed: onMarkReady,
               style: ElevatedButton.styleFrom(
-                backgroundColor: PharmaConnectColors.accentGreen,
-                foregroundColor: PharmaConnectColors.textOnAccent,
+                backgroundColor: context.palette.success,
+                foregroundColor: context.palette.onPrimary,
               ),
               child: const Text('Prêt'),
             )
@@ -328,8 +331,8 @@ class _QueueEntryCard extends StatelessWidget {
             ElevatedButton(
               onPressed: onMarkPickedUp,
               style: ElevatedButton.styleFrom(
-                backgroundColor: PharmaConnectColors.accentCyan,
-                foregroundColor: PharmaConnectColors.textOnAccent,
+                backgroundColor: context.palette.primary,
+                foregroundColor: context.palette.onPrimary,
               ),
               child: const Text('Retiré'),
             ),

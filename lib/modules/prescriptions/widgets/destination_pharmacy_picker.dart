@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/services/supabase_service.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
+import '../../../core/theme/palette.dart';
 
 /// C216 / D61 : choix de l'officine destinataire d'une ordonnance déposée.
 /// Seul le personnel de l'officine choisie verra et traitera l'ordonnance.
@@ -72,9 +71,7 @@ class _DestinationPharmacyPickerState extends State<DestinationPharmacyPicker> {
           Expanded(
             child: Text(
               _error!,
-              style: PharmaConnectTypography.body2.copyWith(
-                color: PharmaConnectColors.accentRed,
-              ),
+              style: context.text.body2.copyWith(color: context.palette.danger),
             ),
           ),
           TextButton(onPressed: _load, child: const Text('Réessayer')),
@@ -109,9 +106,9 @@ class _DestinationPharmacyPickerState extends State<DestinationPharmacyPicker> {
           onChanged: widget.onChanged,
         ),
         const SizedBox(height: 4),
-        const Text(
+        Text(
           'Seule l\'officine choisie pourra voir et préparer votre ordonnance.',
-          style: PharmaConnectTypography.micro,
+          style: context.text.micro,
         ),
       ],
     );
