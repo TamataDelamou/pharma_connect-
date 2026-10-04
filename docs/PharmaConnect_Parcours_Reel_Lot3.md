@@ -44,7 +44,7 @@ Les trois adresses arrivent dans la même boîte Gmail. Chaque connexion envoie 
 
 **L'application installée parle directement à la production** : l'adresse de la base est écrite dans l'application, il n'existe pas de version « d'essai ». Tout ce que vous faites est réel.
 
-1. Je construis le fichier d'installation (APK) à partir de `main`, une fois C245 fusionné, et je vous donne son nom et le numéro du commit. Le fichier est signé avec une clé d'essai : il s'installe à la main, il ne vient pas du Play Store.
+1. Le fichier d'installation est `PharmaConnect-test-a99c171.apk` (261 Mo), construit depuis `main` au commit `a99c171`, en mode d'essai (« debug ») : il s'installe à la main, il ne vient pas du Play Store, et il est plus lourd et un peu plus lent que la version définitive (C248).
 2. Copiez le fichier sur chaque téléphone (câble USB, ou Google Drive puis « Télécharger »).
 3. Sur le téléphone, ouvrez le fichier. Android demande d'autoriser l'installation depuis cette source : acceptez, puis « Installer ».
 4. Si Play Protect affiche un avertissement : « Installer quand même ».
