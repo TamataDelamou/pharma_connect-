@@ -3,11 +3,10 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import '../providers/chain_provider.dart';
 import '../widgets/group_member_tile.dart';
 import '../widgets/transfer_card.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class GroupDetailScreen extends StatefulWidget {
   final String groupId;
@@ -51,9 +50,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
         body: Center(
           child: Text(
             provider.error ?? 'Groupe introuvable',
-            style: PharmaConnectTypography.body2.copyWith(
-              color: PharmaConnectColors.accentRed,
-            ),
+            style: context.text.body2.copyWith(color: context.palette.danger),
           ),
         ),
       );
@@ -68,9 +65,9 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
             Row(
               children: [
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.arrow_back,
-                    color: PharmaConnectColors.textPrimary,
+                    color: context.palette.textPrimary,
                   ),
                   onPressed: () => context.pop(),
                   padding: EdgeInsets.zero,
@@ -79,7 +76,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                 Expanded(
                   child: Text(
                     group.name,
-                    style: PharmaConnectTypography.heading2,
+                    style: context.text.heading2,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -92,8 +89,8 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                     icon: const Icon(Icons.edit),
                     label: const Text('Modifier'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: PharmaConnectColors.accentCyan,
-                      foregroundColor: PharmaConnectColors.textOnAccent,
+                      backgroundColor: context.palette.primary,
+                      foregroundColor: context.palette.onPrimary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -108,8 +105,8 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                     icon: const Icon(Icons.local_shipping),
                     label: const Text('Transfert'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: PharmaConnectColors.accentPurple,
-                      foregroundColor: PharmaConnectColors.textPrimary,
+                      backgroundColor: context.palette.secondary,
+                      foregroundColor: context.palette.textPrimary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -120,11 +117,11 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
             ),
             const SizedBox(height: 4),
             if (group.description != null)
-              Text(group.description!, style: PharmaConnectTypography.body2),
+              Text(group.description!, style: context.text.body2),
             const SizedBox(height: 8),
             Text(
               '${group.memberCount ?? 0} officines • ${group.ownerName ?? 'Propriétaire'}',
-              style: PharmaConnectTypography.micro,
+              style: context.text.micro,
             ),
             const SizedBox(height: 16),
 
@@ -135,9 +132,9 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                 Tab(text: 'Membres'),
                 Tab(text: 'Transferts'),
               ],
-              labelColor: PharmaConnectColors.accentCyan,
-              unselectedLabelColor: PharmaConnectColors.textSecondary,
-              indicatorColor: PharmaConnectColors.accentCyan,
+              labelColor: context.palette.primary,
+              unselectedLabelColor: context.palette.textSecondary,
+              indicatorColor: context.palette.primary,
               indicatorWeight: 3,
               dividerColor: Colors.transparent,
             ),
@@ -154,11 +151,8 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
     if (_tabController.index == 0) {
       // Members tab
       if (provider.members.isEmpty) {
-        return const Center(
-          child: Text(
-            'Aucun membre dans ce groupe',
-            style: PharmaConnectTypography.body2,
-          ),
+        return Center(
+          child: Text('Aucun membre dans ce groupe', style: context.text.body2),
         );
       }
       return ListView.builder(
@@ -174,10 +168,10 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
     } else {
       // Transfers tab
       if (provider.transfers.isEmpty) {
-        return const Center(
+        return Center(
           child: Text(
             'Aucun transfert dans ce groupe',
-            style: PharmaConnectTypography.body2,
+            style: context.text.body2,
           ),
         );
       }

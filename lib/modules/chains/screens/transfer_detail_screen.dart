@@ -3,14 +3,13 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/secondary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/chain_provider.dart';
 import '../models/stock_transfer.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class TransferDetailScreen extends StatefulWidget {
   final String transferId;
@@ -44,9 +43,7 @@ class _TransferDetailScreenState extends State<TransferDetailScreen> {
         body: Center(
           child: Text(
             provider.error ?? 'Transfert introuvable',
-            style: PharmaConnectTypography.body2.copyWith(
-              color: PharmaConnectColors.accentRed,
-            ),
+            style: context.text.body2.copyWith(color: context.palette.danger),
           ),
         ),
       );
@@ -78,18 +75,18 @@ class _TransferDetailScreenState extends State<TransferDetailScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Détail du transfert',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -137,25 +134,25 @@ class _TransferDetailScreenState extends State<TransferDetailScreen> {
                             transfer.fromPharmacyName ??
                                 transfer.fromPharmacyId,
                           ),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           _buildInfoRow(
                             'À',
                             transfer.toPharmacyName ?? transfer.toPharmacyId,
                           ),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           _buildInfoRow(
                             'Date',
                             _formatDate(transfer.transferDate),
                           ),
                           if (transfer.receivedDate != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow(
                               'Reçu le',
                               _formatDate(transfer.receivedDate!),
                             ),
                           ],
                           if (transfer.notes != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow('Notes', transfer.notes!),
                           ],
                         ],
@@ -166,27 +163,24 @@ class _TransferDetailScreenState extends State<TransferDetailScreen> {
                     // Items
                     if (transfer.items != null &&
                         transfer.items!.isNotEmpty) ...[
-                      const Text(
-                        'Articles',
-                        style: PharmaConnectTypography.heading3,
-                      ),
+                      Text('Articles', style: context.text.heading3),
                       const SizedBox(height: 8),
                       ...transfer.items!.map((item) {
                         return Container(
                           padding: const EdgeInsets.all(12),
                           margin: const EdgeInsets.only(bottom: 4),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.04),
+                            color: context.palette.surfaceMuted,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.06),
+                              color: context.palette.borderSubtle,
                             ),
                           ),
                           child: Row(
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.medication,
-                                color: PharmaConnectColors.accentCyan,
+                                color: context.palette.primary,
                                 size: 16,
                               ),
                               const SizedBox(width: 8),
@@ -196,14 +190,13 @@ class _TransferDetailScreenState extends State<TransferDetailScreen> {
                                   children: [
                                     Text(
                                       item.productName,
-                                      style: PharmaConnectTypography.body2
-                                          .copyWith(
-                                            fontWeight: FontWeight.w500,
-                                          ),
+                                      style: context.text.body2.copyWith(
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
                                     Text(
                                       'Qté: ${item.quantity}',
-                                      style: PharmaConnectTypography.micro,
+                                      style: context.text.micro,
                                     ),
                                   ],
                                 ),
@@ -232,10 +225,9 @@ class _TransferDetailScreenState extends State<TransferDetailScreen> {
                                     );
                                 if (success && context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
+                                    SnackBar(
                                       content: Text('Transfert approuvé'),
-                                      backgroundColor:
-                                          PharmaConnectColors.accentGreen,
+                                      backgroundColor: context.palette.success,
                                     ),
                                   );
                                   provider.loadTransfer(transfer.id);
@@ -280,9 +272,9 @@ class _TransferDetailScreenState extends State<TransferDetailScreen> {
                           );
                           if (success && context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
+                              SnackBar(
                                 content: Text('Transfert en transit'),
-                                backgroundColor: PharmaConnectColors.accentCyan,
+                                backgroundColor: context.palette.primary,
                               ),
                             );
                             provider.loadTransfer(transfer.id);
@@ -303,10 +295,9 @@ class _TransferDetailScreenState extends State<TransferDetailScreen> {
                           );
                           if (success && context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
+                              SnackBar(
                                 content: Text('Transfert reçu'),
-                                backgroundColor:
-                                    PharmaConnectColors.accentGreen,
+                                backgroundColor: context.palette.success,
                               ),
                             );
                             provider.loadTransfer(transfer.id);
@@ -319,28 +310,26 @@ class _TransferDetailScreenState extends State<TransferDetailScreen> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: PharmaConnectColors.accentGreen.withValues(
-                            alpha: 0.1,
-                          ),
+                          color: context.palette.success.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: PharmaConnectColors.accentGreen.withValues(
+                            color: context.palette.success.withValues(
                               alpha: 0.2,
                             ),
                           ),
                         ),
                         child: Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.check_circle,
-                              color: PharmaConnectColors.accentGreen,
+                              color: context.palette.success,
                             ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 'Transfert reçu le ${_formatDate(transfer.receivedDate ?? DateTime.now())}',
                                 style: TextStyle(
-                                  color: PharmaConnectColors.accentGreen,
+                                  color: context.palette.success,
                                 ),
                               ),
                             ),
@@ -353,29 +342,22 @@ class _TransferDetailScreenState extends State<TransferDetailScreen> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: PharmaConnectColors.accentRed.withValues(
-                            alpha: 0.1,
-                          ),
+                          color: context.palette.danger.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: PharmaConnectColors.accentRed.withValues(
+                            color: context.palette.danger.withValues(
                               alpha: 0.2,
                             ),
                           ),
                         ),
                         child: Row(
                           children: [
-                            const Icon(
-                              Icons.block,
-                              color: PharmaConnectColors.accentRed,
-                            ),
+                            Icon(Icons.block, color: context.palette.danger),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 'Transfert annulé',
-                                style: TextStyle(
-                                  color: PharmaConnectColors.accentRed,
-                                ),
+                                style: TextStyle(color: context.palette.danger),
                               ),
                             ),
                           ],
@@ -398,11 +380,8 @@ class _TransferDetailScreenState extends State<TransferDetailScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 80,
-            child: Text(label, style: PharmaConnectTypography.label),
-          ),
-          Expanded(child: Text(value, style: PharmaConnectTypography.body1)),
+          SizedBox(width: 80, child: Text(label, style: context.text.label)),
+          Expanded(child: Text(value, style: context.text.body1)),
         ],
       ),
     );
@@ -415,17 +394,17 @@ class _TransferDetailScreenState extends State<TransferDetailScreen> {
   Color _statusColor(String status) {
     switch (status) {
       case 'pending':
-        return PharmaConnectColors.accentOrange;
+        return context.palette.warning;
       case 'approved':
-        return PharmaConnectColors.accentCyan;
+        return context.palette.primary;
       case 'in_transit':
-        return PharmaConnectColors.accentPurple;
+        return context.palette.secondary;
       case 'received':
-        return PharmaConnectColors.accentGreen;
+        return context.palette.success;
       case 'cancelled':
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       default:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
     }
   }
 }

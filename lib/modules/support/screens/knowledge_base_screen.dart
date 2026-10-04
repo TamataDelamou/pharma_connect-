@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../models/knowledge_article.dart';
 import '../services/bot_ai_service.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class KnowledgeBaseScreen extends StatefulWidget {
   const KnowledgeBaseScreen({super.key});
@@ -71,18 +70,18 @@ class _KnowledgeBaseScreenState extends State<KnowledgeBaseScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Base de connaissances',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -99,7 +98,7 @@ class _KnowledgeBaseScreenState extends State<KnowledgeBaseScreen> {
                 prefixIcon: const Icon(Icons.search),
                 border: const OutlineInputBorder(),
                 filled: true,
-                fillColor: Colors.white10,
+                fillColor: context.palette.veil(0.10),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
                         icon: const Icon(Icons.clear),
@@ -128,9 +127,7 @@ class _KnowledgeBaseScreenState extends State<KnowledgeBaseScreen> {
       return Center(
         child: Text(
           _error!,
-          style: PharmaConnectTypography.body2.copyWith(
-            color: PharmaConnectColors.accentRed,
-          ),
+          style: context.text.body2.copyWith(color: context.palette.danger),
         ),
       );
     }
@@ -139,16 +136,13 @@ class _KnowledgeBaseScreenState extends State<KnowledgeBaseScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
+            Icon(
               Icons.menu_book_outlined,
               size: 64,
-              color: Colors.white24,
+              color: context.palette.veil(0.24),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Aucun article trouvé',
-              style: PharmaConnectTypography.heading3,
-            ),
+            Text('Aucun article trouvé', style: context.text.heading3),
           ],
         ),
       );
@@ -164,10 +158,7 @@ class _KnowledgeBaseScreenState extends State<KnowledgeBaseScreen> {
             onTap: () => setState(() => _selected = article),
             child: Row(
               children: [
-                const Icon(
-                  Icons.article_outlined,
-                  color: PharmaConnectColors.accentCyan,
-                ),
+                Icon(Icons.article_outlined, color: context.palette.primary),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -175,7 +166,7 @@ class _KnowledgeBaseScreenState extends State<KnowledgeBaseScreen> {
                     children: [
                       Text(
                         article.title,
-                        style: PharmaConnectTypography.body1.copyWith(
+                        style: context.text.body1.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                         maxLines: 1,
@@ -183,15 +174,12 @@ class _KnowledgeBaseScreenState extends State<KnowledgeBaseScreen> {
                       ),
                       if (article.category != null) ...[
                         const SizedBox(height: 2),
-                        Text(
-                          article.category!,
-                          style: PharmaConnectTypography.micro,
-                        ),
+                        Text(article.category!, style: context.text.micro),
                       ],
                     ],
                   ),
                 ),
-                const Icon(Icons.chevron_right, color: Colors.white24),
+                Icon(Icons.chevron_right, color: context.palette.veil(0.24)),
               ],
             ),
           ),
@@ -210,19 +198,16 @@ class _KnowledgeBaseScreenState extends State<KnowledgeBaseScreen> {
             Row(
               children: [
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.arrow_back,
-                    color: PharmaConnectColors.textPrimary,
+                    color: context.palette.textPrimary,
                   ),
                   onPressed: () => setState(() => _selected = null),
                   padding: EdgeInsets.zero,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text(
-                    article.title,
-                    style: PharmaConnectTypography.heading2,
-                  ),
+                  child: Text(article.title, style: context.text.heading2),
                 ),
               ],
             ),
@@ -231,10 +216,7 @@ class _KnowledgeBaseScreenState extends State<KnowledgeBaseScreen> {
               child: SingleChildScrollView(
                 child: GlassCard(
                   padding: const EdgeInsets.all(16),
-                  child: Text(
-                    article.content,
-                    style: PharmaConnectTypography.body1,
-                  ),
+                  child: Text(article.content, style: context.text.body1),
                 ),
               ),
             ),

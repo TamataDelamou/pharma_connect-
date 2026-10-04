@@ -3,11 +3,10 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../providers/inspection_provider.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 // Audit Module 27 (REG), Étape 3 (05/09/2026) — REG-4 : écran de liste pour
 // `regulatory_inspections`, jusqu'ici entièrement orpheline. Accessible au
@@ -45,18 +44,18 @@ class _InspectionsListScreenState extends State<InspectionsListScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Inspections réglementaires',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -70,8 +69,8 @@ class _InspectionsListScreenState extends State<InspectionsListScreen> {
                   icon: const Icon(Icons.add),
                   label: const Text('Planifier'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: PharmaConnectColors.accentPurple,
-                    foregroundColor: PharmaConnectColors.textOnAccent,
+                    backgroundColor: context.palette.secondary,
+                    foregroundColor: context.palette.onPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -97,18 +96,12 @@ class _InspectionsListScreenState extends State<InspectionsListScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 48,
-              color: PharmaConnectColors.accentRed,
-            ),
+            Icon(Icons.error_outline, size: 48, color: context.palette.danger),
             const SizedBox(height: 16),
             Text(
               provider.error!,
               textAlign: TextAlign.center,
-              style: PharmaConnectTypography.body2.copyWith(
-                color: PharmaConnectColors.accentRed,
-              ),
+              style: context.text.body2.copyWith(color: context.palette.danger),
             ),
             const SizedBox(height: 16),
             PrimaryButton(
@@ -125,17 +118,21 @@ class _InspectionsListScreenState extends State<InspectionsListScreen> {
     }
 
     if (provider.inspections.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.fact_check_outlined, size: 64, color: Colors.white24),
+            Icon(
+              Icons.fact_check_outlined,
+              size: 64,
+              color: context.palette.veil(0.24),
+            ),
             SizedBox(height: 16),
-            Text('Aucune inspection', style: PharmaConnectTypography.heading3),
+            Text('Aucune inspection', style: context.text.heading3),
             SizedBox(height: 8),
             Text(
               'Aucune inspection réglementaire planifiée pour le moment',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
               textAlign: TextAlign.center,
             ),
           ],
@@ -173,7 +170,7 @@ class _InspectionsListScreenState extends State<InspectionsListScreen> {
                           Expanded(
                             child: Text(
                               '${inspection.entityTypeLabel} · ${inspection.typeLabel}',
-                              style: PharmaConnectTypography.body1.copyWith(
+                              style: context.text.body1.copyWith(
                                 fontWeight: FontWeight.w600,
                               ),
                               maxLines: 1,
@@ -205,12 +202,12 @@ class _InspectionsListScreenState extends State<InspectionsListScreen> {
                       const SizedBox(height: 4),
                       Text(
                         _formatDate(inspection.inspectionDate),
-                        style: PharmaConnectTypography.micro,
+                        style: context.text.micro,
                       ),
                     ],
                   ),
                 ),
-                const Icon(Icons.chevron_right, color: Colors.white24),
+                Icon(Icons.chevron_right, color: context.palette.veil(0.24)),
               ],
             ),
           ),
@@ -222,15 +219,15 @@ class _InspectionsListScreenState extends State<InspectionsListScreen> {
   Color _statusColor(String status) {
     switch (status) {
       case 'scheduled':
-        return PharmaConnectColors.accentCyan;
+        return context.palette.primary;
       case 'in_progress':
-        return PharmaConnectColors.accentAmber;
+        return context.palette.warningStrong;
       case 'completed':
-        return PharmaConnectColors.accentGreen;
+        return context.palette.success;
       case 'cancelled':
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       default:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
     }
   }
 

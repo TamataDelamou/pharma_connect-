@@ -3,14 +3,13 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/utils/currency_formatter.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../providers/analytics_provider.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class AnalyticsDashboardScreen extends StatefulWidget {
   const AnalyticsDashboardScreen({super.key});
@@ -45,19 +44,19 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
           children: [
             // C233 : en-tête adaptable (actions sous le titre sur téléphone).
             HeaderRow(
-              leading: const Column(
+              leading: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Analytics',
-                    style: PharmaConnectTypography.heading1,
+                    style: context.text.heading1,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(height: 4),
                   Text(
                     'Indicateurs clés et performances du réseau',
-                    style: PharmaConnectTypography.body2,
+                    style: context.text.body2,
                   ),
                 ],
               ),
@@ -66,10 +65,8 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
                 DropdownButton<String>(
                   value: provider.selectedDashboard?.id,
                   hint: const Text('Tableau de bord'),
-                  dropdownColor: PharmaConnectColors.primaryDeep,
-                  style: const TextStyle(
-                    color: PharmaConnectColors.textPrimary,
-                  ),
+                  dropdownColor: context.palette.background,
+                  style: TextStyle(color: context.palette.textPrimary),
                   items: provider.dashboards.map((d) {
                     return DropdownMenuItem<String>(
                       value: d.id,
@@ -84,9 +81,9 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
                 ),
                 const SizedBox(width: 8),
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.refresh,
-                    color: PharmaConnectColors.textSecondary,
+                    color: context.palette.textSecondary,
                   ),
                   onPressed: () {
                     provider.loadAllData();
@@ -102,9 +99,9 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
                 // réellement ce que chaque compte y voit.
                 IconButton(
                   tooltip: 'Personnaliser',
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.dashboard_customize,
-                    color: PharmaConnectColors.textSecondary,
+                    color: context.palette.textSecondary,
                   ),
                   onPressed: () => context.push('/analytics/dashboard-editor'),
                 ),
@@ -112,9 +109,9 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
                 // (/analytics/forecast, route désactivée par C188) masqué.
                 IconButton(
                   tooltip: 'Exporter des rapports',
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.ios_share,
-                    color: PharmaConnectColors.textSecondary,
+                    color: context.palette.textSecondary,
                   ),
                   onPressed: () => context.push('/analytics/export'),
                 ),
@@ -130,16 +127,16 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.error_outline,
                             size: 48,
-                            color: PharmaConnectColors.accentRed,
+                            color: context.palette.danger,
                           ),
                           const SizedBox(height: 16),
                           Text(
                             provider.error!,
-                            style: PharmaConnectTypography.body2.copyWith(
-                              color: PharmaConnectColors.accentRed,
+                            style: context.text.body2.copyWith(
+                              color: context.palette.danger,
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -202,14 +199,11 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Consultations',
-                  style: PharmaConnectTypography.label,
-                ),
+                Text('Consultations', style: context.text.label),
                 const SizedBox(height: 4),
                 Text(
                   summary.totalConsultations.toString(),
-                  style: PharmaConnectTypography.kpiMedium,
+                  style: context.text.kpiMedium,
                 ),
               ],
             ),
@@ -221,14 +215,11 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Prescriptions',
-                  style: PharmaConnectTypography.label,
-                ),
+                Text('Prescriptions', style: context.text.label),
                 const SizedBox(height: 4),
                 Text(
                   summary.totalPrescriptions.toString(),
-                  style: PharmaConnectTypography.kpiMedium,
+                  style: context.text.kpiMedium,
                 ),
               ],
             ),
@@ -240,14 +231,11 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Réservations',
-                  style: PharmaConnectTypography.label,
-                ),
+                Text('Réservations', style: context.text.label),
                 const SizedBox(height: 4),
                 Text(
                   summary.totalReservations.toString(),
-                  style: PharmaConnectTypography.kpiMedium,
+                  style: context.text.kpiMedium,
                 ),
               ],
             ),
@@ -259,15 +247,12 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Chiffre d\'affaires',
-                  style: PharmaConnectTypography.label,
-                ),
+                Text('Chiffre d\'affaires', style: context.text.label),
                 const SizedBox(height: 4),
                 Text(
                   CurrencyFormatter.format(summary.totalRevenue),
-                  style: PharmaConnectTypography.kpiMedium.copyWith(
-                    color: PharmaConnectColors.accentCyan,
+                  style: context.text.kpiMedium.copyWith(
+                    color: context.palette.primary,
                   ),
                 ),
               ],
@@ -295,9 +280,9 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Activité quotidienne (30 derniers jours)',
-            style: PharmaConnectTypography.heading3,
+            style: context.text.heading3,
           ),
           const SizedBox(height: 16),
           SizedBox(
@@ -333,13 +318,11 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
                   LineChartBarData(
                     spots: spots,
                     isCurved: true,
-                    color: PharmaConnectColors.accentCyan,
+                    color: context.palette.primary,
                     barWidth: 2,
                     belowBarData: BarAreaData(
                       show: true,
-                      color: PharmaConnectColors.accentCyan.withValues(
-                        alpha: 0.2,
-                      ),
+                      color: context.palette.primary.withValues(alpha: 0.2),
                     ),
                     dotData: const FlDotData(show: false),
                   ),
@@ -364,7 +347,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
       padding: const EdgeInsets.only(top: 4),
       child: Text(
         '${date.day}/${date.month}',
-        style: const TextStyle(fontSize: 10, color: Colors.white54),
+        style: TextStyle(fontSize: 10, color: context.palette.textSecondary),
       ),
     );
   }
@@ -378,7 +361,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Top produits', style: PharmaConnectTypography.heading3),
+          Text('Top produits', style: context.text.heading3),
           const SizedBox(height: 8),
           ...provider.topProducts.take(5).map((product) {
             return Padding(
@@ -389,7 +372,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
                     flex: 2,
                     child: Text(
                       product.name,
-                      style: PharmaConnectTypography.body2,
+                      style: context.text.body2,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -397,9 +380,9 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
                   const SizedBox(width: 8),
                   Text(
                     product.totalQuantitySold.toString(),
-                    style: PharmaConnectTypography.body1.copyWith(
+                    style: context.text.body1.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: PharmaConnectColors.accentCyan,
+                      color: context.palette.primary,
                     ),
                   ),
                 ],
@@ -420,7 +403,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Top pharmacies', style: PharmaConnectTypography.heading3),
+          Text('Top pharmacies', style: context.text.heading3),
           const SizedBox(height: 8),
           ...provider.pharmacyPerformance.take(5).map((pharmacy) {
             return Padding(
@@ -430,7 +413,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
                 children: [
                   Text(
                     pharmacy.name,
-                    style: PharmaConnectTypography.body2.copyWith(
+                    style: context.text.body2.copyWith(
                       fontWeight: FontWeight.w500,
                     ),
                     maxLines: 1,
@@ -438,8 +421,8 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
                   ),
                   Text(
                     CurrencyFormatter.format(pharmacy.totalRevenue),
-                    style: PharmaConnectTypography.micro.copyWith(
-                      color: PharmaConnectColors.accentCyan,
+                    style: context.text.micro.copyWith(
+                      color: context.palette.primary,
                     ),
                   ),
                 ],

@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../auth/models/user_role.dart';
 import '../models/verification_request.dart';
 import '../services/admin_service.dart';
+import '../../../core/theme/palette.dart';
 
 /// C214 : vérification des comptes par l'administration GSG (décision D58,
 /// rôle déclaré ≠ rôle vérifié).
@@ -96,7 +95,7 @@ class _RoleVerificationScreenState extends State<RoleVerificationScreen> {
       messenger.showSnackBar(
         SnackBar(
           content: Text(successMessage),
-          backgroundColor: PharmaConnectColors.accentGreen,
+          backgroundColor: context.palette.success,
         ),
       );
       await _load();
@@ -104,7 +103,7 @@ class _RoleVerificationScreenState extends State<RoleVerificationScreen> {
       messenger.showSnackBar(
         SnackBar(
           content: Text(AdminService.describeError(e)),
-          backgroundColor: PharmaConnectColors.accentRed,
+          backgroundColor: context.palette.danger,
         ),
       );
     } finally {
@@ -216,9 +215,9 @@ class _RoleVerificationScreenState extends State<RoleVerificationScreen> {
     final result = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: PharmaConnectColors.primaryDeep,
+        backgroundColor: context.palette.background,
         title: Text(title),
-        content: Text(message, style: PharmaConnectTypography.body2),
+        content: Text(message, style: context.text.body2),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -227,8 +226,8 @@ class _RoleVerificationScreenState extends State<RoleVerificationScreen> {
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: PharmaConnectColors.accentOrange,
-              foregroundColor: PharmaConnectColors.textPrimary,
+              backgroundColor: context.palette.warning,
+              foregroundColor: context.palette.textPrimary,
             ),
             child: Text(actionLabel),
           ),
@@ -254,18 +253,18 @@ class _RoleVerificationScreenState extends State<RoleVerificationScreen> {
                 leading: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.arrow_back,
-                        color: PharmaConnectColors.textPrimary,
+                        color: context.palette.textPrimary,
                       ),
                       onPressed: () => context.pop(),
                       padding: EdgeInsets.zero,
                     ),
                     const SizedBox(width: 8),
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         'Vérification des comptes',
-                        style: PharmaConnectTypography.heading2,
+                        style: context.text.heading2,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -275,10 +274,10 @@ class _RoleVerificationScreenState extends State<RoleVerificationScreen> {
                 trailing: [const KernelBadge()],
               ),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 'Un rôle déclaré n\'ouvre aucun droit tant qu\'il n\'est pas '
                 'vérifié. Les pharmaciens sont validés avec leur officine.',
-                style: PharmaConnectTypography.body2,
+                style: context.text.body2,
               ),
               const SizedBox(height: 16),
               TextField(
@@ -334,7 +333,7 @@ class _RoleVerificationScreenState extends State<RoleVerificationScreen> {
           children: [
             Text(
               _error!,
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
@@ -349,7 +348,7 @@ class _RoleVerificationScreenState extends State<RoleVerificationScreen> {
           _searchController.text.trim().isEmpty
               ? 'Aucun compte dans cette catégorie'
               : 'Aucun compte ne correspond à la recherche',
-          style: PharmaConnectTypography.body2,
+          style: context.text.body2,
         ),
       );
     }
@@ -373,30 +372,27 @@ class _RoleVerificationScreenState extends State<RoleVerificationScreen> {
       padding: const EdgeInsets.all(12),
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.04),
+        color: context.palette.surfaceMuted,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        border: Border.all(color: context.palette.borderSubtle),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             r.displayName,
-            style: PharmaConnectTypography.body1.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+            style: context.text.body1.copyWith(fontWeight: FontWeight.w600),
           ),
-          if (contact.isNotEmpty)
-            Text(contact, style: PharmaConnectTypography.body2),
+          if (contact.isNotEmpty) Text(contact, style: context.text.body2),
           const SizedBox(height: 6),
           Wrap(
             spacing: 6,
             runSpacing: 6,
             children: [
-              _Tag(label: r.role.label, color: PharmaConnectColors.accentCyan),
+              _Tag(label: r.role.label, color: context.palette.primary),
               _Tag(
                 label: _stateLabel(r),
-                color: _stateColor(r.verificationState),
+                color: _stateColor(context, r.verificationState),
               ),
             ],
           ),
@@ -455,7 +451,7 @@ class _RoleVerificationScreenState extends State<RoleVerificationScreen> {
       for (final line in lines)
         Padding(
           padding: const EdgeInsets.only(top: 4),
-          child: Text(line, style: PharmaConnectTypography.micro),
+          child: Text(line, style: context.text.micro),
         ),
     ];
   }
@@ -466,22 +462,14 @@ class _RoleVerificationScreenState extends State<RoleVerificationScreen> {
         return [
           _outlined(
             'Retirer la validation',
-            PharmaConnectColors.accentOrange,
+            context.palette.warning,
             () => _revokeRole(r),
           ),
         ];
       }
       return [
-        _filled(
-          'Valider',
-          PharmaConnectColors.accentGreen,
-          () => _approveRole(r),
-        ),
-        _outlined(
-          'Refuser',
-          PharmaConnectColors.accentRed,
-          () => _rejectRole(r),
-        ),
+        _filled('Valider', context.palette.success, () => _approveRole(r)),
+        _outlined('Refuser', context.palette.danger, () => _rejectRole(r)),
       ];
     }
     if (r.isProfessional) {
@@ -490,13 +478,13 @@ class _RoleVerificationScreenState extends State<RoleVerificationScreen> {
         if (!r.isVerified)
           _filled(
             'Vérifier',
-            PharmaConnectColors.accentGreen,
+            context.palette.success,
             () => _verifyProfessional(r),
           ),
         if (!r.isRejected)
           _outlined(
             r.isVerified ? 'Retirer la vérification' : 'Rejeter',
-            PharmaConnectColors.accentRed,
+            context.palette.danger,
             () => _rejectProfessional(r),
           ),
       ];
@@ -514,7 +502,7 @@ class _RoleVerificationScreenState extends State<RoleVerificationScreen> {
       return [
         _outlined(
           'Attribuer un rôle',
-          PharmaConnectColors.accentCyan,
+          context.palette.primary,
           () => _assignRole(r),
         ),
       ];
@@ -527,7 +515,7 @@ class _RoleVerificationScreenState extends State<RoleVerificationScreen> {
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
         backgroundColor: color,
-        foregroundColor: PharmaConnectColors.textPrimary,
+        foregroundColor: context.palette.textPrimary,
       ),
       child: Text(label),
     );
@@ -572,16 +560,16 @@ class _RoleVerificationScreenState extends State<RoleVerificationScreen> {
     }
   }
 
-  static Color _stateColor(String state) {
+  static Color _stateColor(BuildContext context, String state) {
     switch (state) {
       case 'pending':
-        return PharmaConnectColors.accentOrange;
+        return context.palette.warning;
       case 'verified':
-        return PharmaConnectColors.accentGreen;
+        return context.palette.success;
       case 'rejected':
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       default:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
     }
   }
 
@@ -628,18 +616,18 @@ class _AssignRoleDialogState extends State<_AssignRoleDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: PharmaConnectColors.primaryDeep,
+      backgroundColor: context.palette.background,
       title: Text('Attribuer un rôle à ${widget.name}'),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Les pharmaciens sont rattachés par la validation de leur '
               'officine, et les professionnels par leur fiche : ils ne '
               's\'attribuent pas ici.',
-              style: PharmaConnectTypography.micro,
+              style: context.text.micro,
             ),
             const SizedBox(height: 12),
             for (final role in _roles) ...[
@@ -650,9 +638,9 @@ class _AssignRoleDialogState extends State<_AssignRoleDialog> {
               value: _verified,
               onChanged: (value) => setState(() => _verified = value ?? false),
               title: const Text('Valider immédiatement'),
-              subtitle: const Text(
+              subtitle: Text(
                 'Sinon, le rôle reste à valider dans la liste.',
-                style: PharmaConnectTypography.micro,
+                style: context.text.micro,
               ),
               contentPadding: EdgeInsets.zero,
               controlAffinity: ListTileControlAffinity.leading,
@@ -671,8 +659,8 @@ class _AssignRoleDialogState extends State<_AssignRoleDialog> {
               : () =>
                     Navigator.pop(context, (role: _role!, verified: _verified)),
           style: ElevatedButton.styleFrom(
-            backgroundColor: PharmaConnectColors.accentCyan,
-            foregroundColor: PharmaConnectColors.textPrimary,
+            backgroundColor: context.palette.primary,
+            foregroundColor: context.palette.textPrimary,
           ),
           child: const Text('Attribuer'),
         ),
@@ -690,10 +678,12 @@ class _AssignRoleDialogState extends State<_AssignRoleDialog> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: selected ? PharmaConnectColors.accentCyan : Colors.white24,
+            color: selected
+                ? context.palette.primary
+                : context.palette.veil(0.24),
           ),
           color: selected
-              ? PharmaConnectColors.accentCyan.withValues(alpha: 0.1)
+              ? context.palette.primary.withValues(alpha: 0.1)
               : Colors.transparent,
         ),
         child: Row(
@@ -701,8 +691,8 @@ class _AssignRoleDialogState extends State<_AssignRoleDialog> {
             Icon(
               selected ? Icons.radio_button_checked : Icons.radio_button_off,
               color: selected
-                  ? PharmaConnectColors.accentCyan
-                  : PharmaConnectColors.textSecondary,
+                  ? context.palette.primary
+                  : context.palette.textSecondary,
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -749,14 +739,14 @@ class _ReasonDialogState extends State<_ReasonDialog> {
   Widget build(BuildContext context) {
     final canSubmit = _controller.text.trim().length >= _minReasonLength;
     return AlertDialog(
-      backgroundColor: PharmaConnectColors.primaryDeep,
+      backgroundColor: context.palette.background,
       title: Text(widget.title),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(widget.help, style: PharmaConnectTypography.body2),
+            Text(widget.help, style: context.text.body2),
             const SizedBox(height: 16),
             TextField(
               controller: _controller,
@@ -782,8 +772,8 @@ class _ReasonDialogState extends State<_ReasonDialog> {
               ? () => Navigator.pop(context, _controller.text.trim())
               : null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: PharmaConnectColors.accentRed,
-            foregroundColor: PharmaConnectColors.textPrimary,
+            backgroundColor: context.palette.danger,
+            foregroundColor: context.palette.textPrimary,
           ),
           child: Text(widget.actionLabel),
         ),
@@ -811,13 +801,13 @@ class _StateChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
           color: selected
-              ? PharmaConnectColors.accentCyan.withValues(alpha: 0.15)
-              : Colors.white.withValues(alpha: 0.04),
+              ? context.palette.primary.withValues(alpha: 0.15)
+              : context.palette.surfaceMuted,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: selected
-                ? PharmaConnectColors.accentCyan
-                : Colors.white.withValues(alpha: 0.08),
+                ? context.palette.primary
+                : context.palette.surfaceRaised,
           ),
         ),
         child: Center(
@@ -827,8 +817,8 @@ class _StateChip extends StatelessWidget {
               fontSize: 12,
               fontWeight: FontWeight.w600,
               color: selected
-                  ? PharmaConnectColors.accentCyan
-                  : PharmaConnectColors.textSecondary,
+                  ? context.palette.primary
+                  : context.palette.textSecondary,
             ),
           ),
         ),

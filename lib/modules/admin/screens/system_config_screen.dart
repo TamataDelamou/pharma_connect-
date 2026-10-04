@@ -3,10 +3,9 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../models/system_config.dart';
 import '../providers/admin_provider.dart';
+import '../../../core/theme/palette.dart';
 
 class SystemConfigScreen extends StatefulWidget {
   const SystemConfigScreen({super.key});
@@ -29,14 +28,14 @@ class _SystemConfigScreenState extends State<SystemConfigScreen> {
     final newValue = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: PharmaConnectColors.primaryDeep,
+        backgroundColor: context.palette.background,
         title: Text(config.key),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (config.description != null) ...[
-              Text(config.description!, style: PharmaConnectTypography.body2),
+              Text(config.description!, style: context.text.body2),
               const SizedBox(height: 12),
             ],
             TextField(
@@ -54,8 +53,8 @@ class _SystemConfigScreenState extends State<SystemConfigScreen> {
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(controller.text.trim()),
             style: ElevatedButton.styleFrom(
-              backgroundColor: PharmaConnectColors.accentCyan,
-              foregroundColor: PharmaConnectColors.textOnAccent,
+              backgroundColor: context.palette.primary,
+              foregroundColor: context.palette.onPrimary,
             ),
             child: const Text('Enregistrer'),
           ),
@@ -76,8 +75,8 @@ class _SystemConfigScreenState extends State<SystemConfigScreen> {
                 : (provider.error ?? 'Échec de la mise à jour'),
           ),
           backgroundColor: ok
-              ? PharmaConnectColors.accentGreen
-              : PharmaConnectColors.accentRed,
+              ? context.palette.success
+              : context.palette.danger,
         ),
       );
     }
@@ -102,18 +101,18 @@ class _SystemConfigScreenState extends State<SystemConfigScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Configuration système',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -123,9 +122,9 @@ class _SystemConfigScreenState extends State<SystemConfigScreen> {
               trailing: [const KernelBadge()],
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Paliers, seuils et intégrations du système',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
             ),
             const SizedBox(height: 24),
             Expanded(
@@ -138,8 +137,8 @@ class _SystemConfigScreenState extends State<SystemConfigScreen> {
                         children: [
                           Text(
                             'Erreur : ${provider.error}',
-                            style: PharmaConnectTypography.body2.copyWith(
-                              color: PharmaConnectColors.accentRed,
+                            style: context.text.body2.copyWith(
+                              color: context.palette.danger,
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -153,10 +152,10 @@ class _SystemConfigScreenState extends State<SystemConfigScreen> {
                       ),
                     )
                   : byCategory.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Text(
                         'Aucun paramètre configuré',
-                        style: PharmaConnectTypography.body2,
+                        style: context.text.body2,
                       ),
                     )
                   : ListView(
@@ -168,7 +167,7 @@ class _SystemConfigScreenState extends State<SystemConfigScreen> {
                             children: [
                               Text(
                                 _categoryLabel(entry.key),
-                                style: PharmaConnectTypography.heading3,
+                                style: context.text.heading3,
                               ),
                               const SizedBox(height: 8),
                               ...entry.value.map(
@@ -217,9 +216,9 @@ class _ConfigTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.04),
+        color: context.palette.surfaceMuted,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        border: Border.all(color: context.palette.borderSubtle),
       ),
       child: Row(
         children: [
@@ -229,28 +228,25 @@ class _ConfigTile extends StatelessWidget {
               children: [
                 Text(
                   config.key,
-                  style: PharmaConnectTypography.body1.copyWith(
+                  style: context.text.body1.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 if (config.description != null)
-                  Text(
-                    config.description!,
-                    style: PharmaConnectTypography.body2,
-                  ),
+                  Text(config.description!, style: context.text.body2),
               ],
             ),
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: PharmaConnectColors.accentCyan.withValues(alpha: 0.1),
+              color: context.palette.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
               config.value,
-              style: const TextStyle(
-                color: PharmaConnectColors.accentCyan,
+              style: TextStyle(
+                color: context.palette.primary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -258,10 +254,10 @@ class _ConfigTile extends StatelessWidget {
           if (onTap != null) ...[
             const SizedBox(width: 8),
             IconButton(
-              icon: const Icon(
+              icon: Icon(
                 Icons.edit_outlined,
                 size: 18,
-                color: PharmaConnectColors.textSecondary,
+                color: context.palette.textSecondary,
               ),
               onPressed: onTap,
             ),

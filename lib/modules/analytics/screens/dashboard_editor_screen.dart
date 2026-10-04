@@ -3,13 +3,12 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../models/dashboard_widget.dart';
 import '../providers/dashboard_customization_provider.dart';
 import '../widgets/dashboard_widget_picker.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class DashboardEditorScreen extends StatefulWidget {
   const DashboardEditorScreen({super.key});
@@ -71,18 +70,18 @@ class _DashboardEditorScreenState extends State<DashboardEditorScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       '📊 Personnaliser le tableau de bord',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -105,17 +104,17 @@ class _DashboardEditorScreenState extends State<DashboardEditorScreen> {
                           }
                           provider.toggleEditing();
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
+                            SnackBar(
                               content: Text('Tableau de bord enregistré'),
-                              backgroundColor: PharmaConnectColors.accentGreen,
+                              backgroundColor: context.palette.success,
                             ),
                           );
                         },
                         icon: const Icon(Icons.save),
                         label: const Text('Enregistrer'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: PharmaConnectColors.accentGreen,
-                          foregroundColor: PharmaConnectColors.textPrimary,
+                          backgroundColor: context.palette.success,
+                          foregroundColor: context.palette.textPrimary,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
@@ -138,8 +137,8 @@ class _DashboardEditorScreenState extends State<DashboardEditorScreen> {
                     icon: const Icon(Icons.edit),
                     label: const Text('Personnaliser'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: PharmaConnectColors.accentCyan,
-                      foregroundColor: PharmaConnectColors.textOnAccent,
+                      backgroundColor: context.palette.primary,
+                      foregroundColor: context.palette.onPrimary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -163,7 +162,7 @@ class _DashboardEditorScreenState extends State<DashboardEditorScreen> {
                 children: [
                   Text(
                     provider.selectedDashboard?.name ?? 'Tableau de bord',
-                    style: PharmaConnectTypography.heading3,
+                    style: context.text.heading3,
                   ),
                   if (provider.selectedDashboard != null) ...[
                     const SizedBox(width: 8),
@@ -192,16 +191,16 @@ class _DashboardEditorScreenState extends State<DashboardEditorScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.error_outline,
                             size: 48,
-                            color: PharmaConnectColors.accentRed,
+                            color: context.palette.danger,
                           ),
                           const SizedBox(height: 16),
                           Text(
                             provider.error!,
-                            style: PharmaConnectTypography.body2.copyWith(
-                              color: PharmaConnectColors.accentRed,
+                            style: context.text.body2.copyWith(
+                              color: context.palette.danger,
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -234,14 +233,12 @@ class _DashboardEditorScreenState extends State<DashboardEditorScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: PharmaConnectColors.accentCyan.withValues(alpha: 0.12),
+        color: context.palette.primary.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
         label,
-        style: PharmaConnectTypography.micro.copyWith(
-          color: PharmaConnectColors.accentCyan,
-        ),
+        style: context.text.micro.copyWith(color: context.palette.primary),
       ),
     );
   }
@@ -253,17 +250,21 @@ class _DashboardEditorScreenState extends State<DashboardEditorScreen> {
     }
 
     if (dashboard.panels.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.dashboard_outlined, size: 64, color: Colors.white24),
+            Icon(
+              Icons.dashboard_outlined,
+              size: 64,
+              color: context.palette.veil(0.24),
+            ),
             SizedBox(height: 16),
-            Text('Aucun widget ajouté', style: PharmaConnectTypography.body2),
+            Text('Aucun widget ajouté', style: context.text.body2),
             SizedBox(height: 8),
             Text(
               'Ajoutez des widgets depuis la liste de gauche',
-              style: PharmaConnectTypography.micro,
+              style: context.text.micro,
             ),
           ],
         ),
@@ -306,7 +307,7 @@ class _DashboardEditorScreenState extends State<DashboardEditorScreen> {
                   Expanded(
                     child: Text(
                       widget.name,
-                      style: PharmaConnectTypography.body1.copyWith(
+                      style: context.text.body1.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
                       maxLines: 1,
@@ -328,14 +329,14 @@ class _DashboardEditorScreenState extends State<DashboardEditorScreen> {
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.04),
+                    color: context.palette.surfaceMuted,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Center(
                     child: Text(
                       'Aperçu du widget',
-                      style: PharmaConnectTypography.micro.copyWith(
-                        color: PharmaConnectColors.textSecondary,
+                      style: context.text.micro.copyWith(
+                        color: context.palette.textSecondary,
                       ),
                     ),
                   ),

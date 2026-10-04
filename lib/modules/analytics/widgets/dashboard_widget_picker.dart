@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import '../providers/dashboard_customization_provider.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class DashboardWidgetPicker extends StatelessWidget {
   final Function(String) onWidgetSelected;
@@ -20,17 +19,14 @@ class DashboardWidgetPicker extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.04),
+        color: context.palette.surfaceMuted,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        border: Border.all(color: context.palette.borderSubtle),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '📦 Ajouter un widget',
-            style: PharmaConnectTypography.label,
-          ),
+          Text('📦 Ajouter un widget', style: context.text.label),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
@@ -44,14 +40,10 @@ class DashboardWidgetPicker extends StatelessWidget {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: PharmaConnectColors.accentCyan.withValues(
-                      alpha: 0.1,
-                    ),
+                    color: context.palette.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(6),
                     border: Border.all(
-                      color: PharmaConnectColors.accentCyan.withValues(
-                        alpha: 0.2,
-                      ),
+                      color: context.palette.primary.withValues(alpha: 0.2),
                     ),
                   ),
                   child: Row(
@@ -66,7 +58,7 @@ class DashboardWidgetPicker extends StatelessWidget {
                         widget.name,
                         style: TextStyle(
                           fontSize: 12,
-                          color: PharmaConnectColors.accentCyan,
+                          color: context.palette.primary,
                         ),
                       ),
                     ],

@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/utils/export_service.dart';
 import '../providers/analytics_provider.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 /// Audit Module 28 (BI), Étape 3 (05/09/2026), BI-8 : livrable demandé
 /// explicitement par le porteur du projet ("écran d'exportation de rapports
@@ -148,26 +147,26 @@ class _ExportReportsScreenState extends State<ExportReportsScreen> {
             Row(
               children: [
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.arrow_back,
-                    color: PharmaConnectColors.textPrimary,
+                    color: context.palette.textPrimary,
                   ),
                   onPressed: () => context.pop(),
                   padding: EdgeInsets.zero,
                 ),
                 const SizedBox(width: 8),
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         '📤 Export de rapports',
-                        style: PharmaConnectTypography.heading2,
+                        style: context.text.heading2,
                       ),
                       SizedBox(height: 4),
                       Text(
                         'Rapports agrégés (CSV), sans donnée nominative de patient',
-                        style: PharmaConnectTypography.body2,
+                        style: context.text.body2,
                       ),
                     ],
                   ),
@@ -181,8 +180,8 @@ class _ExportReportsScreenState extends State<ExportReportsScreen> {
                 padding: const EdgeInsets.only(bottom: 16),
                 child: Text(
                   _error!,
-                  style: PharmaConnectTypography.body2.copyWith(
-                    color: PharmaConnectColors.accentRed,
+                  style: context.text.body2.copyWith(
+                    color: context.palette.danger,
                   ),
                 ),
               ),
@@ -191,8 +190,8 @@ class _ExportReportsScreenState extends State<ExportReportsScreen> {
                 padding: const EdgeInsets.only(bottom: 16),
                 child: Text(
                   'Export « $_lastExportLabel » prêt à partager.',
-                  style: PharmaConnectTypography.body2.copyWith(
-                    color: PharmaConnectColors.accentGreen,
+                  style: context.text.body2.copyWith(
+                    color: context.palette.success,
                   ),
                 ),
               ),
@@ -259,15 +258,15 @@ class _ExportReportsScreenState extends State<ExportReportsScreen> {
               children: [
                 Text(
                   title,
-                  style: PharmaConnectTypography.body1.copyWith(
+                  style: context.text.body1.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: PharmaConnectTypography.micro.copyWith(
-                    color: PharmaConnectColors.textSecondary,
+                  style: context.text.micro.copyWith(
+                    color: context.palette.textSecondary,
                   ),
                 ),
               ],
@@ -285,8 +284,8 @@ class _ExportReportsScreenState extends State<ExportReportsScreen> {
                 : const Icon(Icons.ios_share, size: 16),
             label: const Text('Exporter'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: PharmaConnectColors.accentCyan,
-              foregroundColor: PharmaConnectColors.textOnAccent,
+              backgroundColor: context.palette.primary,
+              foregroundColor: context.palette.onPrimary,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),

@@ -3,10 +3,9 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../providers/inspection_provider.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 // Audit Module 27 (REG), Étape 3 (05/09/2026) — REG-4.
 class InspectionDetailScreen extends StatefulWidget {
@@ -41,9 +40,7 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
         body: Center(
           child: Text(
             provider.error ?? 'Inspection introuvable',
-            style: PharmaConnectTypography.body2.copyWith(
-              color: PharmaConnectColors.accentRed,
-            ),
+            style: context.text.body2.copyWith(color: context.palette.danger),
           ),
         ),
       );
@@ -60,18 +57,18 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Détail de l\'inspection',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -91,50 +88,50 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildInfoRow('Entité', inspection.entityTypeLabel),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           _buildInfoRow(
                             'Identifiant entité',
                             inspection.entityId,
                           ),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           _buildInfoRow('Type', inspection.typeLabel),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           _buildInfoRow(
                             'Date d\'inspection',
                             _formatDate(inspection.inspectionDate),
                           ),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           _buildInfoRow('Statut', inspection.statusLabel),
                           if (inspection.inspectorName != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow(
                               'Inspecteur',
                               inspection.inspectorName!,
                             ),
                           ],
                           if (inspection.findings != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow(
                               'Constatations',
                               inspection.findings!,
                             ),
                           ],
                           if (inspection.violations.isNotEmpty) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow(
                               'Manquements',
                               inspection.violations.join(', '),
                             ),
                           ],
                           if (inspection.recommendations != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow(
                               'Recommandations',
                               inspection.recommendations!,
                             ),
                           ],
                           if (inspection.actionTaken != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow(
                               'Action prise',
                               inspection.actionTaken!,
@@ -151,9 +148,9 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'Mettre à jour le statut',
-                              style: PharmaConnectTypography.heading3,
+                              style: context.text.heading3,
                             ),
                             const SizedBox(height: 12),
                             Wrap(
@@ -164,20 +161,20 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
                                   _buildActionChip(
                                     'Démarrer',
                                     'in_progress',
-                                    PharmaConnectColors.accentAmber,
+                                    context.palette.warningStrong,
                                   ),
                                 ],
                                 if (inspection.status == 'in_progress') ...[
                                   _buildActionChip(
                                     'Terminer',
                                     'completed',
-                                    PharmaConnectColors.accentGreen,
+                                    context.palette.success,
                                   ),
                                 ],
                                 _buildActionChip(
                                   'Annuler',
                                   'cancelled',
-                                  PharmaConnectColors.accentRed,
+                                  context.palette.danger,
                                 ),
                               ],
                             ),
@@ -201,11 +198,8 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 140,
-            child: Text(label, style: PharmaConnectTypography.label),
-          ),
-          Expanded(child: Text(value, style: PharmaConnectTypography.body1)),
+          SizedBox(width: 140, child: Text(label, style: context.text.label)),
+          Expanded(child: Text(value, style: context.text.body1)),
         ],
       ),
     );

@@ -3,12 +3,11 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../providers/network_admin_provider.dart';
 import '../models/network_admin_role.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 // Audit Module 26 (CHN), Étape 3 (05/09/2026) — CHN-4 : ce fichier
 // n'existait pas alors qu'il était importé et utilisé (`NetworkRolesScreen`)
@@ -51,18 +50,18 @@ class _NetworkRolesScreenState extends State<NetworkRolesScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       '🌐 Rôles d\'administration réseau',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -76,8 +75,8 @@ class _NetworkRolesScreenState extends State<NetworkRolesScreen> {
                   icon: const Icon(Icons.person_add),
                   label: const Text('Attribuer'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: PharmaConnectColors.accentCyan,
-                    foregroundColor: PharmaConnectColors.textOnAccent,
+                    backgroundColor: context.palette.primary,
+                    foregroundColor: context.palette.onPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -102,18 +101,12 @@ class _NetworkRolesScreenState extends State<NetworkRolesScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 48,
-              color: PharmaConnectColors.accentRed,
-            ),
+            Icon(Icons.error_outline, size: 48, color: context.palette.danger),
             const SizedBox(height: 16),
             Text(
               provider.error!,
               textAlign: TextAlign.center,
-              style: PharmaConnectTypography.body2.copyWith(
-                color: PharmaConnectColors.accentRed,
-              ),
+              style: context.text.body2.copyWith(color: context.palette.danger),
             ),
             const SizedBox(height: 16),
             PrimaryButton(
@@ -129,10 +122,10 @@ class _NetworkRolesScreenState extends State<NetworkRolesScreen> {
       );
     }
     if (provider.roles.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
           'Aucun rôle d\'administration réseau attribué',
-          style: PharmaConnectTypography.body2,
+          style: context.text.body2,
         ),
       );
     }
@@ -152,29 +145,29 @@ class _NetworkRolesScreenState extends State<NetworkRolesScreen> {
                     children: [
                       Text(
                         role.roleLabel,
-                        style: PharmaConnectTypography.body1.copyWith(
+                        style: context.text.body1.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         'Utilisateur : ${role.userId}',
-                        style: PharmaConnectTypography.micro,
+                        style: context.text.micro,
                         overflow: TextOverflow.ellipsis,
                       ),
                       if (role.pharmacyGroupId != null)
                         Text(
                           'Groupe : ${role.pharmacyGroupId}',
-                          style: PharmaConnectTypography.micro,
+                          style: context.text.micro,
                           overflow: TextOverflow.ellipsis,
                         ),
                     ],
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.delete_outline,
-                    color: PharmaConnectColors.accentRed,
+                    color: context.palette.danger,
                   ),
                   tooltip: 'Révoquer',
                   onPressed: () => _confirmRevoke(role),
@@ -191,7 +184,7 @@ class _NetworkRolesScreenState extends State<NetworkRolesScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: PharmaConnectColors.primaryDeep,
+        backgroundColor: context.palette.background,
         title: const Text('Révoquer ce rôle'),
         content: Text(
           'Révoquer le rôle "${role.roleLabel}" de l\'utilisateur ${role.userId} ?',
@@ -207,8 +200,8 @@ class _NetworkRolesScreenState extends State<NetworkRolesScreen> {
               await context.read<NetworkAdminProvider>().deleteRole(role.id);
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: PharmaConnectColors.accentRed,
-              foregroundColor: PharmaConnectColors.textPrimary,
+              backgroundColor: context.palette.danger,
+              foregroundColor: context.palette.textPrimary,
             ),
             child: const Text('Révoquer'),
           ),
@@ -227,7 +220,7 @@ class _NetworkRolesScreenState extends State<NetworkRolesScreen> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          backgroundColor: PharmaConnectColors.primaryDeep,
+          backgroundColor: context.palette.background,
           title: const Text('Attribuer un rôle réseau'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -279,10 +272,7 @@ class _NetworkRolesScreenState extends State<NetworkRolesScreen> {
                 const SizedBox(height: 8),
                 Text(
                   dialogError!,
-                  style: const TextStyle(
-                    color: PharmaConnectColors.accentRed,
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: context.palette.danger, fontSize: 12),
                 ),
               ],
             ],
@@ -323,14 +313,14 @@ class _NetworkRolesScreenState extends State<NetworkRolesScreen> {
                       content: Text(
                         context.read<NetworkAdminProvider>().error ?? 'Erreur',
                       ),
-                      backgroundColor: PharmaConnectColors.accentRed,
+                      backgroundColor: context.palette.danger,
                     ),
                   );
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: PharmaConnectColors.accentCyan,
-                foregroundColor: PharmaConnectColors.textOnAccent,
+                backgroundColor: context.palette.primary,
+                foregroundColor: context.palette.onPrimary,
               ),
               child: const Text('Attribuer'),
             ),

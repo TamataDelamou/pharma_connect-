@@ -4,8 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/tertiary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
@@ -13,6 +11,7 @@ import 'package:pharma_connect/core/widgets/inputs/glass_input.dart';
 import '../providers/support_provider.dart';
 import '../models/ticket.dart';
 import '../models/support_category.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 // Codes de categorie correspondant a un litige potentiel (commande, paiement
 // ou livraison) -- voir seed 20260827008000_support.sql. Pas de categorie
@@ -81,18 +80,18 @@ class _NewTicketScreenState extends State<NewTicketScreen> {
                 leading: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.arrow_back,
-                        color: PharmaConnectColors.textPrimary,
+                        color: context.palette.textPrimary,
                       ),
                       onPressed: () => context.pop(),
                       padding: EdgeInsets.zero,
                     ),
                     const SizedBox(width: 8),
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         'Nouveau ticket de support',
-                        style: PharmaConnectTypography.heading2,
+                        style: context.text.heading2,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -135,9 +134,9 @@ class _NewTicketScreenState extends State<NewTicketScreen> {
                             ),
                             if (categories.isEmpty) ...[
                               const SizedBox(height: 4),
-                              const Text(
+                              Text(
                                 'Chargement des catégories...',
-                                style: PharmaConnectTypography.micro,
+                                style: context.text.micro,
                               ),
                             ],
                             const SizedBox(height: 12),
@@ -174,10 +173,7 @@ class _NewTicketScreenState extends State<NewTicketScreen> {
                             ),
                             const SizedBox(height: 12),
 
-                            const Text(
-                              'Priorité',
-                              style: PharmaConnectTypography.label,
-                            ),
+                            Text('Priorité', style: context.text.label),
                             const SizedBox(height: 4),
                             Wrap(
                               spacing: 8,
@@ -186,32 +182,32 @@ class _NewTicketScreenState extends State<NewTicketScreen> {
                                 _buildPriorityChip(
                                   'low',
                                   'Basse',
-                                  PharmaConnectColors.textSecondary,
+                                  context.palette.textSecondary,
                                 ),
                                 _buildPriorityChip(
                                   'medium',
                                   'Moyenne',
-                                  PharmaConnectColors.accentCyan,
+                                  context.palette.primary,
                                 ),
                                 _buildPriorityChip(
                                   'high',
                                   'Élevée',
-                                  PharmaConnectColors.accentOrange,
+                                  context.palette.warning,
                                 ),
                                 _buildPriorityChip(
                                   'critical',
                                   'Critique',
-                                  PharmaConnectColors.accentRed,
+                                  context.palette.danger,
                                 ),
                               ],
                             ),
                             if (showDisputeFields) ...[
                               const SizedBox(height: 16),
-                              const Divider(color: Colors.white12),
+                              Divider(color: context.palette.veil(0.12)),
                               const SizedBox(height: 8),
-                              const Text(
+                              Text(
                                 '⚠️ Litige lié à une commande, un paiement ou une livraison',
-                                style: PharmaConnectTypography.label,
+                                style: context.text.label,
                               ),
                               const SizedBox(height: 8),
                               Wrap(
@@ -295,14 +291,14 @@ class _NewTicketScreenState extends State<NewTicketScreen> {
           color: isSelected ? color.withValues(alpha: 0.2) : Colors.transparent,
           borderRadius: BorderRadius.circular(6),
           border: Border.all(
-            color: isSelected ? color : Colors.white24,
+            color: isSelected ? color : context.palette.veil(0.24),
             width: isSelected ? 2 : 1,
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? color : PharmaConnectColors.textSecondary,
+            color: isSelected ? color : context.palette.textSecondary,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
           ),
         ),
@@ -312,7 +308,7 @@ class _NewTicketScreenState extends State<NewTicketScreen> {
 
   Widget _buildDisputeCategoryChip(String value, String label) {
     final isSelected = _disputeCategory == value;
-    const color = PharmaConnectColors.accentOrange;
+    final color = context.palette.warning;
     return GestureDetector(
       onTap: () => setState(() => _disputeCategory = value),
       child: Container(
@@ -321,14 +317,14 @@ class _NewTicketScreenState extends State<NewTicketScreen> {
           color: isSelected ? color.withValues(alpha: 0.2) : Colors.transparent,
           borderRadius: BorderRadius.circular(6),
           border: Border.all(
-            color: isSelected ? color : Colors.white24,
+            color: isSelected ? color : context.palette.veil(0.24),
             width: isSelected ? 2 : 1,
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? color : PharmaConnectColors.textSecondary,
+            color: isSelected ? color : context.palette.textSecondary,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
           ),
         ),
@@ -381,16 +377,16 @@ class _NewTicketScreenState extends State<NewTicketScreen> {
     if (success && context.mounted) {
       context.pop();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Ticket créé avec succès'),
-          backgroundColor: PharmaConnectColors.accentGreen,
+          backgroundColor: context.palette.success,
         ),
       );
     } else if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(context.read<SupportProvider>().error ?? 'Erreur'),
-          backgroundColor: PharmaConnectColors.accentRed,
+          backgroundColor: context.palette.danger,
         ),
       );
     }

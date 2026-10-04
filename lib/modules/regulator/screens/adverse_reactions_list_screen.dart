@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import '../../auth/models/user_role.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/regulator_provider.dart';
 import '../widgets/adverse_reaction_anonymized_card.dart';
 import '../widgets/adverse_reaction_card.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 // Audit Module 27 (REG), Étape 3 (05/09/2026) — REG-3 (2e occurrence) :
 // l'ancien paramètre de construction `isRegulator` (jamais lié à un rôle
@@ -103,16 +102,13 @@ class _AdverseReactionsListScreenState extends State<AdverseReactionsListScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Pharmacovigilance',
-                        style: PharmaConnectTypography.heading1,
-                      ),
+                      Text('Pharmacovigilance', style: context.text.heading1),
                       const SizedBox(height: 4),
                       Text(
                         isRegulateur
                             ? 'Statistiques agrégées et anonymisées des signalements'
                             : 'Signalez et suivez les effets indésirables',
-                        style: PharmaConnectTypography.body2,
+                        style: context.text.body2,
                       ),
                     ],
                   ),
@@ -125,8 +121,8 @@ class _AdverseReactionsListScreenState extends State<AdverseReactionsListScreen>
                     icon: const Icon(Icons.add),
                     label: const Text('Signaler'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: PharmaConnectColors.accentCyan,
-                      foregroundColor: PharmaConnectColors.textOnAccent,
+                      backgroundColor: context.palette.primary,
+                      foregroundColor: context.palette.onPrimary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -149,10 +145,8 @@ class _AdverseReactionsListScreenState extends State<AdverseReactionsListScreen>
                       icon: const Icon(Icons.fact_check_outlined),
                       label: const Text('Inspections'),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: PharmaConnectColors.accentPurple,
-                        side: const BorderSide(
-                          color: PharmaConnectColors.accentPurple,
-                        ),
+                        foregroundColor: context.palette.secondary,
+                        side: BorderSide(color: context.palette.secondary),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -162,10 +156,8 @@ class _AdverseReactionsListScreenState extends State<AdverseReactionsListScreen>
                       icon: const Icon(Icons.verified_outlined),
                       label: const Text('AMM'),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: PharmaConnectColors.accentPurple,
-                        side: const BorderSide(
-                          color: PharmaConnectColors.accentPurple,
-                        ),
+                        foregroundColor: context.palette.secondary,
+                        side: BorderSide(color: context.palette.secondary),
                       ),
                     ),
                   ],
@@ -181,9 +173,9 @@ class _AdverseReactionsListScreenState extends State<AdverseReactionsListScreen>
                 Tab(text: 'En attente'),
                 Tab(text: 'En investigation'),
               ],
-              labelColor: PharmaConnectColors.accentCyan,
-              unselectedLabelColor: PharmaConnectColors.textSecondary,
-              indicatorColor: PharmaConnectColors.accentCyan,
+              labelColor: context.palette.primary,
+              unselectedLabelColor: context.palette.textSecondary,
+              indicatorColor: context.palette.primary,
               indicatorWeight: 3,
               dividerColor: Colors.transparent,
             ),
@@ -210,18 +202,12 @@ class _AdverseReactionsListScreenState extends State<AdverseReactionsListScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 48,
-              color: PharmaConnectColors.accentRed,
-            ),
+            Icon(Icons.error_outline, size: 48, color: context.palette.danger),
             const SizedBox(height: 16),
             Text(
               provider.error!,
               textAlign: TextAlign.center,
-              style: PharmaConnectTypography.body2.copyWith(
-                color: PharmaConnectColors.accentRed,
-              ),
+              style: context.text.body2.copyWith(color: context.palette.danger),
             ),
             const SizedBox(height: 16),
             PrimaryButton(
@@ -238,17 +224,21 @@ class _AdverseReactionsListScreenState extends State<AdverseReactionsListScreen>
     }
 
     if (provider.reactions.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.medication_outlined, size: 64, color: Colors.white24),
+            Icon(
+              Icons.medication_outlined,
+              size: 64,
+              color: context.palette.veil(0.24),
+            ),
             SizedBox(height: 16),
-            Text('Aucun signalement', style: PharmaConnectTypography.heading3),
+            Text('Aucun signalement', style: context.text.heading3),
             SizedBox(height: 8),
             Text(
               'Aucun effet indésirable n\'a été signalé',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
               textAlign: TextAlign.center,
             ),
           ],
@@ -281,18 +271,12 @@ class _AdverseReactionsListScreenState extends State<AdverseReactionsListScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 48,
-              color: PharmaConnectColors.accentRed,
-            ),
+            Icon(Icons.error_outline, size: 48, color: context.palette.danger),
             const SizedBox(height: 16),
             Text(
               provider.anonymizedError!,
               textAlign: TextAlign.center,
-              style: PharmaConnectTypography.body2.copyWith(
-                color: PharmaConnectColors.accentRed,
-              ),
+              style: context.text.body2.copyWith(color: context.palette.danger),
             ),
             const SizedBox(height: 16),
             PrimaryButton(
@@ -306,17 +290,21 @@ class _AdverseReactionsListScreenState extends State<AdverseReactionsListScreen>
     }
 
     if (provider.anonymizedReactions.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.medication_outlined, size: 64, color: Colors.white24),
+            Icon(
+              Icons.medication_outlined,
+              size: 64,
+              color: context.palette.veil(0.24),
+            ),
             SizedBox(height: 16),
-            Text('Aucun signalement', style: PharmaConnectTypography.heading3),
+            Text('Aucun signalement', style: context.text.heading3),
             SizedBox(height: 8),
             Text(
               'Aucun effet indésirable n\'a été signalé sur cette période',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
               textAlign: TextAlign.center,
             ),
           ],

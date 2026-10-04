@@ -3,14 +3,13 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/tertiary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/widgets/inputs/glass_input.dart';
 import '../models/marketing_authorization.dart';
 import '../providers/marketing_authorization_provider.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 // Audit Module 27 (REG), Étape 3 (05/09/2026) — REG-4.
 //
@@ -57,18 +56,18 @@ class _MarketingAuthorizationCreateScreenState
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Nouvelle AMM',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -188,9 +187,9 @@ class _MarketingAuthorizationCreateScreenState
     if (success && context.mounted) {
       context.pop();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('AMM créée'),
-          backgroundColor: PharmaConnectColors.accentGreen,
+          backgroundColor: context.palette.success,
         ),
       );
     } else if (context.mounted) {
@@ -200,7 +199,7 @@ class _MarketingAuthorizationCreateScreenState
             context.read<MarketingAuthorizationProvider>().error ??
                 'Erreur lors de l\'envoi',
           ),
-          backgroundColor: PharmaConnectColors.accentRed,
+          backgroundColor: context.palette.danger,
         ),
       );
     }

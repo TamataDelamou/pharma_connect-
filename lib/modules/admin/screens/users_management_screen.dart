@@ -4,9 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
 import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../providers/admin_provider.dart';
 import '../models/admin_role.dart';
+import '../../../core/theme/palette.dart';
 
 class UsersManagementScreen extends StatefulWidget {
   const UsersManagementScreen({super.key});
@@ -39,18 +39,18 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Gestion des utilisateurs',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -64,9 +64,9 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
               ],
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Gérez les comptes utilisateurs et leurs permissions',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
             ),
             const SizedBox(height: 24),
 
@@ -74,10 +74,10 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
               child: provider.isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : provider.users.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Text(
                         'Aucun utilisateur',
-                        style: PharmaConnectTypography.body2,
+                        style: context.text.body2,
                       ),
                     )
                   : ListView.builder(
@@ -88,12 +88,12 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
                           padding: const EdgeInsets.all(12),
                           margin: const EdgeInsets.only(bottom: 8),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.04),
+                            color: context.palette.surfaceMuted,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                               color: user.isActive
-                                  ? Colors.white.withValues(alpha: 0.06)
-                                  : PharmaConnectColors.accentRed.withValues(
+                                  ? context.palette.surface
+                                  : context.palette.danger.withValues(
                                       alpha: 0.2,
                                     ),
                               width: 1,
@@ -104,17 +104,18 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
                               CircleAvatar(
                                 backgroundColor:
                                     user.role == AdminRole.superAdmin
-                                    ? PharmaConnectColors.accentPurple
-                                          .withValues(alpha: 0.2)
-                                    : PharmaConnectColors.accentCyan.withValues(
+                                    ? context.palette.secondary.withValues(
+                                        alpha: 0.2,
+                                      )
+                                    : context.palette.primary.withValues(
                                         alpha: 0.2,
                                       ),
                                 child: Text(
                                   user.fullName[0].toUpperCase(),
                                   style: TextStyle(
                                     color: user.role == AdminRole.superAdmin
-                                        ? PharmaConnectColors.accentPurple
-                                        : PharmaConnectColors.accentCyan,
+                                        ? context.palette.secondary
+                                        : context.palette.primary,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -126,15 +127,11 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
                                   children: [
                                     Text(
                                       user.fullName,
-                                      style: PharmaConnectTypography.body1
-                                          .copyWith(
-                                            fontWeight: FontWeight.w600,
-                                          ),
+                                      style: context.text.body1.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
-                                    Text(
-                                      user.email,
-                                      style: PharmaConnectTypography.body2,
-                                    ),
+                                    Text(user.email, style: context.text.body2),
                                     Row(
                                       children: [
                                         Container(
@@ -180,7 +177,7 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
                                                 ? PharmaConnectColors
                                                       .accentGreen
                                                       .withValues(alpha: 0.15)
-                                                : PharmaConnectColors.accentRed
+                                                : context.palette.danger
                                                       .withValues(alpha: 0.15),
                                             borderRadius: BorderRadius.circular(
                                               4,
@@ -241,9 +238,9 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
                               ),
                               if (!user.isVerified) ...[
                                 IconButton(
-                                  icon: const Icon(
+                                  icon: Icon(
                                     Icons.verified,
-                                    color: PharmaConnectColors.accentCyan,
+                                    color: context.palette.primary,
                                   ),
                                   onPressed: () async {
                                     await provider.verifyUser(user.id);
@@ -251,10 +248,10 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
                                       ScaffoldMessenger.of(
                                         context,
                                       ).showSnackBar(
-                                        const SnackBar(
+                                        SnackBar(
                                           content: Text('Utilisateur vérifié'),
                                           backgroundColor:
-                                              PharmaConnectColors.accentGreen,
+                                              context.palette.success,
                                         ),
                                       );
                                     }
@@ -267,8 +264,8 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
                                       ? Icons.pause_circle_outline
                                       : Icons.play_circle_outline,
                                   color: user.isActive
-                                      ? PharmaConnectColors.accentOrange
-                                      : PharmaConnectColors.accentGreen,
+                                      ? context.palette.warning
+                                      : context.palette.success,
                                 ),
                                 onPressed: () async {
                                   await provider.toggleUserActive(
@@ -284,17 +281,17 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
                                               : 'Utilisateur activé',
                                         ),
                                         backgroundColor: user.isActive
-                                            ? PharmaConnectColors.accentOrange
-                                            : PharmaConnectColors.accentGreen,
+                                            ? context.palette.warning
+                                            : context.palette.success,
                                       ),
                                     );
                                   }
                                 },
                               ),
                               IconButton(
-                                icon: const Icon(
+                                icon: Icon(
                                   Icons.chevron_right,
-                                  color: PharmaConnectColors.textSecondary,
+                                  color: context.palette.textSecondary,
                                 ),
                                 onPressed: () {
                                   // Navigation vers le détail

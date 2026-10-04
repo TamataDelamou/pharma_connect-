@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
 import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/secondary_button.dart';
@@ -12,6 +11,7 @@ import 'package:pharma_connect/core/widgets/inputs/glass_input.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/support_provider.dart';
 import '../models/ticket_response.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class TicketDetailScreen extends StatefulWidget {
   final String ticketId;
@@ -57,9 +57,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
         body: Center(
           child: Text(
             provider.error ?? 'Ticket introuvable',
-            style: PharmaConnectTypography.body2.copyWith(
-              color: PharmaConnectColors.accentRed,
-            ),
+            style: context.text.body2.copyWith(color: context.palette.danger),
           ),
         ),
       );
@@ -77,9 +75,9 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
             Row(
               children: [
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.arrow_back,
-                    color: PharmaConnectColors.textPrimary,
+                    color: context.palette.textPrimary,
                   ),
                   onPressed: () => context.pop(),
                   padding: EdgeInsets.zero,
@@ -88,7 +86,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                 Expanded(
                   child: Text(
                     'Ticket #${ticket.ticketNumber}',
-                    style: PharmaConnectTypography.heading2,
+                    style: context.text.heading2,
                   ),
                 ),
                 const KernelBadge(),
@@ -135,41 +133,39 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildInfoRow('Sujet', ticket.subject),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           _buildInfoRow('Priorité', ticket.priorityLabel),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           if (ticket.categoryName != null) ...[
                             _buildInfoRow('Catégorie', ticket.categoryName!),
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                           ],
                           _buildInfoRow(
                             'Patient',
                             ticket.patientName ?? ticket.patientId,
                           ),
                           if (ticket.assigneeName != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow('Assigné à', ticket.assigneeName!),
                           ],
                           if (ticket.createdAt != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow(
                               'Créé le',
                               _formatDate(ticket.createdAt),
                             ),
                           ],
                           if (ticket.resolvedAt != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow(
                               'Résolu le',
                               _formatDate(ticket.resolvedAt!),
                             ),
                           ],
                           if (ticket.slaDueAt != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             Padding(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 4,
-                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 4),
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -177,7 +173,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                                     width: 120,
                                     child: Text(
                                       'Échéance SLA',
-                                      style: PharmaConnectTypography.label,
+                                      style: context.text.label,
                                     ),
                                   ),
                                   Expanded(
@@ -185,29 +181,26 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                                       children: [
                                         Text(
                                           _formatDate(ticket.slaDueAt!),
-                                          style: PharmaConnectTypography.body1
-                                              .copyWith(
-                                                color: ticket.isSlaBreached
-                                                    ? PharmaConnectColors
-                                                          .accentRed
-                                                    : null,
-                                              ),
+                                          style: context.text.body1.copyWith(
+                                            color: ticket.isSlaBreached
+                                                ? PharmaConnectColors.accentRed
+                                                : null,
+                                          ),
                                         ),
                                         if (ticket.isSlaBreached) ...[
                                           const SizedBox(width: 8),
-                                          const Icon(
+                                          Icon(
                                             Icons.warning_amber_rounded,
                                             size: 16,
-                                            color:
-                                                PharmaConnectColors.accentRed,
+                                            color: context.palette.danger,
                                           ),
                                           const Text(
                                             ' En retard',
                                             style: TextStyle(
                                               fontSize: 12,
                                               fontWeight: FontWeight.w600,
-                                              color: PharmaConnectColors
-                                                  .accentRed,
+                                              color:
+                                                  PharmaConnectColors.accentRed,
                                             ),
                                           ),
                                         ],
@@ -218,7 +211,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                               ),
                             ),
                           ],
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           _buildInfoRow(
                             'Description',
                             ticket.description,
@@ -236,16 +229,13 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                           children: [
                             Row(
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.gavel,
                                   size: 18,
-                                  color: PharmaConnectColors.accentOrange,
+                                  color: context.palette.warning,
                                 ),
                                 const SizedBox(width: 8),
-                                const Text(
-                                  'Litige',
-                                  style: PharmaConnectTypography.heading3,
-                                ),
+                                Text('Litige', style: context.text.heading3),
                               ],
                             ),
                             const SizedBox(height: 8),
@@ -255,14 +245,14 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                                 _disputeCategoryLabel(ticket.disputeCategory!),
                               ),
                             if (ticket.disputedAmount != null) ...[
-                              const Divider(color: Colors.white12),
+                              Divider(color: context.palette.veil(0.12)),
                               _buildInfoRow(
                                 'Montant contesté',
                                 '${ticket.disputedAmount}',
                               ),
                             ],
                             if (ticket.disputeReferenceId != null) ...[
-                              const Divider(color: Colors.white12),
+                              Divider(color: context.palette.veil(0.12)),
                               _buildInfoRow(
                                 'Référence liée',
                                 ticket.disputeReferenceId!,
@@ -276,10 +266,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
 
                     // Responses
                     if (provider.responses.isNotEmpty) ...[
-                      const Text(
-                        'Conversation',
-                        style: PharmaConnectTypography.heading3,
-                      ),
+                      Text('Conversation', style: context.text.heading3),
                       const SizedBox(height: 8),
                       ...provider.responses.map((response) {
                         final isStaff = response.authorId != ticket.patientId;
@@ -288,17 +275,17 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                           margin: const EdgeInsets.only(bottom: 6),
                           decoration: BoxDecoration(
                             color: isStaff
-                                ? PharmaConnectColors.accentCyan.withValues(
+                                ? context.palette.primary.withValues(
                                     alpha: 0.06,
                                   )
-                                : Colors.white.withValues(alpha: 0.04),
+                                : context.palette.surfaceMuted,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
                               color: isStaff
-                                  ? PharmaConnectColors.accentCyan.withValues(
+                                  ? context.palette.primary.withValues(
                                       alpha: 0.2,
                                     )
-                                  : Colors.white.withValues(alpha: 0.06),
+                                  : context.palette.surface,
                             ),
                           ),
                           child: Column(
@@ -308,21 +295,19 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                                 children: [
                                   Text(
                                     response.authorName ?? response.authorId,
-                                    style: PharmaConnectTypography.body1
-                                        .copyWith(fontWeight: FontWeight.w600),
+                                    style: context.text.body1.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                   const Spacer(),
                                   Text(
                                     _formatDate(response.createdAt),
-                                    style: PharmaConnectTypography.micro,
+                                    style: context.text.micro,
                                   ),
                                 ],
                               ),
                               const SizedBox(height: 4),
-                              Text(
-                                response.message,
-                                style: PharmaConnectTypography.body2,
-                              ),
+                              Text(response.message, style: context.text.body2),
                               if (response.isInternal) ...[
                                 const SizedBox(height: 4),
                                 Container(
@@ -331,16 +316,17 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                                     vertical: 2,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: PharmaConnectColors.accentOrange
-                                        .withValues(alpha: 0.15),
+                                    color: context.palette.warning.withValues(
+                                      alpha: 0.15,
+                                    ),
                                     borderRadius: BorderRadius.circular(4),
                                   ),
-                                  child: const Text(
+                                  child: Text(
                                     'Interne',
                                     style: TextStyle(
                                       fontSize: 9,
                                       fontWeight: FontWeight.w500,
-                                      color: PharmaConnectColors.accentOrange,
+                                      color: context.palette.warning,
                                     ),
                                   ),
                                 ),
@@ -358,10 +344,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Répondre',
-                              style: PharmaConnectTypography.heading3,
-                            ),
+                            Text('Répondre', style: context.text.heading3),
                             const SizedBox(height: 8),
                             TextField(
                               controller: _replyController,
@@ -429,9 +412,9 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'Évaluez votre expérience',
-                              style: PharmaConnectTypography.heading3,
+                              style: context.text.heading3,
                             ),
                             const SizedBox(height: 8),
                             Row(
@@ -441,7 +424,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                                     index < _feedbackRating
                                         ? Icons.star
                                         : Icons.star_border,
-                                    color: PharmaConnectColors.accentAmber,
+                                    color: context.palette.warningStrong,
                                   ),
                                   onPressed: () => setState(
                                     () => _feedbackRating = index + 1,
@@ -481,12 +464,11 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                                 );
                                 if (success && context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
+                                    SnackBar(
                                       content: Text(
                                         'Merci pour votre évaluation',
                                       ),
-                                      backgroundColor:
-                                          PharmaConnectColors.accentGreen,
+                                      backgroundColor: context.palette.success,
                                     ),
                                   );
                                   provider.loadTicket(ticket.id);
@@ -610,10 +592,8 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                         icon: const Icon(Icons.delete_outline),
                         label: const Text('Supprimer'),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: PharmaConnectColors.accentRed,
-                          side: const BorderSide(
-                            color: PharmaConnectColors.accentRed,
-                          ),
+                          foregroundColor: context.palette.danger,
+                          side: BorderSide(color: context.palette.danger),
                         ),
                       ),
                     ],
@@ -633,14 +613,11 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 120,
-            child: Text(label, style: PharmaConnectTypography.label),
-          ),
+          SizedBox(width: 120, child: Text(label, style: context.text.label)),
           Expanded(
             child: Text(
               value,
-              style: PharmaConnectTypography.body1,
+              style: context.text.body1,
               maxLines: multiline ? null : 1,
               overflow: multiline
                   ? TextOverflow.visible
@@ -672,19 +649,19 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
   Color _statusColor(String status) {
     switch (status) {
       case 'new':
-        return PharmaConnectColors.accentOrange;
+        return context.palette.warning;
       case 'in_progress':
-        return PharmaConnectColors.accentCyan;
+        return context.palette.primary;
       case 'waiting_for_patient':
-        return PharmaConnectColors.accentPurple;
+        return context.palette.secondary;
       case 'resolved':
-        return PharmaConnectColors.accentGreen;
+        return context.palette.success;
       case 'closed':
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
       case 'cancelled':
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       default:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
     }
   }
 
@@ -692,7 +669,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: PharmaConnectColors.primaryDeep,
+        backgroundColor: context.palette.background,
         title: const Text('Supprimer'),
         content: const Text('Supprimer ce ticket de support ?'),
         actions: [
@@ -709,8 +686,8 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
               if (success && context.mounted) context.pop();
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: PharmaConnectColors.accentRed,
-              foregroundColor: PharmaConnectColors.textPrimary,
+              backgroundColor: context.palette.danger,
+              foregroundColor: context.palette.textPrimary,
             ),
             child: const Text('Supprimer'),
           ),
