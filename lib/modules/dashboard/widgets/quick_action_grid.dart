@@ -38,12 +38,18 @@ class QuickActionGrid extends StatelessWidget {
                 size: 32,
               ),
               const SizedBox(height: 8),
-              Text(
-                action.label,
-                style: context.text.body2.copyWith(fontWeight: FontWeight.w500),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+              // Flexible : un libellé sur deux lignes ne déborde pas de la
+              // carte (petit écran, grande taille de texte).
+              Flexible(
+                child: Text(
+                  action.label,
+                  style: context.text.body2.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ],
           ),
