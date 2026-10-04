@@ -101,8 +101,17 @@ class _PrescriptionUploadScreenState extends State<PrescriptionUploadScreen> {
             style: context.text.body2,
           ),
           const SizedBox(height: 32),
-          Row(
+          // C239 : boutons empilés sur téléphone (« Galerie » débordait à
+          // 360 px), côte à côte en largeur.
+          Flex(
+            direction: isCompactWidth(context)
+                ? Axis.vertical
+                : Axis.horizontal,
             mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: isCompactWidth(context)
+                ? CrossAxisAlignment.stretch
+                : CrossAxisAlignment.center,
             children: [
               ElevatedButton.icon(
                 onPressed: () => _pickImageWithGuidance(ImageSource.camera),
@@ -117,7 +126,7 @@ class _PrescriptionUploadScreenState extends State<PrescriptionUploadScreen> {
                   ),
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 16, height: 12),
               OutlinedButton.icon(
                 onPressed: () => _pickImageWithGuidance(ImageSource.gallery),
                 icon: const Icon(Icons.photo_library),

@@ -125,6 +125,12 @@ void main() {
       '/support/chat',
       prepare: (auth) => auth.setRole(UserRole.patient),
     ),
+    // Aide au triage, sans le mot « IA ».
+    _Shot(
+      '08_triage_aide',
+      '/triage/00000000-0000-0000-0000-000000000001/ai',
+      prepare: (auth) => auth.setRole(UserRole.professionnel),
+    ),
     // Dépôt d'ordonnance sans lecture automatique.
     _Shot(
       '07_prescriptions_upload',

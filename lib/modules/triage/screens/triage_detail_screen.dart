@@ -3,6 +3,7 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
+import 'package:pharma_connect/core/pilot/pilot_config.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/secondary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
@@ -138,7 +139,7 @@ class _TriageDetailScreenState extends State<TriageDetailScreen> {
                   OutlinedButton.icon(
                     onPressed: () => context.push('/triage/${patient.id}/ai'),
                     icon: const Icon(Icons.psychology),
-                    label: const Text('Analyse IA'),
+                    label: const Text('Aide au triage'),
                     style: OutlinedButton.styleFrom(
                       side: BorderSide(color: context.palette.primary),
                       foregroundColor: context.palette.primary,
@@ -345,15 +346,20 @@ class _TriageDetailScreenState extends State<TriageDetailScreen> {
                       const SizedBox(height: 16),
                       Row(
                         children: [
-                          Expanded(
-                            child: PrimaryButton(
-                              label: 'Assigner',
-                              icon: Icons.assignment,
-                              onPressed: () =>
-                                  _showAssignDialog(context, patient),
+                          // C239 : services et médecins écrits en dur,
+                          // affectation masquée pour le pilote
+                          // (`PilotConfig.triageAssignment`).
+                          if (PilotConfig.triageAssignment) ...[
+                            Expanded(
+                              child: PrimaryButton(
+                                label: 'Assigner',
+                                icon: Icons.assignment,
+                                onPressed: () =>
+                                    _showAssignDialog(context, patient),
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 12),
+                            const SizedBox(width: 12),
+                          ],
                           Expanded(
                             child: SecondaryButton(
                               label: 'Transférer',

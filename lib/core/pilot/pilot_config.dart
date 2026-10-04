@@ -59,6 +59,12 @@ class PilotConfig {
   // (`PreConsultationScreen`), traduction (`TranslationService`), défis et
   // récompenses « IA » de fidélité, synthèse « IA » du dossier de santé.
 
+  // ===== Triage =====
+  // Affectation d'un patient : la liste des services et des médecins est
+  // écrite en dur dans l'écran (`triage_detail_screen.dart`). L'aide au
+  // triage (/triage/:id/ai, règles lues en base) reste affichée.
+  static const bool triageAssignment = false;
+
   // ===== Accueil =====
   // Indicateurs du tableau de bord (« Pharmacies actives », « 94 % »…) :
   // valeurs fictives de `DashboardProvider`, pas de vraies données.
