@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../providers/business_provider.dart';
 import '../models/business_company.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class CompanyDetailScreen extends StatefulWidget {
   final String companyId;
@@ -41,9 +40,7 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
         body: Center(
           child: Text(
             provider.error ?? 'Entreprise introuvable',
-            style: PharmaConnectTypography.body2.copyWith(
-              color: PharmaConnectColors.accentRed,
-            ),
+            style: context.text.body2.copyWith(color: context.palette.danger),
           ),
         ),
       );
@@ -58,9 +55,9 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
             Row(
               children: [
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.arrow_back,
-                    color: PharmaConnectColors.textPrimary,
+                    color: context.palette.textPrimary,
                   ),
                   onPressed: () => context.pop(),
                   padding: EdgeInsets.zero,
@@ -69,7 +66,7 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
                 Expanded(
                   child: Text(
                     company.name,
-                    style: PharmaConnectTypography.heading2,
+                    style: context.text.heading2,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -81,8 +78,8 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
                   icon: const Icon(Icons.edit),
                   label: const Text('Modifier'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: PharmaConnectColors.accentCyan,
-                    foregroundColor: PharmaConnectColors.textOnAccent,
+                    backgroundColor: context.palette.primary,
+                    foregroundColor: context.palette.onPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -150,38 +147,38 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
                           const SizedBox(height: 12),
                           if (company.legalName != null) ...[
                             _buildInfoRow('Raison sociale', company.legalName!),
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                           ],
                           if (company.registrationNumber != null) ...[
                             _buildInfoRow(
                               'N° Immatriculation',
                               company.registrationNumber!,
                             ),
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                           ],
                           if (company.taxId != null) ...[
                             _buildInfoRow('N° Fiscal', company.taxId!),
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                           ],
                           if (company.address != null) ...[
                             _buildInfoRow('Adresse', company.address!),
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                           ],
                           if (company.city != null) ...[
                             _buildInfoRow('Ville', company.city!),
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                           ],
                           if (company.phone != null) ...[
                             _buildInfoRow('Téléphone', company.phone!),
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                           ],
                           if (company.email != null) ...[
                             _buildInfoRow('Email', company.email!),
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                           ],
                           if (company.website != null) ...[
                             _buildInfoRow('Site web', company.website!),
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                           ],
                           if (company.contactPersonName != null) ...[
                             _buildInfoRow(
@@ -192,7 +189,7 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
                               Text(company.contactPersonPhone!),
                           ],
                           if (company.notes != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow('Notes', company.notes!),
                           ],
                         ],
@@ -202,20 +199,17 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
 
                     // Contracts section
                     if (provider.contracts.isNotEmpty) ...[
-                      const Text(
-                        '📄 Contrats',
-                        style: PharmaConnectTypography.heading3,
-                      ),
+                      Text('📄 Contrats', style: context.text.heading3),
                       const SizedBox(height: 8),
                       ...provider.contracts.take(3).map((contract) {
                         return Container(
                           padding: const EdgeInsets.all(12),
                           margin: const EdgeInsets.only(bottom: 4),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.04),
+                            color: context.palette.surfaceMuted,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.06),
+                              color: context.palette.borderSubtle,
                             ),
                           ),
                           child: Row(
@@ -226,14 +220,13 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
                                   children: [
                                     Text(
                                       contract.title,
-                                      style: PharmaConnectTypography.body2
-                                          .copyWith(
-                                            fontWeight: FontWeight.w500,
-                                          ),
+                                      style: context.text.body2.copyWith(
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
                                     Text(
                                       '${contract.typeLabel} • ${contract.statusLabel}',
-                                      style: PharmaConnectTypography.micro,
+                                      style: context.text.micro,
                                     ),
                                   ],
                                 ),
@@ -266,11 +259,8 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 120,
-            child: Text(label, style: PharmaConnectTypography.label),
-          ),
-          Expanded(child: Text(value, style: PharmaConnectTypography.body1)),
+          SizedBox(width: 120, child: Text(label, style: context.text.label)),
+          Expanded(child: Text(value, style: context.text.body1)),
         ],
       ),
     );
@@ -279,36 +269,36 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
   Color _typeColor(String type) {
     switch (type) {
       case 'hospital':
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       case 'clinic':
-        return PharmaConnectColors.accentCyan;
+        return context.palette.primary;
       case 'wholesaler':
-        return PharmaConnectColors.accentPurple;
+        return context.palette.secondary;
       case 'laboratory':
-        return PharmaConnectColors.accentGreen;
+        return context.palette.success;
       case 'pharmacy_chain':
-        return PharmaConnectColors.accentAmber;
+        return context.palette.warningStrong;
       case 'insurance':
-        return PharmaConnectColors.accentOrange;
+        return context.palette.warning;
       default:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
     }
   }
 
   Color _statusColor(String status) {
     switch (status) {
       case 'active':
-        return PharmaConnectColors.accentGreen;
+        return context.palette.success;
       case 'inactive':
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
       case 'pending':
-        return PharmaConnectColors.accentOrange;
+        return context.palette.warning;
       case 'suspended':
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       case 'archived':
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
       default:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
     }
   }
 }

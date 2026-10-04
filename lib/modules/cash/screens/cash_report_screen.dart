@@ -3,13 +3,12 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/utils/currency_formatter.dart';
 import '../providers/cash_provider.dart';
 import '../../auth/providers/auth_provider.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class CashReportScreen extends StatefulWidget {
   const CashReportScreen({super.key});
@@ -63,11 +62,11 @@ class _CashReportScreenState extends State<CashReportScreen> {
   Widget build(BuildContext context) {
     final pharmacyId = context.watch<AuthProvider>().pharmacyId;
     if (pharmacyId == null) {
-      return const Scaffold(
+      return Scaffold(
         body: Center(
           child: Text(
             'Aucune officine rattachée à ce compte pharmacien.',
-            style: PharmaConnectTypography.body2,
+            style: context.text.body2,
             textAlign: TextAlign.center,
           ),
         ),
@@ -87,18 +86,18 @@ class _CashReportScreenState extends State<CashReportScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       '📊 Rapport de caisse',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -149,18 +148,12 @@ class _CashReportScreenState extends State<CashReportScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 48,
-              color: PharmaConnectColors.accentRed,
-            ),
+            Icon(Icons.error_outline, size: 48, color: context.palette.danger),
             const SizedBox(height: 16),
             Text(
               provider.error!,
               textAlign: TextAlign.center,
-              style: PharmaConnectTypography.body2.copyWith(
-                color: PharmaConnectColors.accentRed,
-              ),
+              style: context.text.body2.copyWith(color: context.palette.danger),
             ),
             const SizedBox(height: 16),
             PrimaryButton(
@@ -191,7 +184,7 @@ class _CashReportScreenState extends State<CashReportScreen> {
               children: [
                 Text(
                   '${report['total_sessions'] ?? 0} session(s) sur la période',
-                  style: PharmaConnectTypography.body2,
+                  style: context.text.body2,
                 ),
                 const SizedBox(height: 12),
                 _buildRow('Fonds d\'ouverture', report['total_opening']),
@@ -199,7 +192,7 @@ class _CashReportScreenState extends State<CashReportScreen> {
                 _buildRow('Remboursements', report['total_refunds']),
                 _buildRow('Dépôts', report['total_deposits']),
                 _buildRow('Retraits', report['total_withdrawals']),
-                const Divider(color: Colors.white12),
+                Divider(color: context.palette.veil(0.12)),
                 _buildRow('Solde de clôture', report['total_closing']),
                 _buildRow(
                   'Trésorerie nette',
@@ -223,10 +216,8 @@ class _CashReportScreenState extends State<CashReportScreen> {
           Text(
             label,
             style: isTotal
-                ? PharmaConnectTypography.body1.copyWith(
-                    fontWeight: FontWeight.w700,
-                  )
-                : PharmaConnectTypography.body2,
+                ? context.text.body1.copyWith(fontWeight: FontWeight.w700)
+                : context.text.body2,
           ),
           const Spacer(),
           Text(

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import '../models/business_company.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class CompanyCard extends StatelessWidget {
   final BusinessCompany company;
@@ -21,7 +20,7 @@ class CompanyCard extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: _typeColor(company.type).withValues(alpha: 0.15),
+              color: _typeColor(context, company.type).withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Center(
@@ -30,7 +29,7 @@ class CompanyCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
-                  color: _typeColor(company.type),
+                  color: _typeColor(context, company.type),
                 ),
               ),
             ),
@@ -42,7 +41,7 @@ class CompanyCard extends StatelessWidget {
               children: [
                 Text(
                   company.name,
-                  style: PharmaConnectTypography.body1.copyWith(
+                  style: context.text.body1.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                   maxLines: 1,
@@ -50,19 +49,22 @@ class CompanyCard extends StatelessWidget {
                 ),
                 Text(
                   company.typeLabel,
-                  style: PharmaConnectTypography.body2,
+                  style: context.text.body2,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 if (company.city != null)
-                  Text(company.city!, style: PharmaConnectTypography.micro),
+                  Text(company.city!, style: context.text.micro),
               ],
             ),
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
-              color: _statusColor(company.status).withValues(alpha: 0.15),
+              color: _statusColor(
+                context,
+                company.status,
+              ).withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -70,49 +72,49 @@ class CompanyCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w500,
-                color: _statusColor(company.status),
+                color: _statusColor(context, company.status),
               ),
             ),
           ),
-          const Icon(Icons.chevron_right, color: Colors.white24),
+          Icon(Icons.chevron_right, color: context.palette.veil(0.24)),
         ],
       ),
     );
   }
 
-  Color _typeColor(String type) {
+  Color _typeColor(BuildContext context, String type) {
     switch (type) {
       case 'hospital':
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       case 'clinic':
-        return PharmaConnectColors.accentCyan;
+        return context.palette.primary;
       case 'wholesaler':
-        return PharmaConnectColors.accentPurple;
+        return context.palette.secondary;
       case 'laboratory':
-        return PharmaConnectColors.accentGreen;
+        return context.palette.success;
       case 'pharmacy_chain':
-        return PharmaConnectColors.accentAmber;
+        return context.palette.warningStrong;
       case 'insurance':
-        return PharmaConnectColors.accentOrange;
+        return context.palette.warning;
       default:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
     }
   }
 
-  Color _statusColor(String status) {
+  Color _statusColor(BuildContext context, String status) {
     switch (status) {
       case 'active':
-        return PharmaConnectColors.accentGreen;
+        return context.palette.success;
       case 'inactive':
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
       case 'pending':
-        return PharmaConnectColors.accentOrange;
+        return context.palette.warning;
       case 'suspended':
-        return PharmaConnectColors.accentRed;
+        return context.palette.danger;
       case 'archived':
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
       default:
-        return PharmaConnectColors.textSecondary;
+        return context.palette.textSecondary;
     }
   }
 }

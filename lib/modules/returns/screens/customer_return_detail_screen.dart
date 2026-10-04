@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/utils/currency_formatter.dart';
 import '../providers/returns_provider.dart';
 import '../models/customer_return.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class CustomerReturnDetailScreen extends StatefulWidget {
   final String returnId;
@@ -43,9 +42,7 @@ class _CustomerReturnDetailScreenState
         body: Center(
           child: Text(
             provider.error ?? 'Retour introuvable',
-            style: PharmaConnectTypography.body2.copyWith(
-              color: PharmaConnectColors.accentRed,
-            ),
+            style: context.text.body2.copyWith(color: context.palette.danger),
           ),
         ),
       );
@@ -60,9 +57,9 @@ class _CustomerReturnDetailScreenState
             Row(
               children: [
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.arrow_back,
-                    color: PharmaConnectColors.textPrimary,
+                    color: context.palette.textPrimary,
                   ),
                   onPressed: () => context.pop(),
                   padding: EdgeInsets.zero,
@@ -71,7 +68,7 @@ class _CustomerReturnDetailScreenState
                 Expanded(
                   child: Text(
                     returnData.returnNumber,
-                    style: PharmaConnectTypography.heading2,
+                    style: context.text.heading2,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -116,25 +113,25 @@ class _CustomerReturnDetailScreenState
                                 returnData.customerId ??
                                 'Non renseigné',
                           ),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           _buildInfoRow(
                             'Date',
                             _formatDate(returnData.returnDate),
                           ),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           _buildInfoRow(
                             'Motif',
                             returnData.reasonName ??
                                 returnData.reasonText ??
                                 'Non précisé',
                           ),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           _buildInfoRow(
                             'Montant',
                             CurrencyFormatter.format(returnData.totalAmount),
                           ),
                           if (returnData.refundAmount != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow(
                               'Remboursé',
                               CurrencyFormatter.format(
@@ -143,7 +140,7 @@ class _CustomerReturnDetailScreenState
                             ),
                           ],
                           if (returnData.notes != null) ...[
-                            const Divider(color: Colors.white12),
+                            Divider(color: context.palette.veil(0.12)),
                             _buildInfoRow('Notes', returnData.notes!),
                           ],
                         ],
@@ -152,57 +149,46 @@ class _CustomerReturnDetailScreenState
                     const SizedBox(height: 16),
 
                     if (returnData.status == ReturnStatus.pending) ...[
-                      const Text(
-                        'Actions',
-                        style: PharmaConnectTypography.heading3,
-                      ),
+                      Text('Actions', style: context.text.heading3),
                       const SizedBox(height: 8),
                       Row(
                         children: [
                           Expanded(
                             child: ElevatedButton.icon(
-                              onPressed: () => _updateStatus(
-                                context,
-                                ReturnStatus.approved,
-                              ),
+                              onPressed: () =>
+                                  _updateStatus(context, ReturnStatus.approved),
                               icon: const Icon(Icons.check),
                               label: const Text('Approuver'),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    PharmaConnectColors.accentGreen,
-                                foregroundColor:
-                                    PharmaConnectColors.textOnAccent,
+                                backgroundColor: context.palette.success,
+                                foregroundColor: context.palette.onPrimary,
                               ),
                             ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: ElevatedButton.icon(
-                              onPressed: () => _updateStatus(
-                                context,
-                                ReturnStatus.rejected,
-                              ),
+                              onPressed: () =>
+                                  _updateStatus(context, ReturnStatus.rejected),
                               icon: const Icon(Icons.close),
                               label: const Text('Rejeter'),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: PharmaConnectColors.accentRed,
-                                foregroundColor:
-                                    PharmaConnectColors.textOnAccent,
+                                backgroundColor: context.palette.danger,
+                                foregroundColor: context.palette.onPrimary,
                               ),
                             ),
                           ),
                         ],
                       ),
-                    ] else if (returnData.status ==
-                        ReturnStatus.approved) ...[
+                    ] else if (returnData.status == ReturnStatus.approved) ...[
                       ElevatedButton.icon(
                         onPressed: () =>
                             _updateStatus(context, ReturnStatus.completed),
                         icon: const Icon(Icons.done_all),
                         label: const Text('Marquer comme terminé'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: PharmaConnectColors.accentCyan,
-                          foregroundColor: PharmaConnectColors.textOnAccent,
+                          backgroundColor: context.palette.primary,
+                          foregroundColor: context.palette.onPrimary,
                         ),
                       ),
                     ],
@@ -230,14 +216,14 @@ class _CustomerReturnDetailScreenState
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Statut mis à jour : ${newStatus.label}'),
-          backgroundColor: PharmaConnectColors.accentGreen,
+          backgroundColor: context.palette.success,
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(provider.error ?? 'Erreur lors de la mise à jour'),
-          backgroundColor: PharmaConnectColors.accentRed,
+          backgroundColor: context.palette.danger,
         ),
       );
     }
@@ -249,11 +235,8 @@ class _CustomerReturnDetailScreenState
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 100,
-            child: Text(label, style: PharmaConnectTypography.label),
-          ),
-          Expanded(child: Text(value, style: PharmaConnectTypography.body1)),
+          SizedBox(width: 100, child: Text(label, style: context.text.label)),
+          Expanded(child: Text(value, style: context.text.body1)),
         ],
       ),
     );

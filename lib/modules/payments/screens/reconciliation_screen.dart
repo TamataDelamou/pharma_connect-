@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
 import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../../auth/models/user_role.dart';
@@ -12,6 +11,7 @@ import '../../auth/providers/auth_provider.dart';
 import '../providers/payment_provider.dart';
 import '../models/transaction_status.dart';
 import '../../../core/utils/currency_formatter.dart';
+import '../../../core/theme/palette.dart';
 
 class ReconciliationScreen extends StatefulWidget {
   const ReconciliationScreen({super.key});
@@ -65,11 +65,15 @@ class _ReconciliationScreenState extends State<ReconciliationScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.lock_outline, size: 48, color: Colors.white24),
+                Icon(
+                  Icons.lock_outline,
+                  size: 48,
+                  color: context.palette.veil(0.24),
+                ),
                 const SizedBox(height: 16),
                 Text(
                   'Réservé aux pharmaciens de l\'officine.',
-                  style: PharmaConnectTypography.body2,
+                  style: context.text.body2,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16),
@@ -90,7 +94,7 @@ class _ReconciliationScreenState extends State<ReconciliationScreen> {
             padding: const EdgeInsets.all(24),
             child: Text(
               'Aucune officine rattachée à ce compte pharmacien.',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
               textAlign: TextAlign.center,
             ),
           ),
@@ -130,18 +134,18 @@ class _ReconciliationScreenState extends State<ReconciliationScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Réconciliation',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -151,9 +155,9 @@ class _ReconciliationScreenState extends State<ReconciliationScreen> {
               trailing: [const KernelBadge()],
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Vérifiez et réconciliez vos transactions',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
             ),
             const SizedBox(height: 24),
 
@@ -167,48 +171,48 @@ class _ReconciliationScreenState extends State<ReconciliationScreen> {
                     label: 'En attente',
                     value: pendingTransactions.length.toString(),
                     amount: totalPending,
-                    color: PharmaConnectColors.accentOrange,
+                    color: context.palette.warning,
                   ),
                   const SizedBox(width: 12),
                   _buildSummaryCard(
                     label: 'À réconcilier',
                     value: completedTransactions.length.toString(),
                     amount: totalCompleted,
-                    color: PharmaConnectColors.accentCyan,
+                    color: context.palette.primary,
                   ),
                   const SizedBox(width: 12),
                   _buildSummaryCard(
                     label: 'Total',
                     value: provider.transactions.length.toString(),
                     amount: totalPending + totalCompleted,
-                    color: PharmaConnectColors.accentGreen,
+                    color: context.palette.success,
                   ),
                 ],
               ),
               const SizedBox(height: 24),
 
               // Transactions en attente
-              const Text(
+              Text(
                 'Transactions en attente de réconciliation',
-                style: PharmaConnectTypography.heading3,
+                style: context.text.heading3,
               ),
               const SizedBox(height: 8),
 
               Expanded(
                 child: pendingTransactions.isEmpty
-                    ? const Center(
+                    ? Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(
                               Icons.check_circle_outline,
                               size: 48,
-                              color: PharmaConnectColors.accentGreen,
+                              color: context.palette.success,
                             ),
                             SizedBox(height: 8),
                             Text(
                               'Toutes les transactions sont réconciliées',
-                              style: PharmaConnectTypography.body2,
+                              style: context.text.body2,
                             ),
                           ],
                         ),
@@ -221,10 +225,10 @@ class _ReconciliationScreenState extends State<ReconciliationScreen> {
                             margin: const EdgeInsets.only(bottom: 8),
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.04),
+                              color: context.palette.surfaceMuted,
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.06),
+                                color: context.palette.borderSubtle,
                                 width: 1,
                               ),
                             ),
@@ -237,18 +241,17 @@ class _ReconciliationScreenState extends State<ReconciliationScreen> {
                                     children: [
                                       Text(
                                         '#${transaction.id}',
-                                        style: PharmaConnectTypography.body1
-                                            .copyWith(
-                                              fontWeight: FontWeight.w600,
-                                            ),
+                                        style: context.text.body1.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                       ),
                                       Text(
                                         transaction.pharmacyName ?? 'Pharmacie',
-                                        style: PharmaConnectTypography.body2,
+                                        style: context.text.body2,
                                       ),
                                       Text(
                                         '${CurrencyFormatter.format(transaction.finalAmount)} • ${_formatDate(transaction.createdAt)}',
-                                        style: PharmaConnectTypography.micro,
+                                        style: context.text.micro,
                                       ),
                                     ],
                                   ),
@@ -306,18 +309,15 @@ class _ReconciliationScreenState extends State<ReconciliationScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(label, style: PharmaConnectTypography.micro),
+            Text(label, style: context.text.micro),
             Text(
               value,
-              style: PharmaConnectTypography.kpiMedium.copyWith(
+              style: context.text.kpiMedium.copyWith(
                 color: color,
                 fontSize: 20,
               ),
             ),
-            Text(
-              CurrencyFormatter.format(amount),
-              style: PharmaConnectTypography.micro,
-            ),
+            Text(CurrencyFormatter.format(amount), style: context.text.micro),
           ],
         ),
       ),

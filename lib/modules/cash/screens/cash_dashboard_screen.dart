@@ -3,8 +3,6 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_connect/core/kernel/kernel_badge.dart';
-import 'package:pharma_connect/core/theme/colors.dart';
-import 'package:pharma_connect/core/theme/typography.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
 import 'package:pharma_connect/core/widgets/buttons/secondary_button.dart';
@@ -13,6 +11,7 @@ import 'package:pharma_connect/core/utils/currency_formatter.dart';
 import '../providers/cash_provider.dart';
 import '../models/cash_movement.dart';
 import '../../auth/providers/auth_provider.dart';
+import 'package:pharma_connect/core/theme/palette.dart';
 
 class CashDashboardScreen extends StatefulWidget {
   const CashDashboardScreen({super.key});
@@ -39,11 +38,11 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
   Widget build(BuildContext context) {
     final pharmacyId = context.watch<AuthProvider>().pharmacyId;
     if (pharmacyId == null) {
-      return const Scaffold(
+      return Scaffold(
         body: Center(
           child: Text(
             'Aucune officine rattachée à ce compte pharmacien.',
-            style: PharmaConnectTypography.body2,
+            style: context.text.body2,
             textAlign: TextAlign.center,
           ),
         ),
@@ -63,18 +62,18 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       '💰 Caisse',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -90,17 +89,15 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: PharmaConnectColors.accentGreen.withValues(
-                        alpha: 0.15,
-                      ),
+                      color: context.palette.success.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: const Text(
+                    child: Text(
                       '🟢 Ouverte',
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: PharmaConnectColors.accentGreen,
+                        color: context.palette.success,
                       ),
                     ),
                   )
@@ -111,17 +108,15 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: PharmaConnectColors.accentRed.withValues(
-                        alpha: 0.15,
-                      ),
+                      color: context.palette.danger.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: const Text(
+                    child: Text(
                       '🔴 Fermée',
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: PharmaConnectColors.accentRed,
+                        color: context.palette.danger,
                       ),
                     ),
                   ),
@@ -137,16 +132,16 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.error_outline,
                             size: 48,
-                            color: PharmaConnectColors.accentRed,
+                            color: context.palette.danger,
                           ),
                           const SizedBox(height: 16),
                           Text(
                             provider.error!,
-                            style: PharmaConnectTypography.body2.copyWith(
-                              color: PharmaConnectColors.accentRed,
+                            style: context.text.body2.copyWith(
+                              color: context.palette.danger,
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -213,7 +208,7 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Résumé', style: PharmaConnectTypography.heading3),
+                  Text('Résumé', style: context.text.heading3),
                   const SizedBox(height: 8),
                   _buildSummaryRow(
                     'Ventes',
@@ -231,7 +226,7 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
                     'Retraits',
                     provider.summary!['total_withdrawals'] as int? ?? 0,
                   ),
-                  const Divider(color: Colors.white12),
+                  Divider(color: context.palette.veil(0.12)),
                   _buildSummaryRow(
                     'Solde attendu',
                     session.expectedBalance ?? 0,
@@ -245,10 +240,7 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
 
           // Movements
           if (provider.movements.isNotEmpty) ...[
-            const Text(
-              'Mouvements récents',
-              style: PharmaConnectTypography.heading3,
-            ),
+            Text('Mouvements récents', style: context.text.heading3),
             const SizedBox(height: 8),
             ...provider.movements.take(5).map((movement) {
               return Container(
@@ -256,16 +248,13 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
                 margin: const EdgeInsets.only(bottom: 4),
                 decoration: BoxDecoration(
                   color: movement.isIncome
-                      ? PharmaConnectColors.accentGreen.withValues(alpha: 0.06)
-                      : PharmaConnectColors.accentRed.withValues(alpha: 0.06),
+                      ? context.palette.success.withValues(alpha: 0.06)
+                      : context.palette.danger.withValues(alpha: 0.06),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Row(
                   children: [
-                    Text(
-                      movement.type.label,
-                      style: PharmaConnectTypography.micro,
-                    ),
+                    Text(movement.type.label, style: context.text.micro),
                     const Spacer(),
                     Text(
                       movement.isIncome
@@ -274,8 +263,8 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         color: movement.isIncome
-                            ? PharmaConnectColors.accentGreen
-                            : PharmaConnectColors.accentRed,
+                            ? context.palette.success
+                            : context.palette.danger,
                       ),
                     ),
                   ],
@@ -320,21 +309,15 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
+          Icon(
             Icons.account_balance_wallet_outlined,
             size: 64,
-            color: Colors.white24,
+            color: context.palette.veil(0.24),
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Aucune caisse ouverte',
-            style: PharmaConnectTypography.heading3,
-          ),
+          Text('Aucune caisse ouverte', style: context.text.heading3),
           const SizedBox(height: 8),
-          const Text(
-            'Ouvrez une session pour commencer',
-            style: PharmaConnectTypography.body2,
-          ),
+          Text('Ouvrez une session pour commencer', style: context.text.body2),
           const SizedBox(height: 24),
           PrimaryButton(
             label: '🟢 Ouvrir la caisse',
@@ -351,11 +334,8 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         children: [
-          SizedBox(
-            width: 120,
-            child: Text(label, style: PharmaConnectTypography.micro),
-          ),
-          Expanded(child: Text(value, style: PharmaConnectTypography.body2)),
+          SizedBox(width: 120, child: Text(label, style: context.text.micro)),
+          Expanded(child: Text(value, style: context.text.body2)),
         ],
       ),
     );
@@ -366,12 +346,7 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         children: [
-          Text(
-            label,
-            style: isTotal
-                ? PharmaConnectTypography.body1
-                : PharmaConnectTypography.body2,
-          ),
+          Text(label, style: isTotal ? context.text.body1 : context.text.body2),
           const Spacer(),
           Text(
             CurrencyFormatter.format(amount),
@@ -395,7 +370,7 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: PharmaConnectColors.primaryDeep,
+        backgroundColor: context.palette.background,
         title: const Text('🟢 Ouvrir la caisse'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -447,16 +422,16 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
               );
               if (success && context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
+                  SnackBar(
                     content: Text('Caisse ouverte avec succès'),
-                    backgroundColor: PharmaConnectColors.accentGreen,
+                    backgroundColor: context.palette.success,
                   ),
                 );
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: PharmaConnectColors.accentGreen,
-              foregroundColor: PharmaConnectColors.textPrimary,
+              backgroundColor: context.palette.success,
+              foregroundColor: context.palette.textPrimary,
             ),
             child: const Text('Ouvrir'),
           ),
@@ -472,7 +447,7 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: PharmaConnectColors.primaryDeep,
+        backgroundColor: context.palette.background,
         title: const Text('🔒 Fermer la caisse'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -519,16 +494,16 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
               );
               if (success && context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
+                  SnackBar(
                     content: Text('Caisse fermée avec succès'),
-                    backgroundColor: PharmaConnectColors.accentGreen,
+                    backgroundColor: context.palette.success,
                   ),
                 );
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: PharmaConnectColors.accentOrange,
-              foregroundColor: PharmaConnectColors.textPrimary,
+              backgroundColor: context.palette.warning,
+              foregroundColor: context.palette.textPrimary,
             ),
             child: const Text('Fermer'),
           ),

@@ -3,12 +3,11 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../providers/payment_provider.dart';
 import '../models/payment_method.dart';
+import '../../../core/theme/palette.dart';
 
 class TransactionDetailScreen extends StatefulWidget {
   final String transactionId;
@@ -46,8 +45,8 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
             children: [
               Text(
                 provider.error ?? 'Transaction introuvable',
-                style: PharmaConnectTypography.body2.copyWith(
-                  color: PharmaConnectColors.accentRed,
+                style: context.text.body2.copyWith(
+                  color: context.palette.danger,
                 ),
               ),
               const SizedBox(height: 16),
@@ -72,18 +71,18 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Détail de la transaction',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -109,9 +108,9 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                                 width: 56,
                                 height: 56,
                                 decoration: BoxDecoration(
-                                  color: transaction.statusColor.withValues(
-                                    alpha: 0.15,
-                                  ),
+                                  color: transaction.statusColor
+                                      .of(context.palette)
+                                      .withValues(alpha: 0.15),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Icon(
@@ -123,7 +122,9 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                                             PaymentMethod.bankCard
                                       ? Icons.credit_card
                                       : Icons.payments,
-                                  color: transaction.statusColor,
+                                  color: transaction.statusColor.of(
+                                    context.palette,
+                                  ),
                                   size: 28,
                                 ),
                               ),
@@ -134,11 +135,11 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                                   children: [
                                     Text(
                                       transaction.pharmacyName ?? 'Transaction',
-                                      style: PharmaConnectTypography.heading3,
+                                      style: context.text.heading3,
                                     ),
                                     Text(
                                       '#${transaction.id}',
-                                      style: PharmaConnectTypography.body2,
+                                      style: context.text.body2,
                                     ),
                                   ],
                                 ),
@@ -149,9 +150,9 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: transaction.statusColor.withValues(
-                                    alpha: 0.15,
-                                  ),
+                                  color: transaction.statusColor
+                                      .of(context.palette)
+                                      .withValues(alpha: 0.15),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Text(
@@ -159,28 +160,27 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
-                                    color: transaction.statusColor,
+                                    color: transaction.statusColor.of(
+                                      context.palette,
+                                    ),
                                   ),
                                 ),
                               ),
                             ],
                           ),
                           const SizedBox(height: 16),
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           const SizedBox(height: 12),
                           Text(
                             CurrencyFormatter.format(transaction.finalAmount),
-                            style: PharmaConnectTypography.kpiSmall,
+                            style: context.text.kpiSmall,
                           ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 24),
 
-                    const Text(
-                      'Détails',
-                      style: PharmaConnectTypography.heading3,
-                    ),
+                    Text('Détails', style: context.text.heading3),
                     const SizedBox(height: 8),
                     GlassCard(
                       child: Column(
@@ -208,7 +208,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                             value: CurrencyFormatter.format(
                               transaction.finalAmount,
                             ),
-                            valueColor: PharmaConnectColors.accentGreen,
+                            valueColor: context.palette.success,
                           ),
                           _DetailRow(
                             label: 'Méthode',
@@ -217,7 +217,9 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                           _DetailRow(
                             label: 'Statut',
                             value: transaction.statusLabel,
-                            valueColor: transaction.statusColor,
+                            valueColor: transaction.statusColor.of(
+                              context.palette,
+                            ),
                           ),
                           if (transaction.pharmacyName != null)
                             _DetailRow(
@@ -295,14 +297,14 @@ class _DetailRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(child: Text(label, style: PharmaConnectTypography.label)),
+          Expanded(child: Text(label, style: context.text.label)),
           Expanded(
             flex: 2,
             child: Text(
               value,
               textAlign: TextAlign.right,
-              style: PharmaConnectTypography.body2.copyWith(
-                color: valueColor ?? PharmaConnectColors.textPrimary,
+              style: context.text.body2.copyWith(
+                color: valueColor ?? context.palette.textPrimary,
                 fontWeight: FontWeight.w600,
               ),
             ),

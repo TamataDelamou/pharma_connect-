@@ -5,8 +5,6 @@ import 'package:provider/provider.dart';
 
 import '../../../core/kernel/kernel_badge.dart';
 import '../../../core/services/offline_sync_service.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../auth/services/profile_service.dart';
@@ -14,6 +12,7 @@ import '../models/payment_method.dart';
 import '../providers/payment_provider.dart';
 import '../widgets/transaction_list_tile.dart';
 import '../widgets/wallet_balance_card.dart';
+import '../../../core/theme/palette.dart';
 
 class WalletScreen extends StatefulWidget {
   const WalletScreen({super.key});
@@ -66,18 +65,18 @@ class _WalletScreenState extends State<WalletScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Portefeuille GSG',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -91,7 +90,7 @@ class _WalletScreenState extends State<WalletScreen> {
                   icon: const Icon(Icons.add, size: 18),
                   label: const Text('Recharger'),
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.white24),
+                    side: BorderSide(color: context.palette.veil(0.24)),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
                       vertical: 10,
@@ -101,9 +100,9 @@ class _WalletScreenState extends State<WalletScreen> {
               ],
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Gérez votre portefeuille et vos transactions',
-              style: PharmaConnectTypography.body2,
+              style: context.text.body2,
             ),
             const SizedBox(height: 24),
 
@@ -115,19 +114,17 @@ class _WalletScreenState extends State<WalletScreen> {
                 padding: const EdgeInsets.all(12),
                 margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
-                  color: PharmaConnectColors.accentAmber.withValues(alpha: 0.1),
+                  color: context.palette.warningStrong.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: PharmaConnectColors.accentAmber.withValues(
-                      alpha: 0.2,
-                    ),
+                    color: context.palette.warningStrong.withValues(alpha: 0.2),
                   ),
                 ),
                 child: Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.wifi_off,
-                      color: PharmaConnectColors.accentAmber,
+                      color: context.palette.warningStrong,
                       size: 16,
                     ),
                     const SizedBox(width: 8),
@@ -135,7 +132,7 @@ class _WalletScreenState extends State<WalletScreen> {
                       child: Text(
                         provider.error ??
                             'Hors connexion — dernières données synchronisées affichées.',
-                        style: PharmaConnectTypography.micro,
+                        style: context.text.micro,
                       ),
                     ),
                   ],
@@ -158,27 +155,24 @@ class _WalletScreenState extends State<WalletScreen> {
               const SizedBox(height: 16),
 
               // Dernières transactions
-              const Text(
-                'Dernières transactions',
-                style: PharmaConnectTypography.heading3,
-              ),
+              Text('Dernières transactions', style: context.text.heading3),
               const SizedBox(height: 8),
 
               Expanded(
                 child: provider.transactions.isEmpty
-                    ? const Center(
+                    ? Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(
                               Icons.receipt_long_outlined,
                               size: 48,
-                              color: Colors.white24,
+                              color: context.palette.veil(0.24),
                             ),
                             SizedBox(height: 8),
                             Text(
                               'Aucune transaction',
-                              style: PharmaConnectTypography.body2,
+                              style: context.text.body2,
                             ),
                           ],
                         ),
@@ -216,7 +210,7 @@ class _WalletScreenState extends State<WalletScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: PharmaConnectColors.primaryDeep,
+        backgroundColor: context.palette.background,
         title: const Text('Recharger le portefeuille'),
         content: StatefulBuilder(
           builder: (context, setState) {
@@ -245,15 +239,13 @@ class _WalletScreenState extends State<WalletScreen> {
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? PharmaConnectColors.accentCyan.withValues(
-                                alpha: 0.1,
-                              )
+                            ? context.palette.primary.withValues(alpha: 0.1)
                             : Colors.transparent,
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
                           color: isSelected
-                              ? PharmaConnectColors.accentCyan
-                              : Colors.white.withValues(alpha: 0.06),
+                              ? context.palette.primary
+                              : context.palette.surface,
                           width: isSelected ? 2 : 1,
                         ),
                       ),
@@ -266,9 +258,9 @@ class _WalletScreenState extends State<WalletScreen> {
                           const SizedBox(width: 8),
                           Expanded(child: Text(method.label)),
                           if (isSelected) ...[
-                            const Icon(
+                            Icon(
                               Icons.check_circle,
-                              color: PharmaConnectColors.accentCyan,
+                              color: context.palette.primary,
                               size: 18,
                             ),
                           ],
@@ -305,12 +297,12 @@ class _WalletScreenState extends State<WalletScreen> {
               if (!hasInternet) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
+                    SnackBar(
                       content: Text(
                         'Recharge indisponible hors connexion. '
                         'Reconnectez-vous pour recharger votre portefeuille.',
                       ),
-                      backgroundColor: PharmaConnectColors.accentRed,
+                      backgroundColor: context.palette.danger,
                     ),
                   );
                 }
@@ -324,16 +316,16 @@ class _WalletScreenState extends State<WalletScreen> {
               );
               if (success && context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
+                  SnackBar(
                     content: Text('Portefeuille rechargé avec succès !'),
-                    backgroundColor: PharmaConnectColors.accentGreen,
+                    backgroundColor: context.palette.success,
                   ),
                 );
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: PharmaConnectColors.accentCyan,
-              foregroundColor: PharmaConnectColors.textOnAccent,
+              backgroundColor: context.palette.primary,
+              foregroundColor: context.palette.onPrimary,
             ),
             child: const Text('Recharger'),
           ),

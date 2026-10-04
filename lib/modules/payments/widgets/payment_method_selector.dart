@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/colors.dart';
 import '../../../core/theme/spacing.dart';
-import '../../../core/theme/typography.dart';
 import '../models/payment_method.dart';
+import '../../../core/theme/palette.dart';
 
 class PaymentMethodSelector extends StatefulWidget {
   final List<PaymentMethod> availableMethods;
@@ -28,7 +27,7 @@ class _PaymentMethodSelectorState extends State<PaymentMethodSelector> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Moyen de paiement', style: PharmaConnectTypography.label),
+        Text('Moyen de paiement', style: context.text.label),
         const SizedBox(height: 8),
         ...widget.availableMethods.map((method) {
           final isSelected = widget.selectedMethod == method;
@@ -42,15 +41,15 @@ class _PaymentMethodSelectorState extends State<PaymentMethodSelector> {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: isSelected
-                    ? PharmaConnectColors.accentCyan.withValues(alpha: 0.1)
-                    : Colors.white.withValues(alpha: 0.04),
+                    ? context.palette.primary.withValues(alpha: 0.1)
+                    : context.palette.surfaceMuted,
                 borderRadius: BorderRadius.circular(
                   PharmaConnectSpacing.radiusMd,
                 ),
                 border: Border.all(
                   color: isSelected
-                      ? PharmaConnectColors.accentCyan
-                      : Colors.white.withValues(alpha: 0.06),
+                      ? context.palette.primary
+                      : context.palette.surface,
                   width: isSelected ? 2 : 1,
                 ),
               ),
@@ -61,7 +60,7 @@ class _PaymentMethodSelectorState extends State<PaymentMethodSelector> {
                   Expanded(
                     child: Text(
                       method.label,
-                      style: PharmaConnectTypography.body1.copyWith(
+                      style: context.text.body1.copyWith(
                         fontWeight: isSelected
                             ? FontWeight.w600
                             : FontWeight.w400,
@@ -75,27 +74,22 @@ class _PaymentMethodSelectorState extends State<PaymentMethodSelector> {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: PharmaConnectColors.accentGreen.withValues(alpha: 
-                          0.15,
-                        ),
+                        color: context.palette.success.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: const Text(
+                      child: Text(
                         '2% cashback',
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
-                          color: PharmaConnectColors.accentGreen,
+                          color: context.palette.success,
                         ),
                       ),
                     ),
                   ],
                   if (isSelected) ...[
                     const SizedBox(width: 8),
-                    const Icon(
-                      Icons.check_circle,
-                      color: PharmaConnectColors.accentCyan,
-                    ),
+                    Icon(Icons.check_circle, color: context.palette.primary),
                   ],
                 ],
               ),

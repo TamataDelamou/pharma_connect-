@@ -3,8 +3,6 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
@@ -13,6 +11,7 @@ import '../../auth/providers/auth_provider.dart';
 import '../models/payment_method.dart';
 import '../providers/payment_provider.dart';
 import '../widgets/payment_method_selector.dart';
+import '../../../core/theme/palette.dart';
 
 class PaymentScreen extends StatefulWidget {
   final int amount;
@@ -84,18 +83,18 @@ class _PaymentScreenState extends State<PaymentScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Paiement',
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -117,9 +116,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Résumé de la commande',
-                            style: PharmaConnectTypography.heading3,
+                            style: context.text.heading3,
                           ),
                           const SizedBox(height: 8),
                           if (widget.pharmacyName != null) ...[
@@ -128,18 +127,15 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           if (widget.reservationId != null) ...[
                             Text('Réservation : #${widget.reservationId}'),
                           ],
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           const SizedBox(height: 8),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
-                                'Total',
-                                style: PharmaConnectTypography.body1,
-                              ),
+                              Text('Total', style: context.text.body1),
                               Text(
                                 CurrencyFormatter.format(widget.amount),
-                                style: PharmaConnectTypography.body1.copyWith(
+                                style: context.text.body1.copyWith(
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -152,11 +148,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
                               children: [
                                 Text(
                                   'Frais de service (1%)',
-                                  style: PharmaConnectTypography.body2,
+                                  style: context.text.body2,
                                 ),
                                 Text(
                                   '+ ${CurrencyFormatter.format(feeAmount)}',
-                                  style: PharmaConnectTypography.body2,
+                                  style: context.text.body2,
                                 ),
                               ],
                             ),
@@ -168,34 +164,34 @@ class _PaymentScreenState extends State<PaymentScreen> {
                               children: [
                                 Text(
                                   'Cashback (2%)',
-                                  style: PharmaConnectTypography.body2.copyWith(
-                                    color: PharmaConnectColors.accentGreen,
+                                  style: context.text.body2.copyWith(
+                                    color: context.palette.success,
                                   ),
                                 ),
                                 Text(
                                   '- ${CurrencyFormatter.format(cashbackAmount)}',
-                                  style: PharmaConnectTypography.body2.copyWith(
-                                    color: PharmaConnectColors.accentGreen,
+                                  style: context.text.body2.copyWith(
+                                    color: context.palette.success,
                                   ),
                                 ),
                               ],
                             ),
                           ],
-                          const Divider(color: Colors.white12),
+                          Divider(color: context.palette.veil(0.12)),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
                                 'À payer',
-                                style: PharmaConnectTypography.body1.copyWith(
+                                style: context.text.body1.copyWith(
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
                               Text(
                                 CurrencyFormatter.format(finalAmount),
-                                style: PharmaConnectTypography.body1.copyWith(
+                                style: context.text.body1.copyWith(
                                   fontWeight: FontWeight.w700,
-                                  color: PharmaConnectColors.accentCyan,
+                                  color: context.palette.primary,
                                 ),
                               ),
                             ],
@@ -226,12 +222,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
                             onChanged: (value) {
                               setState(() => _useCashback = value ?? true);
                             },
-                            activeColor: PharmaConnectColors.accentCyan,
+                            activeColor: context.palette.primary,
                           ),
                           Expanded(
                             child: Text(
                               'Utiliser mon cashback (${CurrencyFormatter.format(cashbackAmount)})',
-                              style: PharmaConnectTypography.body2,
+                              style: context.text.body2,
                             ),
                           ),
                         ],
@@ -243,10 +239,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     // jusqu'ici jamais exposé côté UI.
                     if (_selectedMethod == PaymentMethod.installment) ...[
                       const SizedBox(height: 8),
-                      const Text(
-                        'Nombre d\'échéances',
-                        style: PharmaConnectTypography.label,
-                      ),
+                      Text('Nombre d\'échéances', style: context.text.label),
                       const SizedBox(height: 8),
                       Row(
                         children: [3, 6, 12].map((n) {
@@ -258,13 +251,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
                               selected: isSelected,
                               onSelected: (_) =>
                                   setState(() => _numberOfPayments = n),
-                              selectedColor: PharmaConnectColors.accentCyan
-                                  .withValues(alpha: 0.2),
+                              selectedColor: context.palette.primary.withValues(
+                                alpha: 0.2,
+                              ),
                               backgroundColor: Colors.transparent,
                               side: BorderSide(
                                 color: isSelected
-                                    ? PharmaConnectColors.accentCyan
-                                    : Colors.white24,
+                                    ? context.palette.primary
+                                    : context.palette.veil(0.24),
                               ),
                             ),
                           );
@@ -294,12 +288,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         if (!hasInternet) {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
+                              SnackBar(
                                 content: Text(
                                   'Paiement indisponible hors connexion. '
                                   'Reconnectez-vous pour régler cette commande.',
                                 ),
-                                backgroundColor: PharmaConnectColors.accentRed,
+                                backgroundColor: context.palette.danger,
                               ),
                             );
                           }
@@ -316,11 +310,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         final userId = auth.userId;
                         if (userId == null) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
+                            SnackBar(
                               content: Text(
                                 'Vous devez être connecté pour payer.',
                               ),
-                              backgroundColor: PharmaConnectColors.accentRed,
+                              backgroundColor: context.palette.danger,
                             ),
                           );
                           return;
@@ -352,13 +346,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
                             // C225 / D67 : le paiement n'est « payé » qu'une
                             // fois l'encaissement confirmé par l'officine.
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
+                              SnackBar(
                                 content: Text(
                                   'Paiement enregistré : l\'officine le '
                                   'confirmera dès réception.',
                                 ),
-                                backgroundColor:
-                                    PharmaConnectColors.accentGreen,
+                                backgroundColor: context.palette.success,
                               ),
                             );
                             context.go('/reservations/confirmation');
@@ -369,7 +362,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                               content: Text(
                                 provider.error ?? 'Erreur lors du paiement',
                               ),
-                              backgroundColor: PharmaConnectColors.accentRed,
+                              backgroundColor: context.palette.danger,
                             ),
                           );
                         }
@@ -380,8 +373,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     Center(
                       child: Text(
                         'Sécurisé par GSG Kernel',
-                        style: PharmaConnectTypography.micro.copyWith(
-                          color: PharmaConnectColors.textSecondary,
+                        style: context.text.micro.copyWith(
+                          color: context.palette.textSecondary,
                         ),
                       ),
                     ),

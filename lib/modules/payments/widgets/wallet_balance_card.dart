@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/widgets/cards/glass_card.dart';
+import '../../../core/theme/palette.dart';
 
 class WalletBalanceCard extends StatelessWidget {
   final int balance;
@@ -32,42 +31,35 @@ class WalletBalanceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GlassCard(
       glow: true,
-      glowColor: PharmaConnectColors.accentPurple,
+      glowColor: context.palette.secondary,
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.account_balance_wallet,
-                color: PharmaConnectColors.accentPurple,
+                color: context.palette.secondary,
               ),
               const SizedBox(width: 8),
-              const Text(
-                'Portefeuille GSG',
-                style: PharmaConnectTypography.heading3,
-              ),
+              Text('Portefeuille GSG', style: context.text.heading3),
               const Spacer(),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: PharmaConnectColors.accentPurple.withValues(
-                    alpha: 0.15,
-                  ),
+                  color: context.palette.secondary.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(4),
                   border: Border.all(
-                    color: PharmaConnectColors.accentPurple.withValues(
-                      alpha: 0.3,
-                    ),
+                    color: context.palette.secondary.withValues(alpha: 0.3),
                   ),
                 ),
-                child: const Text(
+                child: Text(
                   '⚡ Kernel',
                   style: TextStyle(
                     fontSize: 9,
                     fontWeight: FontWeight.w600,
-                    color: PharmaConnectColors.accentPurple,
+                    color: context.palette.secondary,
                   ),
                 ),
               ),
@@ -76,13 +68,13 @@ class WalletBalanceCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             CurrencyFormatter.format(balance),
-            style: PharmaConnectTypography.kpiLarge.copyWith(
-              color: PharmaConnectColors.accentPurple,
+            style: context.text.kpiLarge.copyWith(
+              color: context.palette.secondary,
             ),
           ),
           const SizedBox(height: 4),
           if (userName != null) ...[
-            Text('Bienvenue, $userName', style: PharmaConnectTypography.body2),
+            Text('Bienvenue, $userName', style: context.text.body2),
           ],
           const SizedBox(height: 16),
           Row(
@@ -92,9 +84,7 @@ class WalletBalanceCard extends StatelessWidget {
                   onPressed: onTopUp,
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(
-                      color: PharmaConnectColors.accentPurple.withValues(
-                        alpha: 0.3,
-                      ),
+                      color: context.palette.secondary.withValues(alpha: 0.3),
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
@@ -106,8 +96,8 @@ class WalletBalanceCard extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: onHistory,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: PharmaConnectColors.accentPurple,
-                    foregroundColor: PharmaConnectColors.textPrimary,
+                    backgroundColor: context.palette.secondary,
+                    foregroundColor: context.palette.textPrimary,
                     padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
                   child: const Text('Historique'),
@@ -122,20 +112,17 @@ class WalletBalanceCard extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.04),
+                    color: context.palette.surfaceMuted,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Column(
                     children: [
-                      const Text(
-                        'Cashback',
-                        style: PharmaConnectTypography.micro,
-                      ),
+                      Text('Cashback', style: context.text.micro),
                       Text(
                         CurrencyFormatter.format(cashbackAvailable),
-                        style: PharmaConnectTypography.body1.copyWith(
+                        style: context.text.body1.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: PharmaConnectColors.accentGreen,
+                          color: context.palette.success,
                         ),
                       ),
                     ],
@@ -147,20 +134,17 @@ class WalletBalanceCard extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.04),
+                    color: context.palette.surfaceMuted,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Column(
                     children: [
-                      const Text(
-                        'En attente',
-                        style: PharmaConnectTypography.micro,
-                      ),
+                      Text('En attente', style: context.text.micro),
                       Text(
                         CurrencyFormatter.format(pendingBalance),
-                        style: PharmaConnectTypography.body1.copyWith(
+                        style: context.text.body1.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: PharmaConnectColors.accentOrange,
+                          color: context.palette.warning,
                         ),
                       ),
                     ],

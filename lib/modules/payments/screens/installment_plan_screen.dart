@@ -3,13 +3,12 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
-import '../../../core/theme/colors.dart';
-import '../../../core/theme/typography.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../models/installment.dart';
 import '../providers/payment_provider.dart';
+import '../../../core/theme/palette.dart';
 
 class InstallmentPlanScreen extends StatefulWidget {
   final String transactionId;
@@ -50,18 +49,18 @@ class _InstallmentPlanScreenState extends State<InstallmentPlanScreen> {
                 leading: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.arrow_back,
-                        color: PharmaConnectColors.textPrimary,
+                        color: context.palette.textPrimary,
                       ),
                       onPressed: () => context.pop(),
                       padding: EdgeInsets.zero,
                     ),
                     const SizedBox(width: 8),
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         "Plan d'échelonnement",
-                        style: PharmaConnectTypography.heading2,
+                        style: context.text.heading2,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -71,11 +70,11 @@ class _InstallmentPlanScreenState extends State<InstallmentPlanScreen> {
                 trailing: [const KernelBadge()],
               ),
               const SizedBox(height: 24),
-              const Expanded(
+              Expanded(
                 child: Center(
                   child: Text(
                     'Aucun échéancier trouvé',
-                    style: PharmaConnectTypography.body2,
+                    style: context.text.body2,
                   ),
                 ),
               ),
@@ -96,18 +95,18 @@ class _InstallmentPlanScreenState extends State<InstallmentPlanScreen> {
               leading: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: PharmaConnectColors.textPrimary,
+                      color: context.palette.textPrimary,
                     ),
                     onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       "Plan d'échelonnement",
-                      style: PharmaConnectTypography.heading2,
+                      style: context.text.heading2,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -117,10 +116,7 @@ class _InstallmentPlanScreenState extends State<InstallmentPlanScreen> {
               trailing: [const KernelBadge()],
             ),
             const SizedBox(height: 8),
-            Text(
-              'Résumé du plan de paiement',
-              style: PharmaConnectTypography.body2,
-            ),
+            Text('Résumé du plan de paiement', style: context.text.body2),
             const SizedBox(height: 24),
 
             // Résumé
@@ -133,13 +129,10 @@ class _InstallmentPlanScreenState extends State<InstallmentPlanScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Total à payer',
-                              style: PharmaConnectTypography.label,
-                            ),
+                            Text('Total à payer', style: context.text.label),
                             Text(
                               CurrencyFormatter.format(installment.totalAmount),
-                              style: PharmaConnectTypography.kpiSmall,
+                              style: context.text.kpiSmall,
                             ),
                           ],
                         ),
@@ -148,16 +141,13 @@ class _InstallmentPlanScreenState extends State<InstallmentPlanScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Restant',
-                              style: PharmaConnectTypography.label,
-                            ),
+                            Text('Restant', style: context.text.label),
                             Text(
                               CurrencyFormatter.format(
                                 installment.remainingAmount,
                               ),
-                              style: PharmaConnectTypography.kpiSmall.copyWith(
-                                color: PharmaConnectColors.accentOrange,
+                              style: context.text.kpiSmall.copyWith(
+                                color: context.palette.warning,
                               ),
                             ),
                           ],
@@ -167,13 +157,10 @@ class _InstallmentPlanScreenState extends State<InstallmentPlanScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Échéances',
-                              style: PharmaConnectTypography.label,
-                            ),
+                            Text('Échéances', style: context.text.label),
                             Text(
                               '${installment.paidCount}/${installment.numberOfPayments}',
-                              style: PharmaConnectTypography.kpiSmall,
+                              style: context.text.kpiSmall,
                             ),
                           ],
                         ),
@@ -183,8 +170,8 @@ class _InstallmentPlanScreenState extends State<InstallmentPlanScreen> {
                   const SizedBox(height: 8),
                   LinearProgressIndicator(
                     value: installment.paidCount / installment.numberOfPayments,
-                    color: PharmaConnectColors.accentCyan,
-                    backgroundColor: Colors.white.withValues(alpha: 0.1),
+                    color: context.palette.primary,
+                    backgroundColor: context.palette.border,
                   ),
                 ],
               ),
@@ -192,7 +179,7 @@ class _InstallmentPlanScreenState extends State<InstallmentPlanScreen> {
             const SizedBox(height: 16),
 
             // Liste des échéances
-            const Text('Échéances', style: PharmaConnectTypography.heading3),
+            Text('Échéances', style: context.text.heading3),
             const SizedBox(height: 8),
 
             Expanded(
@@ -212,25 +199,17 @@ class _InstallmentPlanScreenState extends State<InstallmentPlanScreen> {
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: isPaid
-                          ? PharmaConnectColors.accentGreen.withValues(
-                              alpha: 0.08,
-                            )
+                          ? context.palette.success.withValues(alpha: 0.08)
                           : isLate
-                          ? PharmaConnectColors.accentRed.withValues(
-                              alpha: 0.08,
-                            )
-                          : Colors.white.withValues(alpha: 0.04),
+                          ? context.palette.danger.withValues(alpha: 0.08)
+                          : context.palette.surfaceMuted,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: isPaid
-                            ? PharmaConnectColors.accentGreen.withValues(
-                                alpha: 0.2,
-                              )
+                            ? context.palette.success.withValues(alpha: 0.2)
                             : isLate
-                            ? PharmaConnectColors.accentRed.withValues(
-                                alpha: 0.2,
-                              )
-                            : Colors.white.withValues(alpha: 0.06),
+                            ? context.palette.danger.withValues(alpha: 0.2)
+                            : context.palette.surface,
                         width: 1,
                       ),
                     ),
@@ -241,10 +220,10 @@ class _InstallmentPlanScreenState extends State<InstallmentPlanScreen> {
                           height: 40,
                           decoration: BoxDecoration(
                             color: isPaid
-                                ? PharmaConnectColors.accentGreen
+                                ? context.palette.success
                                 : isLate
-                                ? PharmaConnectColors.accentRed
-                                : PharmaConnectColors.accentCyan,
+                                ? context.palette.danger
+                                : context.palette.primary,
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ),
@@ -255,19 +234,19 @@ class _InstallmentPlanScreenState extends State<InstallmentPlanScreen> {
                             children: [
                               Text(
                                 'Échéance #${payment.number}',
-                                style: PharmaConnectTypography.body1.copyWith(
+                                style: context.text.body1.copyWith(
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
                               Text(
                                 _formatDate(payment.dueDate),
-                                style: PharmaConnectTypography.body2,
+                                style: context.text.body2,
                               ),
                               if (isLate) ...[
-                                const Text(
+                                Text(
                                   '⚠️ En retard',
                                   style: TextStyle(
-                                    color: PharmaConnectColors.accentRed,
+                                    color: context.palette.danger,
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -281,7 +260,7 @@ class _InstallmentPlanScreenState extends State<InstallmentPlanScreen> {
                           children: [
                             Text(
                               CurrencyFormatter.format(payment.amount),
-                              style: PharmaConnectTypography.body1.copyWith(
+                              style: context.text.body1.copyWith(
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
@@ -292,13 +271,14 @@ class _InstallmentPlanScreenState extends State<InstallmentPlanScreen> {
                               ),
                               decoration: BoxDecoration(
                                 color: isPaid
-                                    ? PharmaConnectColors.accentGreen
-                                          .withValues(alpha: 0.15)
-                                    : isLate
-                                    ? PharmaConnectColors.accentRed.withValues(
+                                    ? context.palette.success.withValues(
                                         alpha: 0.15,
                                       )
-                                    : PharmaConnectColors.accentCyan.withValues(
+                                    : isLate
+                                    ? context.palette.danger.withValues(
+                                        alpha: 0.15,
+                                      )
+                                    : context.palette.primary.withValues(
                                         alpha: 0.15,
                                       ),
                                 borderRadius: BorderRadius.circular(4),
@@ -309,10 +289,10 @@ class _InstallmentPlanScreenState extends State<InstallmentPlanScreen> {
                                   fontSize: 10,
                                   fontWeight: FontWeight.w600,
                                   color: isPaid
-                                      ? PharmaConnectColors.accentGreen
+                                      ? context.palette.success
                                       : isLate
-                                      ? PharmaConnectColors.accentRed
-                                      : PharmaConnectColors.accentCyan,
+                                      ? context.palette.danger
+                                      : context.palette.primary,
                                 ),
                               ),
                             ),
@@ -329,10 +309,9 @@ class _InstallmentPlanScreenState extends State<InstallmentPlanScreen> {
                               );
                               if (success && context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
+                                  SnackBar(
                                     content: Text('Échéance payée !'),
-                                    backgroundColor:
-                                        PharmaConnectColors.accentGreen,
+                                    backgroundColor: context.palette.success,
                                   ),
                                 );
                               }
