@@ -23,6 +23,7 @@ Tests manuels à lancer sur la base **locale** (`supabase start`, conteneur `sup
 | `c224_single_pending_pharmacy_application.sql` | Une seule candidature d'officine en attente par titulaire (C224) : seconde candidature refusée pendant l'attente ou la revue, nouvelle candidature après un refus, patient refusé, écriture serveur non concernée. |
 | `c225_payments_server_confirmed.sql` | Paiement confirmé par l'officine, jamais par le client (C225, décision D67) : création en attente seulement, aucune écriture directe du statut, du portefeuille, des échéances ni des factures ; confirmation, échéances et remboursement par l'officine qui encaisse (ou GSG) avec règlement du portefeuille, facture numérotée et journal ; abandon et contestation par le patient. |
 | `c240_pos_recalled_batch.sql` | Lot rappelé non vendable (C240) : lot désigné refusé, lot rappelé sauté par le choix du serveur, stock insuffisant avec unités rappelées annoncées, recherche d'encaissement sans les lots rappelés, remise en stock refusée et quarantaine acceptée au remboursement ; statuts (brouillon, annulé, en cours, terminé) ; les trois sources (`recalls`, `product_recalls`, `traceable_batches`) ; rapprochement par produit et numéro de lot (autre produit, produit non renseigné, casse et espaces, numéro voisin) ; contrôle interne non appelable. |
+| `c242_patient_stock_availability.sql` | Disponibilité montrée aux patients (C242, `patient_stock_availability`) : lots rappelés (trois sources) et périmés exclus, quantité réservée déduite, officine listée en rupture quand seul un lot rappelé reste, filtre par officine, officine suspendue et produit arrêté absents, aucun lot lisible par le patient, anonyme refusé ; constat hors C242 : un patient qui réserve ne modifie aucune ligne de stock (C243). |
 | `concurrency_numbering.sh` | Deux sessions `psql` simultanées (retours client, puis ventes POS de deux officines) : numéros distincts et consécutifs, la seconde session attend la première. |
 
 Chaque cas affiche une ligne `CAS n OK : …` ou `CAS n ECHEC : …` (`RESULTAT … OK/ECHEC` pour le script de concurrence).
@@ -51,6 +52,7 @@ docker exec -i supabase_db_pharma_connect psql -U postgres -d postgres < supabas
 docker exec -i supabase_db_pharma_connect psql -U postgres -d postgres < supabase/sql_tests/c224_single_pending_pharmacy_application.sql
 docker exec -i supabase_db_pharma_connect psql -U postgres -d postgres < supabase/sql_tests/c225_payments_server_confirmed.sql
 docker exec -i supabase_db_pharma_connect psql -U postgres -d postgres < supabase/sql_tests/c240_pos_recalled_batch.sql
+docker exec -i supabase_db_pharma_connect psql -U postgres -d postgres < supabase/sql_tests/c242_patient_stock_availability.sql
 bash supabase/sql_tests/concurrency_numbering.sh
 ```
 

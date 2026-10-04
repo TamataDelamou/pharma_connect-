@@ -37,26 +37,38 @@ class SearchService {
     // réellement appliqué par PostgREST (un simple `pharmacies(*)` avec
     // `.eq('pharmacy.status', ...)` ne filtre pas, il ne fait que passer
     // silencieusement l'objet à null).
-    final rows = await _client
-        .from('stock_items')
-        .select('*, pharmacy:pharmacies!inner(*)')
-        .inFilter('product_id', productIds)
-        .eq('pharmacy.status', 'active');
+    //
+    // C242 : la quantité vient de `patient_stock_availability` (officines
+    // actives, lots non périmés et non rappelés, hors réservé), plus du
+    // total `stock_items.total_quantity`, qui compte les lots rappelés.
+    final List<dynamic> rows = await _client.rpc(
+      'patient_stock_availability',
+      params: {'p_product_ids': productIds},
+    );
+    if (rows.isEmpty) return {};
+
+    final pharmacyIds = {for (final row in rows) row['pharmacy_id'] as String};
+    final pharmacyRows = await _client
+        .from('pharmacies')
+        .select()
+        .inFilter('id', pharmacyIds.toList());
+    final pharmacies = {
+      for (final row in pharmacyRows)
+        row['id'] as String: Pharmacy.fromJson(row),
+    };
 
     final byProduct = <String, List<PharmacyStock>>{};
     for (final row in rows) {
       final productId = row['product_id'] as String;
-      final pharmacyJson = row['pharmacy'] as Map<String, dynamic>?;
-      if (pharmacyJson == null) continue;
+      final pharmacy = pharmacies[row['pharmacy_id'] as String];
+      if (pharmacy == null) continue;
 
-      final available =
-          (row['total_quantity'] as int? ?? 0) -
-          (row['reserved_quantity'] as int? ?? 0);
+      final available = row['available_quantity'] as int? ?? 0;
       byProduct
           .putIfAbsent(productId, () => [])
           .add(
             PharmacyStock(
-              pharmacy: Pharmacy.fromJson(pharmacyJson),
+              pharmacy: pharmacy,
               stock: available < 0 ? 0 : available,
               price: row['unit_price'] as int? ?? 0,
               isAvailable: available > 0,
@@ -159,12 +171,16 @@ class SearchService {
       }
       if (filters.maxPrice != null) {
         results = results
-            .where((r) => r.bestPrice != null && r.bestPrice! <= filters.maxPrice!)
+            .where(
+              (r) => r.bestPrice != null && r.bestPrice! <= filters.maxPrice!,
+            )
             .toList();
       }
       if (filters.minPrice != null) {
         results = results
-            .where((r) => r.bestPrice != null && r.bestPrice! >= filters.minPrice!)
+            .where(
+              (r) => r.bestPrice != null && r.bestPrice! >= filters.minPrice!,
+            )
             .toList();
       }
     }
