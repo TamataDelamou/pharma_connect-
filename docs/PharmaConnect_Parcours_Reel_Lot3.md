@@ -29,7 +29,7 @@ C245 a été vérifié par captures à 360 px, avec des données d'exemple. **Il
 | Téléphone A | l'officine : compte administrateur d'abord, puis compte pharmacien |
 | Téléphone B | le patient |
 | Adresse « admin » | `delamoutamata+admin@gmail.com` |
-| Adresse « pharmacien » | `delamoutamata+pharmacien@gmail.com` |
+| Adresse « pharmacien » | `delamoutamata+pharmacien2@gmail.com` (la première, `+pharmacien`, a été créée par erreur comme patient le 09/10/2026 et ne sert plus) |
 | Adresse « patient » | `delamoutamata+patient@gmail.com` |
 
 Les trois adresses arrivent dans la même boîte Gmail. Chaque connexion envoie un **code par e-mail** : c'est le code du **dernier** e-mail reçu qui compte, un code plus ancien est refusé.
@@ -143,9 +143,9 @@ Déconnectez-vous puis reconnectez-vous avec le compte « admin » (le droit est
 > - **le rôle se choisit à l'inscription et ne se change plus ensuite** : il faut passer par « S'inscrire » (pas par « Se connecter ») et choisir **« Pharmacien titulaire »** dans « Je suis un(e) : ». Un compte créé comme patient ne peut pas déposer de candidature d'officine ;
 > - **tous les noms saisis commencent par « TEST »** : le nom complet du compte, et surtout le nom de l'officine.
 >
-> Lors du premier essai, le compte « pharmacien » a été créé avec le rôle patient et aucune candidature n'a été enregistrée en production, alors que l'écran laissait penser le contraire.
+> Lors du premier essai, le compte `delamoutamata+pharmacien@gmail.com` a été créé avec le rôle patient, « Patient » étant présélectionné (C249) : aucune candidature n'a pu être déposée. Le parcours repart de l'adresse `delamoutamata+pharmacien2@gmail.com`.
 
-1. « S'inscrire ». Nom complet : `TEST Pharmacien`. « Je suis un(e) : » **Pharmacien titulaire**. Adresse « pharmacien ».
+1. « S'inscrire ». Nom complet : `TEST Pharmacien`. « Je suis un(e) : » **Pharmacien titulaire**. Adresse : `delamoutamata+pharmacien2@gmail.com`. **Avant d'appuyer sur « S'inscrire », relisez la ligne « Je suis un(e) : » : elle doit afficher « Pharmacien titulaire ».**
 2. Code reçu par e-mail.
 
 **Vous devez voir :** l'écran « Vérification de licence ».
@@ -421,7 +421,8 @@ Tous ces contrôles sont des lectures. Aucune écriture de ma part en production
 
 | Donnée | Comment la reconnaître |
 |---|---|
-| 3 comptes (admin, pharmacien, patient) | adresses en `+admin`, `+pharmacien`, `+patient` ; noms « TEST Pharmacien », « TEST Patient » |
+| 3 comptes du parcours (admin, pharmacien, patient) | adresses en `+admin`, `+pharmacien2`, `+patient` ; noms « TEST Pharmacien », « TEST Patient » |
+| 1 compte créé par erreur le 09/10/2026 | `delamoutamata+pharmacien@gmail.com`, nom « Jeannette Onivogui », rôle patient, aucune officine ; reste en production comme patient (décision d'Achille) |
 | 1 ligne d'administrateur | **à garder** : c'est le vrai premier administrateur GSG, pas une donnée de test |
 | 1 officine | nom « TEST Officine Lot 3 », licence « TEST-LIC-0001 » |
 | 2 articles et 2 lots | lots « TEST-LOT3-A » et « TEST-LOT3-B », fournisseur « TEST fournisseur » |
