@@ -139,12 +139,20 @@ Déconnectez-vous puis reconnectez-vous avec le compte « admin » (le droit est
 
 ### 3.1 Inscription du pharmacien (téléphone A, après déconnexion du compte admin)
 
+> **Attention, deux points à ne pas manquer (incident du 09/10/2026) :**
+> - **le rôle se choisit à l'inscription et ne se change plus ensuite** : il faut passer par « S'inscrire » (pas par « Se connecter ») et choisir **« Pharmacien titulaire »** dans « Je suis un(e) : ». Un compte créé comme patient ne peut pas déposer de candidature d'officine ;
+> - **tous les noms saisis commencent par « TEST »** : le nom complet du compte, et surtout le nom de l'officine.
+>
+> Lors du premier essai, le compte « pharmacien » a été créé avec le rôle patient et aucune candidature n'a été enregistrée en production, alors que l'écran laissait penser le contraire.
+
 1. « S'inscrire ». Nom complet : `TEST Pharmacien`. « Je suis un(e) : » **Pharmacien titulaire**. Adresse « pharmacien ».
 2. Code reçu par e-mail.
 
 **Vous devez voir :** l'écran « Vérification de licence ».
 
 ### 3.2 Candidature de l'officine
+
+**Le nom de l'officine doit commencer par « TEST »**, en majuscules, suivi d'une espace : c'est ce préfixe qui permet de reconnaître l'officine d'essai, de lui réserver la requête de mise en stock (section 4) et de la retirer plus tard. Vérifiez-le avant d'appuyer sur « Soumettre la vérification ».
 
 Remplissez :
 
