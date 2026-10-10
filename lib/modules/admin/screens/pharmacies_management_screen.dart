@@ -3,6 +3,7 @@ import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
+import '../../../core/utils/pharmacy_position.dart';
 import '../models/admin_pharmacy.dart';
 import '../models/pharmacy_status.dart';
 import '../providers/admin_provider.dart';
@@ -109,6 +110,9 @@ class _PharmaciesManagementScreenState
       text: pharmacy.longitude?.toString() ?? '',
     );
     String? fieldError;
+    // Valeurs pour lesquelles l'avertissement « hors de la Guinée » a déjà
+    // été affiché.
+    String? warnedFor;
 
     double? parse(String raw) =>
         double.tryParse(raw.trim().replaceAll(',', '.'));
@@ -127,6 +131,7 @@ class _PharmaciesManagementScreenState
                 const SizedBox(height: 12),
                 TextField(
                   controller: latController,
+                  onChanged: (_) => setDialogState(() => warnedFor = null),
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                     signed: true,
@@ -139,6 +144,7 @@ class _PharmaciesManagementScreenState
                 const SizedBox(height: 12),
                 TextField(
                   controller: lonController,
+                  onChanged: (_) => setDialogState(() => warnedFor = null),
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                     signed: true,
@@ -153,6 +159,15 @@ class _PharmaciesManagementScreenState
                   'Laissez les deux champs vides pour retirer la position.',
                   style: ctx.text.micro,
                 ),
+                if (warnedFor != null) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    PharmacyPosition.outsideGuineaWarning,
+                    style: ctx.text.micro.copyWith(
+                      color: ctx.palette.warningStrong,
+                    ),
+                  ),
+                ],
                 if (fieldError != null) ...[
                   const SizedBox(height: 8),
                   Text(
@@ -178,23 +193,30 @@ class _PharmaciesManagementScreenState
                 }
                 final lat = parse(latRaw);
                 final lon = parse(lonRaw);
-                if (lat == null || lat < -90 || lat > 90) {
-                  setDialogState(
-                    () => fieldError =
-                        'Latitude invalide : un nombre entre -90 et 90.',
-                  );
+                final error = PharmacyPosition.validate(lat, lon);
+                if (error != null) {
+                  setDialogState(() {
+                    fieldError = error;
+                    warnedFor = null;
+                  });
                   return;
                 }
-                if (lon == null || lon < -180 || lon > 180) {
-                  setDialogState(
-                    () => fieldError =
-                        'Longitude invalide : un nombre entre -180 et 180.',
-                  );
+                // Hors de la Guinée : avertissement, sans bloquer. Un second
+                // appui sur les mêmes valeurs enregistre.
+                final key = '$lat,$lon';
+                if (PharmacyPosition.isOutsideGuinea(lat!, lon!) &&
+                    warnedFor != key) {
+                  setDialogState(() {
+                    fieldError = null;
+                    warnedFor = key;
+                  });
                   return;
                 }
                 Navigator.pop(ctx, (lat, lon));
               },
-              child: const Text('Enregistrer'),
+              child: Text(
+                warnedFor != null ? 'Enregistrer quand même' : 'Enregistrer',
+              ),
             ),
           ],
         ),

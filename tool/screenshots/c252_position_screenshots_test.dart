@@ -254,6 +254,37 @@ void main() {
         await _settle(tester);
       },
     ),
+    // Administration : latitude et longitude inversées, avertissement sans
+    // blocage.
+    _Shot(
+      '07_admin_position_hors_guinee',
+      '/admin/pharmacies',
+      prepare: asAdmin,
+      act: (tester) async {
+        await showPharmacies(tester);
+        await tester.tap(find.text('Saisir la position'));
+        await _settle(tester);
+        await tester.enterText(find.byType(TextField).at(0), '-13.6785');
+        await tester.enterText(find.byType(TextField).at(1), '9.5370');
+        await tester.tap(find.text('Enregistrer'));
+        await _settle(tester);
+      },
+    ),
+    // Administration : latitude impossible, refus.
+    _Shot(
+      '08_admin_position_invalide',
+      '/admin/pharmacies',
+      prepare: asAdmin,
+      act: (tester) async {
+        await showPharmacies(tester);
+        await tester.tap(find.text('Saisir la position'));
+        await _settle(tester);
+        await tester.enterText(find.byType(TextField).at(0), '95');
+        await tester.enterText(find.byType(TextField).at(1), '-13.6785');
+        await tester.tap(find.text('Enregistrer'));
+        await _settle(tester);
+      },
+    ),
   ];
 
   for (final shot in shots) {

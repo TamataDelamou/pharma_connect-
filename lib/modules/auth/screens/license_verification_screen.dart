@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
+import '../../../core/utils/pharmacy_position.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../../../core/widgets/inputs/glass_input.dart';
@@ -66,14 +67,35 @@ class _LicenseVerificationScreenState extends State<LicenseVerificationScreen> {
     });
     final position = await LocationService().getCurrentPositionOrNull();
     if (!mounted) return;
+    // Même contrôle que la saisie par l'administrateur : une position
+    // impossible n'est pas gardée ; hors de la Guinée, elle est gardée avec
+    // un avertissement.
+    final valid =
+        position != null &&
+        PharmacyPosition.validate(position.latitude, position.longitude) ==
+            null;
     setState(() {
       _isLocating = false;
-      _latitude = position?.latitude;
-      _longitude = position?.longitude;
-      _locationMessage = position == null
-          ? 'Position indisponible (localisation coupée ou refusée). Vous '
-                'pouvez soumettre sans position : GSG pourra la saisir.'
-          : null;
+      _latitude = valid ? position.latitude : null;
+      _longitude = valid ? position.longitude : null;
+      if (position == null) {
+        _locationMessage =
+            'Position indisponible (localisation coupée ou refusée). Vous '
+            'pouvez soumettre sans position : GSG pourra la saisir.';
+      } else if (!valid) {
+        _locationMessage =
+            'Position lue invalide : elle n\'est pas enregistrée. Vous '
+            'pouvez soumettre sans position : GSG pourra la saisir.';
+      } else if (PharmacyPosition.isOutsideGuinea(
+        position.latitude,
+        position.longitude,
+      )) {
+        _locationMessage =
+            '${PharmacyPosition.outsideGuineaWarning} Vous pouvez la retirer '
+            'ou soumettre telle quelle.';
+      } else {
+        _locationMessage = null;
+      }
     });
   }
 
