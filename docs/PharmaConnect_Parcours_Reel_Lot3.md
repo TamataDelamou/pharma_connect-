@@ -395,6 +395,8 @@ Nouvelle réservation côté patient. **Notez l'heure exacte.** Ne faites rien d
 
 Téléphone A : caisse → « Fermer la caisse », avec le montant compté (4 200).
 
+**Essai réel du 10/10/2026 :** caisse fermée à 23 h 03 ; attendu 5 400, compté 5 400, écart 0. **Section 8.4 en attente** (réservation laissée expirer), à vérifier le 11/10.
+
 ---
 
 ## 9. Récapitulatif des contrôles en lecture seule
