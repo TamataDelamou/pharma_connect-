@@ -368,6 +368,30 @@ class AdminService {
     return updatePharmacy(id, updated);
   }
 
+  /// C252 : pose, corrige ou retire (deux valeurs nulles) la position d'une
+  /// officine. Écriture ciblée : `updatePharmacy` ne sait pas remettre une
+  /// valeur à nul.
+  Future<AdminPharmacy> updatePharmacyPosition(
+    String id, {
+    required double? latitude,
+    required double? longitude,
+  }) async {
+    final row = await _client
+        .from('pharmacies')
+        .update({'latitude': latitude, 'longitude': longitude})
+        .eq('id', id)
+        .select()
+        .single();
+    await logAction(
+      userId: 'system',
+      userName: 'System',
+      action: 'update_pharmacy_position',
+      resource: 'pharmacy',
+      resourceId: id,
+    );
+    return AdminPharmacy.fromJson(row);
+  }
+
   Future<AdminPharmacy> approvePharmacy(String id) async {
     final pharmacy = await getPharmacy(id);
     final updated = pharmacy.copyWith(

@@ -10,6 +10,7 @@ import '../../../core/widgets/cards/glass_card.dart';
 import '../../../core/widgets/inputs/glass_input.dart';
 import '../providers/auth_provider.dart';
 import '../services/pharmacy_service.dart';
+import '../../search/services/location_service.dart';
 import '../widgets/phone_input_field.dart';
 import '../../pharmacy_staff/widgets/pending_invitations_card.dart';
 import '../../../core/theme/palette.dart';
@@ -41,6 +42,10 @@ class _LicenseVerificationScreenState extends State<LicenseVerificationScreen> {
   File? _licenseImage;
   final ImagePicker _picker = ImagePicker();
   bool _isSubmitting = false;
+  double? _latitude;
+  double? _longitude;
+  bool _isLocating = false;
+  String? _locationMessage;
 
   @override
   void dispose() {
@@ -49,6 +54,27 @@ class _LicenseVerificationScreenState extends State<LicenseVerificationScreen> {
     _nameController.dispose();
     _addressController.dispose();
     super.dispose();
+  }
+
+  /// C252 : lit la position de l'appareil à la demande. Sans position
+  /// (localisation coupée, permission refusée, délai dépassé), rien n'est
+  /// enregistré et la candidature reste possible.
+  Future<void> _useCurrentPosition() async {
+    setState(() {
+      _isLocating = true;
+      _locationMessage = null;
+    });
+    final position = await LocationService().getCurrentPositionOrNull();
+    if (!mounted) return;
+    setState(() {
+      _isLocating = false;
+      _latitude = position?.latitude;
+      _longitude = position?.longitude;
+      _locationMessage = position == null
+          ? 'Position indisponible (localisation coupée ou refusée). Vous '
+                'pouvez soumettre sans position : GSG pourra la saisir.'
+          : null;
+    });
   }
 
   @override
@@ -134,6 +160,62 @@ class _LicenseVerificationScreenState extends State<LicenseVerificationScreen> {
                     controller: _addressController,
                     prefixIcon: Icons.location_on,
                   ),
+                  const SizedBox(height: 16),
+                  // C252 : position facultative. La permission de
+                  // localisation n'est demandée qu'à l'appui sur ce bouton ;
+                  // refusée, la candidature part sans position.
+                  Text(
+                    'Position de l\'officine (optionnel)',
+                    style: context.text.label,
+                  ),
+                  const SizedBox(height: 8),
+                  if (_latitude != null && _longitude != null)
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.check_circle,
+                          size: 18,
+                          color: context.palette.success,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Position enregistrée : '
+                            '${_latitude!.toStringAsFixed(5)}, '
+                            '${_longitude!.toStringAsFixed(5)}',
+                            style: context.text.body2,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () => setState(() {
+                            _latitude = null;
+                            _longitude = null;
+                            _locationMessage = null;
+                          }),
+                          child: const Text('Retirer'),
+                        ),
+                      ],
+                    )
+                  else
+                    OutlinedButton.icon(
+                      onPressed: _isLocating ? null : _useCurrentPosition,
+                      icon: _isLocating
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.my_location, size: 18),
+                      label: const Text(
+                        'Utiliser ma position actuelle\n'
+                        '(je suis dans mon officine)',
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  if (_locationMessage != null) ...[
+                    const SizedBox(height: 6),
+                    Text(_locationMessage!, style: context.text.micro),
+                  ],
                   const SizedBox(height: 16),
                   Text(
                     'Photo de la licence (optionnel)',
@@ -242,6 +324,8 @@ class _LicenseVerificationScreenState extends State<LicenseVerificationScreen> {
                           phone: _phoneE164!,
                           address: _addressController.text.trim(),
                           licenseNumber: _licenseNumberController.text.trim(),
+                          latitude: _latitude,
+                          longitude: _longitude,
                         );
                       } catch (e) {
                         errorMessage = e.toString();

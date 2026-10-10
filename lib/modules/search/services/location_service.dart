@@ -82,6 +82,32 @@ class LocationService {
     }
   }
 
+  /// C252 : position réelle de l'appareil, ou `null` si la localisation est
+  /// coupée, refusée ou indisponible. Contrairement à [getCurrentLocation],
+  /// aucune position par défaut n'est rendue : la valeur est enregistrée
+  /// (position d'une officine), une position inventée serait fausse.
+  Future<Position?> getCurrentPositionOrNull() async {
+    try {
+      if (!await Geolocator.isLocationServiceEnabled()) return null;
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        return null;
+      }
+      return await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 20),
+        ),
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<double> calculateDistance(
     double lat1,
     double lon1,

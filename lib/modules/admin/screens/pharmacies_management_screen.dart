@@ -64,6 +64,168 @@ class _PharmaciesManagementScreenState
     }
   }
 
+  /// C252 : une officine sans position peut être approuvée, après
+  /// avertissement.
+  Future<void> _approve(AdminPharmacy pharmacy) async {
+    if (pharmacy.latitude == null || pharmacy.longitude == null) {
+      final proceed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Officine sans position'),
+          content: const Text(
+            'Cette officine n\'apparaîtra pas dans les recherches par '
+            'proximité. Vous pouvez saisir sa position avant d\'approuver, '
+            'ou l\'approuver telle quelle.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Saisir la position'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Approuver sans position'),
+            ),
+          ],
+        ),
+      );
+      if (!mounted) return;
+      if (proceed == null) return;
+      if (proceed == false) {
+        await _editPosition(pharmacy);
+        return;
+      }
+    }
+    await _updateStatus(pharmacy, PharmacyStatus.active, 'Officine activée');
+  }
+
+  /// C252 : saisie ou correction de la position par l'administrateur. Les
+  /// deux champs vides retirent la position.
+  Future<void> _editPosition(AdminPharmacy pharmacy) async {
+    final latController = TextEditingController(
+      text: pharmacy.latitude?.toString() ?? '',
+    );
+    final lonController = TextEditingController(
+      text: pharmacy.longitude?.toString() ?? '',
+    );
+    String? fieldError;
+
+    double? parse(String raw) =>
+        double.tryParse(raw.trim().replaceAll(',', '.'));
+
+    final result = await showDialog<(double?, double?)>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          title: const Text('Position de l\'officine'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(pharmacy.name, style: ctx.text.body2),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: latController,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                    signed: true,
+                  ),
+                  decoration: const InputDecoration(
+                    labelText: 'Latitude (ex. 9.5370)',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: lonController,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                    signed: true,
+                  ),
+                  decoration: const InputDecoration(
+                    labelText: 'Longitude (ex. -13.6785)',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Laissez les deux champs vides pour retirer la position.',
+                  style: ctx.text.micro,
+                ),
+                if (fieldError != null) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    fieldError!,
+                    style: ctx.text.micro.copyWith(color: ctx.palette.danger),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Annuler'),
+            ),
+            TextButton(
+              onPressed: () {
+                final latRaw = latController.text.trim();
+                final lonRaw = lonController.text.trim();
+                if (latRaw.isEmpty && lonRaw.isEmpty) {
+                  Navigator.pop(ctx, (null, null));
+                  return;
+                }
+                final lat = parse(latRaw);
+                final lon = parse(lonRaw);
+                if (lat == null || lat < -90 || lat > 90) {
+                  setDialogState(
+                    () => fieldError =
+                        'Latitude invalide : un nombre entre -90 et 90.',
+                  );
+                  return;
+                }
+                if (lon == null || lon < -180 || lon > 180) {
+                  setDialogState(
+                    () => fieldError =
+                        'Longitude invalide : un nombre entre -180 et 180.',
+                  );
+                  return;
+                }
+                Navigator.pop(ctx, (lat, lon));
+              },
+              child: const Text('Enregistrer'),
+            ),
+          ],
+        ),
+      ),
+    );
+    latController.dispose();
+    lonController.dispose();
+    if (result == null || !mounted) return;
+
+    final palette = context.palette;
+    final provider = context.read<AdminProvider>();
+    final ok = await provider.updatePharmacyPosition(
+      pharmacy.id,
+      latitude: result.$1,
+      longitude: result.$2,
+    );
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          ok
+              ? (result.$1 == null
+                    ? 'Position retirée'
+                    : 'Position enregistrée')
+              : (provider.error ?? 'Échec de la mise à jour'),
+        ),
+        backgroundColor: ok ? palette.success : palette.danger,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<AdminProvider>();
@@ -168,11 +330,8 @@ class _PharmaciesManagementScreenState
                               PharmacyStatus.verified,
                               'Officine vérifiée',
                             ),
-                            onApprove: () => _updateStatus(
-                              pharmacy,
-                              PharmacyStatus.active,
-                              'Officine activée',
-                            ),
+                            onApprove: () => _approve(pharmacy),
+                            onEditPosition: () => _editPosition(pharmacy),
                             onSuspend: () => _updateStatus(
                               pharmacy,
                               PharmacyStatus.suspended,
@@ -252,6 +411,7 @@ class _PharmacyCard extends StatelessWidget {
   final VoidCallback onSuspend;
   final VoidCallback onReactivate;
   final VoidCallback onReject;
+  final VoidCallback onEditPosition;
 
   const _PharmacyCard({
     required this.pharmacy,
@@ -260,6 +420,7 @@ class _PharmacyCard extends StatelessWidget {
     required this.onSuspend,
     required this.onReactivate,
     required this.onReject,
+    required this.onEditPosition,
   });
 
   @override
@@ -309,6 +470,17 @@ class _PharmacyCard extends StatelessWidget {
             '${pharmacy.phone} • ${pharmacy.licenseNumber ?? 'Sans licence déclarée'}',
             style: context.text.mono,
           ),
+          // C252 : position facultative, visible et modifiable avant validation.
+          Text(
+            pharmacy.latitude != null && pharmacy.longitude != null
+                ? 'Position : ${pharmacy.latitude}, ${pharmacy.longitude}'
+                : 'Sans position : absente des recherches par proximité',
+            style: context.text.micro.copyWith(
+              color: pharmacy.latitude != null && pharmacy.longitude != null
+                  ? null
+                  : context.palette.warningStrong,
+            ),
+          ),
           if (pharmacy.managerName != null)
             Text('Gérant : ${pharmacy.managerName}', style: context.text.micro),
           const SizedBox(height: 12),
@@ -316,6 +488,15 @@ class _PharmacyCard extends StatelessWidget {
             spacing: 8,
             runSpacing: 8,
             children: [
+              OutlinedButton.icon(
+                onPressed: onEditPosition,
+                icon: const Icon(Icons.place_outlined, size: 18),
+                label: Text(
+                  pharmacy.latitude != null && pharmacy.longitude != null
+                      ? 'Corriger la position'
+                      : 'Saisir la position',
+                ),
+              ),
               if (pharmacy.status == PharmacyStatus.pending) ...[
                 OutlinedButton(
                   onPressed: onVerify,

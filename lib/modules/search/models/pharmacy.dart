@@ -3,8 +3,9 @@ class Pharmacy {
   final String name;
   final String address;
   final String phone;
-  final double latitude;
-  final double longitude;
+  /// C252 : position facultative (officine inscrite sans position).
+  final double? latitude;
+  final double? longitude;
   final bool isOpenNow;
   final bool isOpen24h;
   final bool isOnDuty;
@@ -17,8 +18,8 @@ class Pharmacy {
     required this.name,
     required this.address,
     required this.phone,
-    required this.latitude,
-    required this.longitude,
+    this.latitude,
+    this.longitude,
     required this.isOpenNow,
     this.isOpen24h = false,
     this.isOnDuty = false,
@@ -36,8 +37,8 @@ class Pharmacy {
     name: json['name'] as String,
     address: json['address'] as String,
     phone: json['phone'] as String,
-    latitude: (json['latitude'] as num).toDouble(),
-    longitude: (json['longitude'] as num).toDouble(),
+    latitude: (json['latitude'] as num?)?.toDouble(),
+    longitude: (json['longitude'] as num?)?.toDouble(),
     isOpenNow: true,
     isOpen24h: false,
     isOnDuty: false,

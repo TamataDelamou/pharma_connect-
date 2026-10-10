@@ -25,6 +25,16 @@ class AdminProvider extends ChangeNotifier {
   List<AdminUser> get users => _users;
   AdminUser? get selectedUser => _selectedUser;
   List<AdminPharmacy> get pharmacies => _pharmacies;
+
+  /// Pose une liste d'officines sans appel au serveur (tests et captures
+  /// d'écran).
+  @visibleForTesting
+  set pharmaciesForTesting(List<AdminPharmacy> value) {
+    _pharmacies = value;
+    _error = null;
+    _isLoading = false;
+    notifyListeners();
+  }
   AdminPharmacy? get selectedPharmacy => _selectedPharmacy;
   List<AuditLog> get auditLogs => _auditLogs;
   List<SystemConfig> get configs => _configs;
@@ -305,6 +315,28 @@ class AdminProvider extends ChangeNotifier {
   Future<bool> approvePharmacy(String id) async {
     try {
       final updated = await _service.approvePharmacy(id);
+      _updatePharmacy(updated);
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// C252 : pose, corrige ou retire (deux valeurs nulles) la position d'une
+  /// officine.
+  Future<bool> updatePharmacyPosition(
+    String id, {
+    required double? latitude,
+    required double? longitude,
+  }) async {
+    try {
+      final updated = await _service.updatePharmacyPosition(
+        id,
+        latitude: latitude,
+        longitude: longitude,
+      );
       _updatePharmacy(updated);
       return true;
     } catch (e) {
