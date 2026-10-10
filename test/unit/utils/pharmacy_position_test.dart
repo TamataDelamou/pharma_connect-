@@ -47,6 +47,12 @@ void main() {
       expect(PharmacyPosition.isOutsideGuinea(0, 0), isTrue);
     });
 
+    // Limite connue : l'emprise est un rectangle, pas la frontière.
+    test('Freetown et Bamako, dans le rectangle, ne sont pas signalées', () {
+      expect(PharmacyPosition.isOutsideGuinea(8.4844, -13.2344), isFalse);
+      expect(PharmacyPosition.isOutsideGuinea(12.6392, -8.0029), isFalse);
+    });
+
     test('un point valide hors de la Guinée reste accepté', () {
       expect(PharmacyPosition.validate(14.7167, -17.4677), isNull);
     });

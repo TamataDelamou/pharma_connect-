@@ -6,6 +6,11 @@ class PharmacyPosition {
   // Emprise approximative de la Guinée. Hors de cette emprise, la position
   // reste acceptée : simple avertissement (officine frontalière, erreur de
   // saisie à corriger).
+  //
+  // Limite connue : c'est un rectangle, pas le tracé de la frontière. Les
+  // zones des pays voisins qui tombent dedans (Freetown, Bamako) ne sont pas
+  // signalées. Ce contrôle détecte une erreur de saisie grossière ; ce n'est
+  // pas un contrôle de frontière.
   static const double guineaMinLatitude = 7.0;
   static const double guineaMaxLatitude = 12.7;
   static const double guineaMinLongitude = -15.1;
