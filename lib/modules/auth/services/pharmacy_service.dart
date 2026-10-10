@@ -18,6 +18,8 @@ class PharmacyService {
     required String phone,
     required String address,
     String? licenseNumber,
+    double? latitude,
+    double? longitude,
   }) async {
     final userId = SupabaseService().currentUser?.id;
     if (userId == null) {
@@ -35,6 +37,11 @@ class PharmacyService {
           'address': address,
           if (licenseNumber != null && licenseNumber.isNotEmpty)
             'license_number': licenseNumber,
+          // C252 : position facultative, jamais inventée.
+          if (latitude != null && longitude != null) ...{
+            'latitude': latitude,
+            'longitude': longitude,
+          },
           'status': 'pending',
         })
         .select()

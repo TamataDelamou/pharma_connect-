@@ -14,8 +14,9 @@ class AdminPharmacy {
   final String? managerName;
   final String? groupId;
   final String? groupName;
-  final double latitude;
-  final double longitude;
+  /// C252 : position facultative. La candidature d'officine ne l'exige pas.
+  final double? latitude;
+  final double? longitude;
   final bool isActive;
   final DateTime createdAt;
   final DateTime? licenseVerifiedAt;
@@ -35,8 +36,8 @@ class AdminPharmacy {
     this.managerName,
     this.groupId,
     this.groupName,
-    required this.latitude,
-    required this.longitude,
+    this.latitude,
+    this.longitude,
     this.isActive = true,
     required this.createdAt,
     this.licenseVerifiedAt,
@@ -58,8 +59,8 @@ class AdminPharmacy {
     managerId: json['manager_id'] as String?,
     managerName: json['manager_name'] as String?,
     groupId: json['group_id'] as String?,
-    latitude: (json['latitude'] as num).toDouble(),
-    longitude: (json['longitude'] as num).toDouble(),
+    latitude: (json['latitude'] as num?)?.toDouble(),
+    longitude: (json['longitude'] as num?)?.toDouble(),
     isActive: json['is_active'] as bool? ?? true,
     createdAt: DateTime.parse(json['created_at'] as String),
     licenseVerifiedAt: json['license_verified_at'] != null
