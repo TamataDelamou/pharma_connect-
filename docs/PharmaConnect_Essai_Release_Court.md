@@ -62,6 +62,8 @@ Sur chaque téléphone :
 
 Laissez la caisse ouverte.
 
+**Avant d'aller plus loin**, ouvrez « Stock & Lots » et vérifiez le point de départ : Paracétamol, 8 boîtes, 0 réservée (constaté le 12/10/2026). S'il est différent, notez-le : il sert au contrôle de la section 11.
+
 ---
 
 ## 4. Téléphone B : recherche (C260, C261, C253)
@@ -181,7 +183,19 @@ Le calcul : fonds 10 000 + retrait n° 1 3 000 + retrait n° 2 1 500 + vente au 
 
 ---
 
-## 11. Ce que cet essai ne couvre pas
+## 11. Téléphone A : contrôle du stock
+
+Menu ☰ → « Stock & Lots ».
+
+**Vous devez voir :** Paracétamol, **4 boîtes, 0 réservée**.
+
+Le calcul : 8 boîtes au départ (constaté le 12/10/2026), moins 2 pour le retrait n° 1, 1 pour le retrait n° 2 et 1 pour la vente au comptoir. Chaque boîte est sortie du stock une seule fois, et plus aucune n'est retenue.
+
+**Si le chiffre de départ n'est plus 8** (une vente ou une réservation faite entre-temps) : notez le stock avant de commencer l'essai ; il doit avoir baissé de 4 à la fin, avec 0 réservée.
+
+---
+
+## 12. Ce que cet essai ne couvre pas
 
 - **Le QR code de l'écran « Réservation confirmée »** : cet écran ne s'ouvre qu'après un paiement en ligne, masqué pendant le pilote. Il utilise le même composant que les deux autres, mais il ne peut pas être scanné ici.
 - **La lecture de la position de l'officine** (C252) en version « release » : elle ne se joue qu'à la candidature d'une nouvelle officine, donc avec un nouveau compte pharmacien. À jouer à part si vous le voulez.
@@ -190,7 +204,7 @@ Le calcul : fonds 10 000 + retrait n° 1 3 000 + retrait n° 2 1 500 + vente au 
 
 ---
 
-## 12. Relevé à me rendre
+## 13. Relevé à me rendre
 
 | # | Point | Écart | Conforme ? |
 |---|---|---|---|
@@ -216,3 +230,4 @@ Le calcul : fonds 10 000 + retrait n° 1 3 000 + retrait n° 2 1 500 + vente au 
 | 20 | Vente au comptoir : une colonne, « À payer » visible | C257 | |
 | 21 | Solde attendu 16 075 à l'écran et dans le message | C258 | |
 | 22 | Fermeture : écart 0 | C258 | |
+| 23 | Stock : Paracétamol à 4 boîtes, 0 réservée | stock | |
