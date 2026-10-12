@@ -56,6 +56,48 @@ class ReservationQRScreen extends StatelessWidget {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
+                              // C255 : réservation ouverte depuis la liste en
+                              // cache, serveur injoignable.
+                              if (provider.selectedReservationFromCache) ...[
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(10),
+                                  margin: const EdgeInsets.only(bottom: 16),
+                                  decoration: BoxDecoration(
+                                    color: context.palette.warningStrong
+                                        .withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: context.palette.warningStrong
+                                          .withValues(alpha: 0.2),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Icon(
+                                        Icons.cloud_off,
+                                        size: 16,
+                                        color: context.palette.warningStrong,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          'Hors connexion — dernières données '
+                                          'enregistrées. L\'état et '
+                                          'l\'échéance affichés sont les '
+                                          'derniers connus.',
+                                          style: context.text.micro.copyWith(
+                                            color:
+                                                context.palette.warningStrong,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                               PickupQrCode(
                                 data:
                                     reservation.qrCodeToken ??

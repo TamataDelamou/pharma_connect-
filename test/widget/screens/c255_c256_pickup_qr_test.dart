@@ -23,7 +23,7 @@ import 'package:pharma_connect/modules/reservations/widgets/reservation_status_c
 // C255 : le QR code s'ouvre depuis la liste des réservations.
 // C256 : le QR code est lisible dans les deux thèmes.
 
-Reservation _reservation(String id, String code) {
+Reservation _reservation(String id, String? code) {
   final now = DateTime.now();
   return Reservation(
     id: id,
@@ -57,36 +57,45 @@ Reservation _reservation(String id, String code) {
 /// dans le vrai fournisseur, puis le test décide de la suite.
 class _FakeReservationProvider extends ReservationProvider {
   bool _loading = false;
-  Reservation? _selected;
   Completer<bool>? _pending;
+  int loadCalls = 0;
 
   @override
   bool get isLoading => _loading;
 
   @override
-  Reservation? get selectedReservation => _selected;
-
-  @override
   Future<void> loadReservation(String id) async {
+    loadCalls++;
     _loading = true;
     notifyListeners();
     _pending = Completer<bool>();
     final found = await _pending!.future;
-    if (found) _selected = reservations.firstWhere((r) => r.id == id);
     _loading = false;
-    notifyListeners();
+    if (found) {
+      // ignore: invalid_use_of_visible_for_testing_member
+      setStateForTesting(selected: reservations.firstWhere((r) => r.id == id));
+    } else {
+      notifyListeners();
+    }
   }
 
+  /// [found] faux : le serveur n'a pas répondu, la sélection ne change pas.
   void finishLoading({required bool found}) => _pending!.complete(found);
 }
 
 Future<_FakeReservationProvider> _pumpHistory(WidgetTester tester) async {
+  // Assez haut pour que les trois cartes de la liste soient construites.
+  tester.view.physicalSize = const Size(360, 1600);
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.reset);
+
   final provider = _FakeReservationProvider()
     // ignore: invalid_use_of_visible_for_testing_member
     ..setStateForTesting(
       reservations: [
         _reservation('r1', 'K7M4QX'),
         _reservation('r2', 'B2N8ZP'),
+        _reservation('r3', null),
       ],
     );
   final router = GoRouter(
@@ -132,47 +141,106 @@ void main() {
     testWidgets('toucher une carte ouvre le QR code de cette réservation', (
       tester,
     ) async {
-      tester.view.physicalSize = const Size(360, 780);
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.reset);
-
       final provider = await _pumpHistory(tester);
-      expect(find.byType(ReservationStatusCard), findsNWidgets(2));
+      expect(find.byType(ReservationStatusCard), findsNWidgets(3));
+      expect(find.byType(LinearProgressIndicator), findsNothing);
 
-      await tester.tap(find.byType(ReservationStatusCard).last);
+      await tester.tap(find.byType(ReservationStatusCard).at(1));
       await tester.pump();
 
-      // Pendant le chargement, la liste reste affichée.
+      // Pendant le chargement, la liste reste affichée et le toucher est
+      // signalé.
       expect(provider.isLoading, isTrue);
-      expect(find.byType(ReservationStatusCard), findsNWidgets(2));
+      expect(find.byType(ReservationStatusCard), findsNWidgets(3));
+      expect(find.byType(LinearProgressIndicator), findsOneWidget);
 
       provider.finishLoading(found: true);
       await tester.pumpAndSettle();
 
       expect(find.byType(ReservationQRScreen), findsOneWidget);
-      expect(find.byType(PickupQrCode), findsOneWidget);
       expect(find.text('B2N8ZP'), findsOneWidget);
       expect(
         tester.widget<PickupQrCode>(find.byType(PickupQrCode)).data,
         'B2N8ZP',
       );
+      expect(find.textContaining('Hors connexion'), findsNothing);
     });
 
-    testWidgets('chargement échoué : pas de QR code, message affiché', (
+    testWidgets(
+      'chargement échoué, réservation en cache : QR code ouvert, mention '
+      '« Hors connexion »',
+      (tester) async {
+        final provider = await _pumpHistory(tester);
+        await tester.tap(find.byType(ReservationStatusCard).first);
+        await tester.pump();
+        provider.finishLoading(found: false);
+        await tester.pumpAndSettle();
+
+        expect(find.byType(ReservationQRScreen), findsOneWidget);
+        expect(
+          tester.widget<PickupQrCode>(find.byType(PickupQrCode)).data,
+          'K7M4QX',
+        );
+        expect(provider.selectedReservationFromCache, isTrue);
+        expect(
+          find.textContaining(
+            'Hors connexion — dernières données enregistrées',
+          ),
+          findsOneWidget,
+        );
+        // État et échéance connus affichés.
+        expect(find.textContaining('À retirer avant le'), findsOneWidget);
+        expect(find.textContaining('Impossible d\'ouvrir'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'chargement échoué, réservation sans code : pas de QR code, message',
+      (tester) async {
+        final provider = await _pumpHistory(tester);
+        await tester.ensureVisible(find.byType(ReservationStatusCard).at(2));
+        await tester.pump();
+        await tester.tap(find.byType(ReservationStatusCard).at(2));
+        await tester.pump();
+        provider.finishLoading(found: false);
+        await tester.pumpAndSettle();
+
+        expect(find.byType(ReservationQRScreen), findsNothing);
+        expect(find.textContaining('Impossible d\'ouvrir'), findsOneWidget);
+        expect(find.byType(LinearProgressIndicator), findsNothing);
+      },
+    );
+
+    testWidgets('double toucher : un seul chargement, un seul écran ouvert', (
       tester,
     ) async {
-      tester.view.physicalSize = const Size(360, 780);
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.reset);
-
       final provider = await _pumpHistory(tester);
       await tester.tap(find.byType(ReservationStatusCard).first);
       await tester.pump();
-      provider.finishLoading(found: false);
-      await tester.pumpAndSettle();
+      await tester.tap(find.byType(ReservationStatusCard).first);
+      await tester.pump();
+      await tester.tap(find.byType(ReservationStatusCard).at(1));
+      await tester.pump();
+      expect(provider.loadCalls, 1);
 
+      provider.finishLoading(found: true);
+      await tester.pumpAndSettle();
+      expect(find.byType(ReservationQRScreen), findsOneWidget);
+      expect(find.text('K7M4QX'), findsOneWidget);
+
+      // Un seul écran empilé : un retour ramène à la liste.
+      await tester.tap(find.byIcon(Icons.arrow_back).last);
+      await tester.pumpAndSettle();
       expect(find.byType(ReservationQRScreen), findsNothing);
-      expect(find.textContaining('Impossible d\'ouvrir'), findsOneWidget);
+      expect(find.byType(ReservationHistoryScreen), findsOneWidget);
+
+      // Le toucher suivant est de nouveau pris en compte.
+      await tester.tap(find.byType(ReservationStatusCard).at(1));
+      await tester.pump();
+      expect(provider.loadCalls, 2);
+      provider.finishLoading(found: true);
+      await tester.pumpAndSettle();
+      expect(find.text('B2N8ZP'), findsOneWidget);
     });
   });
 

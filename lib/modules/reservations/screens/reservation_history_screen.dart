@@ -21,6 +21,9 @@ class _ReservationHistoryScreenState extends State<ReservationHistoryScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
+  /// C255 : réservation dont le QR code est en cours d'ouverture.
+  String? _openingId;
+
   @override
   void initState() {
     super.initState();
@@ -128,7 +131,14 @@ class _ReservationHistoryScreenState extends State<ReservationHistoryScreen>
                 ),
               ),
             ],
-            const SizedBox(height: 16),
+            // C255 : barre de progression pendant l'ouverture d'un QR code,
+            // dans l'espace au-dessus de la liste (rien ne bouge à l'écran).
+            SizedBox(
+              height: 16,
+              child: _openingId == null
+                  ? null
+                  : const Center(child: LinearProgressIndicator(minHeight: 3)),
+            ),
             Expanded(
               // C255 : la roue ne remplace la liste que s'il n'y a encore
               // rien à montrer ; une liste déjà chargée reste affichée
@@ -222,22 +232,35 @@ class _ReservationHistoryScreenState extends State<ReservationHistoryScreen>
   /// l'écran, pas de la carte touchée : la carte peut être retirée de l'écran
   /// pendant le chargement, et son contexte ne permet alors plus de naviguer.
   Future<void> _openQr(Reservation reservation) async {
+    // Un toucher à la fois : le second est ignoré tant que le premier
+    // n'est pas terminé.
+    if (_openingId != null) return;
+    setState(() => _openingId = reservation.id);
     final provider = context.read<ReservationProvider>();
-    await provider.loadReservation(reservation.id);
+    try {
+      await provider.loadReservation(reservation.id);
+    } finally {
+      if (mounted) setState(() => _openingId = null);
+    }
     if (!mounted) return;
     // Chargement échoué : la réservation sélectionnée est restée celle
     // d'avant. Ne jamais montrer le QR code d'une autre réservation.
     if (provider.selectedReservation?.id != reservation.id) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text(
-            'Impossible d\'ouvrir cette réservation. Vérifiez la connexion '
-            'et réessayez.',
+      // Hors connexion : la réservation de la liste, en cache, porte le code
+      // de retrait. Le serveur le vérifie au retrait.
+      if ((reservation.qrCodeToken ?? '').isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text(
+              'Impossible d\'ouvrir cette réservation. Vérifiez la connexion '
+              'et réessayez.',
+            ),
+            backgroundColor: context.palette.danger,
           ),
-          backgroundColor: context.palette.danger,
-        ),
-      );
-      return;
+        );
+        return;
+      }
+      provider.selectCachedReservation(reservation);
     }
     context.push('/reservations/qr');
   }
