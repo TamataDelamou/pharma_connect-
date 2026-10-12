@@ -7,6 +7,9 @@ class SearchBarWithSuggestions extends StatelessWidget {
   final TextEditingController controller;
   final FocusNode focusNode;
   final Function(String) onSearch;
+
+  /// C260 : recherche validée au clavier (touche « Rechercher »).
+  final ValueChanged<String>? onSubmitted;
   final Function(SearchSuggestion) onSuggestionSelected;
   final VoidCallback onClear;
   final bool showSuggestions;
@@ -20,6 +23,7 @@ class SearchBarWithSuggestions extends StatelessWidget {
     required this.controller,
     required this.focusNode,
     required this.onSearch,
+    this.onSubmitted,
     required this.onSuggestionSelected,
     required this.onClear,
     required this.showSuggestions,
@@ -46,6 +50,8 @@ class SearchBarWithSuggestions extends StatelessWidget {
               onSearch(value);
             }
           },
+          onSubmitted: onSubmitted,
+          textInputAction: TextInputAction.search,
         ),
         if (showSuggestions && suggestions.isNotEmpty) ...[
           const SizedBox(height: 8),

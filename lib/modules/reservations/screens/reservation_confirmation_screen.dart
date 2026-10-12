@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import '../../../core/widgets/layout/responsive.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../providers/reservation_provider.dart';
 import '../widgets/pickup_qr_code.dart';
@@ -132,29 +133,25 @@ class ReservationConfirmationScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
-                Row(
+                // C253 : l'un sous l'autre en largeur téléphone.
+                ResponsiveActions(
                   children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => context.push('/reservations/qr'),
-                        style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: context.palette.veil(0.24)),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                        ),
-                        child: const Text('Voir mon QR code'),
+                    OutlinedButton(
+                      onPressed: () => context.push('/reservations/qr'),
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: context.palette.veil(0.24)),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
+                      child: const Text('Voir mon QR code'),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () => context.go('/reservations/history'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: context.palette.primary,
-                          foregroundColor: context.palette.onPrimary,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                        ),
-                        child: const Text('Voir l\'historique'),
+                    ElevatedButton(
+                      onPressed: () => context.go('/reservations/history'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: context.palette.primary,
+                        foregroundColor: context.palette.onPrimary,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
+                      child: const Text('Voir l\'historique'),
                     ),
                   ],
                 ),

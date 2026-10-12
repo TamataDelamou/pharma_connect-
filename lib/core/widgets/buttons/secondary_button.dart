@@ -51,12 +51,17 @@ class SecondaryButton extends StatelessWidget {
               Icon(icon, size: 20),
               const SizedBox(width: 10),
             ],
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                height: 1.0,
+            // C253 : libellé souple, comme PrimaryButton. Sans cela, un bouton
+            // plus étroit que son libellé débordait.
+            Flexible(
+              child: Text(
+                label,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  height: 1.0,
+                ),
               ),
             ),
           ],

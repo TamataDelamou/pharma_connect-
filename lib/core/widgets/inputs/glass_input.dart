@@ -26,6 +26,12 @@ class GlassInput extends StatelessWidget {
   // passent pas).
   final FormFieldValidator<String>? validator;
 
+  // C260 : validation au clavier (touche « Rechercher »), en pass-through
+  // vers le TextFormField interne ; additif, aucun changement pour les
+  // appelants qui ne les passent pas.
+  final ValueChanged<String>? onSubmitted;
+  final TextInputAction? textInputAction;
+
   const GlassInput({
     super.key,
     required this.label,
@@ -42,6 +48,8 @@ class GlassInput extends StatelessWidget {
     this.onChanged,
     this.initialValue,
     this.validator,
+    this.onSubmitted,
+    this.textInputAction,
   });
 
   @override
@@ -58,6 +66,8 @@ class GlassInput extends StatelessWidget {
           enabled: !isDisabled,
           keyboardType: keyboardType,
           onChanged: onChanged,
+          onFieldSubmitted: onSubmitted,
+          textInputAction: textInputAction,
           validator: validator,
           style: context.text.body1.copyWith(
             color: isDisabled ? context.palette.textSecondary : null,

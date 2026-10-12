@@ -31,20 +31,23 @@ class QueuePositionWidget extends StatelessWidget {
           children: [
             Icon(Icons.check_circle, color: context.palette.success, size: 28),
             const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Commande prête !',
-                  style: context.text.heading3.copyWith(
-                    color: context.palette.success,
+            // C253 : texte souple, qui passe à la ligne à 360 px.
+            Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Commande prête !',
+                    style: context.text.heading3.copyWith(
+                      color: context.palette.success,
+                    ),
                   ),
-                ),
-                Text(
-                  'Vous pouvez retirer votre commande',
-                  style: context.text.body2,
-                ),
-              ],
+                  Text(
+                    'Vous pouvez retirer votre commande',
+                    style: context.text.body2,
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -58,33 +61,54 @@ class QueuePositionWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: context.palette.borderSubtle, width: 1),
       ),
+      // C253 : deux moitiés égales ; les libellés passent à la ligne et les
+      // grands chiffres rétrécissent s'ils ne tiennent pas. Côte à côte sans
+      // élément souple, ils débordaient à 360 px.
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Column(
-            children: [
-              Text('Position dans la file', style: context.text.label),
-              Text(
-                '#$position',
-                style: context.text.kpiLarge.copyWith(
-                  color: context.palette.primary,
+          Expanded(
+            child: Column(
+              children: [
+                Text(
+                  'Position dans la file',
+                  style: context.text.label,
+                  textAlign: TextAlign.center,
                 ),
-              ),
-            ],
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    '#$position',
+                    style: context.text.kpiLarge.copyWith(
+                      color: context.palette.primary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(width: 40),
-          Column(
-            children: [
-              Text('Temps d\'attente estimé', style: context.text.label),
-              Text(
-                estimatedMinutes < 60
-                    ? '$estimatedMinutes min'
-                    : '${estimatedMinutes ~/ 60}h ${estimatedMinutes % 60}min',
-                style: context.text.kpiLarge.copyWith(
-                  color: context.palette.primary,
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              children: [
+                Text(
+                  'Temps d\'attente estimé',
+                  style: context.text.label,
+                  textAlign: TextAlign.center,
                 ),
-              ),
-            ],
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    estimatedMinutes < 60
+                        ? '$estimatedMinutes min'
+                        : '${estimatedMinutes ~/ 60}h ${estimatedMinutes % 60}min',
+                    style: context.text.kpiLarge.copyWith(
+                      color: context.palette.primary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

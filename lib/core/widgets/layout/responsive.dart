@@ -102,3 +102,38 @@ class HeaderRow extends StatelessWidget {
     );
   }
 }
+
+/// C253 : rangée de boutons d'action.
+/// - Large : côte à côte, chacun selon son poids ([flex], 1 par défaut).
+/// - Téléphone : l'un sous l'autre, sur toute la largeur. Côte à côte, il ne
+///   restait à 360 px qu'une cinquantaine de pixels par libellé : le texte
+///   débordait, ou aurait été coupé. Un libellé doit se lire en entier.
+class ResponsiveActions extends StatelessWidget {
+  final List<Widget> children;
+  final List<int>? flex;
+
+  const ResponsiveActions({super.key, required this.children, this.flex});
+
+  @override
+  Widget build(BuildContext context) {
+    if (!isCompactWidth(context)) {
+      return Row(
+        children: [
+          for (var i = 0; i < children.length; i++) ...[
+            if (i > 0) const SizedBox(width: 12),
+            Expanded(flex: flex?[i] ?? 1, child: children[i]),
+          ],
+        ],
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (var i = 0; i < children.length; i++) ...[
+          if (i > 0) const SizedBox(height: 8),
+          children[i],
+        ],
+      ],
+    );
+  }
+}

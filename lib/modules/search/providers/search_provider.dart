@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import '../../../shared/models/product.dart';
 import '../models/search_filters.dart';
@@ -9,7 +11,15 @@ import '../services/search_service.dart';
 enum SearchStatus { idle, searching, loaded, error }
 
 class SearchProvider extends ChangeNotifier {
-  final SearchService _service = SearchService();
+  final SearchService _service;
+
+  /// [service] : remplaçable dans les tests.
+  SearchProvider({SearchService? service})
+    : _service = service ?? SearchService();
+
+  // C260 : numéro de la dernière recherche lancée. La réponse d'une
+  // recherche dépassée (frappe plus récente) est ignorée.
+  int _searchSeq = 0;
 
   // État
   String _query = '';
@@ -56,22 +66,37 @@ class SearchProvider extends ChangeNotifier {
 
   // ==================== RECHERCHE ====================
 
+  /// Lance une recherche.
+  ///
+  /// C260 : [recordHistory] n'est vrai que pour une recherche voulue (touche
+  /// « Rechercher » du clavier, suggestion ou ancienne recherche choisie).
+  /// La recherche lancée pendant la frappe ne s'inscrit pas dans
+  /// l'historique : il gardait « p », « pa », « par »…
+  ///
+  /// C261 : [keepResults] laisse la liste affichée pendant une
+  /// actualisation (tirer pour actualiser).
   Future<void> search({
     String? query,
     SearchFilters? filters,
     double? userLat,
     double? userLon,
+    bool recordHistory = false,
+    bool keepResults = false,
   }) async {
     final searchQuery = query ?? _query;
     if (searchQuery.isEmpty) {
+      _searchSeq++;
       _results = [];
       _status = SearchStatus.idle;
       notifyListeners();
       return;
     }
 
+    final seq = ++_searchSeq;
     _query = searchQuery;
-    _status = SearchStatus.searching;
+    if (!(keepResults && _status == SearchStatus.loaded)) {
+      _status = SearchStatus.searching;
+    }
     _error = null;
     _isOffline = false;
     _showSuggestions = false;
@@ -85,11 +110,13 @@ class SearchProvider extends ChangeNotifier {
         userLat: userLat,
         userLon: userLon,
       );
+      if (seq != _searchSeq) return;
       _results = results;
       _status = SearchStatus.loaded;
       _isOffline = false;
-      await _service.addToHistory(searchQuery);
+      if (recordHistory) unawaited(_remember(searchQuery));
     } catch (e) {
+      if (seq != _searchSeq) return;
       // Directive utilisateur (29/08/2026) : « privilégier le mode
       // hors-ligne tant que cela est possible ». Avant ce correctif, toute
       // erreur réseau effaçait `_results` déjà affichés et basculait sur un
@@ -173,6 +200,25 @@ class SearchProvider extends ChangeNotifier {
 
   // ==================== HISTORIQUE ====================
 
+  /// C260 : inscrit la recherche en cours dans l'historique, quand le patient
+  /// ouvre un résultat : c'est le signe qu'il a trouvé ce qu'il cherchait.
+  Future<void> rememberCurrentQuery() => _remember(_query);
+
+  // Une recherche d'une seule lettre n'est jamais gardée. Un échec
+  // d'enregistrement ne touche pas aux résultats affichés.
+  Future<void> _remember(String query) async {
+    final term = query.trim();
+    if (term.length < 2) return;
+    _searchHistory = [
+      term,
+      ..._searchHistory.where((q) => q != term),
+    ].take(10).toList();
+    notifyListeners();
+    try {
+      await _service.addToHistory(term);
+    } catch (_) {}
+  }
+
   Future<void> loadHistory() async {
     try {
       _searchHistory = await _service.getSearchHistory();
@@ -227,7 +273,7 @@ class SearchProvider extends ChangeNotifier {
 
   Future<void> selectSuggestion(SearchSuggestion suggestion) async {
     if (suggestion.query != null) {
-      await search(query: suggestion.query!);
+      await search(query: suggestion.query!, recordHistory: true);
     }
   }
 

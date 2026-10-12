@@ -897,33 +897,44 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
                     color: context.palette.surfaceMuted,
                     borderRadius: BorderRadius.circular(12),
                   ),
+                  // C253 : deux moitiés égales, libellés centrés qui passent à
+                  // la ligne ; côte à côte sans élément souple, ils
+                  // débordaient.
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Column(
-                        children: [
-                          Text(
-                            'Position dans la file',
-                            style: context.text.label,
-                          ),
-                          Text(
-                            reservation.queueDisplay,
-                            style: context.text.kpiSmall,
-                          ),
-                        ],
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Text(
+                              'Position dans la file',
+                              style: context.text.label,
+                              textAlign: TextAlign.center,
+                            ),
+                            Text(
+                              reservation.queueDisplay,
+                              style: context.text.kpiSmall,
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
                       ),
                       const SizedBox(width: 16),
-                      Column(
-                        children: [
-                          Text(
-                            'Temps d\'attente estimé',
-                            style: context.text.label,
-                          ),
-                          Text(
-                            reservation.estimatedWaitDisplay,
-                            style: context.text.kpiSmall,
-                          ),
-                        ],
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Text(
+                              'Temps d\'attente estimé',
+                              style: context.text.label,
+                              textAlign: TextAlign.center,
+                            ),
+                            Text(
+                              reservation.estimatedWaitDisplay,
+                              style: context.text.kpiSmall,
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -970,26 +981,23 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
             ),
           ],
           const SizedBox(height: 24),
-          Row(
+          // C253 : l'un sous l'autre en largeur téléphone (« Voir
+          // l'historique » n'avait que le tiers de la largeur).
+          ResponsiveActions(
+            flex: const [1, 2],
             children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () => context.go('/reservations/history'),
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: context.palette.veil(0.24)),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                  child: const Text('Voir l\'historique'),
+              OutlinedButton(
+                onPressed: () => context.go('/reservations/history'),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: context.palette.veil(0.24)),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
+                child: const Text('Voir l\'historique'),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                flex: 2,
-                child: PrimaryButton(
-                  label: 'Retour à l\'accueil',
-                  icon: Icons.home,
-                  onPressed: () => context.go('/dashboard'),
-                ),
+              PrimaryButton(
+                label: 'Retour à l\'accueil',
+                icon: Icons.home,
+                onPressed: () => context.go('/dashboard'),
               ),
             ],
           ),
