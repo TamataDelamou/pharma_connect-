@@ -18,7 +18,10 @@ import '../../auth/providers/auth_provider.dart';
 import '../../../core/theme/palette.dart';
 
 class POSCheckoutScreen extends StatefulWidget {
-  const POSCheckoutScreen({super.key});
+  /// Service de vente, remplaçable dans les tests.
+  final POSService? posService;
+
+  const POSCheckoutScreen({super.key, this.posService});
 
   @override
   State<POSCheckoutScreen> createState() => _POSCheckoutScreenState();
@@ -27,7 +30,7 @@ class POSCheckoutScreen extends StatefulWidget {
 class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
   final _searchController = TextEditingController();
   final _quantityController = TextEditingController();
-  final POSService _posService = POSService();
+  late final POSService _posService = widget.posService ?? POSService();
 
   // C201 : produits du stock réel de l'officine (plus de catalogue fictif).
   List<StockProduct> _results = [];
@@ -103,271 +106,384 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
 
     final provider = context.watch<POSProvider>();
 
+    // C257 : la mise en page dépend de la largeur réellement disponible
+    // (menu latéral déduit), pas de celle de l'écran.
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // C233 : en-tête adaptable (actions sous le titre sur téléphone).
-            HeaderRow(
-              leading: Row(
-                children: [
-                  IconButton(
-                    icon: Icon(
-                      Icons.arrow_back,
-                      color: context.palette.textPrimary,
-                    ),
-                    onPressed: () => context.pop(),
-                    padding: EdgeInsets.zero,
+      body: LayoutBuilder(
+        builder: (context, constraints) =>
+            constraints.maxWidth < _stackedBreakpoint
+            ? _buildStacked(provider)
+            : _buildSideBySide(provider),
+      ),
+    );
+  }
+
+  /// C257 : en dessous de cette largeur, deux colonnes ne tiennent plus : la
+  /// liste et le résumé sont empilés, « À payer » et le paiement fixés en
+  /// bas.
+  static const double _stackedBreakpoint = 720;
+
+  /// Écran large : produits et panier à gauche, résumé à droite.
+  Widget _buildSideBySide(POSProvider provider) {
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildHeader(provider),
+          const SizedBox(height: 24),
+          Expanded(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Left: Product search & cart
+                Expanded(
+                  flex: 2,
+                  child: Column(
+                    children: [
+                      // Search bar
+                      Row(
+                        children: [
+                          Expanded(child: _buildSearchField()),
+                          const SizedBox(width: 8),
+                          PrimaryButton(
+                            label: 'Rechercher',
+                            onPressed: _search,
+                            width: 120,
+                            height: 50,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      _buildQuantityAndDiscount(provider),
+                      const SizedBox(height: 8),
+                      _buildSearchResults(provider),
+                      const SizedBox(height: 16),
+
+                      // Cart items
+                      Expanded(
+                        child: provider.cart.isEmpty
+                            ? Center(child: _buildEmptyCart())
+                            : ListView.builder(
+                                itemCount: provider.cart.length,
+                                itemBuilder: (context, index) {
+                                  final item = provider.cart[index];
+                                  return _buildCartItem(item, provider);
+                                },
+                              ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      '🧾 Vente au comptoir',
-                      style: context.text.heading2,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-              trailing: [
-                const KernelBadge(),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: provider.cart.isNotEmpty
-                        ? context.palette.success.withValues(alpha: 0.15)
-                        : context.palette.textSecondary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    '${provider.cart.length} article${provider.cart.length > 1 ? 's' : ''}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: provider.cart.isNotEmpty
-                          ? context.palette.success
-                          : context.palette.textSecondary,
+                ),
+                const SizedBox(width: 24),
+
+                // Right: Summary & checkout
+                Expanded(
+                  flex: 1,
+                  child: GlassCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('📊 Résumé', style: context.text.heading3),
+                        const SizedBox(height: 16),
+                        ..._buildAmountRows(provider),
+                        Divider(color: context.palette.veil(0.12)),
+                        _buildSummaryRow(
+                          'À payer',
+                          provider.finalTotal,
+                          isTotal: true,
+                          color: context.palette.primary,
+                        ),
+                        const SizedBox(height: 16),
+                        ..._buildPaymentFields(provider),
+                        const SizedBox(height: 16),
+                        _buildCheckoutButton(provider),
+                        const SizedBox(height: 8),
+                        _buildClearCartButton(provider),
+                      ],
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+          ),
+        ],
+      ),
+    );
+  }
 
-            Expanded(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+  /// C257, téléphone : tout défile sur une colonne (recherche, produits,
+  /// panier, résumé) ; « À payer » et le bouton de paiement restent fixés en
+  /// bas, toujours visibles.
+  Widget _buildStacked(POSProvider provider) {
+    return Column(
+      children: [
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+            children: [
+              _buildHeader(provider),
+              const SizedBox(height: 16),
+              _buildSearchField(),
+              const SizedBox(height: 8),
+              PrimaryButton(
+                label: 'Rechercher',
+                onPressed: _search,
+                height: 44,
+              ),
+              const SizedBox(height: 8),
+              _buildQuantityAndDiscount(provider),
+              const SizedBox(height: 8),
+              _buildSearchResults(provider),
+              const SizedBox(height: 16),
+              Text('🛒 Panier', style: context.text.heading3),
+              const SizedBox(height: 8),
+              if (provider.cart.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: _buildEmptyCart(),
+                )
+              else
+                for (final item in provider.cart)
+                  _buildCartItem(item, provider),
+              const SizedBox(height: 16),
+              GlassCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('📊 Résumé', style: context.text.heading3),
+                    const SizedBox(height: 16),
+                    ..._buildAmountRows(provider),
+                    const SizedBox(height: 16),
+                    ..._buildPaymentFields(provider),
+                    const SizedBox(height: 16),
+                    _buildClearCartButton(provider),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Panneau fixe : le montant à encaisser et le paiement.
+        Container(
+          decoration: BoxDecoration(
+            color: context.palette.surface,
+            border: Border(top: BorderSide(color: context.palette.border)),
+            boxShadow: [
+              BoxShadow(
+                color: context.palette.shadow,
+                blurRadius: 12,
+                offset: const Offset(0, -2),
+              ),
+            ],
+          ),
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Left: Product search & cart
-                  Expanded(
-                    flex: 2,
-                    child: Column(
-                      children: [
-                        // Search bar
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                controller: _searchController,
-                                onChanged: _onSearchChanged,
-                                onSubmitted: (_) => _search(),
-                                textInputAction: TextInputAction.search,
-                                decoration: const InputDecoration(
-                                  hintText:
-                                      'Rechercher un produit en stock (nom ou DCI)...',
-                                  prefixIcon: Icon(Icons.search),
-                                  border: OutlineInputBorder(),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            PrimaryButton(
-                              label: 'Rechercher',
-                              onPressed: _search,
-                              width: 120,
-                              height: 50,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        // Quantity and discount
-                        Row(
-                          children: [
-                            SizedBox(
-                              width: 80,
-                              child: TextField(
-                                controller: _quantityController,
-                                keyboardType: TextInputType.number,
-                                decoration: const InputDecoration(
-                                  labelText: 'Qté',
-                                  border: OutlineInputBorder(),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Slider(
-                                value: provider.discountPercent,
-                                min: 0,
-                                max: 100,
-                                onChanged: (value) {
-                                  provider.setDiscount(value);
-                                },
-                                activeColor: context.palette.secondary,
-                              ),
-                            ),
-                            Text(
-                              '${provider.discountPercent.toStringAsFixed(0)}%',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: provider.discountPercent > 0
-                                    ? context.palette.secondary
-                                    : context.palette.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        _buildSearchResults(provider),
-                        const SizedBox(height: 16),
-
-                        // Cart items
-                        Expanded(
-                          child: provider.cart.isEmpty
-                              ? Center(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        Icons.shopping_cart_outlined,
-                                        size: 48,
-                                        color: context.palette.veil(0.24),
-                                      ),
-                                      SizedBox(height: 16),
-                                      Text(
-                                        'Panier vide',
-                                        style: context.text.body2,
-                                      ),
-                                      Text(
-                                        'Ajoutez des produits pour commencer',
-                                        style: context.text.micro,
-                                      ),
-                                    ],
-                                  ),
-                                )
-                              : ListView.builder(
-                                  itemCount: provider.cart.length,
-                                  itemBuilder: (context, index) {
-                                    final item = provider.cart[index];
-                                    return _buildCartItem(item, provider);
-                                  },
-                                ),
-                        ),
-                      ],
-                    ),
+                  _buildSummaryRow(
+                    'À payer',
+                    provider.finalTotal,
+                    isTotal: true,
+                    color: context.palette.primary,
                   ),
-                  const SizedBox(width: 24),
-
-                  // Right: Summary & checkout
-                  Expanded(
-                    flex: 1,
-                    child: GlassCard(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('📊 Résumé', style: context.text.heading3),
-                          const SizedBox(height: 16),
-                          _buildSummaryRow('Total', provider.total),
-                          if (provider.discountPercent > 0)
-                            _buildSummaryRow(
-                              'Remise (${provider.discountPercent.toStringAsFixed(0)}%)',
-                              -provider.discountAmount,
-                              color: context.palette.secondary,
-                            ),
-                          _buildSummaryRow('TVA (5%)', provider.taxAmount),
-                          Divider(color: context.palette.veil(0.12)),
-                          _buildSummaryRow(
-                            'À payer',
-                            provider.finalTotal,
-                            isTotal: true,
-                            color: context.palette.primary,
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Payment method
-                          DropdownButtonFormField<String>(
-                            value: provider.selectedPaymentMethod,
-                            decoration: const InputDecoration(
-                              labelText: 'Mode de paiement',
-                              border: OutlineInputBorder(),
-                            ),
-                            items: const [
-                              DropdownMenuItem(
-                                value: 'cash',
-                                child: Text('💵 Espèces'),
-                              ),
-                              DropdownMenuItem(
-                                value: 'mobile_money',
-                                child: Text('📱 Mobile Money'),
-                              ),
-                              DropdownMenuItem(
-                                value: 'card',
-                                child: Text('💳 Carte'),
-                              ),
-                              DropdownMenuItem(
-                                value: 'insurance',
-                                child: Text('🛡️ Assurance'),
-                              ),
-                            ],
-                            onChanged: (value) {
-                              if (value != null) {
-                                provider.setPaymentMethod(value);
-                              }
-                            },
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Patient field (optional)
-                          TextField(
-                            decoration: const InputDecoration(
-                              hintText: 'Patient (optionnel)',
-                              border: OutlineInputBorder(),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-
-                          PrimaryButton(
-                            label: provider.isCheckingOut
-                                ? 'Traitement...'
-                                : '💳 Finaliser la vente',
-                            isLoading: provider.isCheckingOut,
-                            onPressed: provider.cart.isEmpty
-                                ? null
-                                : () => _checkout(provider),
-                          ),
-                          const SizedBox(height: 8),
-                          SecondaryButton(
-                            label: '🔄 Vider le panier',
-                            onPressed: provider.cart.isEmpty
-                                ? null
-                                : provider.clearCart,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                  const SizedBox(height: 4),
+                  _buildCheckoutButton(provider),
                 ],
               ),
             ),
-          ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // C233 : en-tête adaptable (actions sous le titre sur téléphone).
+  Widget _buildHeader(POSProvider provider) {
+    return HeaderRow(
+      leading: Row(
+        children: [
+          IconButton(
+            icon: Icon(Icons.arrow_back, color: context.palette.textPrimary),
+            onPressed: () => context.pop(),
+            padding: EdgeInsets.zero,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              '🧾 Vente au comptoir',
+              style: context.text.heading2,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+      trailing: [
+        const KernelBadge(),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: provider.cart.isNotEmpty
+                ? context.palette.success.withValues(alpha: 0.15)
+                : context.palette.textSecondary.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Text(
+            '${provider.cart.length} article${provider.cart.length > 1 ? 's' : ''}',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: provider.cart.isNotEmpty
+                  ? context.palette.success
+                  : context.palette.textSecondary,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSearchField() {
+    return TextField(
+      controller: _searchController,
+      onChanged: _onSearchChanged,
+      onSubmitted: (_) => _search(),
+      textInputAction: TextInputAction.search,
+      decoration: const InputDecoration(
+        hintText: 'Rechercher un produit en stock (nom ou DCI)...',
+        prefixIcon: Icon(Icons.search),
+        border: OutlineInputBorder(),
+      ),
+    );
+  }
+
+  // Quantity and discount
+  Widget _buildQuantityAndDiscount(POSProvider provider) {
+    return Row(
+      children: [
+        SizedBox(
+          width: 80,
+          child: TextField(
+            controller: _quantityController,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(
+              labelText: 'Qté',
+              border: OutlineInputBorder(),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Slider(
+            value: provider.discountPercent,
+            min: 0,
+            max: 100,
+            onChanged: (value) {
+              provider.setDiscount(value);
+            },
+            activeColor: context.palette.secondary,
+          ),
+        ),
+        Text(
+          '${provider.discountPercent.toStringAsFixed(0)}%',
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: provider.discountPercent > 0
+                ? context.palette.secondary
+                : context.palette.textSecondary,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEmptyCart() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          Icons.shopping_cart_outlined,
+          size: 48,
+          color: context.palette.veil(0.24),
+        ),
+        const SizedBox(height: 16),
+        Text('Panier vide', style: context.text.body2),
+        Text(
+          'Ajoutez des produits pour commencer',
+          style: context.text.micro,
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
+  /// Lignes du résumé au-dessus de « À payer ».
+  List<Widget> _buildAmountRows(POSProvider provider) {
+    return [
+      _buildSummaryRow('Total', provider.total),
+      if (provider.discountPercent > 0)
+        _buildSummaryRow(
+          'Remise (${provider.discountPercent.toStringAsFixed(0)}%)',
+          -provider.discountAmount,
+          color: context.palette.secondary,
+        ),
+      _buildSummaryRow('TVA (5%)', provider.taxAmount),
+    ];
+  }
+
+  List<Widget> _buildPaymentFields(POSProvider provider) {
+    return [
+      // Payment method
+      DropdownButtonFormField<String>(
+        value: provider.selectedPaymentMethod,
+        isExpanded: true,
+        decoration: const InputDecoration(
+          labelText: 'Mode de paiement',
+          border: OutlineInputBorder(),
+        ),
+        items: const [
+          DropdownMenuItem(value: 'cash', child: Text('💵 Espèces')),
+          DropdownMenuItem(
+            value: 'mobile_money',
+            child: Text('📱 Mobile Money'),
+          ),
+          DropdownMenuItem(value: 'card', child: Text('💳 Carte')),
+          DropdownMenuItem(value: 'insurance', child: Text('🛡️ Assurance')),
+        ],
+        onChanged: (value) {
+          if (value != null) {
+            provider.setPaymentMethod(value);
+          }
+        },
+      ),
+      const SizedBox(height: 16),
+
+      // Patient field (optional)
+      TextField(
+        decoration: const InputDecoration(
+          hintText: 'Patient (optionnel)',
+          border: OutlineInputBorder(),
         ),
       ),
+    ];
+  }
+
+  Widget _buildCheckoutButton(POSProvider provider) {
+    return PrimaryButton(
+      label: provider.isCheckingOut ? 'Traitement...' : '💳 Finaliser la vente',
+      isLoading: provider.isCheckingOut,
+      onPressed: provider.cart.isEmpty ? null : () => _checkout(provider),
+    );
+  }
+
+  Widget _buildClearCartButton(POSProvider provider) {
+    return SecondaryButton(
+      label: '🔄 Vider le panier',
+      onPressed: provider.cart.isEmpty ? null : provider.clearCart,
     );
   }
 
@@ -417,14 +533,18 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
                                 : context.palette.warning,
                           ),
                           const SizedBox(width: 6),
-                          Text(
-                            item.prescriptionChecked
-                                ? 'Ordonnance vue'
-                                : 'Sur ordonnance : confirmer l\'ordonnance',
-                            style: context.text.micro.copyWith(
-                              color: item.prescriptionChecked
-                                  ? context.palette.success
-                                  : context.palette.warning,
+                          // C257 : le libellé passe à la ligne en largeur
+                          // téléphone.
+                          Flexible(
+                            child: Text(
+                              item.prescriptionChecked
+                                  ? 'Ordonnance vue'
+                                  : 'Sur ordonnance : confirmer l\'ordonnance',
+                              style: context.text.micro.copyWith(
+                                color: item.prescriptionChecked
+                                    ? context.palette.success
+                                    : context.palette.warning,
+                              ),
                             ),
                           ),
                         ],
@@ -560,6 +680,9 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
                                 ? null
                                 : context.palette.textSecondary,
                           ),
+                          // C257 : nom et dosage sur deux lignes au besoin ;
+                          // sur une ligne, le dosage était coupé à 360 px.
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
