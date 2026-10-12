@@ -63,14 +63,17 @@ class SearchResultCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                Row(
+                // C253 : les mentions passent à la ligne au lieu de déborder.
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 2,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     Text(
                       '${product.dosage} • ${product.form}',
                       style: context.text.micro,
                     ),
                     if (product.isGeneric) ...[
-                      const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 6,
@@ -93,7 +96,6 @@ class SearchResultCard extends StatelessWidget {
                       ),
                     ],
                     if (product.isPrescriptionRequired) ...[
-                      const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 6,
@@ -123,33 +125,40 @@ class SearchResultCard extends StatelessWidget {
 
           // Prix et disponibilité
           if (showAvailability) ...[
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                if (bestPrice != null) ...[
-                  Text(
-                    CurrencyFormatter.format(bestPrice),
-                    style: context.text.body1.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: context.palette.primary,
+            const SizedBox(width: 8),
+            // C253 : colonne bornée. Sans borne, le nom de l'officine la plus
+            // proche n'était jamais coupé et poussait la carte hors de
+            // l'écran.
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 124),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  if (bestPrice != null) ...[
+                    Text(
+                      CurrencyFormatter.format(bestPrice),
+                      style: context.text.body1.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: context.palette.primary,
+                      ),
                     ),
+                    const SizedBox(height: 4),
+                  ],
+                  AvailabilityBadge(
+                    isAvailable: hasStock,
+                    count: result.availableCount,
                   ),
-                  const SizedBox(height: 4),
+                  if (result.nearestPharmacy != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      '📍 ${result.nearestPharmacy}',
+                      style: context.text.micro,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ],
-                AvailabilityBadge(
-                  isAvailable: hasStock,
-                  count: result.availableCount,
-                ),
-                if (result.nearestPharmacy != null) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    '📍 ${result.nearestPharmacy}',
-                    style: context.text.micro,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ],
+              ),
             ),
           ],
         ],

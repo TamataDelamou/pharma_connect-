@@ -63,43 +63,38 @@ class PharmacyListTile extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
-                  Row(
+                  // C253 : les mentions passent à la ligne au lieu de
+                  // déborder (« Ouvert », « 24h/24 », « Garde », distance).
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 2,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
-                      if (pharmacy.isOpenNow) ...[
-                        Container(
-                          width: 6,
-                          height: 6,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: context.palette.success,
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 6,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: pharmacy.isOpenNow
+                                  ? context.palette.success
+                                  : context.palette.danger,
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          'Ouvert',
-                          style: context.text.micro.copyWith(
-                            color: context.palette.success,
+                          const SizedBox(width: 4),
+                          Text(
+                            pharmacy.isOpenNow ? 'Ouvert' : 'Fermé',
+                            style: context.text.micro.copyWith(
+                              color: pharmacy.isOpenNow
+                                  ? context.palette.success
+                                  : context.palette.danger,
+                            ),
                           ),
-                        ),
-                      ] else ...[
-                        Container(
-                          width: 6,
-                          height: 6,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: context.palette.danger,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          'Fermé',
-                          style: context.text.micro.copyWith(
-                            color: context.palette.danger,
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                       if (pharmacy.isOpen24h) ...[
-                        const SizedBox(width: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 6,
@@ -122,7 +117,6 @@ class PharmacyListTile extends StatelessWidget {
                         ),
                       ],
                       if (pharmacy.isOnDuty) ...[
-                        const SizedBox(width: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 6,
@@ -145,7 +139,6 @@ class PharmacyListTile extends StatelessWidget {
                         ),
                       ],
                       if (pharmacy.distance != null) ...[
-                        const SizedBox(width: 8),
                         Text(
                           pharmacy.distanceFormatted,
                           style: context.text.micro,

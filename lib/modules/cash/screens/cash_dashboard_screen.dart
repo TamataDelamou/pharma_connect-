@@ -273,28 +273,21 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
             const SizedBox(height: 16),
           ],
 
-          // Actions
-          Row(
+          // Actions. C253 : l'une sous l'autre en largeur téléphone, libellés
+          // lisibles en entier.
+          ResponsiveActions(
             children: [
-              Expanded(
-                child: SecondaryButton(
-                  label: '📊 Rapport',
-                  onPressed: () => context.push('/cash/report'),
-                ),
+              SecondaryButton(
+                label: '📊 Rapport',
+                onPressed: () => context.push('/cash/report'),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: SecondaryButton(
-                  label: '📋 Historique',
-                  onPressed: () => context.push('/cash/history'),
-                ),
+              SecondaryButton(
+                label: '📋 Historique',
+                onPressed: () => context.push('/cash/history'),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: PrimaryButton(
-                  label: '🔒 Fermer la caisse',
-                  onPressed: () => _confirmClose(provider),
-                ),
+              PrimaryButton(
+                label: '🔒 Fermer la caisse',
+                onPressed: () => _confirmClose(provider),
               ),
             ],
           ),

@@ -197,52 +197,45 @@ class _POSReceiptScreenState extends State<POSReceiptScreen> {
                     const SizedBox(height: 16),
 
                     // Actions
-                    Row(
+                    // C253 : l'une sous l'autre en largeur téléphone.
+                    ResponsiveActions(
                       children: [
-                        Expanded(
-                          child: PrimaryButton(
-                            label: provider.isPrinting
-                                ? 'Impression...'
-                                : '🖨️ Imprimer',
-                            isLoading: provider.isPrinting,
-                            onPressed: () async {
-                              final success = await provider.printReceipt();
-                              if (success && context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Reçu imprimé avec succès'),
-                                    backgroundColor: context.palette.success,
-                                  ),
-                                );
-                              } else if (context.mounted &&
-                                  provider.error != null) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(provider.error!),
-                                    backgroundColor: context.palette.danger,
-                                  ),
-                                );
-                              }
-                            },
-                          ),
+                        PrimaryButton(
+                          label: provider.isPrinting
+                              ? 'Impression...'
+                              : '🖨️ Imprimer',
+                          isLoading: provider.isPrinting,
+                          onPressed: () async {
+                            final success = await provider.printReceipt();
+                            if (success && context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Reçu imprimé avec succès'),
+                                  backgroundColor: context.palette.success,
+                                ),
+                              );
+                            } else if (context.mounted &&
+                                provider.error != null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(provider.error!),
+                                  backgroundColor: context.palette.danger,
+                                ),
+                              );
+                            }
+                          },
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: SecondaryButton(
-                            label: '📤 Partager',
-                            onPressed: () {
-                              // Share receipt
-                            },
-                          ),
+                        SecondaryButton(
+                          label: '📤 Partager',
+                          onPressed: () {
+                            // Share receipt
+                          },
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: SecondaryButton(
-                            label: '🔄 Rembourser',
-                            onPressed: sale.isCompleted
-                                ? () => _confirmRefund(context, sale)
-                                : null,
-                          ),
+                        SecondaryButton(
+                          label: '🔄 Rembourser',
+                          onPressed: sale.isCompleted
+                              ? () => _confirmRefund(context, sale)
+                              : null,
                         ),
                       ],
                     ),
