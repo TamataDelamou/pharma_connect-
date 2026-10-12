@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
@@ -23,6 +25,25 @@ class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
 
+  // C260 : la recherche pendant la frappe attend une courte pause, au lieu
+  // de partir à chaque lettre.
+  Timer? _debounce;
+
+  void _searchWhileTyping(String query) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 350), () {
+      if (!mounted) return;
+      context.read<SearchProvider>().search(query: query);
+    });
+  }
+
+  /// Recherche voulue : lancée tout de suite et inscrite dans l'historique.
+  void _searchNow(String query) {
+    _debounce?.cancel();
+    if (query.trim().isEmpty) return;
+    context.read<SearchProvider>().search(query: query, recordHistory: true);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -34,6 +55,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _controller.dispose();
     _focusNode.dispose();
     super.dispose();
@@ -101,10 +123,12 @@ class _SearchScreenState extends State<SearchScreen> {
             SearchBarWithSuggestions(
               controller: _controller,
               focusNode: _focusNode,
-              onSearch: (query) => provider.search(query: query),
+              onSearch: _searchWhileTyping,
+              onSubmitted: _searchNow,
               onSuggestionSelected: (suggestion) =>
                   provider.selectSuggestion(suggestion),
               onClear: () {
+                _debounce?.cancel();
                 _controller.clear();
                 provider.clearSearch();
               },
@@ -113,7 +137,7 @@ class _SearchScreenState extends State<SearchScreen> {
               searchHistory: provider.searchHistory,
               onHistoryItemSelected: (query) {
                 _controller.text = query;
-                provider.search(query: query);
+                _searchNow(query);
               },
               onClearHistory: () => provider.clearHistory(),
             ),
@@ -144,7 +168,7 @@ class _SearchScreenState extends State<SearchScreen> {
           history: provider.searchHistory,
           onHistoryTap: (query) {
             _controller.text = query;
-            provider.search(query: query);
+            _searchNow(query);
           },
         );
 
@@ -166,19 +190,31 @@ class _SearchScreenState extends State<SearchScreen> {
           );
         }
 
-        return ListView.builder(
-          itemCount: provider.results.length,
-          itemBuilder: (context, index) {
-            final result = provider.results[index];
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: SearchResultCard(
-                result: result,
-                onTap: () => context.push('/product/${result.product.id}'),
-                showAvailability: true,
-              ),
-            );
-          },
+        // C261 : tirer la liste vers le bas relance la recherche ; la roue
+        // d'actualisation reste visible jusqu'à la réponse et la liste reste
+        // affichée.
+        return RefreshIndicator(
+          onRefresh: () => provider.search(keepResults: true),
+          child: ListView.builder(
+            physics: const AlwaysScrollableScrollPhysics(),
+            itemCount: provider.results.length,
+            itemBuilder: (context, index) {
+              final result = provider.results[index];
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: SearchResultCard(
+                  result: result,
+                  onTap: () {
+                    // C260 : ouvrir un résultat inscrit la recherche dans
+                    // l'historique.
+                    provider.rememberCurrentQuery();
+                    context.push('/product/${result.product.id}');
+                  },
+                  showAvailability: true,
+                ),
+              );
+            },
+          ),
         );
     }
   }

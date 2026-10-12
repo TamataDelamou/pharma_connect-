@@ -35,10 +35,12 @@ class _ReservationHistoryScreenState extends State<ReservationHistoryScreen>
   // dans reservation_checkout_screen.dart — reservations.patient_id est de
   // type uuid, cette liste ne pouvait jamais rien retourner en production
   // pour un vrai compte.
-  void _load() {
+  Future<void> _load() async {
     final patientId = context.read<AuthProvider>().userId;
     if (patientId == null) return;
-    context.read<ReservationProvider>().loadPatientReservations(patientId);
+    await context.read<ReservationProvider>().loadPatientReservations(
+      patientId,
+    );
   }
 
   @override
@@ -283,23 +285,29 @@ class _ReservationHistoryScreenState extends State<ReservationHistoryScreen>
       );
     }
 
-    return ListView.builder(
-      itemCount: reservations.length,
-      itemBuilder: (context, index) {
-        final reservation = reservations[index];
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: ReservationStatusCard(
-            reservation: reservation,
-            // C243 : produit devenu indisponible, annulation par le patient.
-            unavailableProducts: context
-                .read<ReservationProvider>()
-                .unavailableProductsOf(reservation.id),
-            onCancel: () => _confirmCancel(context, reservation),
-            onTap: () => _openQr(reservation),
-          ),
-        );
-      },
+    // C261 : tirer la liste vers le bas la recharge (état « prête »,
+    // expiration) ; la roue d'actualisation reste visible jusqu'à la réponse.
+    return RefreshIndicator(
+      onRefresh: _load,
+      child: ListView.builder(
+        physics: const AlwaysScrollableScrollPhysics(),
+        itemCount: reservations.length,
+        itemBuilder: (context, index) {
+          final reservation = reservations[index];
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: ReservationStatusCard(
+              reservation: reservation,
+              // C243 : produit devenu indisponible, annulation par le patient.
+              unavailableProducts: context
+                  .read<ReservationProvider>()
+                  .unavailableProductsOf(reservation.id),
+              onCancel: () => _confirmCancel(context, reservation),
+              onTap: () => _openQr(reservation),
+            ),
+          );
+        },
+      ),
     );
   }
 }
