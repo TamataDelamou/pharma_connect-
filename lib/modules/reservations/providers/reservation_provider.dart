@@ -188,6 +188,10 @@ class ReservationProvider extends ChangeNotifier {
 
   // ==================== CART ====================
 
+  /// C254 : vrai si le produit est déjà dans le panier.
+  bool isInCart(String productId) =>
+      _cartItems.any((item) => item.productId == productId);
+
   void addToCart(ReservationItem item) {
     final existingIndex = _cartItems.indexWhere(
       (i) => i.productId == item.productId,

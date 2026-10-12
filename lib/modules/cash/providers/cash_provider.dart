@@ -24,6 +24,32 @@ class CashProvider extends ChangeNotifier {
 
   bool get hasOpenSession => _currentSession != null && _currentSession!.isOpen;
 
+  /// C258 : solde d'espèces attendu de la session ouverte, calculé par le
+  /// serveur à partir des mouvements (`cash_summary.current_expected_cash`,
+  /// même calcul que `cash_expected_balance` à la fermeture). `null` tant que
+  /// le résumé de cette session n'est pas chargé : l'écran affiche alors
+  /// « — ». Ne jamais lire `expected_balance` d'une session ouverte : il
+  /// reste égal au fonds de caisse jusqu'à la fermeture.
+  int? get currentExpectedCash {
+    final summary = this.summary;
+    final session = currentSession;
+    if (summary == null || session == null) return null;
+    if (summary['session_id'] != session.id) return null;
+    return (summary['current_expected_cash'] as num?)?.toInt();
+  }
+
+  /// C258 : relit le résumé de la session avant la fermeture. En cas
+  /// d'échec, le résumé est vidé (« — » à l'écran) plutôt que de laisser une
+  /// valeur ancienne ; l'écran ne bascule pas en erreur.
+  Future<void> refreshSummary(String sessionId) async {
+    try {
+      _summary = await _service.getSessionSummary(sessionId);
+    } catch (_) {
+      _summary = null;
+    }
+    notifyListeners();
+  }
+
   Future<void> loadCurrentSession(String pharmacyId) async {
     _isLoading = true;
     _error = null;

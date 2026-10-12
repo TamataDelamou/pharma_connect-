@@ -83,6 +83,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       reservations.clearCart();
     }
 
+    // C254 : produit déjà dans le panier : le panier s'ouvre sans rien
+    // ajouter. Chaque retour sur la fiche ajoutait une boîte ; la quantité
+    // ne se change que dans le panier.
+    if (reservations.isInCart(product.id)) {
+      context.push('/cart');
+      return;
+    }
+
     reservations.setPharmacyInfo(
       id: pharmacy.id,
       name: pharmacy.name,
