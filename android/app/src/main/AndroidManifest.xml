@@ -1,4 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- C248 : accès au réseau. Sans cette permission dans le manifeste
+         principal, la version « release » ne joint pas le serveur : seules
+         les variantes « debug » et « profile » la déclaraient. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <!-- C252 : position de l'officine, demandée seulement quand le pharmacien
          touche « Utiliser ma position actuelle » à la candidature. -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
