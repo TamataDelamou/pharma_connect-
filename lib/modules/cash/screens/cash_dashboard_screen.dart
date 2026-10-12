@@ -202,41 +202,40 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
           ),
           const SizedBox(height: 16),
 
-          // Summary
-          if (provider.summary != null) ...[
-            GlassCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Résumé', style: context.text.heading3),
-                  const SizedBox(height: 8),
-                  _buildSummaryRow(
-                    'Ventes',
-                    provider.summary!['total_sales'] as int? ?? 0,
-                  ),
-                  _buildSummaryRow(
-                    'Remboursements',
-                    provider.summary!['total_refunds'] as int? ?? 0,
-                  ),
-                  _buildSummaryRow(
-                    'Dépôts',
-                    provider.summary!['total_deposits'] as int? ?? 0,
-                  ),
-                  _buildSummaryRow(
-                    'Retraits',
-                    provider.summary!['total_withdrawals'] as int? ?? 0,
-                  ),
-                  Divider(color: context.palette.veil(0.12)),
-                  _buildSummaryRow(
-                    'Solde attendu',
-                    session.expectedBalance ?? 0,
-                    isTotal: true,
-                  ),
-                ],
-              ),
+          // Summary. C258 : toujours affiché pour une session ouverte ; un
+          // montant inconnu (résumé non chargé) s'affiche « — ».
+          GlassCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Résumé', style: context.text.heading3),
+                const SizedBox(height: 8),
+                _buildSummaryRow(
+                  'Ventes',
+                  provider.summary?['total_sales'] as int?,
+                ),
+                _buildSummaryRow(
+                  'Remboursements',
+                  provider.summary?['total_refunds'] as int?,
+                ),
+                _buildSummaryRow(
+                  'Dépôts',
+                  provider.summary?['total_deposits'] as int?,
+                ),
+                _buildSummaryRow(
+                  'Retraits',
+                  provider.summary?['total_withdrawals'] as int?,
+                ),
+                Divider(color: context.palette.veil(0.12)),
+                _buildSummaryRow(
+                  'Solde attendu',
+                  provider.currentExpectedCash,
+                  isTotal: true,
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-          ],
+          ),
+          const SizedBox(height: 16),
 
           // Movements
           if (provider.movements.isNotEmpty) ...[
@@ -294,7 +293,7 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
               Expanded(
                 child: PrimaryButton(
                   label: '🔒 Fermer la caisse',
-                  onPressed: () => _showCloseDialog(context, provider),
+                  onPressed: () => _confirmClose(provider),
                 ),
               ),
             ],
@@ -341,7 +340,7 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
     );
   }
 
-  Widget _buildSummaryRow(String label, int amount, {bool isTotal = false}) {
+  Widget _buildSummaryRow(String label, int? amount, {bool isTotal = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
@@ -349,7 +348,7 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
           Text(label, style: isTotal ? context.text.body1 : context.text.body2),
           const Spacer(),
           Text(
-            CurrencyFormatter.format(amount),
+            amount == null ? '—' : CurrencyFormatter.format(amount),
             style: isTotal
                 ? const TextStyle(fontWeight: FontWeight.w700)
                 : null,
@@ -440,7 +439,18 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
     );
   }
 
+  /// C258 : le solde attendu est relu juste avant d'ouvrir le message de
+  /// fermeture : c'est le chiffre que le caissier compare à son tiroir.
+  Future<void> _confirmClose(CashProvider provider) async {
+    final sessionId = provider.currentSession?.id;
+    if (sessionId == null) return;
+    await provider.refreshSummary(sessionId);
+    if (!mounted) return;
+    _showCloseDialog(context, provider);
+  }
+
   void _showCloseDialog(BuildContext context, CashProvider provider) {
+    final expected = provider.currentExpectedCash;
     final controller = TextEditingController();
     final notesController = TextEditingController();
 
@@ -453,7 +463,7 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Solde attendu: ${CurrencyFormatter.format(provider.currentSession?.expectedBalance ?? 0)}',
+              'Solde attendu : ${expected == null ? '—' : CurrencyFormatter.format(expected)}',
               style: const TextStyle(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
