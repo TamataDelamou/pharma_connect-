@@ -451,6 +451,11 @@ class PharmaConnectFixedColors {
   static const Color onCamera = Color(0xFFFFFFFF);
   static const Color onCameraMuted = Color(0xB3FFFFFF);
 
+  /// C256 : QR code. Modules noirs sur fond blanc dans les deux thèmes, le
+  /// contraste dont un lecteur a besoin.
+  static const Color qrBackground = Color(0xFFFFFFFF);
+  static const Color qrModule = Color(0xFF000000);
+
   static const Color tierBronze = Color(0xFFCD7F32);
   static const Color tierSilver = Color(0xFFC0C0C0);
   static const Color tierGold = Color(0xFFFFD700);

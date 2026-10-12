@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 import '../../../core/widgets/cards/glass_card.dart';
 import '../providers/reservation_provider.dart';
+import '../widgets/pickup_qr_code.dart';
 import '../../../core/theme/palette.dart';
 
 class ReservationQRScreen extends StatelessWidget {
@@ -56,20 +56,53 @@ class ReservationQRScreen extends StatelessWidget {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Container(
-                                padding: const EdgeInsets.all(20),
-                                decoration: BoxDecoration(
-                                  color: context.palette.textPrimary,
-                                  borderRadius: BorderRadius.circular(16),
+                              // C255 : réservation ouverte depuis la liste en
+                              // cache, serveur injoignable.
+                              if (provider.selectedReservationFromCache) ...[
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(10),
+                                  margin: const EdgeInsets.only(bottom: 16),
+                                  decoration: BoxDecoration(
+                                    color: context.palette.warningStrong
+                                        .withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: context.palette.warningStrong
+                                          .withValues(alpha: 0.2),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Icon(
+                                        Icons.cloud_off,
+                                        size: 16,
+                                        color: context.palette.warningStrong,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          'Hors connexion — dernières données '
+                                          'enregistrées. L\'état et '
+                                          'l\'échéance affichés sont les '
+                                          'derniers connus.',
+                                          style: context.text.micro.copyWith(
+                                            color:
+                                                context.palette.warningStrong,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                child: QrImageView(
-                                  data:
-                                      reservation.qrCodeToken ??
-                                      'reservation_${reservation.id}',
-                                  version: QrVersions.auto,
-                                  size: 220,
-                                  gapless: false,
-                                ),
+                              ],
+                              PickupQrCode(
+                                data:
+                                    reservation.qrCodeToken ??
+                                    'reservation_${reservation.id}',
+                                extent: 260,
                               ),
                               const SizedBox(height: 20),
                               // C243 : code de retrait, à dicter si le QR

@@ -14,6 +14,9 @@ class ReservationProvider extends ChangeNotifier {
 
   List<Reservation> _reservations = [];
   Reservation? _selectedReservation;
+  // C255 : vrai si la réservation sélectionnée vient de la liste en cache
+  // (serveur injoignable), non d'une lecture du serveur.
+  bool _selectedFromCache = false;
   final List<ReservationItem> _cartItems = [];
   List<TimeSlot> _availableSlots = [];
   TimeSlot? _selectedSlot;
@@ -40,6 +43,7 @@ class ReservationProvider extends ChangeNotifier {
   // Getters
   List<Reservation> get reservations => _reservations;
   Reservation? get selectedReservation => _selectedReservation;
+  bool get selectedReservationFromCache => _selectedFromCache;
   List<ReservationItem> get cartItems => _cartItems;
   List<TimeSlot> get availableSlots => _availableSlots;
   TimeSlot? get selectedSlot => _selectedSlot;
@@ -144,10 +148,21 @@ class ReservationProvider extends ChangeNotifier {
     notifyListeners();
     try {
       _selectedReservation = await _service.getReservation(id);
+      _selectedFromCache = false;
     } catch (e) {
       _error = e.toString();
     }
     _isLoading = false;
+    notifyListeners();
+  }
+
+  /// C255 : sélectionne une réservation de la liste en cache, quand le
+  /// serveur ne répond pas : le patient garde son QR code et son code de
+  /// retrait hors connexion. Le serveur vérifie le code au retrait.
+  void selectCachedReservation(Reservation reservation) {
+    _selectedReservation = reservation;
+    _selectedFromCache = true;
+    _error = null;
     notifyListeners();
   }
 
@@ -235,6 +250,7 @@ class ReservationProvider extends ChangeNotifier {
         items: _cartItems,
         notes: notes,
       );
+      _selectedFromCache = false;
       _selectedReservation = reservation;
       _reservations.add(reservation);
       _cartItems.clear();
@@ -289,6 +305,7 @@ class ReservationProvider extends ChangeNotifier {
     notifyListeners();
     try {
       _selectedReservation = await _service.getReservation(id);
+      _selectedFromCache = false;
       _pickupLines = await _service.getPickupPreview(id);
     } catch (e) {
       _error = e.toString();
@@ -438,7 +455,10 @@ class ReservationProvider extends ChangeNotifier {
     List<ReservationItem>? cartItems,
   }) {
     if (reservations != null) _reservations = reservations;
-    if (selected != null) _selectedReservation = selected;
+    if (selected != null) {
+      _selectedReservation = selected;
+      _selectedFromCache = false;
+    }
     if (pickupLines != null) _pickupLines = pickupLines;
     if (unavailableItems != null) _unavailableItems = unavailableItems;
     if (cartItems != null) {

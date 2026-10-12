@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 import '../../../core/kernel/kernel_badge.dart';
 import '../../../core/services/offline_sync_service.dart';
 import '../../../core/utils/currency_formatter.dart';
@@ -18,6 +17,7 @@ import '../../payments/widgets/pay_at_pickup_notice.dart';
 import '../../../core/pilot/pilot_config.dart';
 import '../providers/reservation_provider.dart';
 import '../widgets/checkout_step_indicator.dart';
+import '../widgets/pickup_qr_code.dart';
 import '../widgets/reservation_status_card.dart';
 import '../widgets/timeslot_picker.dart';
 import '../../../core/theme/palette.dart';
@@ -938,20 +938,11 @@ class _ReservationCheckoutScreenState extends State<ReservationCheckoutScreen> {
               children: [
                 Text('QR Code de retrait', style: context.text.heading3),
                 const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: context.palette.textPrimary,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: QrImageView(
-                    data:
-                        reservation.qrCodeToken ??
-                        'reservation_${reservation.id}',
-                    version: QrVersions.auto,
-                    size: 200,
-                    gapless: false,
-                  ),
+                PickupQrCode(
+                  data:
+                      reservation.qrCodeToken ??
+                      'reservation_${reservation.id}',
+                  extent: 232,
                 ),
                 const SizedBox(height: 8),
                 // C243 : code de retrait, exigé par l'officine.
