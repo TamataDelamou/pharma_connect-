@@ -5,7 +5,10 @@ import '../models/pos_receipt.dart';
 import '../services/pos_service.dart';
 
 class POSProvider extends ChangeNotifier {
-  final POSService _service = POSService();
+  final POSService _service;
+
+  /// [service] : remplaçable dans les tests.
+  POSProvider({POSService? service}) : _service = service ?? POSService();
 
   List<POSSale> _sales = [];
   List<POSSaleItem> _cart = [];
@@ -16,7 +19,6 @@ class POSProvider extends ChangeNotifier {
   bool _isPrinting = false;
   String? _error;
   String _selectedPaymentMethod = 'cash';
-  double _discountPercent = 0;
   List<POSSale> _refunds = [];
   bool _isLoadingRefunds = false;
   String? _refundsError;
@@ -30,7 +32,6 @@ class POSProvider extends ChangeNotifier {
   bool get isPrinting => _isPrinting;
   String? get error => _error;
   String get selectedPaymentMethod => _selectedPaymentMethod;
-  double get discountPercent => _discountPercent;
   List<POSSale> get refunds => _refunds;
   bool get isLoadingRefunds => _isLoadingRefunds;
   String? get refundsError => _refundsError;
@@ -39,16 +40,17 @@ class POSProvider extends ChangeNotifier {
     return _cart.fold(0, (sum, item) => sum + item.totalPrice);
   }
 
-  double get discountAmount {
-    return total * (_discountPercent / 100);
-  }
+  // C262 : plus de remise au comptoir. La réglette de l'écran de vente était
+  // déplacée par erreur et rien ne plafonnait la remise ; le serveur refuse
+  // désormais toute vente avec une remise non nulle. La remise exceptionnelle
+  // validée par un responsable est une évolution à part (FEAT-005).
 
   double get taxAmount {
-    return (total - discountAmount) * 0.05; // 5% TVA
+    return total * 0.05; // 5% TVA
   }
 
   double get finalTotal {
-    return total - discountAmount + taxAmount;
+    return total + taxAmount;
   }
 
   // ---- Cart Management ----
@@ -120,17 +122,11 @@ class POSProvider extends ChangeNotifier {
 
   void clearCart() {
     _cart.clear();
-    _discountPercent = 0;
     notifyListeners();
   }
 
   void setPaymentMethod(String method) {
     _selectedPaymentMethod = method;
-    notifyListeners();
-  }
-
-  void setDiscount(double percent) {
-    _discountPercent = percent.clamp(0, 100);
     notifyListeners();
   }
 
@@ -155,7 +151,7 @@ class POSProvider extends ChangeNotifier {
         patientId: patientId,
         cashierId: cashierId,
         totalAmount: total.round(),
-        discountAmount: discountAmount.round(),
+        discountAmount: 0,
         taxAmount: taxAmount.round(),
         finalAmount: finalTotal.round(),
         paymentMethod: _selectedPaymentMethod,
@@ -168,7 +164,6 @@ class POSProvider extends ChangeNotifier {
       _currentSale = await _service.createSale(sale);
       _currentReceipt = await _service.getReceipt(_currentSale!.id);
       _cart.clear();
-      _discountPercent = 0;
       _isCheckingOut = false;
       notifyListeners();
       return true;
