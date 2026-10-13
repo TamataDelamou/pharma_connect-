@@ -125,8 +125,7 @@ void main() {
             125000,
             prescription: true,
           ),
-        )
-        ..setDiscount(10);
+        );
       final overflows = await _pump(tester, pos);
       expect(overflows, isEmpty);
 

@@ -325,7 +325,9 @@ do $$ begin
 exception when others then insert into t_out values ('11', sqlstate, sqlerrm);
 end $$;
 reset role;
-select pg_temp.expect_err('11', '22023', 'remise 2000 superieure au total 1500', :'before');
+-- C262 : toute remise non nulle est refusée ; le contrôle « remise supérieure
+-- au total » de C203 est remplacé par ce refus plus large.
+select pg_temp.expect_err('11', '22023', 'remise non autorisee (remise 2000)', :'before');
 
 -- ==================== Cas 12 (C203) : montant final à 1 près ====================
 -- total 1500, remise 0, TVA 75 : attendu 1575. 1577 (écart 2) refusé ; 1576 (écart 1) accepté.

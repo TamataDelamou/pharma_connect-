@@ -155,7 +155,7 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
                         ],
                       ),
                       const SizedBox(height: 8),
-                      _buildQuantityAndDiscount(provider),
+                      _buildQuantity(),
                       const SizedBox(height: 8),
                       _buildSearchResults(provider),
                       const SizedBox(height: 16),
@@ -232,7 +232,7 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
                 height: 44,
               ),
               const SizedBox(height: 8),
-              _buildQuantityAndDiscount(provider),
+              _buildQuantity(),
               const SizedBox(height: 8),
               _buildSearchResults(provider),
               const SizedBox(height: 16),
@@ -361,43 +361,22 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
     );
   }
 
-  // Quantity and discount
-  Widget _buildQuantityAndDiscount(POSProvider provider) {
-    return Row(
-      children: [
-        SizedBox(
-          width: 80,
-          child: TextField(
-            controller: _quantityController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: 'Qté',
-              border: OutlineInputBorder(),
-            ),
+  // Quantité à ajouter au panier. C262 : la réglette de remise qui la suivait
+  // est retirée (remise bloquée au comptoir).
+  Widget _buildQuantity() {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: SizedBox(
+        width: 80,
+        child: TextField(
+          controller: _quantityController,
+          keyboardType: TextInputType.number,
+          decoration: const InputDecoration(
+            labelText: 'Qté',
+            border: OutlineInputBorder(),
           ),
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Slider(
-            value: provider.discountPercent,
-            min: 0,
-            max: 100,
-            onChanged: (value) {
-              provider.setDiscount(value);
-            },
-            activeColor: context.palette.secondary,
-          ),
-        ),
-        Text(
-          '${provider.discountPercent.toStringAsFixed(0)}%',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            color: provider.discountPercent > 0
-                ? context.palette.secondary
-                : context.palette.textSecondary,
-          ),
-        ),
-      ],
+      ),
     );
   }
 
@@ -425,12 +404,6 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
   List<Widget> _buildAmountRows(POSProvider provider) {
     return [
       _buildSummaryRow('Total', provider.total),
-      if (provider.discountPercent > 0)
-        _buildSummaryRow(
-          'Remise (${provider.discountPercent.toStringAsFixed(0)}%)',
-          -provider.discountAmount,
-          color: context.palette.secondary,
-        ),
       _buildSummaryRow('TVA (5%)', provider.taxAmount),
     ];
   }
