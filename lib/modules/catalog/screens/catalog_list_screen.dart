@@ -70,7 +70,8 @@ class _CatalogListScreenState extends State<CatalogListScreen> {
             // Barre de recherche
             GlassInput(
               label: '',
-              hint: 'Rechercher un médicament, DCI, fabricant...',
+              // C265 : texte d'aide qui tient sur une ligne à 360 px.
+              hint: 'Médicament, DCI, fabricant',
               controller: _searchController,
               prefixIcon: Icons.search,
               suffixIcon: _searchController.text.isNotEmpty
@@ -156,7 +157,7 @@ class _CatalogListScreenState extends State<CatalogListScreen> {
       gridDelegate: isCompactWidth(context)
           ? const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              mainAxisExtent: 260,
+              mainAxisExtent: 290,
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
             )

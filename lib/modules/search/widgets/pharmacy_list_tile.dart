@@ -53,13 +53,13 @@ class PharmacyListTile extends StatelessWidget {
                     style: context.text.body1.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
-                    maxLines: 1,
+                    maxLines: 2, // C265 : nom ou adresse, 2 lignes au plus.
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
                     pharmacy.address,
                     style: context.text.body2,
-                    maxLines: 1,
+                    maxLines: 2, // C265 : nom ou adresse, 2 lignes au plus.
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
@@ -111,7 +111,9 @@ class PharmacyListTile extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 9,
                               fontWeight: FontWeight.w600,
-                              color: context.palette.primary,
+                              color: context.palette.onTint(
+                                context.palette.primary,
+                              ),
                             ),
                           ),
                         ),
@@ -133,7 +135,9 @@ class PharmacyListTile extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 9,
                               fontWeight: FontWeight.w600,
-                              color: context.palette.warning,
+                              color: context.palette.onTint(
+                                context.palette.warning,
+                              ),
                             ),
                           ),
                         ),
@@ -189,7 +193,9 @@ class PharmacyListTile extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w500,
-                        color: stock.stockColor.of(context.palette),
+                        color: context.palette.onTint(
+                          stock.stockColor.of(context.palette),
+                        ),
                       ),
                     ),
                   ),
@@ -208,7 +214,7 @@ class PharmacyListTile extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: context.palette.danger,
+                        color: context.palette.onTint(context.palette.danger),
                       ),
                     ),
                   ),

@@ -97,7 +97,7 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: context.palette.success,
+                        color: context.palette.onTint(context.palette.success),
                       ),
                     ),
                   )
@@ -116,7 +116,7 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: context.palette.danger,
+                        color: context.palette.onTint(context.palette.danger),
                       ),
                     ),
                   ),

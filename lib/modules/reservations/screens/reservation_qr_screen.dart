@@ -150,8 +150,10 @@ class ReservationQRScreen extends StatelessWidget {
                                   style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w600,
-                                    color: reservation.statusColor.of(
-                                      context.palette,
+                                    color: context.palette.onTint(
+                                      reservation.statusColor.of(
+                                        context.palette,
+                                      ),
                                     ),
                                   ),
                                 ),

@@ -104,7 +104,7 @@ class ReservationStatusCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
-                    color: statusColor,
+                    color: context.palette.onTint(statusColor),
                   ),
                 ),
               ),

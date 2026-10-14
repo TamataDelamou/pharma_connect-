@@ -200,7 +200,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         )
                       : GlassInput(
                           label: 'Adresse email',
-                          hint: 'jean.dupont@example.com',
+                          // C265 : texte d'aide qui tient sur une ligne à 360 px.
+                          hint: 'nom@exemple.com',
                           controller: _identifierController,
                           prefixIcon: Icons.email,
                           keyboardType: TextInputType.emailAddress,

@@ -43,15 +43,14 @@ class ProductGridItem extends StatelessWidget {
           Text(
             product.genericName,
             style: context.text.body2,
-            maxLines: 1,
+            maxLines: 2, // C265 : nom ou adresse, 2 lignes au plus.
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 4),
           Text(
             '${product.dosage} • ${product.form}',
             style: context.text.micro,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+            // C265 : dosage et forme jamais coupés.
           ),
           const SizedBox(height: 8),
           // Badges
@@ -60,17 +59,21 @@ class ProductGridItem extends StatelessWidget {
             runSpacing: 4,
             children: [
               if (product.isGeneric)
-                _buildBadge('Générique', context.palette.secondary),
+                _buildBadge(context, 'Générique', context.palette.secondary),
               if (product.isPrescriptionRequired)
-                _buildBadge('Ordonnance', context.palette.warning),
+                _buildBadge(context, 'Ordonnance', context.palette.warning),
               if (!product.isPrescriptionRequired)
-                _buildBadge('Libre', context.palette.success),
+                _buildBadge(context, 'Libre', context.palette.success),
               // RG-CAT-02 : ce badge ne peut visuellement apparaître que
               // pour un utilisateur déjà autorisé à voir ce produit (la RLS
               // le retire du flux réseau pour un patient) — il informe le
               // personnel opérationnel du statut réglementaire renforcé.
               if (product.isControlledSubstance)
-                _buildBadge('Stupéfiant/Psychotrope', context.palette.danger),
+                _buildBadge(
+                  context,
+                  'Stupéfiant/Psychotrope',
+                  context.palette.danger,
+                ),
             ],
           ),
         ],
@@ -78,7 +81,7 @@ class ProductGridItem extends StatelessWidget {
     );
   }
 
-  Widget _buildBadge(String label, Color color) {
+  Widget _buildBadge(BuildContext context, String label, Color color) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
@@ -91,7 +94,7 @@ class ProductGridItem extends StatelessWidget {
         style: TextStyle(
           fontSize: 9,
           fontWeight: FontWeight.w500,
-          color: color,
+          color: context.palette.onTint(color),
         ),
       ),
     );

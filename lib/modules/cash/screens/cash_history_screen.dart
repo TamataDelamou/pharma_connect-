@@ -105,9 +105,11 @@ class _CashHistoryScreenState extends State<CashHistoryScreen> {
                     selectedColor: context.palette.primary.withValues(
                       alpha: 0.2,
                     ),
+                    // C265 : puce choisie, texte foncé sur fond teinté
+                    // (4,5:1).
                     labelStyle: TextStyle(
                       color: selected
-                          ? context.palette.primary
+                          ? context.palette.onTint(context.palette.primary)
                           : context.palette.textSecondary,
                     ),
                   ),
