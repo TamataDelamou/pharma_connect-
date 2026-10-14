@@ -31,6 +31,23 @@
 1. Copiez `PharmaConnect-release-45948e0.apk` (117,5 Mo, construit depuis `main` au commit `45948e0`, fichier `build/app/outputs/flutter-apk/PharmaConnect-release-45948e0.apk`) sur les deux téléphones et installez-le par-dessus la version actuelle.
 2. **Vous devez voir :** le tableau de bord (ou l'écran « Connexion », puis le tableau de bord après le code reçu par e-mail).
 
+### 1.1 Version remise aux officines pilotes : un fichier par type de téléphone (C269)
+
+Le fichier ci-dessus (117,5 Mo) contient l'application pour tous les types de processeur à la fois. Pour les officines pilotes, il est remplacé par **deux fichiers plus légers** ; chaque téléphone n'en installe **qu'un** :
+
+| Fichier | Taille | Pour quels téléphones |
+|---|---|---|
+| `PharmaConnect-release-0faa74c-arm64-v8a.apk` | 43,9 Mo | **presque tous** les téléphones Android récents (processeur 64 bits, la règle depuis 2017-2018) |
+| `PharmaConnect-release-0faa74c-armeabi-v7a.apk` | 36,5 Mo | téléphones anciens ou d'entrée de gamme à processeur 32 bits (souvent « Android Go ») |
+
+**Lequel installer :**
+
+1. **Essayez d'abord `arm64-v8a`.**
+2. Si Android refuse l'installation (« Application non installée », « Application non compatible avec votre téléphone »), installez **`armeabi-v7a`** à la place.
+3. Pour vérifier sans essayer : une application d'information gratuite du Play Store (par exemple « CPU-Z » ou « Droid Hardware Info ») indique le jeu d'instructions : « arm64 » ou « AArch64 » → `arm64-v8a` ; « armv7 » ou « ARM 32 bits » seulement → `armeabi-v7a`. Le menu « Paramètres » → « À propos du téléphone » ne le dit pas toujours.
+
+Les deux fichiers sont construits depuis `main` au commit `0faa74c` (dossier `build/app/outputs/flutter-apk/`), même code que la version essayée (`45948e0`, seuls des documents ont changé depuis) ; ils contiennent la même application ; seul le code natif du processeur diffère. Aucun fichier n'est fourni pour les processeurs x86 (émulateurs, quelques tablettes) : inutile sur les téléphones des officines.
+
 ---
 
 ## 2. Téléphone A : « Stock & Lots » et caisse (C265)
