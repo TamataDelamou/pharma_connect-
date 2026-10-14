@@ -665,6 +665,7 @@ void main() {
         tester.view.physicalSize = phoneSize;
         tester.view.devicePixelRatio = 1;
         addTearDown(tester.view.reset);
+        applyPhoneTextScale(tester);
 
         // Hors ligne, les écrans signalent des erreurs réseau : seules les
         // erreurs de débordement comptent ici.

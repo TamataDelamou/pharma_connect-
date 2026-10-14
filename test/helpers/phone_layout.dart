@@ -56,6 +56,10 @@ Future<List<String>> collectOverflows(
   } finally {
     FlutterError.onError = previous;
   }
+  if (phoneDiscovery) {
+    _discoveryLog(overflows.map((o) => 'débordement | $o'));
+    return const [];
+  }
   return overflows;
 }
 
@@ -80,6 +84,7 @@ Future<List<String>> pumpAtPhoneWidth(
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
+  applyPhoneTextScale(tester);
 
   final app = MaterialApp(
     debugShowCheckedModeBanner: false,
@@ -281,5 +286,102 @@ Future<List<String>> checkReadability(
   if (lines.isNotEmpty) {
     out.writeAsStringSync('${lines.join('\n')}\n', mode: FileMode.append);
   }
+  if (phoneDiscovery) {
+    // C268, découverte : les mots coupés en deux ne sont relevés qu'ici.
+    _discoveryLog([
+      ...lines,
+      for (final b in brokenWords(tester)) '$screen | mot coupé en deux | $b',
+    ]);
+    return const [];
+  }
   return lines;
+}
+
+// ==================== POLICE AGRANDIE (C268) ====================
+
+/// C268 : échelle de police du téléphone simulée par l'essai
+/// (`--dart-define=PHONE_TEXT_SCALE=1.3`, réglage « grande police » courant ;
+/// l'application plafonne l'échelle à 1,3). 1 par défaut.
+final double phoneTextScale =
+    double.tryParse(const String.fromEnvironment('PHONE_TEXT_SCALE')) ?? 1.0;
+
+/// C268 : mode découverte (`--dart-define=PHONE_DISCOVERY=true`) : les
+/// débordements, textes coupés, contrastes et mots coupés en deux sont écrits
+/// dans build/phone_decouverte_<échelle>.txt, sans faire échouer l'essai.
+const bool phoneDiscovery = bool.fromEnvironment('PHONE_DISCOVERY');
+
+/// Applique [phoneTextScale] au téléphone simulé.
+void applyPhoneTextScale(WidgetTester tester) {
+  _currentTest = tester.testDescription;
+  if (phoneTextScale == 1.0) return;
+  tester.platformDispatcher.textScaleFactorTestValue = phoneTextScale;
+  addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+}
+
+/// Essai en cours, pour le relevé de découverte.
+String _currentTest = '';
+
+void _discoveryLog(Iterable<String> lines) {
+  final list = lines.toList();
+  if (list.isEmpty) return;
+  final name = _currentTest.replaceAll('\n', ' ');
+  final out = File('build/phone_decouverte_$phoneTextScale.txt');
+  out.parent.createSync(recursive: true);
+  out.writeAsStringSync(
+    '${list.map((l) => '$name | $l').join('\n')}\n',
+    mode: FileMode.append,
+  );
+}
+
+final RegExp _wordChar = RegExp(r'[\p{L}\p{N}]', unicode: true);
+
+/// C268 : mots coupés en deux par un retour à la ligne (« Parac / étamol ») :
+/// une ligne se termine au milieu d'un mot.
+List<String> brokenWords(WidgetTester tester) {
+  final found = <String>{};
+  for (final element in find.byType(RichText).evaluate()) {
+    final render = element.renderObject;
+    if (render is! RenderParagraph || !render.attached || !render.hasSize) {
+      continue;
+    }
+    final text = render.text.toPlainText();
+    if (text.length < 2) continue;
+    // Même mise en page que le paragraphe affiché, pour lire ses lignes.
+    final painter = TextPainter(
+      text: render.text,
+      textAlign: render.textAlign,
+      textDirection: render.textDirection,
+      textScaler: render.textScaler,
+      maxLines: render.maxLines,
+      ellipsis: render.overflow == TextOverflow.ellipsis ? '…' : null,
+      locale: render.locale,
+      strutStyle: render.strutStyle,
+      textWidthBasis: render.textWidthBasis,
+      textHeightBehavior: render.textHeightBehavior,
+    )..layout(maxWidth: render.size.width);
+    final lines = <TextRange>[];
+    var start = 0;
+    while (start < text.length) {
+      final line = painter.getLineBoundary(TextPosition(offset: start));
+      if (line.end <= start) break;
+      lines.add(line);
+      start = line.end;
+    }
+    // Dernière ligne d'un texte coupé par « … » : la coupure est celle du
+    // « … », déjà jugée par [truncatedTexts].
+    if (painter.didExceedMaxLines && lines.isNotEmpty) lines.removeLast();
+    for (final line in lines) {
+      final end = line.end;
+      if (end < text.length &&
+          _wordChar.hasMatch(text[end - 1]) &&
+          _wordChar.hasMatch(text[end])) {
+        final shown = text.replaceAll('\n', ' ').trim();
+        found.add(
+          '${shown.length > 60 ? '${shown.substring(0, 60)}…' : shown} '
+          '(coupé après « ${text.substring(line.start, end).trim()} »)',
+        );
+      }
+    }
+  }
+  return found.toList();
 }
