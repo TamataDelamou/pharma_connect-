@@ -392,7 +392,8 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
           ),
           ElevatedButton(
             onPressed: () async {
-              final amount = int.tryParse(controller.text);
+              // C267 : « 10000 » ou « 10 000 », avec ou sans « GNF ».
+              final amount = CurrencyFormatter.parse(controller.text);
               if (amount == null || amount < 0) return;
               final userId = SupabaseService().currentUser?.id;
               if (userId == null) return;
@@ -485,7 +486,8 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
           ),
           ElevatedButton(
             onPressed: () async {
-              final amount = int.tryParse(controller.text);
+              // C267 : « 10000 » ou « 10 000 », avec ou sans « GNF ».
+              final amount = CurrencyFormatter.parse(controller.text);
               if (amount == null || amount < 0) return;
               final sessionId = provider.currentSession?.id;
               if (sessionId == null) return;

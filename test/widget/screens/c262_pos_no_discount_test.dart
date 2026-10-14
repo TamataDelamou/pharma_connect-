@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:pharma_connect/core/utils/currency_formatter.dart';
 import 'package:pharma_connect/modules/auth/providers/auth_provider.dart';
 import 'package:pharma_connect/modules/pos/models/pos_receipt.dart';
 import 'package:pharma_connect/modules/pos/models/pos_sale.dart';
@@ -121,7 +122,7 @@ void main() {
         expect(find.byType(Slider), findsNothing);
         expect(find.textContaining('Remise'), findsNothing);
         expect(find.text('0%'), findsNothing);
-        expect(find.text('1575 GNF'), findsOneWidget);
+        expect(find.text(CurrencyFormatter.format(1575)), findsOneWidget);
 
         // Gestes de défilement partis du champ de quantité, là où était la
         // réglette : le montant ne bouge pas.
@@ -135,7 +136,7 @@ void main() {
           await pumpFrames(tester);
         }
         expect(pos.finalTotal, 1575);
-        expect(find.text('1575 GNF'), findsOneWidget);
+        expect(find.text(CurrencyFormatter.format(1575)), findsOneWidget);
       },
     );
   }

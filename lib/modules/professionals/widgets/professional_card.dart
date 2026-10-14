@@ -1,3 +1,4 @@
+import 'package:pharma_connect/core/utils/currency_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:pharma_connect/core/widgets/cards/glass_card.dart';
 import 'package:pharma_connect/core/widgets/buttons/primary_button.dart';
@@ -100,7 +101,9 @@ class ProfessionalCard extends StatelessWidget {
                     ],
                     if (professional.consultationFee != null)
                       Text(
-                        '${professional.consultationFee} GNF consultation',
+                        // C267 : montant formaté par CurrencyFormatter.
+                        '${CurrencyFormatter.format(professional.consultationFee!)} '
+                        'consultation',
                         style: context.text.micro,
                       ),
                   ],
