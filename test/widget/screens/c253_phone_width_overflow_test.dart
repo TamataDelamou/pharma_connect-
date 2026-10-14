@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -36,6 +38,13 @@ import 'package:pharma_connect/modules/search/models/search_result.dart';
 import 'package:pharma_connect/modules/search/providers/search_provider.dart';
 import 'package:pharma_connect/modules/search/screens/product_detail_screen.dart';
 import 'package:pharma_connect/modules/search/widgets/search_result_card.dart';
+import 'package:pharma_connect/modules/stock/models/stock_item.dart';
+import 'package:pharma_connect/modules/stock/providers/stock_provider.dart';
+import 'package:pharma_connect/modules/stock/screens/stock_list_screen.dart';
+import 'package:pharma_connect/modules/catalog/providers/catalog_provider.dart';
+import 'package:pharma_connect/modules/catalog/screens/catalog_list_screen.dart';
+import 'package:pharma_connect/modules/admin/providers/admin_provider.dart';
+import 'package:pharma_connect/modules/admin/screens/admin_dashboard_screen.dart';
 import 'package:pharma_connect/routes/app_router.dart';
 import 'package:pharma_connect/shared/models/product.dart';
 
@@ -219,6 +228,109 @@ class _FakeSearchProvider extends SearchProvider {
   Future<void> loadProductAvailability(String productId) async {}
 }
 
+/// C265 : stock de l'officine posé par le test (tuiles et liste).
+class _StockProvider extends StockProvider {
+  @override
+  List<StockItem> get stockItems => [
+    for (final (name, qty) in [
+      ('Amoxicilline acide clavulanique', 3),
+      ('Paracétamol', 125),
+      ('Ibuprofène', 0),
+    ])
+      StockItem(
+        id: name,
+        pharmacyId: 'ph1',
+        product: Product(
+          id: name,
+          name: name,
+          genericName: name,
+          dosage: '500mg',
+          form: 'Comprimé',
+          category: 'Antalgiques',
+          imageUrl: '',
+          isGeneric: true,
+          manufacturer: 'Laboratoire',
+          isPrescriptionRequired: false,
+        ),
+        batches: const [],
+        totalQuantity: qty,
+      ),
+  ];
+
+  @override
+  bool get isLoading => false;
+
+  @override
+  String? get error => null;
+
+  @override
+  Future<void> loadStock({
+    String? pharmacyId,
+    String? productId,
+    String? searchQuery,
+  }) async {}
+}
+
+/// C266 : catalogue posé par le test.
+class _CatalogProvider extends CatalogProvider {
+  @override
+  List<Product> get products => [
+    for (final name in [
+      'Paracétamol',
+      'Amoxicilline acide clavulanique',
+      'Métronidazole',
+      'Ibuprofène',
+    ])
+      Product(
+        id: name,
+        name: name,
+        genericName: name,
+        dosage: '500mg',
+        form: 'Comprimé pelliculé',
+        category: 'Antalgiques',
+        imageUrl: '',
+        isGeneric: true,
+        manufacturer: 'Laboratoire',
+        isPrescriptionRequired: name.startsWith('Amox'),
+      ),
+  ];
+
+  @override
+  bool get isLoading => false;
+
+  @override
+  String? get error => null;
+
+  @override
+  Future<void> loadCatalog({String? categoryId, String? searchQuery}) async {}
+
+  @override
+  Future<void> loadCategories() async {}
+}
+
+/// C265 : chiffres de l'administration posés par le test.
+class _AdminProvider extends AdminProvider {
+  @override
+  Map<String, dynamic> get statistics => const {
+    'totalUsers': 1284,
+    'activeUsers': 1102,
+    'totalPharmacies': 312,
+    'activePharmacies': 298,
+    'pendingPharmacies': 14,
+    'totalAuditLogs': 125430,
+    'recentLogs': 842,
+  };
+
+  @override
+  bool get isLoading => false;
+
+  @override
+  String? get error => null;
+
+  @override
+  Future<void> loadStatistics() async {}
+}
+
 AuthProvider _pharmacist() => AuthProvider()
   // ignore: invalid_use_of_visible_for_testing_member
   ..pharmacyIdForTesting = 'ph1';
@@ -243,6 +355,9 @@ void main() {
       publishableKey: 'test-anon-key',
     );
     await loadAppFonts();
+    // C265 : relevé de découverte, refait à chaque passage.
+    final discovery = File('build/c265_decouverte.txt');
+    if (discovery.existsSync()) discovery.deleteSync();
   });
 
   group('composants', () {
@@ -361,6 +476,7 @@ void main() {
         ),
       );
       expect(overflows, isEmpty);
+      await recordReadability(tester, 'caisse ouverte');
       expect(find.text('📋 Historique'), findsOneWidget);
     });
 
@@ -378,6 +494,7 @@ void main() {
         ),
       );
       expect(overflows, isEmpty);
+      await recordReadability(tester, 'reçu de vente');
     });
 
     testWidgets('fiche produit', (tester) async {
@@ -398,6 +515,7 @@ void main() {
         ),
       );
       expect(overflows, isEmpty);
+      await recordReadability(tester, 'fiche produit');
     });
 
     testWidgets('mes réservations', (tester) async {
@@ -415,6 +533,7 @@ void main() {
         ),
       );
       expect(overflows, isEmpty);
+      await recordReadability(tester, 'mes réservations');
     });
 
     testWidgets('réservation confirmée', (tester) async {
@@ -429,6 +548,7 @@ void main() {
         ),
       );
       expect(overflows, isEmpty);
+      await recordReadability(tester, 'réservation confirmée');
       final afterScroll = await collectOverflows(() async {
         await tester.drag(
           find.byType(SingleChildScrollView).first,
@@ -452,6 +572,66 @@ void main() {
         ),
       );
       expect(overflows, isEmpty);
+      await recordReadability(tester, 'QR code de retrait');
+    });
+    testWidgets('stock et lots', (tester) async {
+      final overflows = await pumpAtPhoneWidth(
+        tester,
+        const StockListScreen(),
+        wrap: (app) => MultiProvider(
+          providers: [
+            ChangeNotifierProvider<AuthProvider>.value(value: _pharmacist()),
+            ChangeNotifierProvider<StockProvider>.value(
+              value: _StockProvider(),
+            ),
+          ],
+          child: app,
+        ),
+      );
+      expect(overflows, isEmpty);
+      // C265 : tuiles en grille 2 × 2, titres entiers.
+      for (final title in ['Produits', 'Unités', 'Stock faible', 'Ruptures']) {
+        expect(find.text(title), findsOneWidget);
+      }
+      expect(
+        tester.getTopLeft(find.text('Stock faible')).dy,
+        greaterThan(tester.getBottomLeft(find.text('Produits')).dy),
+      );
+      await recordReadability(tester, 'stock et lots');
+    });
+
+    testWidgets('catalogue', (tester) async {
+      final overflows = await pumpAtPhoneWidth(
+        tester,
+        const CatalogListScreen(),
+        wrap: (app) => ChangeNotifierProvider<CatalogProvider>.value(
+          value: _CatalogProvider(),
+          child: app,
+        ),
+      );
+      expect(overflows, isEmpty);
+      await recordReadability(tester, 'catalogue');
+    });
+
+    testWidgets('tableau de bord de l\'administration', (tester) async {
+      final overflows = await pumpAtPhoneWidth(
+        tester,
+        const AdminDashboardScreen(),
+        wrap: (app) => ChangeNotifierProvider<AdminProvider>.value(
+          value: _AdminProvider(),
+          child: app,
+        ),
+      );
+      expect(overflows, isEmpty);
+      for (final title in [
+        'Utilisateurs',
+        'Pharmacies',
+        'En attente',
+        'Audit',
+      ]) {
+        expect(find.text(title), findsWidgets);
+      }
+      await recordReadability(tester, 'administration');
     });
   });
 
@@ -463,6 +643,7 @@ void main() {
       ('/register', UserRole.patient),
       ('/dashboard', UserRole.patient),
       ('/search', UserRole.patient),
+      ('/catalog', UserRole.patient),
       ('/cart', UserRole.patient),
       ('/reservations/history', UserRole.patient),
       ('/reservations/checkout', UserRole.patient),
@@ -495,13 +676,17 @@ void main() {
               routes: AppRouter.router.configuration.routes,
             );
             await tester.pumpWidget(
-              MultiProvider(
-                providers: appProviders(restoreSession: false),
-                child: MaterialApp.router(
-                  debugShowCheckedModeBanner: false,
-                  theme: PharmaConnectAppTheme.light(),
-                  routerConfig: router,
-                  builder: (context, child) => AdaptiveTextScale(child: child!),
+              RepaintBoundary(
+                key: phoneBoundaryKey,
+                child: MultiProvider(
+                  providers: appProviders(restoreSession: false),
+                  child: MaterialApp.router(
+                    debugShowCheckedModeBanner: false,
+                    theme: PharmaConnectAppTheme.light(),
+                    routerConfig: router,
+                    builder: (context, child) =>
+                        AdaptiveTextScale(child: child!),
+                  ),
                 ),
               ),
             );
@@ -519,6 +704,7 @@ void main() {
         );
 
         expect(overflows, isEmpty);
+        await recordReadability(tester, route);
 
         await tester.pumpWidget(const SizedBox.shrink());
         await tester.pump(const Duration(minutes: 5));

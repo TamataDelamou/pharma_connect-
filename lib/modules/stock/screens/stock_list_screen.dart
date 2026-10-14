@@ -284,7 +284,12 @@ class _StockListScreenState extends State<StockListScreen> {
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4),
-                      Row(
+                      // C265 : passe à la ligne au lieu de déborder à
+                      // 360 px, à côté de la pastille d'état.
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 2,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           Text(
                             'Stock : ${item.availableQuantity}',
@@ -292,7 +297,6 @@ class _StockListScreenState extends State<StockListScreen> {
                               fontWeight: FontWeight.w500,
                             ),
                           ),
-                          const SizedBox(width: 12),
                           Text(
                             'Réservés : ${item.reservedQuantity}',
                             style: context.text.micro,

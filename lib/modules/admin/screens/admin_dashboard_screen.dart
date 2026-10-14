@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
 import '../../../core/widgets/cards/glass_card.dart';
+import '../../../core/widgets/cards/stat_tile_grid.dart';
 import '../providers/admin_provider.dart';
 import '../../../core/theme/palette.dart';
 
@@ -60,50 +61,46 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             if (provider.isLoading) ...[
               const Expanded(child: Center(child: CircularProgressIndicator())),
             ] else ...[
-              // Statistiques
-              Row(
-                children: [
-                  _buildStatCard(
+              // Statistiques. C265 : tuiles communes, grille 2 × 2 en largeur
+              // téléphone, titres entiers.
+              StatTileGrid(
+                tiles: [
+                  StatTileData(
                     label: 'Utilisateurs',
                     value: provider.statistics['totalUsers']?.toString() ?? '0',
-                    subValue:
-                        '${provider.statistics['activeUsers'] ?? 0} actifs',
+                    detail: '${provider.statistics['activeUsers'] ?? 0} actifs',
                     color: context.palette.primary,
                     icon: Icons.people,
                     onTap: () => context.push('/admin/users'),
                   ),
-                  const SizedBox(width: 12),
-                  _buildStatCard(
+                  StatTileData(
                     label: 'Pharmacies',
                     value:
                         provider.statistics['totalPharmacies']?.toString() ??
                         '0',
-                    subValue:
+                    detail:
                         '${provider.statistics['activePharmacies'] ?? 0} actives',
                     color: context.palette.success,
                     icon: Icons.local_pharmacy,
                     onTap: () => context.push('/admin/pharmacies'),
                   ),
-                  const SizedBox(width: 12),
-                  _buildStatCard(
+                  StatTileData(
                     label: 'En attente',
                     value:
                         provider.statistics['pendingPharmacies']?.toString() ??
                         '0',
-                    subValue: 'Pharmacies à vérifier',
+                    detail: 'Pharmacies à vérifier',
                     color: context.palette.warning,
                     icon: Icons.pending_actions,
                     onTap: () =>
                         context.push('/admin/pharmacies?status=pending'),
                   ),
-                  const SizedBox(width: 12),
-                  _buildStatCard(
+                  StatTileData(
                     label: 'Audit',
                     value:
                         provider.statistics['totalAuditLogs']?.toString() ??
                         '0',
-                    subValue:
-                        '${provider.statistics['recentLogs'] ?? 0} récents',
+                    detail: '${provider.statistics['recentLogs'] ?? 0} récents',
                     color: context.palette.secondary,
                     icon: Icons.history,
                     onTap: () => context.push('/admin/audit'),
@@ -224,56 +221,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       ),
               ),
             ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatCard({
-    required String label,
-    required String value,
-    required String subValue,
-    required Color color,
-    required IconData icon,
-    VoidCallback? onTap,
-  }) {
-    return Expanded(
-      child: GlassCard(
-        onTap: onTap,
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(icon, color: color, size: 18),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    label,
-                    style: context.text.micro,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: context.text.kpiMedium.copyWith(
-                color: color,
-                fontSize: 20,
-              ),
-            ),
-            Text(subValue, style: context.text.micro),
           ],
         ),
       ),
