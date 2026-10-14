@@ -355,8 +355,8 @@ void main() {
       publishableKey: 'test-anon-key',
     );
     await loadAppFonts();
-    // C265 : relevé de découverte, refait à chaque passage.
-    final discovery = File('build/c265_decouverte.txt');
+    // C265 : relevé des fautes de lisibilité, refait à chaque passage.
+    final discovery = File('build/c265_lisibilite.txt');
     if (discovery.existsSync()) discovery.deleteSync();
   });
 
@@ -476,7 +476,7 @@ void main() {
         ),
       );
       expect(overflows, isEmpty);
-      await recordReadability(tester, 'caisse ouverte');
+      expect(await checkReadability(tester, 'caisse ouverte'), isEmpty);
       expect(find.text('📋 Historique'), findsOneWidget);
     });
 
@@ -494,7 +494,7 @@ void main() {
         ),
       );
       expect(overflows, isEmpty);
-      await recordReadability(tester, 'reçu de vente');
+      expect(await checkReadability(tester, 'reçu de vente'), isEmpty);
     });
 
     testWidgets('fiche produit', (tester) async {
@@ -515,7 +515,7 @@ void main() {
         ),
       );
       expect(overflows, isEmpty);
-      await recordReadability(tester, 'fiche produit');
+      expect(await checkReadability(tester, 'fiche produit'), isEmpty);
     });
 
     testWidgets('mes réservations', (tester) async {
@@ -533,7 +533,7 @@ void main() {
         ),
       );
       expect(overflows, isEmpty);
-      await recordReadability(tester, 'mes réservations');
+      expect(await checkReadability(tester, 'mes réservations'), isEmpty);
     });
 
     testWidgets('réservation confirmée', (tester) async {
@@ -548,7 +548,7 @@ void main() {
         ),
       );
       expect(overflows, isEmpty);
-      await recordReadability(tester, 'réservation confirmée');
+      expect(await checkReadability(tester, 'réservation confirmée'), isEmpty);
       final afterScroll = await collectOverflows(() async {
         await tester.drag(
           find.byType(SingleChildScrollView).first,
@@ -572,7 +572,7 @@ void main() {
         ),
       );
       expect(overflows, isEmpty);
-      await recordReadability(tester, 'QR code de retrait');
+      expect(await checkReadability(tester, 'QR code de retrait'), isEmpty);
     });
     testWidgets('stock et lots', (tester) async {
       final overflows = await pumpAtPhoneWidth(
@@ -597,7 +597,7 @@ void main() {
         tester.getTopLeft(find.text('Stock faible')).dy,
         greaterThan(tester.getBottomLeft(find.text('Produits')).dy),
       );
-      await recordReadability(tester, 'stock et lots');
+      expect(await checkReadability(tester, 'stock et lots'), isEmpty);
     });
 
     testWidgets('catalogue', (tester) async {
@@ -610,7 +610,7 @@ void main() {
         ),
       );
       expect(overflows, isEmpty);
-      await recordReadability(tester, 'catalogue');
+      expect(await checkReadability(tester, 'catalogue'), isEmpty);
     });
 
     testWidgets('tableau de bord de l\'administration', (tester) async {
@@ -631,7 +631,7 @@ void main() {
       ]) {
         expect(find.text(title), findsWidgets);
       }
-      await recordReadability(tester, 'administration');
+      expect(await checkReadability(tester, 'administration'), isEmpty);
     });
   });
 
@@ -704,7 +704,7 @@ void main() {
         );
 
         expect(overflows, isEmpty);
-        await recordReadability(tester, route);
+        expect(await checkReadability(tester, route), isEmpty);
 
         await tester.pumpWidget(const SizedBox.shrink());
         await tester.pump(const Duration(minutes: 5));

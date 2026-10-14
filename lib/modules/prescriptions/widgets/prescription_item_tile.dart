@@ -106,8 +106,7 @@ class PrescriptionItemTile extends StatelessWidget {
                 Text(
                   '${item.dosage} • ${item.frequency} • ${item.duration}',
                   style: context.text.body2,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  // C265 : dosage et forme jamais coupés.
                 ),
                 if (item.instructions != null) ...[
                   const SizedBox(height: 2),

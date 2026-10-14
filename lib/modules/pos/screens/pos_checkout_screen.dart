@@ -354,7 +354,8 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
       onSubmitted: (_) => _search(),
       textInputAction: TextInputAction.search,
       decoration: const InputDecoration(
-        hintText: 'Rechercher un produit en stock (nom ou DCI)...',
+        // C265 : texte d'aide qui tient sur une ligne à 360 px.
+        hintText: 'Produit ou DCI',
         prefixIcon: Icon(Icons.search),
         border: OutlineInputBorder(),
       ),

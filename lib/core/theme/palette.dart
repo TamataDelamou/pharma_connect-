@@ -232,6 +232,13 @@ class PharmaConnectPalette extends ThemeExtension<PharmaConnectPalette> {
       ? Colors.white.withValues(alpha: alpha)
       : textPrimary.withValues(alpha: alpha * 0.6);
 
+  /// C265 : texte posé sur un fond teinté de sa propre couleur (pastille
+  /// d'état, encadré) : rapproché du texte principal pour atteindre 4,5:1 en
+  /// thème clair. En thème sombre, la couleur d'origine, déjà claire, est
+  /// gardée.
+  Color onTint(Color base) =>
+      isDark ? base : Color.lerp(base, textPrimary, 0.45)!;
+
   /// Carte mise en avant par une couleur d'accent (bordure et halo).
   BoxDecoration cardGlow(Color accent) => card.copyWith(
     border: Border.all(

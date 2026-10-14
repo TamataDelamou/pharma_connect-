@@ -50,9 +50,9 @@ class AvailabilityBadge extends StatelessWidget {
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: isAvailable
-                  ? context.palette.success
-                  : context.palette.danger,
+              color: context.palette.onTint(
+                isAvailable ? context.palette.success : context.palette.danger,
+              ),
             ),
           ),
         ],

@@ -91,7 +91,9 @@ class ReservationConfirmationScreen extends StatelessWidget {
                             Text(
                               reservation.id,
                               style: context.text.kpiMedium.copyWith(
-                                color: context.palette.primary,
+                                color: context.palette.onTint(
+                                  context.palette.primary,
+                                ),
                                 fontSize: 20,
                               ),
                             ),

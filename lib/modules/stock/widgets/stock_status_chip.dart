@@ -42,7 +42,7 @@ class StockStatusChip extends StatelessWidget {
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
-                color: status.color.of(context.palette),
+                color: context.palette.onTint(status.color.of(context.palette)),
               ),
             ),
           ],

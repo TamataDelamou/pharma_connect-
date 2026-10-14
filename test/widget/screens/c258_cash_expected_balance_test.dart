@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:pharma_connect/core/utils/currency_formatter.dart';
 import 'package:pharma_connect/core/theme/app_theme.dart';
 import 'package:pharma_connect/modules/auth/providers/auth_provider.dart';
 import 'package:pharma_connect/modules/cash/models/cash_drawer_session.dart';
@@ -63,6 +64,19 @@ class _FakeCashProvider extends CashProvider {
     refreshCalls++;
     _fakeSummary = refreshFails ? null : (summaryAfterRefresh ?? _fakeSummary);
     notifyListeners();
+  }
+
+  /// C267 : solde compté reçu par la fermeture.
+  int? closedWith;
+
+  @override
+  Future<bool> closeSession({
+    required String sessionId,
+    required int closingBalance,
+    String? notes,
+  }) async {
+    closedWith = closingBalance;
+    return true;
   }
 }
 
@@ -142,8 +156,11 @@ void main() {
       final provider = _FakeCashProvider(_summary(sales: 5400, expected: 5400));
       await _pump(tester, provider);
 
-      expect(_amountOf(tester, 'Ventes'), '5400 GNF');
-      expect(_amountOf(tester, 'Solde attendu'), '5400 GNF');
+      expect(_amountOf(tester, 'Ventes'), CurrencyFormatter.format(5400));
+      expect(
+        _amountOf(tester, 'Solde attendu'),
+        CurrencyFormatter.format(5400),
+      );
 
       // Une vente de plus avant la fermeture : le message relit le serveur.
       provider.summaryAfterRefresh = _summary(sales: 6900, expected: 6900);
@@ -151,7 +168,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(provider.refreshCalls, 1);
-      expect(find.text('Solde attendu : 6900 GNF'), findsOneWidget);
+      expect(
+        find.text('Solde attendu : ${CurrencyFormatter.format(6900)}'),
+        findsOneWidget,
+      );
     },
   );
 
@@ -178,4 +198,26 @@ void main() {
     expect(find.text('Solde attendu : —'), findsOneWidget);
     expect(_amountOf(tester, 'Solde attendu'), '—');
   });
+
+  testWidgets(
+    'C267 : solde compté saisi « 16 075 » (avec séparateur) : lu 16 075 à la '
+    'fermeture',
+    (tester) async {
+      final provider = _FakeCashProvider(
+        _summary(sales: 6075, expected: 16075),
+      );
+      await _pump(tester, provider);
+
+      await tester.tap(find.text('🔒 Fermer la caisse'));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Solde réel (GNF)'),
+        '16 075',
+      );
+      await tester.tap(find.widgetWithText(ElevatedButton, 'Fermer'));
+      await tester.pumpAndSettle();
+
+      expect(provider.closedWith, 16075);
+    },
+  );
 }

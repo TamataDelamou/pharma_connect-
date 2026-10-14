@@ -59,8 +59,7 @@ class ProductCard extends StatelessWidget {
           Text(
             '${product.dosage} • ${product.form}',
             style: context.text.micro,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+            // C265 : dosage et forme jamais coupés.
           ),
           const SizedBox(height: 8),
           // Badges

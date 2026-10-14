@@ -54,13 +54,13 @@ class SearchResultCard extends StatelessWidget {
                   style: context.text.body1.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
-                  maxLines: 1,
+                  maxLines: 2, // C265 : nom ou adresse, 2 lignes au plus.
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   product.genericName,
                   style: context.text.body2,
-                  maxLines: 1,
+                  maxLines: 2, // C265 : nom ou adresse, 2 lignes au plus.
                   overflow: TextOverflow.ellipsis,
                 ),
                 // C253 : les mentions passent à la ligne au lieu de déborder.
@@ -90,7 +90,9 @@ class SearchResultCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.w500,
-                            color: context.palette.secondary,
+                            color: context.palette.onTint(
+                              context.palette.secondary,
+                            ),
                           ),
                         ),
                       ),
@@ -112,7 +114,9 @@ class SearchResultCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.w500,
-                            color: context.palette.warning,
+                            color: context.palette.onTint(
+                              context.palette.warning,
+                            ),
                           ),
                         ),
                       ),
@@ -153,7 +157,7 @@ class SearchResultCard extends StatelessWidget {
                     Text(
                       '📍 ${result.nearestPharmacy}',
                       style: context.text.micro,
-                      maxLines: 1,
+                      maxLines: 2, // C265 : nom ou adresse, 2 lignes au plus.
                       overflow: TextOverflow.ellipsis,
                     ),
                   ],

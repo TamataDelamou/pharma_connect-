@@ -225,7 +225,8 @@ class _LoginScreenState extends State<LoginScreen> {
         return '+224612345678';
       case LoginMethod.emailMagic:
       case LoginMethod.emailCode:
-        return 'jean.dupont@example.com';
+        // C265 : texte d'aide qui tient sur une ligne à 360 px.
+        return 'nom@exemple.com';
     }
   }
 

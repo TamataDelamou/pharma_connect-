@@ -61,7 +61,7 @@ class CartItemTile extends StatelessWidget {
                       style: context.text.body1.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
-                      maxLines: 1,
+                      maxLines: 2, // C265 : nom ou adresse, 2 lignes au plus.
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
