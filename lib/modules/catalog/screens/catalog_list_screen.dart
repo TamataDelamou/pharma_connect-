@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/kernel/kernel_badge.dart';
+import '../../../core/widgets/layout/responsive.dart';
 import '../../../core/widgets/inputs/glass_input.dart';
 import '../providers/catalog_provider.dart';
 import '../widgets/category_filter.dart';
@@ -147,13 +148,24 @@ class _CatalogListScreenState extends State<CatalogListScreen> {
       );
     }
 
+    // C266 : en largeur téléphone, deux colonnes de hauteur fixe. Trois
+    // colonnes ne laissaient à 360 px qu'une centaine de pixels par carte :
+    // le nom du produit, à la même taille que dans « Stock & Lots », était
+    // coupé lettre par lettre et le contenu dépassait la carte.
     return GridView.builder(
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        childAspectRatio: 0.9,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-      ),
+      gridDelegate: isCompactWidth(context)
+          ? const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisExtent: 260,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+            )
+          : const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              childAspectRatio: 0.9,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+            ),
       itemCount: provider.products.length,
       itemBuilder: (context, index) {
         final product = provider.products[index];
