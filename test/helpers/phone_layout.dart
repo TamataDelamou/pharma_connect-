@@ -100,12 +100,50 @@ Future<List<String>> pumpAtPhoneWidth(
 
 // ==================== LISIBILITÉ (C265) ====================
 
+/// C265 : textes jamais coupés : montants (« GNF ») et dosages (« 500mg »,
+/// « 1g/125mg », « 5 ml », « 100 UI », « 0,5 % »).
+final RegExp neverCut = RegExp(
+  r'GNF|d+([.,]d+)?s?(mg|g|ml|mL|µg|mcg|UI|%)(?![a-zA-Zé])',
+);
+
+/// C265 : exclusions du contrôle de contraste, décidées par Achille le
+/// 14/10/2026 :
+/// 1. les textes et icônes d'un bouton désactivé (non tenus au seuil par les
+///    règles d'accessibilité usuelles) ;
+/// 2. les icônes décoratives des écrans vides, dessinées en voile
+///    (`palette.veil`, opacité de 30 % au plus).
+const List<String> contrastExclusions = [
+  'bouton désactivé',
+  'icône décorative d'
+      'un écran vide (voile, opacité ≤ 30 %)',
+];
+
+bool _inDisabledButton(Element element) {
+  var disabled = false;
+  element.visitAncestorElements((ancestor) {
+    final widget = ancestor.widget;
+    if (widget is ButtonStyleButton) {
+      disabled = !widget.enabled;
+      return false;
+    }
+    return true;
+  });
+  return disabled;
+}
+
 /// Racine des écrans montés par [pumpAtPhoneWidth] : sert à relever les
 /// couleurs réellement affichées.
 final GlobalKey phoneBoundaryKey = GlobalKey();
 
-/// C265 : textes coupés par « … » (ou effacés par un fondu) à l'écran. Un
-/// titre réduit à « … » ne déborde pas : il disparaît.
+/// C265 : textes coupés par « … » (ou effacés par un fondu) à tort. Un titre
+/// réduit à « … » ne déborde pas : il disparaît.
+///
+/// Règles d'Achille (14/10/2026) :
+/// - dosage, forme, montants et prix ne sont jamais coupés ;
+/// - noms d'officine, adresses et noms de produits : deux lignes au plus,
+///   puis « … » (permis) ;
+/// - tout autre texte, dont les textes d'aide des champs, tient sur sa ligne :
+///   une coupure sur une seule ligne est une faute.
 List<String> truncatedTexts(WidgetTester tester) {
   final found = <String>{};
   for (final element in find.byType(RichText).evaluate()) {
@@ -120,6 +158,9 @@ List<String> truncatedTexts(WidgetTester tester) {
     if (!render.didExceedMaxLines) continue;
     final text = render.text.toPlainText().replaceAll('\n', ' ').trim();
     if (text.isEmpty) continue;
+    // Nom ou adresse coupé après deux lignes : permis.
+    final twoLines = (render.maxLines ?? 1) >= 2;
+    if (twoLines && !neverCut.hasMatch(text)) continue;
     found.add(text.length > 60 ? '${text.substring(0, 60)}…' : text);
   }
   return found.toList();
@@ -193,9 +234,14 @@ Future<List<String>> lowContrastTexts(WidgetTester tester) async {
       samples.add((math.max(l1, l2) + 0.05) / (math.min(l1, l2) + 0.05));
     }
     samples.sort();
-    // Médiane basse : un seul coin posé sur autre chose ne suffit pas.
-    final contrast = samples[1];
+    // Médiane haute : au moins trois des quatre coins doivent être sous le
+    // seuil. Un libellé flottant posé sur le trait d'un champ n'est pas
+    // signalé à tort ; un texte sur un fond uniforme l'est.
+    final contrast = samples[2];
     final isIcon = label.runes.every((rune) => rune >= 0xE000);
+    // Exclusions (voir [contrastExclusions]).
+    if (_inDisabledButton(element)) continue;
+    if (isIcon && color.a <= 0.3) continue;
     final size =
         (style?.fontSize ?? 14) * MediaQuery.textScalerOf(element).scale(1);
     final bold = (style?.fontWeight?.value ?? 400) >= 600;
@@ -217,13 +263,16 @@ Future<List<String>> lowContrastTexts(WidgetTester tester) async {
   return found.toList();
 }
 
-/// C265, découverte : relève les textes coupés et les contrastes faibles de
-/// l'écran affiché et les ajoute à build/c265_decouverte.txt. N'échoue pas :
-/// la liste est rendue à Achille avant toute correction.
-Future<void> recordReadability(WidgetTester tester, String screen) async {
+/// C265 : textes coupés à tort et contrastes sous les seuils de l'écran
+/// affiché. Les fautes sont aussi ajoutées à build/c265_lisibilite.txt.
+/// L'essai attend une liste vide.
+Future<List<String>> checkReadability(
+  WidgetTester tester,
+  String screen,
+) async {
   final truncated = truncatedTexts(tester);
   final contrast = await lowContrastTexts(tester);
-  final out = File('build/c265_decouverte.txt');
+  final out = File('build/c265_lisibilite.txt');
   out.parent.createSync(recursive: true);
   final lines = [
     for (final t in truncated) '$screen | coupé | $t',
@@ -232,4 +281,5 @@ Future<void> recordReadability(WidgetTester tester, String screen) async {
   if (lines.isNotEmpty) {
     out.writeAsStringSync('${lines.join('\n')}\n', mode: FileMode.append);
   }
+  return lines;
 }
