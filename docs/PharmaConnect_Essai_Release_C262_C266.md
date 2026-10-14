@@ -1,9 +1,9 @@
-# PharmaConnect — Essai court de la version « release » (C262 à C266)
+# PharmaConnect — Essai court de la version « release » (C262 à C267)
 
 **Pour qui :** Achille, avec les deux téléphones et les comptes de l'essai du lot 3.
 **État :** guide préparé le 14/10/2026, avant la construction de la version. Rien n'a encore été joué sur un téléphone.
 **Durée :** environ 40 minutes, migration comprise.
-**But :** reprouver sur appareil C262 (remise bloquée), C263 (aucun message technique), C264 (QR code immédiat hors connexion), C265 (tuiles, textes et contrastes), C266 (catalogue), mode avion compris ; puis appliquer la migration C262 en production.
+**But :** reprouver sur appareil C262 (remise bloquée), C263 (aucun message technique), C264 (QR code immédiat hors connexion), C265 (tuiles, textes et contrastes), C266 (catalogue) et C267 (montants « 1 575 GNF »), mode avion compris ; puis appliquer la migration C262 en production.
 
 ---
 
@@ -41,9 +41,9 @@
 - Dans la liste, des noms de produits sur deux lignes au plus ; les lignes « Stock : … » et « Réservés : … » lisibles.
 - **Notez le stock de Paracétamol** (4 boîtes attendues après l'essai du 12-13/10, 0 réservée) : il sert au contrôle de la section 8.
 
-2. Menu ☰ → « Ouverture de caisse ». Si une caisse est ouverte, fermez-la (solde réel = solde attendu affiché). Ouvrez la caisse avec un fonds de `10000`.
+2. Menu ☰ → « Ouverture de caisse ». Si une caisse est ouverte, fermez-la (solde réel = solde attendu affiché). Ouvrez la caisse avec un fonds saisi `10 000` (avec l'espace : C267, la saisie doit être acceptée).
 
-**Vous devez voir :** les pastilles « Ouverte » et les chiffres lisibles, texte foncé sur fond clair.
+**Vous devez voir :** les pastilles « Ouverte » et les chiffres lisibles, texte foncé sur fond clair. Les montants sont écrits avec un séparateur des milliers : « 10 000 GNF », jamais « 10000 GNF », et ne sont jamais coupés en fin de ligne (C267).
 
 ---
 
@@ -55,7 +55,7 @@
 
 2. Touchez « Paracétamol ». Faites défiler l'écran de haut en bas plusieurs fois, en partant de différents endroits.
 
-**Vous devez voir :** « À payer **1575 GNF** », inchangé après chaque défilement.
+**Vous devez voir :** « À payer **1 575 GNF** », inchangé après chaque défilement.
 
 3. « Finaliser la vente ». **Vous devez voir :** le reçu, **1 575 GNF**, sans remise.
 
@@ -143,7 +143,7 @@ where p.oid = 'public.pos_create_sale(uuid,text,integer,integer,integer,integer,
 
 ## 8. Fermeture de la caisse et stock
 
-1. Téléphone A, « Ouverture de caisse ». **Vous devez voir :** « Solde attendu **14650 GNF** » (10 000 + 1 575 + 1 500 + 1 575), le même chiffre dans le message de fermeture. Fermez avec `14650`. **Vous devez voir :** écart 0.
+1. Téléphone A, « Ouverture de caisse ». **Vous devez voir :** « Solde attendu **14 650 GNF** » (10 000 + 1 575 + 1 500 + 1 575), le même chiffre dans le message de fermeture. Fermez en saisissant `14 650` (avec l'espace). **Vous devez voir :** écart 0.
 2. « Stock & Lots » : Paracétamol **3 boîtes de moins** qu'au départ (section 2), 0 réservée : une réservation retirée et deux ventes au comptoir.
 
 ---
@@ -155,7 +155,7 @@ where p.oid = 'public.pos_create_sale(uuid,text,integer,integer,integer,integer,
 | 1 | Installation, connexion des deux téléphones | — | |
 | 2 | « Stock & Lots » : tuiles 2 × 2, titres entiers, une icône | C265 | |
 | 3 | Vente au comptoir : pas de réglette ni de ligne « Remise » | C262 | |
-| 4 | « À payer 1575 GNF » inchangé après défilement, reçu 1 575 | C262 | |
+| 4 | « À payer 1 575 GNF » inchangé après défilement, reçu 1 575 | C262 | |
 | 5 | Catalogue : deux colonnes, noms lisibles, dosage et forme entiers | C266, C265 | |
 | 6 | Fiche produit : nom et adresse d'officine, pastilles lisibles | C265 | |
 | 7 | Mode avion : QR code tout de suite, mention « Hors connexion » | C264 | |
@@ -168,3 +168,4 @@ where p.oid = 'public.pos_create_sale(uuid,text,integer,integer,integer,integer,
 | 14 | Vente sans remise acceptée après migration | C262 | |
 | 15 | Solde attendu 14 650, fermeture à écart 0 | C258 | |
 | 16 | Stock : 3 boîtes de moins, 0 réservée | stock | |
+| 17 | Montants avec séparateur des milliers (« 10 000 GNF ») ; saisie « 10 000 » et « 14 650 » acceptée | C267 | |
