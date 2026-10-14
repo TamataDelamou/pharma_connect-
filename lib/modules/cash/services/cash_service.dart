@@ -1,11 +1,13 @@
 import 'package:pharma_connect/core/services/supabase_service.dart';
+import 'package:pharma_connect/core/utils/user_message.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show PostgrestException;
 import '../models/cash_drawer_session.dart';
 import '../models/cash_movement.dart';
 
 /// C205 : refus du serveur sur une opération de caisse, message lisible tel
 /// qu'affiché à l'utilisateur.
-class CashException implements Exception {
+class CashException implements UserFacingException {
+  @override
   final String message;
   const CashException(this.message);
 

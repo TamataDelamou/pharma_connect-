@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:pharma_connect/core/utils/user_message.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
@@ -112,7 +113,7 @@ class PrescriptionProvider extends ChangeNotifier {
         _error =
             'Hors connexion — dernière liste synchronisée affichée (${_prescriptions.length} ordonnance(s)).';
       } else {
-        _error = e.toString();
+        _error = userMessage(e);
       }
     } finally {
       _isLoading = false;
@@ -153,10 +154,10 @@ class PrescriptionProvider extends ChangeNotifier {
           _error =
               'Hors connexion — dernière version connue de cette ordonnance affichée.';
         } catch (_) {
-          _error = e.toString();
+          _error = userMessage(e);
         }
       } else {
-        _error = e.toString();
+        _error = userMessage(e);
       }
       notifyListeners();
     }
@@ -251,9 +252,9 @@ class PrescriptionProvider extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       _uploadStatus = PrescriptionUploadStatus.error;
-      _uploadError = 'Erreur lors de l\'upload: $e';
+      _uploadError = 'Envoi de l\'ordonnance impossible. ${userMessage(e)}';
       _isProcessingOcr = false;
-      _error = e.toString();
+      _error = userMessage(e);
       notifyListeners();
     }
   }
@@ -323,7 +324,7 @@ class PrescriptionProvider extends ChangeNotifier {
       if (_selectedPrescription?.id == id) _selectedPrescription = updated;
       notifyListeners();
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       notifyListeners();
     }
   }
@@ -336,7 +337,7 @@ class PrescriptionProvider extends ChangeNotifier {
       if (_selectedPrescription?.id == id) _selectedPrescription = updated;
       notifyListeners();
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       notifyListeners();
     }
   }
@@ -357,7 +358,7 @@ class PrescriptionProvider extends ChangeNotifier {
       }
       notifyListeners();
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       notifyListeners();
     }
   }
@@ -428,7 +429,7 @@ class PrescriptionProvider extends ChangeNotifier {
       _prescriptions = await _service.searchPrescriptions(query);
       notifyListeners();
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       notifyListeners();
     }
   }

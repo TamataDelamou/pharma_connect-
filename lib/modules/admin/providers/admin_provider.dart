@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pharma_connect/core/utils/user_message.dart';
 import '../models/admin_user.dart';
 import '../models/admin_role.dart';
 import '../models/admin_permission.dart';
@@ -35,6 +36,7 @@ class AdminProvider extends ChangeNotifier {
     _isLoading = false;
     notifyListeners();
   }
+
   AdminPharmacy? get selectedPharmacy => _selectedPharmacy;
   List<AuditLog> get auditLogs => _auditLogs;
   List<SystemConfig> get configs => _configs;
@@ -71,7 +73,7 @@ class AdminProvider extends ChangeNotifier {
         isVerified: isVerified,
       );
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
     }
 
     _isLoading = false;
@@ -86,7 +88,7 @@ class AdminProvider extends ChangeNotifier {
     try {
       _selectedUser = await _service.getUser(id);
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
     }
 
     _isLoading = false;
@@ -109,7 +111,7 @@ class AdminProvider extends ChangeNotifier {
         isActive: isActive,
       );
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
     }
 
     _isLoading = false;
@@ -124,7 +126,7 @@ class AdminProvider extends ChangeNotifier {
     try {
       _selectedPharmacy = await _service.getPharmacy(id);
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
     }
 
     _isLoading = false;
@@ -151,7 +153,7 @@ class AdminProvider extends ChangeNotifier {
         toDate: toDate,
       );
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
     }
 
     _isLoading = false;
@@ -163,7 +165,7 @@ class AdminProvider extends ChangeNotifier {
       _configs = await _service.getConfigs(category: category);
       notifyListeners();
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       notifyListeners();
     }
   }
@@ -173,7 +175,7 @@ class AdminProvider extends ChangeNotifier {
       _statistics = await _service.getStatistics();
       notifyListeners();
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       notifyListeners();
     }
   }
@@ -210,7 +212,7 @@ class AdminProvider extends ChangeNotifier {
       notifyListeners();
       return user;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       _isLoading = false;
       notifyListeners();
       return null;
@@ -223,7 +225,7 @@ class AdminProvider extends ChangeNotifier {
       _updateUser(updated);
       return true;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       notifyListeners();
       return false;
     }
@@ -235,7 +237,7 @@ class AdminProvider extends ChangeNotifier {
       _updateUser(updated);
       return true;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       notifyListeners();
       return false;
     }
@@ -281,7 +283,7 @@ class AdminProvider extends ChangeNotifier {
       notifyListeners();
       return pharmacy;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       _isLoading = false;
       notifyListeners();
       return null;
@@ -294,7 +296,7 @@ class AdminProvider extends ChangeNotifier {
       _updatePharmacy(updated);
       return true;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       notifyListeners();
       return false;
     }
@@ -306,7 +308,7 @@ class AdminProvider extends ChangeNotifier {
       _updatePharmacy(updated);
       return true;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       notifyListeners();
       return false;
     }
@@ -318,7 +320,7 @@ class AdminProvider extends ChangeNotifier {
       _updatePharmacy(updated);
       return true;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       notifyListeners();
       return false;
     }
@@ -340,7 +342,7 @@ class AdminProvider extends ChangeNotifier {
       _updatePharmacy(updated);
       return true;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       notifyListeners();
       return false;
     }
@@ -358,7 +360,7 @@ class AdminProvider extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       notifyListeners();
       return false;
     }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pharma_connect/core/utils/user_message.dart';
 import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -50,7 +51,7 @@ class _POSRefundScreenState extends State<POSRefundScreen> {
       await provider.loadSale(_saleIdController.text);
       _selectedSale = provider.currentSale;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
     }
     setState(() => _isLoading = false);
   }

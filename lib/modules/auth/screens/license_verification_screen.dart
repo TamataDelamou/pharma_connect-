@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:pharma_connect/core/utils/user_message.dart';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -350,7 +351,7 @@ class _LicenseVerificationScreenState extends State<LicenseVerificationScreen> {
                           longitude: _longitude,
                         );
                       } catch (e) {
-                        errorMessage = e.toString();
+                        errorMessage = userMessage(e);
                       }
 
                       if (!context.mounted) return;

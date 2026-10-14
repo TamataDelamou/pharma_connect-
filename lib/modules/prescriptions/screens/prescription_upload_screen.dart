@@ -377,7 +377,11 @@ class _PrescriptionUploadScreenState extends State<PrescriptionUploadScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Impossible d\'accéder à l\'image : $e'),
+            // C263 : jamais le détail de l'erreur à l'écran.
+            content: const Text(
+              'Impossible d\'accéder à l\'image. Vérifiez que l\'application '
+              'a le droit d\'utiliser l\'appareil photo et les photos.',
+            ),
             backgroundColor: context.palette.danger,
           ),
         );

@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:pharma_connect/core/utils/user_message.dart';
 
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
@@ -18,7 +19,8 @@ enum ReceiptLinkPurpose { consultation, export }
 
 /// C201 : refus du serveur lors d'une vente (stock insuffisant, lot périmé,
 /// accès refusé…), message lisible tel qu'affiché à l'utilisateur.
-class POSSaleException implements Exception {
+class POSSaleException implements UserFacingException {
+  @override
   final String message;
   const POSSaleException(this.message);
 
@@ -28,7 +30,8 @@ class POSSaleException implements Exception {
 
 /// C204 : refus du serveur lors d'un remboursement, message lisible tel
 /// qu'affiché à l'utilisateur.
-class POSRefundException implements Exception {
+class POSRefundException implements UserFacingException {
+  @override
   final String message;
   const POSRefundException(this.message);
 

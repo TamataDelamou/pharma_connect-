@@ -1,10 +1,12 @@
 import 'package:pharma_connect/core/services/supabase_service.dart';
+import 'package:pharma_connect/core/utils/user_message.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show PostgrestException;
 import '../models/emergency_access.dart';
 
 /// C219 : refus du serveur sur un accès d'urgence, message lisible tel
 /// qu'affiché à l'utilisateur.
-class EmergencyAccessException implements Exception {
+class EmergencyAccessException implements UserFacingException {
+  @override
   final String message;
   const EmergencyAccessException(this.message);
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pharma_connect/core/utils/user_message.dart';
 import '../../../core/kernel/gsg_kernel_auth_bridge.dart';
 import '../../../core/services/supabase_service.dart';
 import '../../../core/utils/validators.dart';
@@ -65,6 +66,7 @@ class AuthProvider extends ChangeNotifier {
     _isGsgAdmin = value;
     notifyListeners();
   }
+
   String? get error => _error;
 
   String? get fullName => _fullName;
@@ -145,7 +147,7 @@ class AuthProvider extends ChangeNotifier {
       _setLoading(false);
       return true;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       _setLoading(false);
       return false;
     }
@@ -180,7 +182,7 @@ class AuthProvider extends ChangeNotifier {
       _setLoading(false);
       return false;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       _setLoading(false);
       return false;
     }
@@ -200,7 +202,7 @@ class AuthProvider extends ChangeNotifier {
       _setLoading(false);
       return true;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       _setLoading(false);
       return false;
     }
@@ -230,7 +232,7 @@ class AuthProvider extends ChangeNotifier {
       _setLoading(false);
       return false;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       _setLoading(false);
       return false;
     }
@@ -396,7 +398,7 @@ class AuthProvider extends ChangeNotifier {
       _setLoading(false);
       return true;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       _setLoading(false);
       return false;
     }

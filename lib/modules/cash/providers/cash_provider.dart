@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pharma_connect/core/utils/user_message.dart';
 import '../models/cash_drawer_session.dart';
 import '../models/cash_movement.dart';
 import '../services/cash_service.dart';
@@ -61,7 +62,7 @@ class CashProvider extends ChangeNotifier {
         await loadSummary(_currentSession!.id);
       }
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
     }
     _isLoading = false;
     notifyListeners();
@@ -86,7 +87,7 @@ class CashProvider extends ChangeNotifier {
         toDate: toDate,
       );
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
     }
     _isLoading = false;
     notifyListeners();
@@ -97,7 +98,7 @@ class CashProvider extends ChangeNotifier {
       _movements = await _service.getMovements(sessionId);
       notifyListeners();
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
     }
   }
 
@@ -106,7 +107,7 @@ class CashProvider extends ChangeNotifier {
       _summary = await _service.getSessionSummary(sessionId);
       notifyListeners();
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
     }
   }
 
@@ -132,7 +133,7 @@ class CashProvider extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       _isLoading = false;
       notifyListeners();
       return false;
@@ -159,7 +160,7 @@ class CashProvider extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       _isLoading = false;
       notifyListeners();
       return false;
@@ -192,7 +193,7 @@ class CashProvider extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       _isLoading = false;
       notifyListeners();
       return false;
@@ -217,7 +218,7 @@ class CashProvider extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       _isLoading = false;
       notifyListeners();
       return false;
