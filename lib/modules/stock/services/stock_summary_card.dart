@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../../core/widgets/cards/glass_card.dart';
+import '../../../core/widgets/cards/stat_tile_grid.dart';
 import '../../../core/theme/palette.dart';
 
+/// Chiffres du stock de l'officine, en tête de « Stock & Lots ».
+/// C265 : tuiles communes (`StatTileGrid`) : grille 2 × 2 en largeur
+/// téléphone, titres entiers, une seule icône par tuile.
 class StockSummaryCard extends StatelessWidget {
   final int totalProducts;
   final int totalStock;
@@ -18,80 +21,33 @@ class StockSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        _buildStatCard(
-          context,
+    return StatTileGrid(
+      tiles: [
+        StatTileData(
           label: 'Produits',
           value: totalProducts.toString(),
           icon: Icons.inventory_2,
           color: context.palette.primary,
         ),
-        const SizedBox(width: 12),
-        _buildStatCard(
-          context,
+        StatTileData(
           label: 'Unités',
           value: totalStock.toString(),
           icon: Icons.numbers,
           color: context.palette.secondary,
         ),
-        const SizedBox(width: 12),
-        _buildStatCard(
-          context,
-          label: '⚠️ Faible',
+        StatTileData(
+          label: 'Stock faible',
           value: lowStockCount.toString(),
           icon: Icons.warning_amber,
           color: context.palette.warning,
         ),
-        const SizedBox(width: 12),
-        _buildStatCard(
-          context,
-          label: '🔴 Rupture',
+        StatTileData(
+          label: 'Ruptures',
           value: outOfStockCount.toString(),
           icon: Icons.error_outline,
           color: context.palette.danger,
         ),
       ],
-    );
-  }
-
-  Widget _buildStatCard(
-    BuildContext context, {
-    required String label,
-    required String value,
-    required IconData icon,
-    required Color color,
-  }) {
-    return Expanded(
-      child: GlassCard(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(icon, color: color, size: 16),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(
-                    label,
-                    style: context.text.micro,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: context.text.kpiMedium.copyWith(
-                color: color,
-                fontSize: 24,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
