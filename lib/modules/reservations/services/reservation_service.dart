@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:pharma_connect/core/utils/user_message.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/pickup_line.dart';
 import '../models/reservation.dart';
@@ -10,7 +11,8 @@ import '../../pos/services/pos_service.dart';
 
 /// C243 : refus du serveur lors d'une réservation, d'une annulation ou d'un
 /// retrait, message lisible tel qu'affiché à l'utilisateur.
-class ReservationException implements Exception {
+class ReservationException implements UserFacingException {
+  @override
   final String message;
   const ReservationException(this.message);
 

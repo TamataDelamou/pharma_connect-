@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
@@ -21,8 +23,14 @@ class _ReservationHistoryScreenState extends State<ReservationHistoryScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
-  /// C255 : réservation dont le QR code est en cours d'ouverture.
+  /// C255 : réservation dont le QR code attend le serveur (réservation sans
+  /// code de retrait dans la liste) : barre de progression au-dessus de la
+  /// liste.
   String? _openingId;
+
+  /// C255 : vrai pendant l'ouverture d'un QR code ; tout autre toucher est
+  /// ignoré.
+  bool _opening = false;
 
   @override
   void initState() {
@@ -122,8 +130,8 @@ class _ReservationHistoryScreenState extends State<ReservationHistoryScreen>
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        provider.error ??
-                            'Hors connexion — dernières données synchronisées.',
+                        // C263 : texte fixe, jamais le détail d'une erreur.
+                        'Hors connexion — dernières données enregistrées',
                         style: context.text.micro.copyWith(
                           color: context.palette.warningStrong,
                         ),
@@ -234,23 +242,30 @@ class _ReservationHistoryScreenState extends State<ReservationHistoryScreen>
   /// l'écran, pas de la carte touchée : la carte peut être retirée de l'écran
   /// pendant le chargement, et son contexte ne permet alors plus de naviguer.
   Future<void> _openQr(Reservation reservation) async {
-    // Un toucher à la fois : le second est ignoré tant que le premier
+    // Un toucher à la fois : les suivants sont ignorés tant que le premier
     // n'est pas terminé.
-    if (_openingId != null) return;
-    setState(() => _openingId = reservation.id);
+    if (_opening) return;
+    _opening = true;
     final provider = context.read<ReservationProvider>();
     try {
-      await provider.loadReservation(reservation.id);
-    } finally {
-      if (mounted) setState(() => _openingId = null);
-    }
-    if (!mounted) return;
-    // Chargement échoué : la réservation sélectionnée est restée celle
-    // d'avant. Ne jamais montrer le QR code d'une autre réservation.
-    if (provider.selectedReservation?.id != reservation.id) {
-      // Hors connexion : la réservation de la liste, en cache, porte le code
-      // de retrait. Le serveur le vérifie au retrait.
-      if ((reservation.qrCodeToken ?? '').isEmpty) {
+      // C264 : la réservation de la liste porte le code de retrait : le QR
+      // code s'affiche tout de suite, la relecture du serveur se fait en
+      // arrière-plan.
+      if ((reservation.qrCodeToken ?? '').isNotEmpty) {
+        unawaited(provider.openReservation(reservation));
+        await context.push('/reservations/qr');
+        return;
+      }
+
+      // Sans code de retrait dans la liste, il faut le serveur.
+      setState(() => _openingId = reservation.id);
+      final answered = await provider.openReservation(reservation);
+      if (!mounted) return;
+      setState(() => _openingId = null);
+      final selected = provider.selectedReservation;
+      if (!answered ||
+          selected?.id != reservation.id ||
+          (selected?.qrCodeToken ?? '').isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text(
@@ -262,9 +277,10 @@ class _ReservationHistoryScreenState extends State<ReservationHistoryScreen>
         );
         return;
       }
-      provider.selectCachedReservation(reservation);
+      await context.push('/reservations/qr');
+    } finally {
+      _opening = false;
     }
-    context.push('/reservations/qr');
   }
 
   Widget _buildList(BuildContext context, List<Reservation> reservations) {

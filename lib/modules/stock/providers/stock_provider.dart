@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:pharma_connect/core/utils/user_message.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../models/stock_item.dart';
@@ -82,7 +83,7 @@ class StockProvider extends ChangeNotifier {
           ? await _tryOfflineFallback(pharmacyId, searchQuery)
           : false;
       if (!fallback) {
-        _error = e.toString();
+        _error = userMessage(e);
       }
     }
 
@@ -134,7 +135,7 @@ class StockProvider extends ChangeNotifier {
         _movements = await _service.getMovements(stockItemId: id);
       }
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
     }
 
     _isLoading = false;
@@ -149,7 +150,7 @@ class StockProvider extends ChangeNotifier {
       );
       notifyListeners();
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       notifyListeners();
     }
   }
@@ -218,7 +219,7 @@ class StockProvider extends ChangeNotifier {
           ? await _tryOfflineFallback(pharmacyId, null)
           : false;
       if (!fallback) {
-        _error = e.toString();
+        _error = userMessage(e);
       }
     }
 
@@ -360,7 +361,7 @@ class StockProvider extends ChangeNotifier {
       await loadStock(pharmacyId: pharmacyId);
       return result;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       _isLoading = false;
       notifyListeners();
       return false;
@@ -478,7 +479,7 @@ class StockProvider extends ChangeNotifier {
       await loadStock(pharmacyId: fromPharmacyId);
       return result;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       _isLoading = false;
       notifyListeners();
       return false;
@@ -518,7 +519,7 @@ class StockProvider extends ChangeNotifier {
       }
       return success;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       notifyListeners();
       return false;
     }
@@ -534,7 +535,7 @@ class StockProvider extends ChangeNotifier {
         daysThreshold: daysThreshold,
       );
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       notifyListeners();
       return [];
     }
@@ -564,7 +565,7 @@ class StockProvider extends ChangeNotifier {
         status: status,
       );
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
     }
 
     _isLoading = false;

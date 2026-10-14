@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:pharma_connect/core/utils/user_message.dart';
 
 import 'package:uuid/uuid.dart';
 import '../models/transaction.dart';
@@ -13,7 +14,8 @@ import '../../../core/services/supabase_service.dart';
 /// factures) n'est plus écrit par l'application. L'officine qui encaisse (ou
 /// GSG) confirme ou rembourse par des fonctions serveur journalisées ; le
 /// patient peut abandonner ou contester. RG-PAY-01.
-class PaymentException implements Exception {
+class PaymentException implements UserFacingException {
+  @override
   final String message;
   const PaymentException(this.message);
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pharma_connect/core/utils/user_message.dart';
 import 'package:pharma_connect/core/services/offline_sales_service.dart';
 import '../models/pos_sale.dart';
 import '../models/pos_sale_item.dart';
@@ -27,7 +28,7 @@ class OfflinePOSProvider extends ChangeNotifier {
       _pendingSales = sales.length;
       notifyListeners();
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
     }
   }
 
@@ -47,7 +48,7 @@ class OfflinePOSProvider extends ChangeNotifier {
       await loadPendingSales();
       return true;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       return false;
     }
   }
@@ -60,7 +61,7 @@ class OfflinePOSProvider extends ChangeNotifier {
         await _offlineService.syncOfflineSales();
         await loadPendingSales();
       } catch (e) {
-        _error = e.toString();
+        _error = userMessage(e);
       }
       _isSyncing = false;
       notifyListeners();
@@ -74,7 +75,7 @@ class OfflinePOSProvider extends ChangeNotifier {
     try {
       return await _offlineService.searchProducts(pharmacyId, query);
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       return [];
     }
   }
@@ -86,7 +87,7 @@ class OfflinePOSProvider extends ChangeNotifier {
     try {
       await _offlineService.cacheProducts(pharmacyId, products);
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
     }
   }
 

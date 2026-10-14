@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:pharma_connect/core/utils/user_message.dart';
 
 import 'package:flutter/material.dart';
 import '../../../shared/models/product.dart';
@@ -132,7 +133,7 @@ class SearchProvider extends ChangeNotifier {
             'possiblement pas à jour.';
         _status = SearchStatus.loaded;
       } else {
-        _error = e.toString();
+        _error = userMessage(e);
         _status = SearchStatus.error;
       }
     }
@@ -157,7 +158,7 @@ class SearchProvider extends ChangeNotifier {
     } catch (e) {
       _suggestions = [];
       _showSuggestions = false;
-      _error = e.toString();
+      _error = userMessage(e);
     }
     notifyListeners();
   }
@@ -224,7 +225,7 @@ class SearchProvider extends ChangeNotifier {
       _searchHistory = await _service.getSearchHistory();
     } catch (e) {
       _searchHistory = [];
-      _error = e.toString();
+      _error = userMessage(e);
     }
     notifyListeners();
   }
@@ -234,7 +235,7 @@ class SearchProvider extends ChangeNotifier {
       await _service.clearHistory();
       _searchHistory = [];
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
     }
     notifyListeners();
   }
@@ -257,7 +258,7 @@ class SearchProvider extends ChangeNotifier {
         _status = SearchStatus.error;
       }
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       _status = SearchStatus.error;
     }
 
@@ -286,7 +287,7 @@ class SearchProvider extends ChangeNotifier {
       );
     } catch (e) {
       _selectedProductAvailability = null;
-      _error = e.toString();
+      _error = userMessage(e);
     }
     notifyListeners();
   }

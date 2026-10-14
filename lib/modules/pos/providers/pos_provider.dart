@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pharma_connect/core/utils/user_message.dart';
 import '../models/pos_sale.dart';
 import '../models/pos_sale_item.dart';
 import '../models/pos_receipt.dart';
@@ -173,7 +174,7 @@ class POSProvider extends ChangeNotifier {
       notifyListeners();
       return false;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       _isCheckingOut = false;
       notifyListeners();
       return false;
@@ -199,7 +200,7 @@ class POSProvider extends ChangeNotifier {
         toDate: toDate,
       );
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
     }
     _isLoading = false;
     notifyListeners();
@@ -215,7 +216,7 @@ class POSProvider extends ChangeNotifier {
         _currentReceipt = await _service.getReceipt(id);
       }
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
     }
     _isLoading = false;
     notifyListeners();
@@ -247,7 +248,7 @@ class POSProvider extends ChangeNotifier {
       notifyListeners();
       return false;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       _isLoading = false;
       notifyListeners();
       return false;
@@ -270,7 +271,7 @@ class POSProvider extends ChangeNotifier {
         toDate: toDate,
       );
     } catch (e) {
-      _refundsError = e.toString();
+      _refundsError = userMessage(e);
     }
     _isLoadingRefunds = false;
     notifyListeners();
@@ -290,7 +291,7 @@ class POSProvider extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       _isPrinting = false;
       notifyListeners();
       return false;

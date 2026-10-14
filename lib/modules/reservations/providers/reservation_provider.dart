@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:pharma_connect/core/utils/user_message.dart';
 import 'package:flutter/material.dart';
 import '../models/pickup_line.dart';
 import '../models/reservation.dart';
@@ -9,7 +10,15 @@ import '../services/reservation_service.dart';
 import '../../../core/services/offline_sync_service.dart';
 
 class ReservationProvider extends ChangeNotifier {
-  final ReservationService _service = ReservationService();
+  final ReservationService _service;
+
+  /// [service] : remplaçable dans les tests.
+  ReservationProvider({ReservationService? service})
+    : _service = service ?? ReservationService();
+
+  /// C264 : délai maximal de la relecture d'une réservation ouverte depuis la
+  /// liste.
+  static const Duration refreshTimeout = Duration(seconds: 10);
   final OfflineSyncService _offlineSync = OfflineSyncService();
 
   List<Reservation> _reservations = [];
@@ -101,7 +110,7 @@ class ReservationProvider extends ChangeNotifier {
       _reservations = await _service.getReservations(status: status);
       _isOffline = false;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
     }
     _isLoading = false;
     notifyListeners();
@@ -135,7 +144,7 @@ class ReservationProvider extends ChangeNotifier {
         _error =
             'Hors connexion — dernières réservations synchronisées affichées (${_reservations.length}).';
       } else {
-        _error = e.toString();
+        _error = userMessage(e);
       }
     }
     _isLoading = false;
@@ -150,20 +159,45 @@ class ReservationProvider extends ChangeNotifier {
       _selectedReservation = await _service.getReservation(id);
       _selectedFromCache = false;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
     }
     _isLoading = false;
     notifyListeners();
   }
 
-  /// C255 : sélectionne une réservation de la liste en cache, quand le
-  /// serveur ne répond pas : le patient garde son QR code et son code de
-  /// retrait hors connexion. Le serveur vérifie le code au retrait.
-  void selectCachedReservation(Reservation reservation) {
+  /// C264 : ouvre tout de suite une réservation de la liste, puis la relit
+  /// sur le serveur en arrière-plan. Le QR code et le code de retrait
+  /// s'affichent sans attendre le réseau ; le serveur vérifie le code au
+  /// retrait.
+  ///
+  /// C263 : un échec de la relecture ne laisse aucune erreur : la réservation
+  /// reste celle de la liste, marquée « dernières données enregistrées ».
+  /// Rend vrai si le serveur a répondu.
+  Future<bool> openReservation(Reservation reservation) async {
     _selectedReservation = reservation;
-    _selectedFromCache = true;
-    _error = null;
+    _selectedFromCache = _isOffline;
     notifyListeners();
+    try {
+      final fresh = await _service
+          .getReservation(reservation.id)
+          .timeout(refreshTimeout);
+      _isOffline = false;
+      final index = _reservations.indexWhere((r) => r.id == fresh.id);
+      if (index != -1) _reservations[index] = fresh;
+      if (_selectedReservation?.id == fresh.id) {
+        _selectedReservation = fresh;
+        _selectedFromCache = false;
+      }
+      notifyListeners();
+      return true;
+    } catch (e) {
+      debugPrint('PharmaConnect, réservation relue en cache : $e');
+      if (_selectedReservation?.id == reservation.id) {
+        _selectedFromCache = true;
+        notifyListeners();
+      }
+      return false;
+    }
   }
 
   Future<void> loadAvailableSlots({
@@ -180,7 +214,7 @@ class ReservationProvider extends ChangeNotifier {
       );
       _selectedPharmacyId = pharmacyId;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
     }
     _isLoading = false;
     notifyListeners();
@@ -264,7 +298,7 @@ class ReservationProvider extends ChangeNotifier {
       notifyListeners();
       return reservation;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       _isLoading = false;
       notifyListeners();
       return null;
@@ -279,7 +313,7 @@ class ReservationProvider extends ChangeNotifier {
       _updateReservation(updated);
       return true;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       notifyListeners();
       return false;
     }
@@ -292,7 +326,7 @@ class ReservationProvider extends ChangeNotifier {
       _updateReservation(updated);
       return true;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       notifyListeners();
       return false;
     }
@@ -312,7 +346,7 @@ class ReservationProvider extends ChangeNotifier {
       _selectedFromCache = false;
       _pickupLines = await _service.getPickupPreview(id);
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
     }
     _isLoading = false;
     notifyListeners();
@@ -340,7 +374,7 @@ class ReservationProvider extends ChangeNotifier {
       _updateReservation(await _service.getReservation(id));
       return saleId;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       notifyListeners();
       return null;
     }
@@ -396,7 +430,7 @@ class ReservationProvider extends ChangeNotifier {
         _error =
             'Hors connexion — dernière file d\'attente synchronisée affichée.';
       } else {
-        _error = e.toString();
+        _error = userMessage(e);
       }
     }
     _isLoading = false;
@@ -457,6 +491,7 @@ class ReservationProvider extends ChangeNotifier {
     List<PickupLine>? pickupLines,
     Map<String, List<String>>? unavailableItems,
     List<ReservationItem>? cartItems,
+    bool offline = false,
   }) {
     if (reservations != null) _reservations = reservations;
     if (selected != null) {
@@ -472,7 +507,7 @@ class ReservationProvider extends ChangeNotifier {
     }
     _isLoading = false;
     _error = null;
-    _isOffline = false;
+    _isOffline = offline;
     notifyListeners();
   }
 }
