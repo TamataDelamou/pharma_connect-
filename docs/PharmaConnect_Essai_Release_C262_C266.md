@@ -1,7 +1,7 @@
 # PharmaConnect — Essai court de la version « release » (C262 à C267)
 
 **Pour qui :** Achille, avec les deux téléphones et les comptes de l'essai du lot 3.
-**État :** guide préparé le 14/10/2026, avant la construction de la version. Rien n'a encore été joué sur un téléphone.
+**État :** guide préparé le 14/10/2026 ; version construite le 14/10/2026 (`PharmaConnect-release-45948e0.apk`). Rien n'a encore été joué sur un téléphone.
 **Durée :** environ 40 minutes, migration comprise.
 **But :** reprouver sur appareil C262 (remise bloquée), C263 (aucun message technique), C264 (QR code immédiat hors connexion), C265 (tuiles, textes et contrastes), C266 (catalogue) et C267 (montants « 1 575 GNF »), mode avion compris ; puis appliquer la migration C262 en production.
 
@@ -17,6 +17,8 @@
 
 **En cas d'écart :** une capture, l'heure, le téléphone (A ou B) et le compte. Notez, puis continuez si l'étape suivante n'en dépend pas.
 
+**Stock de Paracétamol : 4 boîtes au départ, 1 à la fin.** L'essai en consomme 3 (une réservation retirée, deux ventes au comptoir) dans l'officine TEST. **Aucune vente ni réservation de Paracétamol hors des étapes de ce guide**, sur aucun des deux téléphones, entre le début et la fin de l'essai : sinon le contrôle de la section 8 ne tient plus. Si le stock de départ n'est pas de 4, notez-le et prévenez-moi avant de commencer.
+
 | Élément | Rôle |
 |---|---|
 | Téléphone A | l'officine : compte « pharmacien », puis compte « admin » à la section 6 |
@@ -26,7 +28,7 @@
 
 ## 1. Installation
 
-1. Copiez `PharmaConnect-release-<commit>.apk` sur les deux téléphones et installez-le par-dessus la version actuelle.
+1. Copiez `PharmaConnect-release-45948e0.apk` (117,5 Mo, construit depuis `main` au commit `45948e0`, fichier `build/app/outputs/flutter-apk/PharmaConnect-release-45948e0.apk`) sur les deux téléphones et installez-le par-dessus la version actuelle.
 2. **Vous devez voir :** le tableau de bord (ou l'écran « Connexion », puis le tableau de bord après le code reçu par e-mail).
 
 ---
@@ -39,7 +41,7 @@
 
 - Les quatre tuiles sous « Historique » en **grille 2 × 2** : « Produits », « Unités », « Stock faible », « Ruptures », **titres entiers**, **une seule icône** par tuile.
 - Dans la liste, des noms de produits sur deux lignes au plus ; les lignes « Stock : … » et « Réservés : … » lisibles.
-- **Notez le stock de Paracétamol** (4 boîtes attendues après l'essai du 12-13/10, 0 réservée) : il sert au contrôle de la section 8.
+- **Vérifiez le stock de Paracétamol : 4 boîtes, 0 réservée** (après l'essai du 12-13/10). S'il est différent, notez-le et prévenez-moi avant d'aller plus loin.
 
 2. Menu ☰ → « Ouverture de caisse ». Si une caisse est ouverte, fermez-la (solde réel = solde attendu affiché). Ouvrez la caisse avec un fonds saisi `10 000` (avec l'espace : C267, la saisie doit être acceptée).
 
@@ -144,7 +146,7 @@ where p.oid = 'public.pos_create_sale(uuid,text,integer,integer,integer,integer,
 ## 8. Fermeture de la caisse et stock
 
 1. Téléphone A, « Ouverture de caisse ». **Vous devez voir :** « Solde attendu **14 650 GNF** » (10 000 + 1 575 + 1 500 + 1 575), le même chiffre dans le message de fermeture. Fermez en saisissant `14 650` (avec l'espace). **Vous devez voir :** écart 0.
-2. « Stock & Lots » : Paracétamol **3 boîtes de moins** qu'au départ (section 2), 0 réservée : une réservation retirée et deux ventes au comptoir.
+2. « Stock & Lots » : Paracétamol **1 boîte**, 0 réservée (4 au départ, moins une réservation retirée et deux ventes au comptoir).
 
 ---
 
@@ -167,5 +169,5 @@ where p.oid = 'public.pos_create_sale(uuid,text,integer,integer,integer,integer,
 | 13 | Requête de contrôle après migration conforme | C262 | |
 | 14 | Vente sans remise acceptée après migration | C262 | |
 | 15 | Solde attendu 14 650, fermeture à écart 0 | C258 | |
-| 16 | Stock : 3 boîtes de moins, 0 réservée | stock | |
+| 16 | Stock de Paracétamol : 1 boîte à la fin (4 au départ), 0 réservée | stock | |
 | 17 | Montants avec séparateur des milliers (« 10 000 GNF ») ; saisie « 10 000 » et « 14 650 » acceptée | C267 | |
