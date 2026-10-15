@@ -25,9 +25,10 @@ class DangerButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isInteractive = !isDisabled && !isLoading && onPressed != null;
 
-    return SizedBox(
+    // C272 : hauteur minimale, plus fixe : libellé sur deux lignes au plus.
+    return Container(
       width: width,
-      height: 50,
+      constraints: const BoxConstraints(minHeight: 50),
       child: ElevatedButton(
         onPressed: isInteractive ? onPressed : null,
         style: ElevatedButton.styleFrom(
@@ -41,7 +42,11 @@ class DangerButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(PharmaConnectSpacing.radiusMd),
           ),
           elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+          // C272 : hauteur exacte pour un libellé sur une ligne (sans la marge
+          // de 48 px du doigt, qui agrandissait les boutons plus bas).
+          minimumSize: const Size(0, 50),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         ),
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 200),
@@ -63,12 +68,17 @@ class DangerButton extends StatelessWidget {
                       Icon(icon, size: 20),
                       const SizedBox(width: 10),
                     ],
-                    Text(
-                      label,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        height: 1.0,
+                    Flexible(
+                      child: Text(
+                        label,
+                        maxLines: 2,
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          height: 1.0,
+                        ),
                       ),
                     ),
                   ],

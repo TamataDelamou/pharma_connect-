@@ -23,9 +23,10 @@ class SecondaryButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isInteractive = !isDisabled && onPressed != null;
 
-    return SizedBox(
+    // C272 : hauteur minimale, plus fixe : libellé sur deux lignes au plus.
+    return Container(
       width: width,
-      height: 50,
+      constraints: const BoxConstraints(minHeight: 50),
       child: OutlinedButton(
         onPressed: isInteractive ? onPressed : null,
         style: OutlinedButton.styleFrom(
@@ -42,7 +43,11 @@ class SecondaryButton extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(PharmaConnectSpacing.radiusMd),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+          // C272 : hauteur exacte pour un libellé sur une ligne (sans la marge
+          // de 48 px du doigt, qui agrandissait les boutons plus bas).
+          minimumSize: const Size(0, 50),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -56,6 +61,8 @@ class SecondaryButton extends StatelessWidget {
             Flexible(
               child: Text(
                 label,
+                maxLines: 2,
+                textAlign: TextAlign.center,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   fontSize: 16,
