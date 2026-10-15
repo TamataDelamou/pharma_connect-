@@ -99,8 +99,10 @@ List<SidebarNavigationItem> appMenuFor(
 }) {
   // C239 : « Livraisons » masqué pendant le pilote (retrait à l'officine
   // seulement).
+  // C270 : « Objectifs santé » masqué pendant le pilote.
   bool visible(SidebarNavigationItem item) =>
       (PilotConfig.reservationDelivery || item.route != '/deliveries') &&
+      (PilotConfig.healthGoals || item.route != '/healthrecord/goals') &&
       (role != UserRole.patient || item.route != '/stock');
   final items = appMenuItems.where(visible).toList();
   if (role == UserRole.pharmacien) items.addAll(pharmacyMenuItems);

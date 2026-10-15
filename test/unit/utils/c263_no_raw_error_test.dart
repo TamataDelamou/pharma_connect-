@@ -124,8 +124,9 @@ void main() {
     );
     // C270 : le catalogue y manquait.
     expect(modules, contains('catalog'));
-    // « Objectifs santé » est dans le menu pendant le pilote.
-    expect(modules, contains('healthrecord'));
+    // « Objectifs santé » est masqué pendant le pilote (décision d'Achille
+    // du 15/10/2026) : son module sort du garde-fou.
+    expect(modules.contains('healthrecord'), PilotConfig.healthGoals);
     // « Livraisons » est masqué pendant le pilote (C239).
     expect(modules.contains('delivery'), PilotConfig.reservationDelivery);
   });

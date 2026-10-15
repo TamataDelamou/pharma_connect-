@@ -42,6 +42,11 @@ class PilotConfig {
   // (`ReservationService.getAvailableTimeSlots`), aucune table de créneaux.
   static const bool reservationTimeslots = false;
 
+  // ===== Dossier de santé =====
+  // Entrée « Objectifs santé » du menu (/healthrecord/goals) : hors du
+  // parcours du pilote, décision d'Achille du 15/10/2026 (registre, C270).
+  static const bool healthGoals = false;
+
   // ===== Fonctions « IA » simulées (registre, A36) =====
   // Prévision de la demande : bouton de l'écran des alertes de stock (les
   // routes /stock/forecast et /analytics/forecast sont déjà retirées, C188).
