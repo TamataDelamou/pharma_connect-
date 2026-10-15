@@ -1,12 +1,7 @@
-# C248 : google_mlkit_text_recognition référence les reconnaisseurs chinois,
-# devanagari, japonais et coréen, qui ne sont pas embarqués : l'application
-# ne demande que l'alphabet latin (lecture des ordonnances). Sans ces règles,
-# la réduction du code (R8) échoue sur ces classes absentes.
--dontwarn com.google.mlkit.vision.text.chinese.ChineseTextRecognizerOptions
--dontwarn com.google.mlkit.vision.text.chinese.ChineseTextRecognizerOptions$Builder
--dontwarn com.google.mlkit.vision.text.devanagari.DevanagariTextRecognizerOptions
--dontwarn com.google.mlkit.vision.text.devanagari.DevanagariTextRecognizerOptions$Builder
--dontwarn com.google.mlkit.vision.text.japanese.JapaneseTextRecognizerOptions
--dontwarn com.google.mlkit.vision.text.japanese.JapaneseTextRecognizerOptions$Builder
--dontwarn com.google.mlkit.vision.text.korean.KoreanTextRecognizerOptions
--dontwarn com.google.mlkit.vision.text.korean.KoreanTextRecognizerOptions$Builder
+# Règles de réduction du code (R8) propres au projet.
+#
+# C248 : huit règles -dontwarn y figuraient pour les reconnaisseurs de texte
+# chinois, devanagari, japonais et coréen de google_mlkit_text_recognition.
+# C269 : cette bibliothèque est retirée de la version pilote ; les règles sont
+# retirées avec elle. Le fichier reste déclaré dans build.gradle.kts pour les
+# règles à venir.

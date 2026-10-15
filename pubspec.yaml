@@ -51,7 +51,6 @@ dependencies:
   # SCAN & CAMÉRA (QR Code réservations + OCR)
   mobile_scanner: ^7.4.0
   qr_flutter: ^4.1.0
-  google_mlkit_text_recognition: ^0.17.1
 
   # IMAGES & PARTAGE
   cached_network_image: ^3.3.0

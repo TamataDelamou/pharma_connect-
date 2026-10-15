@@ -1,18 +1,20 @@
-import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+import '../../../core/services/text_recognition.dart';
 import '../../catalog/services/catalog_service.dart';
 import '../models/prescription_item.dart';
 
 class OcrService {
-  final TextRecognizer _recognizer = TextRecognizer(
-    script: TextRecognitionScript.latin,
-  );
+  // C269 : plus de bibliothèque de reconnaissance de texte dans la version
+  // pilote : lecture indisponible par défaut (voir text_recognition.dart).
+  final TextRecognizerPort _recognizer;
+
+  OcrService({TextRecognizerPort? recognizer})
+    : _recognizer = recognizer ?? const UnavailableTextRecognizer();
+
   final CatalogService _catalogService = CatalogService();
 
   Future<Map<String, dynamic>> extractFromImage(String imagePath) async {
     try {
-      final inputImage = InputImage.fromFilePath(imagePath);
-      final recognized = await _recognizer.processImage(inputImage);
-      final text = recognized.text;
+      final text = await _recognizer.readText(imagePath);
 
       // Parser le texte extrait pour en extraire les médicaments
       final items = _parsePrescriptionText(text);
@@ -30,9 +32,7 @@ class OcrService {
     }
   }
 
-  void dispose() {
-    _recognizer.close();
-  }
+  void dispose() {}
 
   /// Suggère des noms de médicaments du catalogue proches de [wrongName],
   /// pour corriger une erreur de reconnaissance OCR.

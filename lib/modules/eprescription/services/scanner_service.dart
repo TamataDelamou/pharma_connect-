@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:image_picker/image_picker.dart';
-import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+import '../../../core/services/text_recognition.dart';
 import 'package:pharma_connect/core/services/supabase_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show FileOptions;
 import 'package:uuid/uuid.dart';
@@ -10,6 +10,13 @@ import '../models/eprescription_item.dart';
 import 'eprescription_service.dart';
 
 class ScannerService {
+  // C269 : plus de bibliothèque de reconnaissance de texte dans la version
+  // pilote : lecture indisponible par défaut (voir text_recognition.dart).
+  final TextRecognizerPort _recognizer;
+
+  ScannerService({TextRecognizerPort? recognizer})
+    : _recognizer = recognizer ?? const UnavailableTextRecognizer();
+
   final _client = SupabaseService().client;
   final _uuid = const Uuid();
   final _imagePicker = ImagePicker();
@@ -106,32 +113,10 @@ class ScannerService {
   }
 
   Future<Map<String, dynamic>> _performOCR(XFile image) async {
-    final inputImage = InputImage.fromFilePath(image.path);
-    // PRE-4 (audit Module 25, Étape 2/3, 30/08/2026) : `GoogleMlKit.vision`
-    // appartient au paquet agrégateur `google_ml_kit`, jamais déclaré dans
-    // `pubspec.yaml` (vérifié directement sur le fichier) — seul le paquet
-    // scopé `google_mlkit_text_recognition` (importé ci-dessus) est présent,
-    // qui expose directement la classe `TextRecognizer`. Corrigé par l'appel
-    // direct au constructeur réellement fourni par ce paquet.
-    final textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
-    final RecognizedText recognizedText = await textRecognizer.processImage(
-      inputImage,
-    );
-    await textRecognizer.close();
-
-    return {
-      'text': recognizedText.text,
-      'blocks': recognizedText.blocks
-          .map(
-            (block) => {
-              'text': block.text,
-              'corner_points': block.cornerPoints
-                  .map((p) => {'x': p.x, 'y': p.y})
-                  .toList(),
-            },
-          )
-          .toList(),
-    };
+    // C269 : lecture par le contrat [TextRecognizerPort] ; sans bibliothèque
+    // (version pilote), un refus lisible est levé.
+    final text = await _recognizer.readText(image.path);
+    return {'text': text, 'blocks': const <Map<String, dynamic>>[]};
   }
 
   List<Map<String, String>> _extractItems(Map<String, dynamic> ocrResult) {
