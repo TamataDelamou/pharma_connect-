@@ -142,7 +142,7 @@ class PrescriptionItemTile extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
-                            color: context.palette.danger,
+                            color: context.palette.onTint(context.palette.danger),
                           ),
                         ),
                       ],
@@ -170,7 +170,7 @@ class PrescriptionItemTile extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w500,
-                            color: context.palette.secondary,
+                            color: context.palette.onTint(context.palette.secondary),
                           ),
                         ),
                       ],

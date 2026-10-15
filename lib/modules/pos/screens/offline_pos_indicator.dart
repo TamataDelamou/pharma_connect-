@@ -60,7 +60,7 @@ class OfflinePOSIndicator extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w500,
-                  color: context.palette.danger,
+                  color: context.palette.onTint(context.palette.danger),
                 ),
               ),
             ),

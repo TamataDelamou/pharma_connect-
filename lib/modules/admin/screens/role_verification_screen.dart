@@ -847,7 +847,7 @@ class _Tag extends StatelessWidget {
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w600,
-          color: color,
+          color: context.palette.onTint(color),
         ),
       ),
     );

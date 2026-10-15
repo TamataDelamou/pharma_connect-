@@ -163,14 +163,17 @@ class _CatalogDetailScreenState extends State<CatalogDetailScreen> {
                           const SizedBox(height: 12),
                           Divider(color: context.palette.veil(0.12)),
                           const SizedBox(height: 12),
-                          Row(
+                          // C272 : les pastilles passent à la ligne quand la
+                          // place manque (débordement de 73 px à 360 px).
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
                             children: [
                               _buildInfoChip(
                                 product.manufacturer,
                                 Icons.business,
                                 context.palette.textSecondary,
                               ),
-                              const SizedBox(width: 8),
                               _buildInfoChip(
                                 product.isGeneric ? 'Générique' : 'Princeps',
                                 Icons.local_pharmacy,
@@ -178,7 +181,6 @@ class _CatalogDetailScreenState extends State<CatalogDetailScreen> {
                                     ? context.palette.secondary
                                     : context.palette.primary,
                               ),
-                              const SizedBox(width: 8),
                               _buildInfoChip(
                                 product.isPrescriptionRequired
                                     ? 'Sur ordonnance'
@@ -188,14 +190,12 @@ class _CatalogDetailScreenState extends State<CatalogDetailScreen> {
                                     ? context.palette.warning
                                     : context.palette.success,
                               ),
-                              if (product.isControlledSubstance) ...[
-                                const SizedBox(width: 8),
+                              if (product.isControlledSubstance)
                                 _buildInfoChip(
                                   'Stupéfiant/Psychotrope',
                                   Icons.warning_amber_rounded,
                                   context.palette.danger,
                                 ),
-                              ],
                             ],
                           ),
                           if (product.description != null) ...[
@@ -207,45 +207,42 @@ class _CatalogDetailScreenState extends State<CatalogDetailScreen> {
                           ],
                           const SizedBox(height: 16),
                           // ========== BOUTONS D'ACTION ==========
-                          Row(
+                          // C272 : en largeur téléphone, les boutons passent
+                          // l'un sous l'autre ; côte à côte, « Vérifier la
+                          // disponibilité » était coupé.
+                          ResponsiveActions(
                             children: [
-                              Expanded(
-                                child: PrimaryButton(
-                                  label: 'Vérifier la disponibilité',
-                                  icon: Icons.search,
-                                  onPressed: () {
-                                    context.push('/product/${product.id}');
-                                  },
-                                ),
+                              PrimaryButton(
+                                label: 'Vérifier la disponibilité',
+                                icon: Icons.search,
+                                onPressed: () {
+                                  context.push('/product/${product.id}');
+                                },
                               ),
-                              if (isPharmacyRole) ...[
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: OutlinedButton.icon(
-                                    onPressed: () {
-                                      context.push(
-                                        '/stock/adjust/${product.id}',
-                                        extra: product.name,
-                                      );
-                                    },
-                                    icon: const Icon(Icons.inventory),
-                                    label: const Text('Gérer le stock'),
-                                    style: OutlinedButton.styleFrom(
-                                      side: BorderSide(
-                                        color: context.palette.veil(0.24),
-                                      ),
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 14,
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(
-                                          PharmaConnectSpacing.radiusMd,
-                                        ),
+                              if (isPharmacyRole)
+                                OutlinedButton.icon(
+                                  onPressed: () {
+                                    context.push(
+                                      '/stock/adjust/${product.id}',
+                                      extra: product.name,
+                                    );
+                                  },
+                                  icon: const Icon(Icons.inventory),
+                                  label: const Text('Gérer le stock'),
+                                  style: OutlinedButton.styleFrom(
+                                    side: BorderSide(
+                                      color: context.palette.veil(0.24),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 14,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(
+                                        PharmaConnectSpacing.radiusMd,
                                       ),
                                     ),
                                   ),
                                 ),
-                              ],
                             ],
                           ),
                         ],
@@ -279,7 +276,7 @@ class _CatalogDetailScreenState extends State<CatalogDetailScreen> {
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w500,
-              color: color,
+              color: context.palette.onTint(color),
             ),
           ),
         ],

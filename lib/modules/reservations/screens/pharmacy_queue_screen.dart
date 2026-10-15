@@ -374,7 +374,7 @@ class _QueueEntryCard extends StatelessWidget {
                   '#$position',
                   style: TextStyle(
                     fontWeight: FontWeight.w700,
-                    color: statusColor,
+                    color: context.palette.onTint(statusColor),
                     fontSize: 12,
                   ),
                 ),

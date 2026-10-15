@@ -124,13 +124,18 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                                       item.product.genericName,
                                       style: context.text.body2,
                                     ),
-                                    Row(
+                                    // C272 : l'état passe sous le dosage et
+                                    // la forme quand la place manque.
+                                    Wrap(
+                                      spacing: 12,
+                                      runSpacing: 4,
+                                      crossAxisAlignment:
+                                          WrapCrossAlignment.center,
                                       children: [
                                         Text(
                                           '${item.product.dosage} • ${item.product.form}',
                                           style: context.text.micro,
                                         ),
-                                        const SizedBox(width: 12),
                                         StockStatusChip(
                                           status: item.status,
                                           showLabel: true,
@@ -191,11 +196,16 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                             ],
                           ),
                           const SizedBox(height: 8),
+                          // C272 : seuils l'un sous l'autre (côte à côte,
+                          // débordement avec une police agrandie).
                           Row(
                             children: [
                               Text('Seuil bas : ', style: context.text.label),
                               Text('${item.thresholdLow}'),
-                              const SizedBox(width: 16),
+                            ],
+                          ),
+                          Row(
+                            children: [
                               Text(
                                 'Seuil critique : ',
                                 style: context.text.label,

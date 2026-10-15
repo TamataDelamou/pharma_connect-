@@ -1,3 +1,4 @@
+import 'button_label.dart';
 import 'package:flutter/material.dart';
 
 import '../../theme/spacing.dart';
@@ -23,9 +24,10 @@ class SecondaryButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isInteractive = !isDisabled && onPressed != null;
 
-    return SizedBox(
+    // C272 : hauteur minimale, plus fixe : libellé sur deux lignes au plus.
+    return Container(
       width: width,
-      height: 50,
+      constraints: const BoxConstraints(minHeight: 50),
       child: OutlinedButton(
         onPressed: isInteractive ? onPressed : null,
         style: OutlinedButton.styleFrom(
@@ -42,7 +44,11 @@ class SecondaryButton extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(PharmaConnectSpacing.radiusMd),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+          // C272 : hauteur exacte pour un libellé sur une ligne (sans la marge
+          // de 48 px du doigt, qui agrandissait les boutons plus bas).
+          minimumSize: const Size(0, 50),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -53,19 +59,15 @@ class SecondaryButton extends StatelessWidget {
             ],
             // C253 : libellé souple, comme PrimaryButton. Sans cela, un bouton
             // plus étroit que son libellé débordait.
-            // C268 : un libellé de bouton n'est jamais coupé : il rétrécit
-            // s'il ne tient pas (police agrandie).
+            // C268, C272 : deux lignes au plus, jamais « … » ; rétrécit
+            // seulement si deux lignes ne suffisent pas.
             Flexible(
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    height: 1.0,
-                  ),
+              child: ButtonLabel(
+                label,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  height: 1.0,
                 ),
               ),
             ),
