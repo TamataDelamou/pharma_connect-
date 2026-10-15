@@ -123,7 +123,11 @@ class _CatalogListScreenState extends State<CatalogListScreen> {
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => provider.loadCatalog(),
+              // C271 : réessayer garde la catégorie et la recherche en cours.
+              onPressed: () => provider.loadCatalog(
+                categoryId: provider.selectedCategoryId,
+                searchQuery: provider.searchQuery,
+              ),
               child: const Text('Réessayer'),
             ),
           ],

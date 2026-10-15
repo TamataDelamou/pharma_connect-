@@ -6,7 +6,11 @@ import '../models/manufacturer.dart';
 import '../services/catalog_service.dart';
 
 class CatalogProvider extends ChangeNotifier {
-  final CatalogService _service = CatalogService();
+  final CatalogService _service;
+
+  /// [service] : remplaçable dans les tests.
+  CatalogProvider({CatalogService? service})
+    : _service = service ?? CatalogService();
 
   List<Product> _products = [];
   List<Category> _categories = [];
@@ -16,6 +20,8 @@ class CatalogProvider extends ChangeNotifier {
   String? _error;
   String? _selectedCategoryId;
   String? _searchQuery;
+  bool _isDetailLoading = false;
+  String? _detailError;
 
   // Getters
   List<Product> get products => _products;
@@ -26,6 +32,8 @@ class CatalogProvider extends ChangeNotifier {
   String? get error => _error;
   String? get selectedCategoryId => _selectedCategoryId;
   String? get searchQuery => _searchQuery;
+  bool get isDetailLoading => _isDetailLoading;
+  String? get detailError => _detailError;
 
   // ==================== CHARGEMENT ====================
 
@@ -70,18 +78,22 @@ class CatalogProvider extends ChangeNotifier {
     }
   }
 
+  /// C271 : la fiche produit a son propre état de chargement et d'erreur.
+  /// Elle levait `isLoading`, celui de la liste : la liste, restée ouverte
+  /// sous la fiche, était remplacée par la roue de chargement et revenait en
+  /// haut au retour.
   Future<void> loadProductDetail(String id) async {
-    _isLoading = true;
-    _error = null;
+    _isDetailLoading = true;
+    _detailError = null;
     notifyListeners();
 
     try {
       _selectedProduct = await _service.getProduct(id);
     } catch (e) {
-      _error = userMessage(e);
+      _detailError = userMessage(e);
     }
 
-    _isLoading = false;
+    _isDetailLoading = false;
     notifyListeners();
   }
 
@@ -112,6 +124,11 @@ class CatalogProvider extends ChangeNotifier {
 
   void clearError() {
     _error = null;
+    notifyListeners();
+  }
+
+  void clearDetailError() {
+    _detailError = null;
     notifyListeners();
   }
 }
