@@ -53,7 +53,8 @@ class _CatalogDetailScreenState extends State<CatalogDetailScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Erreur : ${provider.error}',
+                provider.error!,
+                textAlign: TextAlign.center,
                 style: context.text.body2.copyWith(
                   color: context.palette.danger,
                 ),

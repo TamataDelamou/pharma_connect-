@@ -63,7 +63,7 @@ class _PrescriptionDetailScreenState extends State<PrescriptionDetailScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Text(
-                  'Erreur : ${provider.error}',
+                  provider.error!,
                   style: context.text.body2.copyWith(
                     color: context.palette.danger,
                   ),

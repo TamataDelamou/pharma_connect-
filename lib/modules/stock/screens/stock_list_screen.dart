@@ -206,7 +206,7 @@ class _StockListScreenState extends State<StockListScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'Erreur : ${provider.error}',
+              provider.error!,
               style: context.text.body2.copyWith(color: context.palette.danger),
             ),
             const SizedBox(height: 16),

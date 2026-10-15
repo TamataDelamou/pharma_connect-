@@ -1,3 +1,4 @@
+import 'package:pharma_connect/core/utils/user_message.dart';
 import 'package:flutter/material.dart';
 import '../models/preventive_alert.dart';
 import '../models/preventive_alert_history.dart';
@@ -26,7 +27,7 @@ class PreventiveAlertProvider extends ChangeNotifier {
       _alerts = await _service.getPatientAlerts(patientId);
       _history = await _service.getAlertHistory(patientId);
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
     }
     _isLoading = false;
     notifyListeners();
@@ -39,7 +40,7 @@ class PreventiveAlertProvider extends ChangeNotifier {
     try {
       _selectedAlert = await _service.getAlert(id);
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
     }
     _isLoading = false;
     notifyListeners();
@@ -64,7 +65,7 @@ class PreventiveAlertProvider extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       _isLoading = false;
       notifyListeners();
       return false;
@@ -83,7 +84,7 @@ class PreventiveAlertProvider extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       _isLoading = false;
       notifyListeners();
       return false;
@@ -104,7 +105,7 @@ class PreventiveAlertProvider extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       _isLoading = false;
       notifyListeners();
       return false;
@@ -119,7 +120,7 @@ class PreventiveAlertProvider extends ChangeNotifier {
       await _service.checkAndTriggerAlerts(patientId);
       await loadAlerts(patientId);
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
     }
     _isLoading = false;
     notifyListeners();

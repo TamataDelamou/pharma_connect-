@@ -167,7 +167,7 @@ class _ReservationHistoryScreenState extends State<ReservationHistoryScreen>
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            'Erreur : ${provider.error}',
+                            provider.error!,
                             style: context.text.body2.copyWith(
                               color: context.palette.danger,
                             ),

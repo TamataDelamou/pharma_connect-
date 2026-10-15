@@ -261,7 +261,7 @@ class _PharmacyQueueScreenState extends State<PharmacyQueueScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              'Erreur : ${provider.error}',
+                              provider.error!,
                               style: context.text.body2.copyWith(
                                 color: context.palette.danger,
                               ),

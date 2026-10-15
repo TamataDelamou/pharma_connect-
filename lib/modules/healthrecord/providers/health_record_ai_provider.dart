@@ -1,3 +1,4 @@
+import 'package:pharma_connect/core/utils/user_message.dart';
 import 'package:flutter/material.dart';
 import '../models/health_record.dart';
 import '../models/health_record_summary.dart';
@@ -26,7 +27,7 @@ class HealthRecordAIProvider extends ChangeNotifier {
       _isGenerating = false;
       notifyListeners();
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       _isGenerating = false;
       notifyListeners();
     }
@@ -39,7 +40,7 @@ class HealthRecordAIProvider extends ChangeNotifier {
     try {
       _summary = await _service.getLatestSummary(healthRecordId);
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
     }
     _isLoading = false;
     notifyListeners();

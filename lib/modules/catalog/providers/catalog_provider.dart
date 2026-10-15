@@ -1,3 +1,4 @@
+import 'package:pharma_connect/core/utils/user_message.dart';
 import 'package:flutter/material.dart';
 import '../../../shared/models/product.dart';
 import '../models/category.dart';
@@ -42,7 +43,7 @@ class CatalogProvider extends ChangeNotifier {
       _selectedCategoryId = categoryId;
       _searchQuery = searchQuery;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
     }
 
     _isLoading = false;
@@ -54,7 +55,7 @@ class CatalogProvider extends ChangeNotifier {
       _categories = await _service.getCategories();
       notifyListeners();
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       notifyListeners();
     }
   }
@@ -64,7 +65,7 @@ class CatalogProvider extends ChangeNotifier {
       _manufacturers = await _service.getManufacturers();
       notifyListeners();
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       notifyListeners();
     }
   }
@@ -77,7 +78,7 @@ class CatalogProvider extends ChangeNotifier {
     try {
       _selectedProduct = await _service.getProduct(id);
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
     }
 
     _isLoading = false;

@@ -1,3 +1,4 @@
+import 'package:pharma_connect/core/utils/user_message.dart';
 import 'package:flutter/material.dart';
 import '../models/health_goal.dart';
 import '../models/health_milestone.dart';
@@ -25,7 +26,7 @@ class HealthGoalProvider extends ChangeNotifier {
     try {
       _goals = await _service.getGoals(patientId, status: status);
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
     }
     _isLoading = false;
     notifyListeners();
@@ -38,7 +39,7 @@ class HealthGoalProvider extends ChangeNotifier {
     try {
       _selectedGoal = await _service.getGoal(id);
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
     }
     _isLoading = false;
     notifyListeners();
@@ -63,7 +64,7 @@ class HealthGoalProvider extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       _isLoading = false;
       notifyListeners();
       return false;
@@ -81,7 +82,7 @@ class HealthGoalProvider extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       _isLoading = false;
       notifyListeners();
       return false;
@@ -100,7 +101,7 @@ class HealthGoalProvider extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       _isLoading = false;
       notifyListeners();
       return false;
@@ -114,7 +115,7 @@ class HealthGoalProvider extends ChangeNotifier {
     try {
       _milestones = await _service.getMilestones(patientId);
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
     }
     _isLoading = false;
     notifyListeners();
