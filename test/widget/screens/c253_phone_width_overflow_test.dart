@@ -661,11 +661,8 @@ void main() {
       expect(await checkReadability(tester, 'catalogue'), isEmpty);
     });
 
-    // C272 : les deux fiches, chargées avec des données. Relevées en
-    // découverte d'abord (registre, C272), aucune correction avant la
-    // décision d'Achille. En attendant, ils ne tournent qu'en découverte
-    // (`--dart-define=PHONE_DISCOVERY=true`) : à rendre stricts avec la
-    // correction.
+    // C272 : les deux fiches, chargées avec des données (pastilles, état,
+    // seuils, lots, boutons du pharmacien), à 1,0 et à 1,3.
     testWidgets('fiche du catalogue', (tester) async {
       final overflows = await pumpAtPhoneWidth(
         tester,
@@ -685,7 +682,7 @@ void main() {
       expect(find.text(_product.name), findsWidgets);
       expect(overflows, isEmpty);
       expect(await checkReadability(tester, 'fiche du catalogue'), isEmpty);
-    }, skip: !phoneDiscovery);
+    });
 
     testWidgets('fiche d\'un produit en stock', (tester) async {
       final overflows = await pumpAtPhoneWidth(
@@ -702,7 +699,7 @@ void main() {
         await checkReadability(tester, 'fiche d\'un produit en stock'),
         isEmpty,
       );
-    }, skip: !phoneDiscovery);
+    });
 
     testWidgets('tableau de bord de l\'administration', (tester) async {
       final overflows = await pumpAtPhoneWidth(
