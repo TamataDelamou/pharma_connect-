@@ -91,13 +91,18 @@ class StockBatchTile extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 4),
-            Row(
+            // C272 : la quantité passe à la ligne quand la place manque
+            // (débordement de 5,4 px avec une police agrandie) ; la date de
+            // péremption, d'un seul tenant, n'est jamais coupée.
+            Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              spacing: 12,
+              runSpacing: 2,
               children: [
                 Text(
-                  'Péremption : ${_formatDate(batch.expiryDate)}',
+                  'Péremption : ${_formatDate(batch.expiryDate)}',
                   style: context.text.body2,
                 ),
-                const Spacer(),
                 Text(
                   '${batch.quantity} unités',
                   style: context.text.body2.copyWith(
