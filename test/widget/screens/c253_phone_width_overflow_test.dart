@@ -38,11 +38,17 @@ import 'package:pharma_connect/modules/search/models/search_result.dart';
 import 'package:pharma_connect/modules/search/providers/search_provider.dart';
 import 'package:pharma_connect/modules/search/screens/product_detail_screen.dart';
 import 'package:pharma_connect/modules/search/widgets/search_result_card.dart';
+import 'package:pharma_connect/modules/stock/models/stock_batch.dart';
 import 'package:pharma_connect/modules/stock/models/stock_item.dart';
+import 'package:pharma_connect/modules/stock/models/stock_movement.dart';
 import 'package:pharma_connect/modules/stock/providers/stock_provider.dart';
+import 'package:pharma_connect/modules/stock/screens/stock_detail_screen.dart';
 import 'package:pharma_connect/modules/stock/screens/stock_list_screen.dart';
+import 'package:pharma_connect/modules/stock/services/stock_service.dart';
 import 'package:pharma_connect/modules/catalog/providers/catalog_provider.dart';
+import 'package:pharma_connect/modules/catalog/screens/catalog_detail_screen.dart';
 import 'package:pharma_connect/modules/catalog/screens/catalog_list_screen.dart';
+import 'package:pharma_connect/modules/catalog/services/catalog_service.dart';
 import 'package:pharma_connect/modules/admin/providers/admin_provider.dart';
 import 'package:pharma_connect/modules/admin/screens/admin_dashboard_screen.dart';
 import 'package:pharma_connect/routes/app_router.dart';
@@ -306,6 +312,48 @@ class _CatalogProvider extends CatalogProvider {
 
   @override
   Future<void> loadCategories() async {}
+}
+
+/// C272 : fiche du catalogue chargée, avec un produit aux noms longs.
+class _CatalogDetailService extends CatalogService {
+  @override
+  Future<Product> getProduct(String id) async => _product;
+}
+
+/// C272 : fiche d'un produit en stock chargée, avec deux lots.
+class _StockDetailService extends StockService {
+  @override
+  Future<StockItem?> getStockItem(String id) async => StockItem(
+    id: id,
+    pharmacyId: 'ph1',
+    product: _product,
+    batches: [
+      for (final (n, qty, months) in [
+        ('LOT-2026-AMX-000125', 120, 18),
+        ('LOT-2025-AMX-000987', 5, 1),
+      ])
+        StockBatch(
+          id: n,
+          batchNumber: n,
+          manufacturingDate: DateTime(2025, 1, 15),
+          expiryDate: DateTime.now().add(Duration(days: 30 * months)),
+          quantity: qty,
+          purchasePriceInt: 112500,
+          supplierName: 'Laborex Guinée — dépôt de Kaloum',
+          location: 'Réserve, étagère B3',
+        ),
+    ],
+    totalQuantity: 125,
+    reservedQuantity: 3,
+    defaultLocation: 'Réserve, étagère B3',
+  );
+
+  @override
+  Future<List<StockMovement>> getMovements({
+    String? stockItemId,
+    String? batchId,
+    int limit = 50,
+  }) async => [];
 }
 
 /// C265 : chiffres de l'administration posés par le test.
@@ -612,6 +660,49 @@ void main() {
       expect(overflows, isEmpty);
       expect(await checkReadability(tester, 'catalogue'), isEmpty);
     });
+
+    // C272 : les deux fiches, chargées avec des données. Relevées en
+    // découverte d'abord (registre, C272), aucune correction avant la
+    // décision d'Achille. En attendant, ils ne tournent qu'en découverte
+    // (`--dart-define=PHONE_DISCOVERY=true`) : à rendre stricts avec la
+    // correction.
+    testWidgets('fiche du catalogue', (tester) async {
+      final overflows = await pumpAtPhoneWidth(
+        tester,
+        const CatalogDetailScreen(productId: 'p1'),
+        wrap: (app) => MultiProvider(
+          providers: [
+            ChangeNotifierProvider<AuthProvider>.value(
+              value: _pharmacist()..setRole(UserRole.pharmacien),
+            ),
+            ChangeNotifierProvider<CatalogProvider>.value(
+              value: CatalogProvider(service: _CatalogDetailService()),
+            ),
+          ],
+          child: app,
+        ),
+      );
+      expect(find.text(_product.name), findsWidgets);
+      expect(overflows, isEmpty);
+      expect(await checkReadability(tester, 'fiche du catalogue'), isEmpty);
+    }, skip: !phoneDiscovery);
+
+    testWidgets('fiche d\'un produit en stock', (tester) async {
+      final overflows = await pumpAtPhoneWidth(
+        tester,
+        const StockDetailScreen(stockId: 's1'),
+        wrap: (app) => ChangeNotifierProvider<StockProvider>.value(
+          value: StockProvider(service: _StockDetailService()),
+          child: app,
+        ),
+      );
+      expect(find.text(_product.name), findsWidgets);
+      expect(overflows, isEmpty);
+      expect(
+        await checkReadability(tester, 'fiche d\'un produit en stock'),
+        isEmpty,
+      );
+    }, skip: !phoneDiscovery);
 
     testWidgets('tableau de bord de l\'administration', (tester) async {
       final overflows = await pumpAtPhoneWidth(
