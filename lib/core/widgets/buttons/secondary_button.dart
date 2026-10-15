@@ -53,14 +53,19 @@ class SecondaryButton extends StatelessWidget {
             ],
             // C253 : libellé souple, comme PrimaryButton. Sans cela, un bouton
             // plus étroit que son libellé débordait.
+            // C268 : un libellé de bouton n'est jamais coupé : il rétrécit
+            // s'il ne tient pas (police agrandie).
             Flexible(
-              child: Text(
-                label,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  height: 1.0,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    height: 1.0,
+                  ),
                 ),
               ),
             ),

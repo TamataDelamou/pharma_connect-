@@ -242,6 +242,10 @@ class _StockListScreenState extends State<StockListScreen> {
       itemCount: provider.stockItems.length,
       itemBuilder: (context, index) {
         final item = provider.stockItems[index];
+        // C268 : en largeur téléphone, la pastille d'état passe sous les
+        // quantités ; à droite, elle laissait trop peu de place au nom du
+        // produit avec une police agrandie (mot coupé en deux).
+        final compact = isCompactWidth(context);
         return Padding(
           padding: const EdgeInsets.only(bottom: 8),
           child: GlassCard(
@@ -303,11 +307,16 @@ class _StockListScreenState extends State<StockListScreen> {
                           ),
                         ],
                       ),
+                      if (compact) ...[
+                        const SizedBox(height: 6),
+                        StockStatusChip(status: item.status, showLabel: true),
+                      ],
                     ],
                   ),
                 ),
                 // Statut
-                StockStatusChip(status: item.status, showLabel: true),
+                if (!compact)
+                  StockStatusChip(status: item.status, showLabel: true),
               ],
             ),
           ),

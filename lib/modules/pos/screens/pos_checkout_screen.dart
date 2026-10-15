@@ -268,14 +268,9 @@ class _POSCheckoutScreenState extends State<POSCheckoutScreen> {
         Container(
           decoration: BoxDecoration(
             color: context.palette.surface,
+            // C268 : trait du haut sans ombre : l'ombre assombrissait la
+            // ligne posée juste au-dessus (« Total » à 3,97:1).
             border: Border(top: BorderSide(color: context.palette.border)),
-            boxShadow: [
-              BoxShadow(
-                color: context.palette.shadow,
-                blurRadius: 12,
-                offset: const Offset(0, -2),
-              ),
-            ],
           ),
           child: SafeArea(
             top: false,

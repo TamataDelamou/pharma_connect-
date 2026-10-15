@@ -120,6 +120,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                   // Rôle
                   DropdownButtonFormField<UserRole>(
+                    // C268 : libellé du rôle sur toute la largeur du champ.
+                    isExpanded: true,
                     initialValue: _selectedRole,
                     dropdownColor: context.palette.background,
                     style: context.text.body1,
@@ -311,8 +313,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     },
                   ),
                   const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  // C268 : passe à la ligne avec une police agrandie.
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text('Déjà un compte ?', style: context.text.body2),
                       TertiaryButton(

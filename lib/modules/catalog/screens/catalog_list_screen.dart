@@ -158,11 +158,15 @@ class _CatalogListScreenState extends State<CatalogListScreen> {
     // colonnes ne laissaient à 360 px qu'une centaine de pixels par carte :
     // le nom du produit, à la même taille que dans « Stock & Lots », était
     // coupé lettre par lettre et le contenu dépassait la carte.
+    // C268 : avec une police agrandie, une seule colonne, plus haute : sur
+    // deux colonnes, le nom d'un produit ne tenait plus et était coupé au
+    // milieu d'un mot.
+    final textScale = MediaQuery.textScalerOf(context).scale(16) / 16;
     return GridView.builder(
       gridDelegate: isCompactWidth(context)
-          ? const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              mainAxisExtent: 290,
+          ? SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: textScale > 1.15 ? 1 : 2,
+              mainAxisExtent: 290 * textScale,
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
             )
