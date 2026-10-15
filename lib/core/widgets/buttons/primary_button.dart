@@ -74,14 +74,19 @@ class PrimaryButton extends StatelessWidget {
                       Icon(icon, size: 20),
                       const SizedBox(width: 10),
                     ],
+                    // C268 : un libellé de bouton n'est jamais coupé : il
+                    // rétrécit s'il ne tient pas (police agrandie).
                     Flexible(
-                      child: Text(
-                        label,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: fontSize,
-                          fontWeight: FontWeight.w600,
-                          height: 1.0,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          label,
+                          maxLines: 1,
+                          style: TextStyle(
+                            fontSize: fontSize,
+                            fontWeight: FontWeight.w600,
+                            height: 1.0,
+                          ),
                         ),
                       ),
                     ),

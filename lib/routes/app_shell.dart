@@ -136,12 +136,12 @@ class _AppShellState extends State<AppShell> {
                 onPressed: () => goBack(context),
               )
             : null,
-        title: Text(
-          title,
-          style: context.text.heading3,
-          maxLines: 1, // C233 : une seule ligne, coupée avec « … ».
-          softWrap: false,
-          overflow: TextOverflow.ellipsis,
+        // C268 : une seule ligne ; un titre trop long rétrécit au lieu d'être
+        // coupé par « … » (police agrandie).
+        title: FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(title, style: context.text.heading3, maxLines: 1),
         ),
         actions: [
           Builder(

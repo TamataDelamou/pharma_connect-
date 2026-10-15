@@ -137,26 +137,36 @@ class _POSReceiptScreenState extends State<POSReceiptScreen> {
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 4,
                                 ),
-                                child: Row(
+                                // C268 : le nom du produit sur toute la
+                                // largeur, quantité et montants en dessous.
+                                // À côté des montants, il n'avait plus que
+                                // quelques pixels : une lettre par ligne.
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Expanded(
-                                      flex: 2,
-                                      child: Text(
-                                        item.productName,
-                                        style: context.text.body2,
-                                      ),
-                                    ),
                                     Text(
-                                      '${item.quantity} x ${CurrencyFormatter.format(item.unitPrice)}',
-                                      style: context.text.micro,
+                                      item.productName,
+                                      style: context.text.body2,
                                     ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      CurrencyFormatter.format(item.totalPrice),
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        color: context.palette.primary,
-                                      ),
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            '${item.quantity} x ${CurrencyFormatter.format(item.unitPrice)}',
+                                            style: context.text.micro,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          CurrencyFormatter.format(
+                                            item.totalPrice,
+                                          ),
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            color: context.palette.primary,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),

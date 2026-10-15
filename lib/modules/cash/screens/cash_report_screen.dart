@@ -108,27 +108,48 @@ class _CashReportScreenState extends State<CashReportScreen> {
             ),
             const SizedBox(height: 16),
 
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
+            // C268 : en largeur téléphone, les deux dates l'une sous l'autre ;
+            // côte à côte, une date était coupée en deux avec une police
+            // agrandie.
+            if (isCompactWidth(context))
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  OutlinedButton.icon(
                     onPressed: () => _pickDate(isFrom: true),
                     icon: const Icon(Icons.calendar_today, size: 16),
-                    label: Text(_formatDate(_fromDate)),
+                    label: Text('Du ${_formatDate(_fromDate)}'),
                   ),
-                ),
-                const SizedBox(width: 8),
-                const Text('→'),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: OutlinedButton.icon(
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(
                     onPressed: () => _pickDate(isFrom: false),
                     icon: const Icon(Icons.calendar_today, size: 16),
-                    label: Text(_formatDate(_toDate)),
+                    label: Text('Au ${_formatDate(_toDate)}'),
                   ),
-                ),
-              ],
-            ),
+                ],
+              )
+            else
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => _pickDate(isFrom: true),
+                      icon: const Icon(Icons.calendar_today, size: 16),
+                      label: Text(_formatDate(_fromDate)),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Text('→'),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => _pickDate(isFrom: false),
+                      icon: const Icon(Icons.calendar_today, size: 16),
+                      label: Text(_formatDate(_toDate)),
+                    ),
+                  ),
+                ],
+              ),
             const SizedBox(height: 16),
 
             Expanded(child: _buildContent(provider)),
@@ -213,13 +234,21 @@ class _CashReportScreenState extends State<CashReportScreen> {
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          Text(
-            label,
-            style: isTotal
-                ? context.text.body1.copyWith(fontWeight: FontWeight.w700)
-                : context.text.body2,
+          // C268 : libellé à gauche, qui rétrécit plutôt que de couper un mot ;
+          // le montant reste entier.
+          Expanded(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                label,
+                style: isTotal
+                    ? context.text.body1.copyWith(fontWeight: FontWeight.w700)
+                    : context.text.body2,
+              ),
+            ),
           ),
-          const Spacer(),
+          const SizedBox(width: 8),
           Text(
             CurrencyFormatter.format(value),
             style: isTotal

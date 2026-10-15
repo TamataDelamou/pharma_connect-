@@ -314,7 +314,9 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
           PrimaryButton(
             label: '🟢 Ouvrir la caisse',
             onPressed: () => _showOpenDialog(context, provider),
-            width: 200,
+            // C268 : sur toute la largeur en téléphone ; à 200 px, le libellé
+            // était coupé avec une police agrandie.
+            width: isCompactWidth(context) ? double.infinity : 200,
           ),
         ],
       ),
@@ -338,8 +340,19 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         children: [
-          Text(label, style: isTotal ? context.text.body1 : context.text.body2),
-          const Spacer(),
+          // C268 : libellé à gauche, qui rétrécit plutôt que de couper un mot
+          // (« Remboursements ») ; le montant reste entier.
+          Expanded(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                label,
+                style: isTotal ? context.text.body1 : context.text.body2,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
           Text(
             amount == null ? '—' : CurrencyFormatter.format(amount),
             style: isTotal

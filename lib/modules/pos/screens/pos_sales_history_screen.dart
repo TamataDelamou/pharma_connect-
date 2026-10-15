@@ -301,7 +301,11 @@ class _POSSalesHistoryScreenState extends State<POSSalesHistoryScreen> {
           Expanded(
             child: Column(
               children: [
-                Text('Total ventes', style: context.text.micro),
+                // C268 : un mot entier, qui rétrécit au besoin.
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text('Total ventes', style: context.text.micro),
+                ),
                 Text(
                   '$totalSales',
                   style: TextStyle(
@@ -317,7 +321,11 @@ class _POSSalesHistoryScreenState extends State<POSSalesHistoryScreen> {
           Expanded(
             child: Column(
               children: [
-                Text('CA total', style: context.text.micro),
+                // C268 : un mot entier, qui rétrécit au besoin.
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text('CA total', style: context.text.micro),
+                ),
                 Text(
                   CurrencyFormatter.format(totalRevenue),
                   style: TextStyle(
@@ -333,7 +341,11 @@ class _POSSalesHistoryScreenState extends State<POSSalesHistoryScreen> {
           Expanded(
             child: Column(
               children: [
-                Text('Remboursées', style: context.text.micro),
+                // C268 : un mot entier, qui rétrécit au besoin.
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text('Remboursées', style: context.text.micro),
+                ),
                 Text(
                   '${provider.sales.where((s) => s.status == 'refunded').length}',
                   style: TextStyle(

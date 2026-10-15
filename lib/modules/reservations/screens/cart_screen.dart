@@ -129,7 +129,12 @@ class CartScreen extends StatelessWidget {
                           PrimaryButton(
                             label: 'Rechercher des médicaments',
                             onPressed: () => context.go('/search'),
-                            width: 300,
+                            // C268 : sur toute la largeur en téléphone ; à
+                            // 300 px, le libellé était coupé avec une police
+                            // agrandie.
+                            width: isCompactWidth(context)
+                                ? double.infinity
+                                : 300,
                           ),
                         ],
                       ),

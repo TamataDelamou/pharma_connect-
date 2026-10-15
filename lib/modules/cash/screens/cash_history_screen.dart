@@ -90,7 +90,9 @@ class _CashHistoryScreenState extends State<CashHistoryScreen> {
             ),
             const SizedBox(height: 16),
 
-            Row(
+            // C268 : les puces passent à la ligne avec une police agrandie.
+            Wrap(
+              runSpacing: 8,
               children: [7, 30, 90].map((days) {
                 final selected = _selectedRange == days;
                 return Padding(
