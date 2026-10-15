@@ -25,13 +25,15 @@ void main() {
     });
 
     test(
-      'loadProductDetail() (erreur) avec un id inexistant renseigne error',
+      'loadProductDetail() (erreur) avec un id inexistant renseigne detailError sans toucher à la liste (C271)',
       () async {
         final provider = CatalogProvider();
 
         await provider.loadProductDetail('id-inexistant');
 
-        expect(provider.error, isNotNull);
+        expect(provider.detailError, isNotNull);
+        expect(provider.error, isNull);
+        expect(provider.isDetailLoading, isFalse);
         expect(provider.isLoading, isFalse);
         expect(provider.selectedProduct, isNull);
       },

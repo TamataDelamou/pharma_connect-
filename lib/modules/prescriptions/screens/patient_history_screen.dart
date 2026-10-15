@@ -63,7 +63,7 @@ class PatientHistoryScreen extends StatelessWidget {
                   : provider.error != null && provider.prescriptions.isEmpty
                   ? Center(
                       child: Text(
-                        'Erreur : ${provider.error}',
+                        provider.error!,
                         style: context.text.body2.copyWith(
                           color: context.palette.danger,
                         ),

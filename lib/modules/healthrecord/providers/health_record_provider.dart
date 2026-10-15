@@ -1,3 +1,4 @@
+import 'package:pharma_connect/core/utils/user_message.dart';
 import 'package:flutter/material.dart';
 import '../models/health_record.dart';
 import '../services/health_record_service.dart';
@@ -28,7 +29,7 @@ class HealthRecordProvider extends ChangeNotifier {
     try {
       _records = await _service.getRecordsForPatient(patientId);
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
     }
     _isLoading = false;
     notifyListeners();
@@ -41,7 +42,7 @@ class HealthRecordProvider extends ChangeNotifier {
     try {
       _selectedRecord = await _service.getRecord(id);
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
     }
     _isLoading = false;
     notifyListeners();
@@ -66,7 +67,7 @@ class HealthRecordProvider extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       _isLoading = false;
       notifyListeners();
       return false;
@@ -85,7 +86,7 @@ class HealthRecordProvider extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      _error = e.toString();
+      _error = userMessage(e);
       _isLoading = false;
       notifyListeners();
       return false;

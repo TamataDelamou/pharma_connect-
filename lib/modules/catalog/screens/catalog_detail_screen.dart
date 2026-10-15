@@ -42,18 +42,19 @@ class _CatalogDetailScreenState extends State<CatalogDetailScreen> {
     final isPharmacyRole =
         context.watch<AuthProvider>().effectiveRole == UserRole.pharmacien;
 
-    if (provider.isLoading) {
+    if (provider.isDetailLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    if (provider.error != null) {
+    if (provider.detailError != null) {
       return Scaffold(
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Erreur : ${provider.error}',
+                provider.detailError!,
+                textAlign: TextAlign.center,
                 style: context.text.body2.copyWith(
                   color: context.palette.danger,
                 ),
@@ -61,7 +62,7 @@ class _CatalogDetailScreenState extends State<CatalogDetailScreen> {
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {
-                  provider.clearError();
+                  provider.clearDetailError();
                   provider.loadProductDetail(widget.productId);
                 },
                 child: const Text('Réessayer'),

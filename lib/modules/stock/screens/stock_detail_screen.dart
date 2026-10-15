@@ -31,18 +31,18 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     final provider = context.watch<StockProvider>();
     final item = provider.selectedStockItem;
 
-    if (provider.isLoading) {
+    if (provider.isItemLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    if (provider.error != null || item == null) {
+    if (provider.itemError != null || item == null) {
       return Scaffold(
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                provider.error ?? 'Produit introuvable',
+                provider.itemError ?? 'Produit introuvable',
                 style: context.text.body2.copyWith(
                   color: context.palette.danger,
                 ),

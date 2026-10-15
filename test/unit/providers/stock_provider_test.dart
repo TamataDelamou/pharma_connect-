@@ -38,7 +38,9 @@ void main() {
         await provider.loadStockItem('id-inexistant');
 
         expect(provider.selectedStockItem, isNull);
+        expect(provider.itemError, isNull);
         expect(provider.error, isNull);
+        expect(provider.isItemLoading, isFalse);
         expect(provider.isLoading, isFalse);
       },
     );

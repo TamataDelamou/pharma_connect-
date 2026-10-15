@@ -12,7 +12,11 @@ import '../../../core/services/offline_sync_service.dart';
 import '../../alerts/services/alert_service.dart';
 
 class StockProvider extends ChangeNotifier {
-  final StockService _service = StockService();
+  final StockService _service;
+
+  /// [service] : remplaçable dans les tests.
+  StockProvider({StockService? service}) : _service = service ?? StockService();
+
   final OfflineSyncService _offline = OfflineSyncService();
   final AlertService _alertService = AlertService();
 
@@ -21,6 +25,8 @@ class StockProvider extends ChangeNotifier {
   List<StockMovement> _movements = [];
   bool _isLoading = false;
   String? _error;
+  bool _isItemLoading = false;
+  String? _itemError;
   String? _searchQuery;
   String? _selectedProductId;
   // Directive standing « privilégier le mode hors-ligne » (Module 4, STK) :
@@ -35,6 +41,8 @@ class StockProvider extends ChangeNotifier {
   List<StockMovement> get movements => _movements;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  bool get isItemLoading => _isItemLoading;
+  String? get itemError => _itemError;
   String? get searchQuery => _searchQuery;
   bool get isOffline => _isOffline;
 
@@ -124,9 +132,13 @@ class StockProvider extends ChangeNotifier {
         .toList();
   }
 
+  /// C271 : la fiche d'un produit en stock a son propre état de chargement
+  /// et d'erreur. Elle levait `isLoading`, celui de la liste : « Stock &
+  /// Lots », restée ouverte sous la fiche, était remplacée par la roue de
+  /// chargement et revenait en haut au retour.
   Future<void> loadStockItem(String id) async {
-    _isLoading = true;
-    _error = null;
+    _isItemLoading = true;
+    _itemError = null;
     notifyListeners();
 
     try {
@@ -135,10 +147,10 @@ class StockProvider extends ChangeNotifier {
         _movements = await _service.getMovements(stockItemId: id);
       }
     } catch (e) {
-      _error = userMessage(e);
+      _itemError = userMessage(e);
     }
 
-    _isLoading = false;
+    _isItemLoading = false;
     notifyListeners();
   }
 
