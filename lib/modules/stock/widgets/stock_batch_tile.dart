@@ -62,7 +62,7 @@ class StockBatchTile extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w600,
-                        color: context.palette.danger,
+                        color: context.palette.onTint(context.palette.danger),
                       ),
                     ),
                   ),
@@ -81,9 +81,9 @@ class StockBatchTile extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w600,
-                        // C272 : orange foncé de la palette (3,51:1 avec
-                        // `warning`, sous le seuil de 4,5:1).
-                        color: context.palette.warningStrong,
+                        // C272 : texte de pastille d'état par onTint (C265),
+                        // comme toutes les pastilles d'état.
+                        color: context.palette.onTint(context.palette.warning),
                       ),
                     ),
                   ),

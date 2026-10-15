@@ -276,7 +276,7 @@ class _CatalogDetailScreenState extends State<CatalogDetailScreen> {
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w500,
-              color: color,
+              color: context.palette.onTint(color),
             ),
           ),
         ],

@@ -68,11 +68,11 @@ class ProductCard extends StatelessWidget {
             runSpacing: 4,
             children: [
               if (product.isGeneric)
-                _buildBadge('Générique', context.palette.secondary),
+                _buildBadge(context, 'Générique', context.palette.secondary),
               if (product.isPrescriptionRequired)
-                _buildBadge('Ordonnance', context.palette.warning),
+                _buildBadge(context, 'Ordonnance', context.palette.warning),
               if (!product.isPrescriptionRequired)
-                _buildBadge('Libre', context.palette.success),
+                _buildBadge(context, 'Libre', context.palette.success),
             ],
           ),
           if (showStockIndicator) ...[
@@ -99,7 +99,7 @@ class ProductCard extends StatelessWidget {
                   Text(
                     'Disponible en pharmacie',
                     style: context.text.micro.copyWith(
-                      color: context.palette.success,
+                      color: context.palette.onTint(context.palette.success),
                     ),
                   ),
                 ],
@@ -111,7 +111,7 @@ class ProductCard extends StatelessWidget {
     );
   }
 
-  Widget _buildBadge(String label, Color color) {
+  Widget _buildBadge(BuildContext context, String label, Color color) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
@@ -124,7 +124,7 @@ class ProductCard extends StatelessWidget {
         style: TextStyle(
           fontSize: 9,
           fontWeight: FontWeight.w500,
-          color: color,
+          color: context.palette.onTint(color),
         ),
       ),
     );
