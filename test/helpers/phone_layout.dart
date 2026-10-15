@@ -46,7 +46,13 @@ Future<List<String>> collectOverflows(
   FlutterError.onError = (details) {
     final message = details.exceptionAsString();
     if (message.contains('overflowed')) {
-      overflows.add(message.split('\n').first);
+      // Avec le fichier et la ligne du composant qui déborde.
+      final where = RegExp(
+        r'(lib/[\w/]+\.dart:\d+)',
+      ).firstMatch(details.toString())?.group(1);
+      overflows.add(
+        '${message.split('\n').first}${where == null ? '' : ' ($where)'}',
+      );
     } else if (!ignoreOtherErrors) {
       previous?.call(details);
     }
@@ -108,7 +114,10 @@ Future<List<String>> pumpAtPhoneWidth(
 /// C265 : textes jamais coupés : montants (« GNF ») et dosages (« 500mg »,
 /// « 1g/125mg », « 5 ml », « 100 UI », « 0,5 % »).
 final RegExp neverCut = RegExp(
-  r'GNF|d+([.,]d+)?s?(mg|g|ml|mL|µg|mcg|UI|%)(?![a-zA-Zé])',
+  r'\bGNF\b'
+  r'|\d+([.,]\d+)?\s?(mg|g|ml|mL|µg|mcg|UI|%)(?![a-zA-Zé])'
+  // C268 : les dates rejoignent les textes jamais coupés.
+  r'|\b\d{1,2}/\d{1,2}/\d{2,4}\b',
 );
 
 /// C265 : exclusions du contrôle de contraste, décidées par Achille le
@@ -122,6 +131,32 @@ const List<String> contrastExclusions = [
   'icône décorative d'
       'un écran vide (voile, opacité ≤ 30 %)',
 ];
+
+/// C268 : texte d'un bouton (jamais coupé).
+bool _inButton(Element element) {
+  var found = false;
+  element.visitAncestorElements((ancestor) {
+    if (ancestor.widget is ButtonStyleButton) {
+      found = true;
+      return false;
+    }
+    return true;
+  });
+  return found;
+}
+
+/// C268 : texte posé dans la décoration d'un champ de saisie (texte d'aide).
+bool _inFieldDecoration(Element element) {
+  var found = false;
+  element.visitAncestorElements((ancestor) {
+    if (ancestor.widget is InputDecorator) {
+      found = true;
+      return false;
+    }
+    return true;
+  });
+  return found;
+}
 
 bool _inDisabledButton(Element element) {
   var disabled = false;
@@ -163,9 +198,13 @@ List<String> truncatedTexts(WidgetTester tester) {
     if (!render.didExceedMaxLines) continue;
     final text = render.text.toPlainText().replaceAll('\n', ' ').trim();
     if (text.isEmpty) continue;
+    final protected = neverCut.hasMatch(text) || _inButton(element);
+    // C268 : texte d'aide d'un champ coupé par « … » : permis (décision
+    // d'Achille, 15/10/2026).
+    if (!protected && _inFieldDecoration(element)) continue;
     // Nom ou adresse coupé après deux lignes : permis.
     final twoLines = (render.maxLines ?? 1) >= 2;
-    if (twoLines && !neverCut.hasMatch(text)) continue;
+    if (twoLines && !protected) continue;
     found.add(text.length > 60 ? '${text.substring(0, 60)}…' : text);
   }
   return found.toList();
@@ -221,6 +260,17 @@ Future<List<String>> lowContrastTexts(WidgetTester tester) async {
         box.right > width ||
         box.bottom > height) {
       continue;
+    }
+    // Texte d'une liste qui défile, hors de sa zone visible (caché par un
+    // panneau fixe, par exemple) : rien à mesurer.
+    final viewport = RenderAbstractViewport.maybeOf(render);
+    if (viewport is RenderBox) {
+      final area = viewport as RenderBox;
+      final visible = area.localToGlobal(Offset.zero) & area.size;
+      if (!visible.contains(box.topLeft) ||
+          !visible.contains(box.bottomRight - const Offset(1, 1))) {
+        continue;
+      }
     }
     final samples = <double>[];
     for (final point in [
@@ -282,16 +332,13 @@ Future<List<String>> checkReadability(
   final lines = [
     for (final t in truncated) '$screen | coupé | $t',
     for (final c in contrast) '$screen | contraste | $c',
+    for (final b in brokenWords(tester)) '$screen | mot coupé en deux | $b',
   ];
   if (lines.isNotEmpty) {
     out.writeAsStringSync('${lines.join('\n')}\n', mode: FileMode.append);
   }
   if (phoneDiscovery) {
-    // C268, découverte : les mots coupés en deux ne sont relevés qu'ici.
-    _discoveryLog([
-      ...lines,
-      for (final b in brokenWords(tester)) '$screen | mot coupé en deux | $b',
-    ]);
+    _discoveryLog(lines);
     return const [];
   }
   return lines;
@@ -302,7 +349,7 @@ Future<List<String>> checkReadability(
 /// C268 : échelle de police du téléphone simulée par l'essai
 /// (`--dart-define=PHONE_TEXT_SCALE=1.3`, réglage « grande police » courant ;
 /// l'application plafonne l'échelle à 1,3). 1 par défaut.
-final double phoneTextScale =
+double phoneTextScale =
     double.tryParse(const String.fromEnvironment('PHONE_TEXT_SCALE')) ?? 1.0;
 
 /// C268 : mode découverte (`--dart-define=PHONE_DISCOVERY=true`) : les
