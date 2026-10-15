@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// C268, C272 : libellé d'un bouton. Règle d'Achille (16/10/2026) : deux
+/// C268, C272 : libellé d'un bouton. Règle d'Achille (15/10/2026) : deux
 /// lignes au plus, jamais coupé par « … », mots entiers ; il ne rétrécit que
 /// si deux lignes ne suffisent pas. Un libellé qui tient sur une ligne garde
 /// sa taille (et le bouton sa hauteur).
