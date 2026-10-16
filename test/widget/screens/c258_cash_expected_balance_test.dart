@@ -216,6 +216,9 @@ void main() {
       );
       await tester.tap(find.widgetWithText(ElevatedButton, 'Fermer'));
       await tester.pumpAndSettle();
+      // C273 (a) : étape de confirmation avant la fermeture.
+      await tester.tap(find.widgetWithText(ElevatedButton, 'Confirmer'));
+      await tester.pumpAndSettle();
 
       expect(provider.closedWith, 16075);
     },

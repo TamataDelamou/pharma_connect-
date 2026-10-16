@@ -368,8 +368,12 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
     return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
   }
 
-  void _showOpenDialog(BuildContext context, CashProvider provider) {
-    final controller = TextEditingController();
+  void _showOpenDialog(
+    BuildContext context,
+    CashProvider provider, {
+    String initial = '',
+  }) {
+    final controller = TextEditingController(text: initial);
     final notesController = TextEditingController();
 
     showDialog(
@@ -408,7 +412,7 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
               // C267 : « 10000 » ou « 10 000 », avec ou sans « GNF ».
               final amount = CurrencyFormatter.parse(controller.text);
               if (amount == null || amount < 0) return;
-              final userId = SupabaseService().currentUser?.id;
+              final userId = context.read<AuthProvider>().userId;
               if (userId == null) return;
               final pharmacyId = context.read<AuthProvider>().pharmacyId;
               if (pharmacyId == null) {
@@ -420,6 +424,14 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
                 return;
               }
               Navigator.pop(ctx);
+              // C273 (a) : le fonds saisi est confirmé avant d'être enregistré ;
+              // « Corriger » ramène à la saisie, avec le montant tapé.
+              final confirmed = await _confirmOpening(context, amount);
+              if (!context.mounted) return;
+              if (!confirmed) {
+                _showOpenDialog(context, provider, initial: controller.text);
+                return;
+              }
               final success = await provider.openSession(
                 pharmacyId: pharmacyId,
                 cashierId: userId,
@@ -456,9 +468,13 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
     _showCloseDialog(context, provider);
   }
 
-  void _showCloseDialog(BuildContext context, CashProvider provider) {
+  void _showCloseDialog(
+    BuildContext context,
+    CashProvider provider, {
+    String initial = '',
+  }) {
     final expected = provider.currentExpectedCash;
-    final controller = TextEditingController();
+    final controller = TextEditingController(text: initial);
     final notesController = TextEditingController();
 
     showDialog(
@@ -505,6 +521,19 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
               final sessionId = provider.currentSession?.id;
               if (sessionId == null) return;
               Navigator.pop(ctx);
+              // C273 (a) : attendu, compté et écart confirmés avant la
+              // fermeture, qui ne se modifie plus ensuite ; « Recompter »
+              // ramène à la saisie, avec le montant tapé.
+              final confirmed = await _confirmClosing(
+                context,
+                expected: expected,
+                counted: amount,
+              );
+              if (!context.mounted) return;
+              if (!confirmed) {
+                _showCloseDialog(context, provider, initial: controller.text);
+                return;
+              }
               final success = await provider.closeSession(
                 sessionId: sessionId,
                 closingBalance: amount,
@@ -528,5 +557,97 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
         ],
       ),
     );
+  }
+
+  /// C273 (a) : confirmation du fonds de caisse avant l'ouverture. Vrai si
+  /// le caissier confirme, faux s'il veut corriger.
+  Future<bool> _confirmOpening(BuildContext context, int amount) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: context.palette.background,
+        title: const Text('Confirmer l\'ouverture'),
+        content: Text(
+          'Fonds de caisse : ${CurrencyFormatter.format(amount)}\n\n'
+          'Vérifiez le montant avant de confirmer.',
+          style: context.text.body1,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Corriger'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Confirmer'),
+          ),
+        ],
+      ),
+    );
+    return confirmed ?? false;
+  }
+
+  /// C273 (a) : confirmation de la fermeture : attendu, compté, écart. Un
+  /// écart non nul invite à recompter le tiroir. Vrai si le caissier
+  /// confirme, faux s'il veut recompter ou corriger.
+  Future<bool> _confirmClosing(
+    BuildContext context, {
+    required int? expected,
+    required int counted,
+  }) async {
+    final difference = expected == null ? null : counted - expected;
+    final hasGap = difference != null && difference != 0;
+    final gap = difference == null
+        ? '—'
+        : '${difference > 0 ? '+' : ''}${CurrencyFormatter.format(difference)}';
+    final confirmed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: context.palette.background,
+        title: const Text('Confirmer la fermeture'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Solde attendu : ${expected == null ? '—' : CurrencyFormatter.format(expected)}',
+              style: context.text.body1,
+            ),
+            Text(
+              'Solde compté : ${CurrencyFormatter.format(counted)}',
+              style: context.text.body1,
+            ),
+            Text(
+              'Écart : $gap',
+              style: context.text.body1.copyWith(
+                fontWeight: FontWeight.w600,
+                color: hasGap ? context.palette.danger : null,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              hasGap
+                  ? 'L\'écart n\'est pas nul. Recomptez le tiroir avant de '
+                        'confirmer : une caisse fermée ne se modifie plus.'
+                  : 'Une caisse fermée ne se modifie plus.',
+              style: context.text.body2,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(hasGap ? 'Recompter' : 'Corriger'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Confirmer'),
+          ),
+        ],
+      ),
+    );
+    return confirmed ?? false;
   }
 }
