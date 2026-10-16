@@ -70,8 +70,36 @@ class _FakeCashService extends CashService {
     return _session(open: false);
   }
 
+  /// C273 (b) : mouvements de la session et réponse « titulaire ».
+  final movements = <CashMovement>[];
+  bool manager = false;
+  bool movementsFail = false;
+
+  void addSale(int amount) =>
+      movements.add(_movement(CashMovementType.sale, amount));
+
   @override
-  Future<List<CashMovement>> getMovements(String sessionId) async => [];
+  Future<List<CashMovement>> getMovements(String sessionId) async {
+    if (movementsFail) throw Exception('SocketException: hors connexion');
+    return List.of(movements);
+  }
+
+  @override
+  Future<bool> isPharmacyManager(String pharmacyId) async => manager;
+
+  @override
+  Future<CashMovement> addMovement({
+    required String sessionId,
+    required CashMovementType type,
+    required int amount,
+    String? referenceId,
+    String? referenceType,
+    String? notes,
+  }) async {
+    final m = _movement(type, amount, notes: notes);
+    movements.add(m);
+    return m;
+  }
 
   @override
   Future<Map<String, dynamic>> getSessionSummary(String sessionId) async => {
@@ -83,6 +111,16 @@ class _FakeCashService extends CashService {
     'current_expected_cash': 11500,
   };
 }
+
+CashMovement _movement(CashMovementType type, int amount, {String? notes}) =>
+    CashMovement(
+      id: 'm${type.name}$amount',
+      cashDrawerSessionId: 's1',
+      type: type,
+      amount: amount,
+      notes: notes,
+      createdAt: DateTime(2026, 10, 16, 9),
+    );
 
 String? _cashLabel(bool? drawerOpen) => appMenuFor(
   UserRole.pharmacien,
@@ -274,5 +312,134 @@ void main() {
         expect(service.closedWith, 11500);
       },
     );
+  });
+
+  group('C273 (b), corrections', () {
+    Future<(CashProvider, _FakeCashService)> openWith({
+      bool manager = false,
+      int sales = 0,
+      bool movementsFail = false,
+    }) async {
+      final service = _FakeCashService()
+        ..open = true
+        ..manager = manager
+        ..movementsFail = movementsFail;
+      for (var i = 0; i < sales; i++) {
+        service.addSale(1500);
+      }
+      final provider = CashProvider(service: service);
+      await provider.loadCurrentSession('ph1');
+      return (provider, service);
+    }
+
+    test('avant la première vente : le caissier corrige le fonds', () async {
+      final (provider, service) = await openWith();
+      expect(provider.canCorrectOpening, isTrue);
+      expect(provider.canAddCashMovement, isFalse);
+
+      // Fonds saisi 10 000 à l'ouverture, 12 000 en réalité : dépôt de 2 000.
+      expect(await provider.correctOpening(12000), isTrue);
+      expect(service.movements.last.type, CashMovementType.deposit);
+      expect(service.movements.last.amount, 2000);
+      expect(service.movements.last.notes, CashProvider.openingCorrectionNote);
+
+      // Deuxième correction, à 9 000 : retrait de 3 000 (depuis 12 000).
+      expect(await provider.correctOpening(9000), isTrue);
+      expect(service.movements.last.type, CashMovementType.withdrawal);
+      expect(service.movements.last.amount, 3000);
+
+      // Même montant : rien à enregistrer.
+      final count = service.movements.length;
+      expect(await provider.correctOpening(9000), isTrue);
+      expect(service.movements.length, count);
+    });
+
+    test('après une vente : plus de correction du fonds', () async {
+      final (provider, service) = await openWith(sales: 1);
+      expect(provider.canCorrectOpening, isFalse);
+      expect(await provider.correctOpening(12000), isFalse);
+      expect(service.movements.length, 1);
+    });
+
+    test('après une vente : dépôt ou retrait par le titulaire seul', () async {
+      final (cashier, _) = await openWith(sales: 1);
+      expect(cashier.canAddCashMovement, isFalse);
+      expect(
+        await cashier.addCashMovement(
+          type: CashMovementType.deposit,
+          amount: 500,
+          reason: 'Monnaie',
+        ),
+        isFalse,
+      );
+
+      final (owner, service) = await openWith(sales: 1, manager: true);
+      expect(owner.canAddCashMovement, isTrue);
+      // Motif obligatoire.
+      expect(
+        await owner.addCashMovement(
+          type: CashMovementType.withdrawal,
+          amount: 500,
+          reason: '  ',
+        ),
+        isFalse,
+      );
+      expect(
+        await owner.addCashMovement(
+          type: CashMovementType.withdrawal,
+          amount: 500,
+          reason: 'Erreur de saisie du caissier',
+        ),
+        isTrue,
+      );
+      expect(service.movements.last.notes, 'Erreur de saisie du caissier');
+    });
+
+    test('mouvements non chargés : aucune correction proposée', () async {
+      final (provider, _) = await openWith(manager: true, movementsFail: true);
+      expect(provider.canCorrectOpening, isFalse);
+      expect(provider.canAddCashMovement, isFalse);
+    });
+
+    testWidgets(
+      'écran : « Corriger le fonds », confirmation, puis enregistré',
+      (tester) async {
+        final (provider, service) = await openWith();
+        await _pump(tester, provider);
+        expect(find.text('💵 Dépôt ou retrait'), findsNothing);
+
+        await tester.tap(find.text('✏️ Corriger le fonds'));
+        await tester.pumpAndSettle();
+        await tester.enterText(
+          find.widgetWithText(TextField, 'Fonds correct (GNF)'),
+          '12 000',
+        );
+        await tester.tap(find.widgetWithText(ElevatedButton, 'Corriger'));
+        await tester.pumpAndSettle();
+        expect(
+          find.text('Fonds correct : ${CurrencyFormatter.format(12000)}'),
+          findsOneWidget,
+        );
+        expect(service.movements, isEmpty);
+
+        await tester.tap(find.widgetWithText(ElevatedButton, 'Confirmer'));
+        await tester.pumpAndSettle();
+        expect(service.movements.single.amount, 2000);
+        expect(find.text('Fonds corrigé'), findsOneWidget);
+      },
+    );
+
+    testWidgets('écran : après une vente, « Dépôt ou retrait » pour le '
+        'titulaire seulement', (tester) async {
+      final (cashier, _) = await openWith(sales: 1);
+      await _pump(tester, cashier);
+      expect(find.text('✏️ Corriger le fonds'), findsNothing);
+      expect(find.text('💵 Dépôt ou retrait'), findsNothing);
+
+      final (owner, _) = await openWith(sales: 1, manager: true);
+      await _pump(tester, owner);
+      expect(find.text('✏️ Corriger le fonds'), findsNothing);
+      expect(find.text('💵 Dépôt ou retrait'), findsOneWidget);
+    });
   });
 }
