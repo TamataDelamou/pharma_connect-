@@ -148,25 +148,32 @@ select pg_temp.expect('6', 'OK',
   '; vente mobile money de 4 500 tracee dans la caisse de A');
 
 -- ==================== Dépôts et retraits ====================
+-- C273 (c) : après la première vente, dépôt et retrait réservés au titulaire,
+-- motif obligatoire. Les écritures de 7a à 7c passent donc par le titulaire ;
+-- 7g et 7h montrent le refus pour le caissier et sans motif.
 select v as s_a from (select pg_temp.session_of(:'A')::text as v) x \gset
 select pg_temp.as_user(:'A'); set local role authenticated;
-select pg_temp.try('7a', format('select public.cash_add_movement(%L, %L, 2000, %L)', :'s_a', 'deposit', 'Monnaie'));
-select pg_temp.try('7b', format('select public.cash_add_movement(%L, %L, 500, %L)', :'s_a', 'withdrawal', 'Achat fournitures'));
-select pg_temp.try('7c', format('select public.cash_add_movement(%L, %L, 999999, null)', :'s_a', 'withdrawal'));
-select pg_temp.try('7d', format('select public.cash_add_movement(%L, %L, 1000, null)', :'s_a', 'sale'));
+select pg_temp.try('7d', format('select public.cash_add_movement(%L, %L, 1000, %L)', :'s_a', 'sale', 'Vente'));
+select pg_temp.try('7g', format('select public.cash_add_movement(%L, %L, 2000, %L)', :'s_a', 'deposit', 'Monnaie'));
 reset role;
 select pg_temp.as_user(:'E'); set local role authenticated;
-select pg_temp.try('7e', format('select public.cash_add_movement(%L, %L, 100, null)', :'s_a', 'deposit'));
+select pg_temp.try('7e', format('select public.cash_add_movement(%L, %L, 100, %L)', :'s_a', 'deposit', 'Essai'));
 reset role;
 select pg_temp.as_user(:'T'); set local role authenticated;
+select pg_temp.try('7a', format('select public.cash_add_movement(%L, %L, 2000, %L)', :'s_a', 'deposit', 'Monnaie'));
+select pg_temp.try('7b', format('select public.cash_add_movement(%L, %L, 500, %L)', :'s_a', 'withdrawal', 'Achat fournitures'));
+select pg_temp.try('7c', format('select public.cash_add_movement(%L, %L, 999999, %L)', :'s_a', 'withdrawal', 'Essai'));
+select pg_temp.try('7h', format('select public.cash_add_movement(%L, %L, 100, null)', :'s_a', 'deposit'));
 select pg_temp.try('7f', format('select public.cash_add_movement(%L, %L, 1000, %L)', :'s_a', 'deposit', 'Apport titulaire'));
 reset role;
-select pg_temp.expect('7a', 'OK', true, '; depot de 2 000');
-select pg_temp.expect('7b', 'OK', true, '; retrait de 500');
+select pg_temp.expect('7a', 'OK', true, '; depot de 2 000 (titulaire)');
+select pg_temp.expect('7b', 'OK', true, '; retrait de 500 (titulaire)');
 select pg_temp.expect('7c', '22023', true, '; retrait superieur aux especes attendues refuse');
 select pg_temp.expect('7d', '22023', true, '; une vente ne se saisit pas a la main');
 select pg_temp.expect('7e', '42501', true, '; E ne touche pas a la caisse de A');
 select pg_temp.expect('7f', 'OK', true, '; le titulaire peut deposer dans la caisse de A');
+select pg_temp.expect('7g', '42501', true, '; C273 : apres une vente, le caissier ne depose plus');
+select pg_temp.expect('7h', '22023', true, '; C273 : depot sans motif refuse');
 
 -- ==================== Écritures directes interdites ====================
 select count(*) as mv_before from public.cash_movements where cash_drawer_session_id = :'s_a' \gset
