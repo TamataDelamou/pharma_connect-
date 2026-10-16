@@ -29,7 +29,7 @@
 ## 1. Installation
 
 1. Copiez `PharmaConnect-release-a3b3094-arm64-v8a.apk` (32,0 Mo, construit depuis `main` au commit `a3b3094`, dossier `build/app/outputs/flutter-apk/`) sur les deux téléphones et installez-le par-dessus la version actuelle.
-2. Si Android refuse (« Application non installée », « non compatible ») : le téléphone a un processeur 32 bits ; prévenez-moi, je construirai le fichier `armeabi-v7a` pour lui.
+2. Si Android refuse (« Application non installée », « non compatible ») : le téléphone a sans doute un processeur 32 bits. Installez à la place `PharmaConnect-release-9973241-armeabi-v7a.apk` (28,6 Mo, même dossier ; construit le 16/10/2026 depuis `main` au commit `9973241`, même application que `a3b3094`, seul un commentaire du code a changé). **Constaté le 16/10/2026 sur le téléphone B** : le fichier `arm64-v8a` est refusé ; message exact à relever. Si le message parle d'un **conflit** avec une application existante, n'installez rien et ne désinstallez rien : prévenez-moi.
 3. **Vous devez voir :** le tableau de bord (ou « Connexion », puis le tableau de bord après le code reçu par e-mail).
 
 **Taille de police :** les sections 2 à 5 se font d'abord à la taille **normale**. La section 7 les reprend avec la **police la plus grande** du téléphone (Paramètres → Affichage → Taille de police, au maximum ; l'application la suit jusqu'à 1,3 fois).
