@@ -28,6 +28,33 @@ class CashProvider extends ChangeNotifier {
 
   bool get hasOpenSession => _currentSession != null && _currentSession!.isOpen;
 
+  /// C273 (b) : session dont les mouvements sont chargés. Sans eux, on ne
+  /// sait pas si une vente a eu lieu : aucune correction n'est proposée.
+  String? _movementsSessionId;
+
+  /// C273 (b) : le compte connecté est-il le titulaire de l'officine ? `null`
+  /// tant que ce n'est pas connu.
+  bool? get isManager => _isManager;
+  bool? _isManager;
+
+  /// C273 (b) : mouvements de la session ouverte chargés.
+  bool get _movementsKnown =>
+      hasOpenSession && _movementsSessionId == currentSession?.id;
+
+  /// C273 (b) : une vente ou un remboursement a eu lieu dans la session.
+  bool get hasSaleInSession => movements.any(
+    (m) => m.type == CashMovementType.sale || m.type == CashMovementType.refund,
+  );
+
+  /// C273 (b), décision d'Achille du 16/10/2026 : avant la première vente, le
+  /// caissier corrige le fonds de sa caisse.
+  bool get canCorrectOpening => _movementsKnown && !hasSaleInSession;
+
+  /// C273 (b) : après une vente, dépôt ou retrait avec motif, par le
+  /// titulaire seulement, sur sa propre session (pilote).
+  bool get canAddCashMovement =>
+      _movementsKnown && hasSaleInSession && _isManager == true;
+
   /// C274 : la caisse du caissier connecté est-elle ouverte ? `null` tant que
   /// ce n'est pas connu (pas encore lu, ou dernière lecture en échec, par
   /// exemple hors connexion) : le menu affiche alors « Caisse ».
@@ -83,6 +110,7 @@ class CashProvider extends ChangeNotifier {
     try {
       _currentSession = await _service.getCurrentOpenSession(pharmacyId);
       _drawerOpen = _currentSession?.isOpen ?? false;
+      _isManager = await _readIsManager(pharmacyId);
       if (_currentSession != null) {
         await loadMovements(_currentSession!.id);
         await loadSummary(_currentSession!.id);
@@ -121,8 +149,10 @@ class CashProvider extends ChangeNotifier {
   }
 
   Future<void> loadMovements(String sessionId) async {
+    _movementsSessionId = null;
     try {
       _movements = await _service.getMovements(sessionId);
+      _movementsSessionId = sessionId;
       notifyListeners();
     } catch (e) {
       _error = userMessage(e);
@@ -227,6 +257,67 @@ class CashProvider extends ChangeNotifier {
       notifyListeners();
       return false;
     }
+  }
+
+  /// C273 (b) : titulaire ou non ; `null` si la lecture échoue (aucune action
+  /// réservée au titulaire n'est alors proposée).
+  Future<bool?> _readIsManager(String pharmacyId) async {
+    try {
+      return await _service.isPharmacyManager(pharmacyId);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// C273 (b) : motif des corrections du fonds avant la première vente.
+  static const String openingCorrectionNote = 'Correction du fonds de caisse';
+
+  /// C273 (b) : corrige le fonds de la session ouverte, avant la première
+  /// vente, par un dépôt ou un retrait de la différence. Le fonds d'origine
+  /// reste dans l'historique. Vrai si rien n'était à corriger.
+  Future<bool> correctOpening(int correctFund) async {
+    final session = currentSession;
+    if (session == null || !canCorrectOpening) return false;
+    // Avant la première vente, les espèces en caisse sont le fonds
+    // d'ouverture et les corrections déjà faites (dépôts et retraits).
+    final current =
+        session.openingBalance +
+        movements.fold<int>(
+          0,
+          (sum, m) => switch (m.type) {
+            CashMovementType.deposit => sum + m.amount,
+            CashMovementType.withdrawal => sum - m.amount,
+            _ => sum,
+          },
+        );
+    final difference = correctFund - current;
+    if (difference == 0) return true;
+    return addMovement(
+      sessionId: session.id,
+      type: difference > 0
+          ? CashMovementType.deposit
+          : CashMovementType.withdrawal,
+      amount: difference.abs(),
+      notes: openingCorrectionNote,
+    );
+  }
+
+  /// C273 (b) : dépôt ou retrait d'espèces après une vente, par le titulaire,
+  /// motif obligatoire.
+  Future<bool> addCashMovement({
+    required CashMovementType type,
+    required int amount,
+    required String reason,
+  }) async {
+    final session = currentSession;
+    if (session == null || !canAddCashMovement) return false;
+    if (reason.trim().isEmpty || amount <= 0) return false;
+    return addMovement(
+      sessionId: session.id,
+      type: type,
+      amount: amount,
+      notes: reason.trim(),
+    );
   }
 
   Future<bool> loadReport({

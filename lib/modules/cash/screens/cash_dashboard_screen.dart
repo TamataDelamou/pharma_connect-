@@ -285,6 +285,19 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
                 label: '📋 Historique',
                 onPressed: () => context.push('/cash/history'),
               ),
+              // C273 (b) : correction du fonds avant la première vente
+              // (caissier) ; dépôt ou retrait avec motif après une vente
+              // (titulaire, sur sa propre session).
+              if (provider.canCorrectOpening)
+                SecondaryButton(
+                  label: '✏️ Corriger le fonds',
+                  onPressed: () => _showCorrectOpeningDialog(context, provider),
+                ),
+              if (provider.canAddCashMovement)
+                SecondaryButton(
+                  label: '💵 Dépôt ou retrait',
+                  onPressed: () => _showCashMovementDialog(context, provider),
+                ),
               PrimaryButton(
                 label: '🔒 Fermer la caisse',
                 onPressed: () => _confirmClose(provider),
@@ -649,5 +662,226 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
       ),
     );
     return confirmed ?? false;
+  }
+
+  /// C273 (b) : correction du fonds de caisse avant la première vente. Le
+  /// fonds d'origine reste dans l'historique ; la différence est enregistrée
+  /// en dépôt ou en retrait, motif « Correction du fonds de caisse ».
+  void _showCorrectOpeningDialog(
+    BuildContext context,
+    CashProvider provider, {
+    String initial = '',
+  }) {
+    final controller = TextEditingController(text: initial);
+    final opening = provider.currentSession?.openingBalance ?? 0;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: context.palette.background,
+        title: const Text('Corriger le fonds de caisse'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Fonds saisi à l\'ouverture : ${CurrencyFormatter.format(opening)}',
+              style: context.text.body1,
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: controller,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Fonds correct (GNF)',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Possible tant qu\'aucune vente n\'est enregistrée. Le fonds '
+              'd\'origine reste dans l\'historique.',
+              style: context.text.body2,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Annuler'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final amount = CurrencyFormatter.parse(controller.text);
+              if (amount == null || amount < 0) return;
+              Navigator.pop(ctx);
+              final confirmed = await _confirmAmount(
+                context,
+                title: 'Confirmer la correction',
+                lines: [
+                  'Fonds correct : ${CurrencyFormatter.format(amount)}',
+                  'Motif : ${CashProvider.openingCorrectionNote}',
+                ],
+              );
+              if (!context.mounted) return;
+              if (!confirmed) {
+                _showCorrectOpeningDialog(
+                  context,
+                  provider,
+                  initial: controller.text,
+                );
+                return;
+              }
+              final success = await provider.correctOpening(amount);
+              if (!context.mounted) return;
+              _reportResult(context, provider, success, 'Fonds corrigé');
+            },
+            child: const Text('Corriger'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// C273 (b) : dépôt ou retrait d'espèces après une vente, par le titulaire,
+  /// sur sa propre session ; motif obligatoire.
+  void _showCashMovementDialog(BuildContext context, CashProvider provider) {
+    final amountController = TextEditingController();
+    final reasonController = TextEditingController();
+    var type = CashMovementType.deposit;
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          backgroundColor: context.palette.background,
+          title: const Text('Dépôt ou retrait d\'espèces'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SegmentedButton<CashMovementType>(
+                segments: const [
+                  ButtonSegment(
+                    value: CashMovementType.deposit,
+                    label: Text('Dépôt'),
+                  ),
+                  ButtonSegment(
+                    value: CashMovementType.withdrawal,
+                    label: Text('Retrait'),
+                  ),
+                ],
+                selected: {type},
+                onSelectionChanged: (s) => setDialogState(() => type = s.first),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: amountController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Montant (GNF)',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: reasonController,
+                decoration: const InputDecoration(
+                  labelText: 'Motif (obligatoire)',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Annuler'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final amount = CurrencyFormatter.parse(amountController.text);
+                final reason = reasonController.text.trim();
+                if (amount == null || amount <= 0 || reason.isEmpty) return;
+                Navigator.pop(ctx);
+                final isDeposit = type == CashMovementType.deposit;
+                final confirmed = await _confirmAmount(
+                  context,
+                  title: isDeposit
+                      ? 'Confirmer le dépôt'
+                      : 'Confirmer le retrait',
+                  lines: [
+                    '${isDeposit ? 'Dépôt' : 'Retrait'} : '
+                        '${CurrencyFormatter.format(amount)}',
+                    'Motif : $reason',
+                  ],
+                );
+                if (!confirmed || !context.mounted) return;
+                final success = await provider.addCashMovement(
+                  type: type,
+                  amount: amount,
+                  reason: reason,
+                );
+                if (!context.mounted) return;
+                _reportResult(
+                  context,
+                  provider,
+                  success,
+                  isDeposit ? 'Dépôt enregistré' : 'Retrait enregistré',
+                );
+              },
+              child: const Text('Enregistrer'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// C273 : confirmation d'un montant avant enregistrement. Vrai si confirmé.
+  Future<bool> _confirmAmount(
+    BuildContext context, {
+    required String title,
+    required List<String> lines,
+  }) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: context.palette.background,
+        title: Text(title),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (final line in lines) Text(line, style: context.text.body1),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Corriger'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Confirmer'),
+          ),
+        ],
+      ),
+    );
+    return confirmed ?? false;
+  }
+
+  void _reportResult(
+    BuildContext context,
+    CashProvider provider,
+    bool success,
+    String done,
+  ) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(success ? done : provider.error ?? 'Action impossible.'),
+        backgroundColor: success
+            ? context.palette.success
+            : context.palette.danger,
+      ),
+    );
   }
 }
