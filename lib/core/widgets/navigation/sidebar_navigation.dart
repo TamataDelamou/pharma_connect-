@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pharma_connect/core/widgets/text/whole_words_text.dart';
 
 import '../../kernel/kernel_connection_indicator.dart';
 import '../../kernel/kernel_status.dart';
@@ -124,8 +125,8 @@ class _SidebarNavigationState extends State<SidebarNavigation>
                     if (widget.expanded) ...[
                       const SizedBox(width: 8),
                       Expanded(
-                        child: Text(
-                          'PHARMACONNECT',
+                        child: AppNameText(
+                          // C276 : une seule ligne, rétréci si besoin.
                           style: TextStyle(
                             fontFamily: 'Inter',
                             fontSize: 16,
@@ -133,7 +134,6 @@ class _SidebarNavigationState extends State<SidebarNavigation>
                             color: context.palette.textPrimary,
                             letterSpacing: 0.5,
                           ),
-                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],

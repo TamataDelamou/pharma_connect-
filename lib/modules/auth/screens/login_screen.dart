@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pharma_connect/core/widgets/text/whole_words_text.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -63,8 +64,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       SizedBox(width: 8),
                       Expanded(
-                        child: Text(
-                          'PHARMACONNECT',
+                        child: AppNameText(
+                          // C276 : une seule ligne, rétréci si besoin.
                           style: TextStyle(
                             fontFamily: 'Inter',
                             fontSize: 18,
