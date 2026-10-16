@@ -50,6 +50,13 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Pose un compte connecté sans appel au serveur (tests).
+  @visibleForTesting
+  set userIdForTesting(String? userId) {
+    _userId = userId;
+    notifyListeners();
+  }
+
   /// Vrai si le compte connecté est aussi un membre actif du back-office GSG
   /// (`public.admin_users`, audit Module 14, 29/08/2026). Reflète côté client
   /// exactement le test déjà utilisé par la RLS `is_gsg_admin()` — sans

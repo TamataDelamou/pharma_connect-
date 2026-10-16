@@ -229,6 +229,16 @@ class CashService {
     }
   }
 
+  /// C273 (b) : le compte connecté est-il le titulaire de [pharmacyId] ?
+  /// (`is_pharmacy_manager`, même règle que le serveur.)
+  Future<bool> isPharmacyManager(String pharmacyId) async {
+    final result = await _client.rpc(
+      'is_pharmacy_manager',
+      params: {'p_pharmacy_id': pharmacyId},
+    );
+    return result == true;
+  }
+
   // ---- Summary ----
 
   Future<Map<String, dynamic>> getSessionSummary(String sessionId) async {

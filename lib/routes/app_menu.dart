@@ -69,8 +69,9 @@ const List<SidebarNavigationItem> pharmacyMenuItems = [
     icon: Icons.assignment_turned_in,
     route: '/pharmacy/queue',
   ),
+  // C274 : libellé selon l'état de la caisse, voir [cashMenuLabel].
   SidebarNavigationItem(
-    label: 'Ouverture de caisse',
+    label: 'Caisse',
     icon: Icons.point_of_sale,
     route: '/cash',
   ),
@@ -89,6 +90,16 @@ const SidebarNavigationItem adminMenuItem = SidebarNavigationItem(
   route: '/admin',
 );
 
+/// C274 : libellé de l'entrée de la caisse : « Ouverture de caisse » si la caisse
+/// du caissier connecté est fermée, « Fermeture de caisse » si elle est
+/// ouverte, « Caisse » tant que l'état n'est pas connu (décision d'Achille
+/// du 16/10/2026).
+String cashMenuLabel(bool? drawerOpen) => switch (drawerOpen) {
+  true => 'Fermeture de caisse',
+  false => 'Ouverture de caisse',
+  null => 'Caisse',
+};
+
 /// C213 / D64 : menus selon le rôle effectif. Un compte dont le rôle n'est
 /// pas vérifié (ou un patient) n'a pas le menu « Stock & Lots ».
 /// C245 : le pharmacien vérifié a en plus les écrans de l'officine ;
@@ -96,6 +107,7 @@ const SidebarNavigationItem adminMenuItem = SidebarNavigationItem(
 List<SidebarNavigationItem> appMenuFor(
   UserRole? role, {
   bool isGsgAdmin = false,
+  bool? cashDrawerOpen,
 }) {
   // C239 : « Livraisons » masqué pendant le pilote (retrait à l'officine
   // seulement).
@@ -105,7 +117,18 @@ List<SidebarNavigationItem> appMenuFor(
       (PilotConfig.healthGoals || item.route != '/healthrecord/goals') &&
       (role != UserRole.patient || item.route != '/stock');
   final items = appMenuItems.where(visible).toList();
-  if (role == UserRole.pharmacien) items.addAll(pharmacyMenuItems);
+  if (role == UserRole.pharmacien) {
+    items.addAll([
+      for (final item in pharmacyMenuItems)
+        item.route == '/cash'
+            ? SidebarNavigationItem(
+                label: cashMenuLabel(cashDrawerOpen),
+                icon: item.icon,
+                route: item.route,
+              )
+            : item,
+    ]);
+  }
   if (isGsgAdmin) items.add(adminMenuItem);
   return items;
 }

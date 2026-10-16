@@ -285,6 +285,19 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
                 label: '📋 Historique',
                 onPressed: () => context.push('/cash/history'),
               ),
+              // C273 (b) : correction du fonds avant la première vente
+              // (caissier) ; dépôt ou retrait avec motif après une vente
+              // (titulaire, sur sa propre session).
+              if (provider.canCorrectOpening)
+                SecondaryButton(
+                  label: '✏️ Corriger le fonds',
+                  onPressed: () => _showCorrectOpeningDialog(context, provider),
+                ),
+              if (provider.canAddCashMovement)
+                SecondaryButton(
+                  label: '💵 Dépôt ou retrait',
+                  onPressed: () => _showCashMovementDialog(context, provider),
+                ),
               PrimaryButton(
                 label: '🔒 Fermer la caisse',
                 onPressed: () => _confirmClose(provider),
@@ -368,8 +381,12 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
     return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
   }
 
-  void _showOpenDialog(BuildContext context, CashProvider provider) {
-    final controller = TextEditingController();
+  void _showOpenDialog(
+    BuildContext context,
+    CashProvider provider, {
+    String initial = '',
+  }) {
+    final controller = TextEditingController(text: initial);
     final notesController = TextEditingController();
 
     showDialog(
@@ -408,7 +425,7 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
               // C267 : « 10000 » ou « 10 000 », avec ou sans « GNF ».
               final amount = CurrencyFormatter.parse(controller.text);
               if (amount == null || amount < 0) return;
-              final userId = SupabaseService().currentUser?.id;
+              final userId = context.read<AuthProvider>().userId;
               if (userId == null) return;
               final pharmacyId = context.read<AuthProvider>().pharmacyId;
               if (pharmacyId == null) {
@@ -420,6 +437,14 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
                 return;
               }
               Navigator.pop(ctx);
+              // C273 (a) : le fonds saisi est confirmé avant d'être enregistré ;
+              // « Corriger » ramène à la saisie, avec le montant tapé.
+              final confirmed = await _confirmOpening(context, amount);
+              if (!context.mounted) return;
+              if (!confirmed) {
+                _showOpenDialog(context, provider, initial: controller.text);
+                return;
+              }
               final success = await provider.openSession(
                 pharmacyId: pharmacyId,
                 cashierId: userId,
@@ -456,9 +481,13 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
     _showCloseDialog(context, provider);
   }
 
-  void _showCloseDialog(BuildContext context, CashProvider provider) {
+  void _showCloseDialog(
+    BuildContext context,
+    CashProvider provider, {
+    String initial = '',
+  }) {
     final expected = provider.currentExpectedCash;
-    final controller = TextEditingController();
+    final controller = TextEditingController(text: initial);
     final notesController = TextEditingController();
 
     showDialog(
@@ -505,6 +534,19 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
               final sessionId = provider.currentSession?.id;
               if (sessionId == null) return;
               Navigator.pop(ctx);
+              // C273 (a) : attendu, compté et écart confirmés avant la
+              // fermeture, qui ne se modifie plus ensuite ; « Recompter »
+              // ramène à la saisie, avec le montant tapé.
+              final confirmed = await _confirmClosing(
+                context,
+                expected: expected,
+                counted: amount,
+              );
+              if (!context.mounted) return;
+              if (!confirmed) {
+                _showCloseDialog(context, provider, initial: controller.text);
+                return;
+              }
               final success = await provider.closeSession(
                 sessionId: sessionId,
                 closingBalance: amount,
@@ -526,6 +568,319 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
             child: const Text('Fermer'),
           ),
         ],
+      ),
+    );
+  }
+
+  /// C273 (a) : confirmation du fonds de caisse avant l'ouverture. Vrai si
+  /// le caissier confirme, faux s'il veut corriger.
+  Future<bool> _confirmOpening(BuildContext context, int amount) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: context.palette.background,
+        title: const Text('Confirmer l\'ouverture'),
+        content: Text(
+          'Fonds de caisse : ${CurrencyFormatter.format(amount)}\n\n'
+          'Vérifiez le montant avant de confirmer.',
+          style: context.text.body1,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Corriger'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Confirmer'),
+          ),
+        ],
+      ),
+    );
+    return confirmed ?? false;
+  }
+
+  /// C273 (a) : confirmation de la fermeture : attendu, compté, écart. Un
+  /// écart non nul invite à recompter le tiroir. Vrai si le caissier
+  /// confirme, faux s'il veut recompter ou corriger.
+  Future<bool> _confirmClosing(
+    BuildContext context, {
+    required int? expected,
+    required int counted,
+  }) async {
+    final difference = expected == null ? null : counted - expected;
+    final hasGap = difference != null && difference != 0;
+    final gap = difference == null
+        ? '—'
+        : '${difference > 0 ? '+' : ''}${CurrencyFormatter.format(difference)}';
+    final confirmed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: context.palette.background,
+        title: const Text('Confirmer la fermeture'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Solde attendu : ${expected == null ? '—' : CurrencyFormatter.format(expected)}',
+              style: context.text.body1,
+            ),
+            Text(
+              'Solde compté : ${CurrencyFormatter.format(counted)}',
+              style: context.text.body1,
+            ),
+            Text(
+              'Écart : $gap',
+              style: context.text.body1.copyWith(
+                fontWeight: FontWeight.w600,
+                color: hasGap ? context.palette.danger : null,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              hasGap
+                  ? 'L\'écart n\'est pas nul. Recomptez le tiroir avant de '
+                        'confirmer : une caisse fermée ne se modifie plus.'
+                  : 'Une caisse fermée ne se modifie plus.',
+              style: context.text.body2,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(hasGap ? 'Recompter' : 'Corriger'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Confirmer'),
+          ),
+        ],
+      ),
+    );
+    return confirmed ?? false;
+  }
+
+  /// C273 (b) : correction du fonds de caisse avant la première vente. Le
+  /// fonds d'origine reste dans l'historique ; la différence est enregistrée
+  /// en dépôt ou en retrait, motif « Correction du fonds de caisse ».
+  void _showCorrectOpeningDialog(
+    BuildContext context,
+    CashProvider provider, {
+    String initial = '',
+  }) {
+    final controller = TextEditingController(text: initial);
+    final opening = provider.currentSession?.openingBalance ?? 0;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: context.palette.background,
+        title: const Text('Corriger le fonds de caisse'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Fonds saisi à l\'ouverture : ${CurrencyFormatter.format(opening)}',
+              style: context.text.body1,
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: controller,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Fonds correct (GNF)',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Possible tant qu\'aucune vente n\'est enregistrée. Le fonds '
+              'd\'origine reste dans l\'historique.',
+              style: context.text.body2,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Annuler'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final amount = CurrencyFormatter.parse(controller.text);
+              if (amount == null || amount < 0) return;
+              Navigator.pop(ctx);
+              final confirmed = await _confirmAmount(
+                context,
+                title: 'Confirmer la correction',
+                lines: [
+                  'Fonds correct : ${CurrencyFormatter.format(amount)}',
+                  'Motif : ${CashProvider.openingCorrectionNote}',
+                ],
+              );
+              if (!context.mounted) return;
+              if (!confirmed) {
+                _showCorrectOpeningDialog(
+                  context,
+                  provider,
+                  initial: controller.text,
+                );
+                return;
+              }
+              final success = await provider.correctOpening(amount);
+              if (!context.mounted) return;
+              _reportResult(context, provider, success, 'Fonds corrigé');
+            },
+            child: const Text('Corriger'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// C273 (b) : dépôt ou retrait d'espèces après une vente, par le titulaire,
+  /// sur sa propre session ; motif obligatoire.
+  void _showCashMovementDialog(BuildContext context, CashProvider provider) {
+    final amountController = TextEditingController();
+    final reasonController = TextEditingController();
+    var type = CashMovementType.deposit;
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          backgroundColor: context.palette.background,
+          title: const Text('Dépôt ou retrait d\'espèces'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SegmentedButton<CashMovementType>(
+                segments: const [
+                  ButtonSegment(
+                    value: CashMovementType.deposit,
+                    label: Text('Dépôt'),
+                  ),
+                  ButtonSegment(
+                    value: CashMovementType.withdrawal,
+                    label: Text('Retrait'),
+                  ),
+                ],
+                selected: {type},
+                onSelectionChanged: (s) => setDialogState(() => type = s.first),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: amountController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Montant (GNF)',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: reasonController,
+                decoration: const InputDecoration(
+                  labelText: 'Motif (obligatoire)',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Annuler'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final amount = CurrencyFormatter.parse(amountController.text);
+                final reason = reasonController.text.trim();
+                if (amount == null || amount <= 0 || reason.isEmpty) return;
+                Navigator.pop(ctx);
+                final isDeposit = type == CashMovementType.deposit;
+                final confirmed = await _confirmAmount(
+                  context,
+                  title: isDeposit
+                      ? 'Confirmer le dépôt'
+                      : 'Confirmer le retrait',
+                  lines: [
+                    '${isDeposit ? 'Dépôt' : 'Retrait'} : '
+                        '${CurrencyFormatter.format(amount)}',
+                    'Motif : $reason',
+                  ],
+                );
+                if (!confirmed || !context.mounted) return;
+                final success = await provider.addCashMovement(
+                  type: type,
+                  amount: amount,
+                  reason: reason,
+                );
+                if (!context.mounted) return;
+                _reportResult(
+                  context,
+                  provider,
+                  success,
+                  isDeposit ? 'Dépôt enregistré' : 'Retrait enregistré',
+                );
+              },
+              child: const Text('Enregistrer'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// C273 : confirmation d'un montant avant enregistrement. Vrai si confirmé.
+  Future<bool> _confirmAmount(
+    BuildContext context, {
+    required String title,
+    required List<String> lines,
+  }) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: context.palette.background,
+        title: Text(title),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (final line in lines) Text(line, style: context.text.body1),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Corriger'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Confirmer'),
+          ),
+        ],
+      ),
+    );
+    return confirmed ?? false;
+  }
+
+  void _reportResult(
+    BuildContext context,
+    CashProvider provider,
+    bool success,
+    String done,
+  ) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(success ? done : provider.error ?? 'Action impossible.'),
+        backgroundColor: success
+            ? context.palette.success
+            : context.palette.danger,
       ),
     );
   }

@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import '../core/widgets/confirm_dialog.dart';
 import '../core/widgets/navigation/sidebar_navigation.dart';
 import '../modules/auth/providers/auth_provider.dart';
+import '../modules/auth/models/user_role.dart';
+import '../modules/cash/providers/cash_provider.dart';
 import 'app_back.dart';
 import 'app_menu.dart';
 import 'route_titles.dart';
@@ -77,17 +79,38 @@ class _AppShellState extends State<AppShell> {
     );
   }
 
+  /// C274 : état de la caisse du pharmacien connecté, pour le libellé du
+  /// menu ; lu une fois par compte et par officine. `null` : pas connu.
+  bool? _cashDrawerOpen(AuthProvider auth) {
+    final userId = auth.userId;
+    final pharmacyId = auth.pharmacyId;
+    if (auth.effectiveRole != UserRole.pharmacien ||
+        userId == null ||
+        pharmacyId == null) {
+      return null;
+    }
+    final cash = context.watch<CashProvider>();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        cash.ensureDrawerState(userId: userId, pharmacyId: pharmacyId);
+      }
+    });
+    return cash.drawerOpen;
+  }
+
   SidebarNavigation _menu(
     String path, {
     required bool expanded,
     VoidCallback? onToggleExpand,
     VoidCallback? onNavigate,
   }) {
-    final role = context.watch<AuthProvider>().effectiveRole;
+    final auth = context.watch<AuthProvider>();
+    final role = auth.effectiveRole;
     return SidebarNavigation(
       items: appMenuFor(
         role,
-        isGsgAdmin: context.watch<AuthProvider>().isGsgAdmin,
+        isGsgAdmin: auth.isGsgAdmin,
+        cashDrawerOpen: _cashDrawerOpen(auth),
       ),
       currentRoute: path,
       expanded: expanded,
