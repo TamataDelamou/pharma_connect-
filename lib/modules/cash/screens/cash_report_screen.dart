@@ -215,6 +215,13 @@ class _CashReportScreenState extends State<CashReportScreen> {
                 _buildRow('Retraits', report['total_withdrawals']),
                 Divider(color: context.palette.veil(0.12)),
                 _buildRow('Solde de clôture', report['total_closing']),
+                // C273 (c) : la clôture d'origine reste affichée ; le total
+                // rectifié s'y ajoute s'il y a des rectifications.
+                if ((report['rectified_sessions'] as int? ?? 0) > 0)
+                  _buildRow(
+                    'Solde de clôture rectifié (${report['rectified_sessions']} rectifiée(s))',
+                    report['total_closing_rectified'],
+                  ),
                 _buildRow(
                   'Trésorerie nette',
                   report['net_cash'],

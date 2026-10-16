@@ -1,3 +1,4 @@
+import 'cash_rectification.dart';
 import 'package:equatable/equatable.dart';
 import '../../../core/theme/palette.dart';
 
@@ -49,6 +50,10 @@ class CashDrawerSession extends Equatable {
   // Derived
   final String? cashierName;
 
+  /// C273 (c) : rectifications rattachées à la caisse fermée, dans l'ordre
+  /// d'enregistrement (embed `rectifications:cash_drawer_rectifications(*)`).
+  final List<CashRectification> rectifications;
+
   const CashDrawerSession({
     required this.id,
     required this.pharmacyId,
@@ -68,6 +73,7 @@ class CashDrawerSession extends Equatable {
     this.gsgId,
     this.gsgOrgId,
     this.cashierName,
+    this.rectifications = const [],
   });
 
   CashDrawerSession copyWith({
@@ -89,6 +95,7 @@ class CashDrawerSession extends Equatable {
     String? gsgId,
     String? gsgOrgId,
     String? cashierName,
+    List<CashRectification>? rectifications,
   }) {
     return CashDrawerSession(
       id: id ?? this.id,
@@ -109,6 +116,7 @@ class CashDrawerSession extends Equatable {
       gsgId: gsgId ?? this.gsgId,
       gsgOrgId: gsgOrgId ?? this.gsgOrgId,
       cashierName: cashierName ?? this.cashierName,
+      rectifications: rectifications ?? this.rectifications,
     );
   }
 
@@ -140,6 +148,10 @@ class CashDrawerSession extends Equatable {
     if (cashiersEmbed is Map) {
       derivedCashierName = cashiersEmbed['full_name'] as String?;
     }
+    final rectifications = [
+      for (final r in (json['rectifications'] as List? ?? const []))
+        CashRectification.fromJson(r as Map<String, dynamic>),
+    ]..sort((a, b) => a.seq.compareTo(b.seq));
 
     return CashDrawerSession(
       id: json['id'] as String,
@@ -162,6 +174,7 @@ class CashDrawerSession extends Equatable {
       gsgId: json['gsg_id'] as String?,
       gsgOrgId: json['gsg_org_id'] as String?,
       cashierName: derivedCashierName,
+      rectifications: rectifications,
     );
   }
 
@@ -185,10 +198,16 @@ class CashDrawerSession extends Equatable {
     gsgId,
     gsgOrgId,
     cashierName,
+    rectifications,
   ];
 
   bool get isOpen => status == CashSessionStatus.open;
   bool get isClosed => status == CashSessionStatus.closed;
+
+  /// C273 (c) : dernière rectification, qui fait foi ; `null` sans
+  /// rectification.
+  CashRectification? get latestRectification =>
+      rectifications.isEmpty ? null : rectifications.last;
 
   String get differenceLabel {
     if (difference == null) return 'Non vérifié';
