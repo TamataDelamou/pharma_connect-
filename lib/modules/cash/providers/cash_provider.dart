@@ -130,6 +130,14 @@ class CashProvider extends ChangeNotifier {
     DateTime? fromDate,
     DateTime? toDate,
   }) async {
+    // C273 (c) : même lecture après une rectification.
+    _reloadSessions = () => loadSessions(
+      pharmacyId: pharmacyId,
+      cashierId: cashierId,
+      status: status,
+      fromDate: fromDate,
+      toDate: toDate,
+    );
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -267,6 +275,57 @@ class CashProvider extends ChangeNotifier {
     } catch (_) {
       return null;
     }
+  }
+
+  /// C273 (c) : dernière lecture de l'historique, refaite après une
+  /// rectification.
+  Future<void> Function()? _reloadSessions;
+
+  /// Compte et officine pour lesquels [isManager] a été lu par
+  /// [ensureManager].
+  String? _managerKey;
+
+  /// C273 (c) : lit la qualité de titulaire, une fois par compte et par
+  /// officine (écran de l'historique, ouvert sans passer par la caisse).
+  Future<void> ensureManager({
+    required String userId,
+    required String pharmacyId,
+  }) async {
+    final key = '$userId|$pharmacyId';
+    if (_managerKey == key) return;
+    _managerKey = key;
+    _isManager = await _readIsManager(pharmacyId);
+    notifyListeners();
+  }
+
+  /// C273 (c) : le titulaire peut rectifier [session] (caisse fermée).
+  bool canRectify(CashDrawerSession session) =>
+      _isManager == true && session.isClosed && session.closingBalance != null;
+
+  /// C273 (c) : rattache une rectification à une caisse fermée (titulaire,
+  /// motif obligatoire), puis relit l'historique. La session n'est pas
+  /// modifiée.
+  Future<bool> rectifyClosing({
+    required CashDrawerSession session,
+    required int countedBalance,
+    required String reason,
+  }) async {
+    if (!canRectify(session) || countedBalance < 0) return false;
+    if (reason.trim().isEmpty) return false;
+    _error = null;
+    try {
+      await _service.rectifyClosing(
+        sessionId: session.id,
+        countedBalance: countedBalance,
+        reason: reason.trim(),
+      );
+    } catch (e) {
+      _error = userMessage(e);
+      notifyListeners();
+      return false;
+    }
+    await _reloadSessions?.call();
+    return true;
   }
 
   /// C273 (b) : motif des corrections du fonds avant la première vente.

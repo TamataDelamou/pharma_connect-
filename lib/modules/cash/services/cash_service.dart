@@ -34,6 +34,11 @@ class CashService {
       'superieur': 'supérieur',
       'depots': 'dépôts',
       'compte invalide': 'compté invalide',
+      // C273 (c).
+      'reservee': 'réservée',
+      'fermee': 'fermée',
+      'apres': 'après',
+      'depot ou retrait': 'dépôt ou retrait',
     };
     accents.forEach((from, to) => message = message.replaceAll(from, to));
     if (message.isEmpty) return message;
@@ -121,7 +126,11 @@ class CashService {
     try {
       var query = _client
           .from('cash_drawer_sessions')
-          .select('*, cashiers:cashier_id(full_name)');
+          .select(
+            // C273 (c) : rectifications des caisses fermées.
+            '*, cashiers:cashier_id(full_name), '
+            'rectifications:cash_drawer_rectifications(*)',
+          );
 
       if (pharmacyId != null) {
         query = query.eq('pharmacy_id', pharmacyId);
@@ -229,6 +238,27 @@ class CashService {
     }
   }
 
+  /// C273 (c) : rattache une rectification à une caisse fermée (titulaire,
+  /// motif obligatoire ; RPC `cash_rectify_closing`).
+  Future<void> rectifyClosing({
+    required String sessionId,
+    required int countedBalance,
+    required String reason,
+  }) async {
+    try {
+      await _client.rpc(
+        'cash_rectify_closing',
+        params: {
+          'p_session_id': sessionId,
+          'p_counted_balance': countedBalance,
+          'p_reason': reason,
+        },
+      );
+    } on PostgrestException catch (e) {
+      throw CashException(serverMessage(e.message));
+    }
+  }
+
   /// C273 (b) : le compte connecté est-il le titulaire de [pharmacyId] ?
   /// (`is_pharmacy_manager`, même règle que le serveur.)
   Future<bool> isPharmacyManager(String pharmacyId) async {
@@ -273,6 +303,9 @@ class CashService {
       int totalWithdrawals = 0;
       int totalDeposits = 0;
       int totalClosing = 0;
+      // C273 (c) : clôtures après rectification (la dernière fait foi).
+      int totalClosingRectified = 0;
+      int rectifiedSessions = 0;
 
       for (final session in sessions) {
         final summary = await getSessionSummary(session.id);
@@ -284,6 +317,10 @@ class CashService {
         if (session.closingBalance != null) {
           totalClosing += session.closingBalance!;
         }
+        final rectified = session.latestRectification;
+        if (rectified != null) rectifiedSessions++;
+        totalClosingRectified +=
+            rectified?.countedBalance ?? session.closingBalance ?? 0;
       }
 
       return {
@@ -294,6 +331,8 @@ class CashService {
         'total_withdrawals': totalWithdrawals,
         'total_deposits': totalDeposits,
         'total_closing': totalClosing,
+        'total_closing_rectified': totalClosingRectified,
+        'rectified_sessions': rectifiedSessions,
         'net_cash':
             totalOpening +
             totalSales -
