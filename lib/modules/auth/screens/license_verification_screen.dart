@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:pharma_connect/core/widgets/text/whole_words_text.dart';
 import 'package:pharma_connect/core/utils/user_message.dart';
 
 import 'package:flutter/material.dart';
@@ -126,8 +127,8 @@ class _LicenseVerificationScreenState extends State<LicenseVerificationScreen> {
                       ),
                       SizedBox(width: 8),
                       Expanded(
-                        child: Text(
-                          'PHARMACONNECT',
+                        child: AppNameText(
+                          // C276 : une seule ligne, rétréci si besoin.
                           style: TextStyle(
                             fontFamily: 'Inter',
                             fontSize: 18,

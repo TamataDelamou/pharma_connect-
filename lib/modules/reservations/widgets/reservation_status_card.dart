@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pharma_connect/core/widgets/text/whole_words_text.dart';
 import '../../../core/pilot/pilot_config.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/widgets/cards/glass_card.dart';
@@ -75,7 +76,7 @@ class ReservationStatusCard extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    Text(
+                    WholeWordsText(
                       '${reservation.items.length} article(s) • '
                       '${CurrencyFormatter.format(reservation.totalPrice)}',
                       style: context.text.body2,

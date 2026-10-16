@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pharma_connect/core/widgets/text/whole_words_text.dart';
 import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -392,7 +393,7 @@ class _QueueEntryCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    Text(
+                    WholeWordsText(
                       '${reservation.items.length} article(s) • '
                       '${CurrencyFormatter.format(reservation.totalPrice)} • '
                       '${overdue ? 'Expirée' : reservation.status.label}',

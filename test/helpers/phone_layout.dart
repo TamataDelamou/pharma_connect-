@@ -15,8 +15,14 @@ import 'package:pharma_connect/core/theme/app_theme.dart';
 // « OVERFLOWED BY … PIXELS » en mode « debug », contenu coupé sans aucun
 // signe en version « release »).
 
-/// Largeur du plus petit téléphone visé.
-const Size phoneSize = Size(360, 780);
+/// Largeur du plus petit téléphone visé. C276 : réglable
+/// (`--dart-define=PHONE_WIDTH=320`, ou [phoneWidth] posé par un essai) :
+/// un téléphone étroit, ou dont l'affichage est agrandi (« zoom de
+/// l'écran »), offre moins de 360 points.
+double phoneWidth =
+    double.tryParse(const String.fromEnvironment('PHONE_WIDTH')) ?? 360;
+
+Size get phoneSize => Size(phoneWidth, 780);
 
 /// Charge la police de l'application : sans elle, les essais mesurent le
 /// texte avec la police de test, bien plus large que la vraie.
@@ -84,10 +90,10 @@ Future<void> pumpFrames(WidgetTester tester) async {
 Future<List<String>> pumpAtPhoneWidth(
   WidgetTester tester,
   Widget child, {
-  Size size = phoneSize,
+  Size? size,
   Widget Function(Widget app)? wrap,
 }) {
-  tester.view.physicalSize = size;
+  tester.view.physicalSize = size ?? phoneSize;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   applyPhoneTextScale(tester);
@@ -372,7 +378,9 @@ void _discoveryLog(Iterable<String> lines) {
   final list = lines.toList();
   if (list.isEmpty) return;
   final name = _currentTest.replaceAll('\n', ' ');
-  final out = File('build/phone_decouverte_$phoneTextScale.txt');
+  final out = File(
+    'build/phone_decouverte_${phoneWidth.round()}_$phoneTextScale.txt',
+  );
   out.parent.createSync(recursive: true);
   out.writeAsStringSync(
     '${list.map((l) => '$name | $l').join('\n')}\n',

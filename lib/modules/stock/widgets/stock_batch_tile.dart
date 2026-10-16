@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pharma_connect/core/widgets/text/whole_words_text.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../models/stock_batch.dart';
 import '../../../core/theme/palette.dart';
@@ -40,7 +41,7 @@ class StockBatchTile extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: Text(
+                  child: WholeWordsText(
                     'Lot #${batch.batchNumber}',
                     style: context.text.body1.copyWith(
                       fontWeight: FontWeight.w600,
