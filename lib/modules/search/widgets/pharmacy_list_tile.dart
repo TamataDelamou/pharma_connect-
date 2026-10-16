@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pharma_connect/core/widgets/text/whole_words_text.dart';
 import '../../../core/theme/spacing.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../models/availability_result.dart';
@@ -48,7 +49,7 @@ class PharmacyListTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  WholeWordsText(
                     pharmacy.name,
                     style: context.text.body1.copyWith(
                       fontWeight: FontWeight.w600,
@@ -56,7 +57,7 @@ class PharmacyListTile extends StatelessWidget {
                     maxLines: 2, // C265 : nom ou adresse, 2 lignes au plus.
                     overflow: TextOverflow.ellipsis,
                   ),
-                  Text(
+                  WholeWordsText(
                     pharmacy.address,
                     style: context.text.body2,
                     maxLines: 2, // C265 : nom ou adresse, 2 lignes au plus.

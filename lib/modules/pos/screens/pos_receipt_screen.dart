@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pharma_connect/core/widgets/text/whole_words_text.dart';
 import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -98,8 +99,9 @@ class _POSReceiptScreenState extends State<POSReceiptScreen> {
                           Center(
                             child: Column(
                               children: [
-                                Text(
-                                  'PHARMACONNECT',
+                                AppNameText(
+                                  // C276 : une seule ligne, rétréci si besoin.
+                                  alignment: Alignment.center,
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w700,
@@ -151,7 +153,7 @@ class _POSReceiptScreenState extends State<POSReceiptScreen> {
                                     Row(
                                       children: [
                                         Expanded(
-                                          child: Text(
+                                          child: WholeWordsText(
                                             '${item.quantity} x ${CurrencyFormatter.format(item.unitPrice)}',
                                             style: context.text.micro,
                                           ),

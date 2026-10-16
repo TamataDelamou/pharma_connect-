@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pharma_connect/core/widgets/text/whole_words_text.dart';
 import 'package:pharma_connect/core/widgets/layout/responsive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -342,7 +343,11 @@ class _CashDashboardScreenState extends State<CashDashboardScreen> {
       child: Row(
         children: [
           SizedBox(width: 120, child: Text(label, style: context.text.micro)),
-          Expanded(child: Text(value, style: context.text.body2)),
+          Expanded(
+            // C276 : un montant ne se coupe jamais ; il passe seul sur sa
+            // ligne et ne rétrécit qu'en dernier recours.
+            child: WholeWordsText(value, style: context.text.body2),
+          ),
         ],
       ),
     );

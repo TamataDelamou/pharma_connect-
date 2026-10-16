@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pharma_connect/core/widgets/text/whole_words_text.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/kernel/kernel_badge.dart';
@@ -156,7 +157,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
+                                    WholeWordsText(
                                       'Disponible',
                                       style: context.text.label,
                                     ),
@@ -171,7 +172,10 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text('Réservé', style: context.text.label),
+                                    WholeWordsText(
+                                      'Réservé',
+                                      style: context.text.label,
+                                    ),
                                     Text(
                                       '${item.reservedQuantity}',
                                       style: context.text.kpiSmall.copyWith(
@@ -185,7 +189,10 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text('Total', style: context.text.label),
+                                    WholeWordsText(
+                                      'Total',
+                                      style: context.text.label,
+                                    ),
                                     Text(
                                       '${item.totalQuantity}',
                                       style: context.text.kpiSmall,
