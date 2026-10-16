@@ -5,7 +5,10 @@ import '../models/cash_movement.dart';
 import '../services/cash_service.dart';
 
 class CashProvider extends ChangeNotifier {
-  final CashService _service = CashService();
+  final CashService _service;
+
+  /// [service] : remplaçable dans les tests.
+  CashProvider({CashService? service}) : _service = service ?? CashService();
 
   CashDrawerSession? _currentSession;
   List<CashDrawerSession> _sessions = [];
@@ -24,6 +27,28 @@ class CashProvider extends ChangeNotifier {
   String? get error => _error;
 
   bool get hasOpenSession => _currentSession != null && _currentSession!.isOpen;
+
+  /// C274 : la caisse du caissier connecté est-elle ouverte ? `null` tant que
+  /// ce n'est pas connu (pas encore lu, ou dernière lecture en échec, par
+  /// exemple hors connexion) : le menu affiche alors « Caisse ».
+  bool? get drawerOpen => _drawerOpen;
+  bool? _drawerOpen;
+
+  /// Compte et officine pour lesquels [drawerOpen] a été demandé.
+  String? _drawerStateKey;
+
+  /// C274 : lit une fois l'état de la caisse pour ce compte et cette officine
+  /// (le téléphone de l'officine passe d'un compte à l'autre).
+  Future<void> ensureDrawerState({
+    required String userId,
+    required String pharmacyId,
+  }) async {
+    final key = '$userId|$pharmacyId';
+    if (_drawerStateKey == key) return;
+    _drawerStateKey = key;
+    _drawerOpen = null;
+    await loadCurrentSession(pharmacyId);
+  }
 
   /// C258 : solde d'espèces attendu de la session ouverte, calculé par le
   /// serveur à partir des mouvements (`cash_summary.current_expected_cash`,
@@ -57,12 +82,14 @@ class CashProvider extends ChangeNotifier {
     notifyListeners();
     try {
       _currentSession = await _service.getCurrentOpenSession(pharmacyId);
+      _drawerOpen = _currentSession?.isOpen ?? false;
       if (_currentSession != null) {
         await loadMovements(_currentSession!.id);
         await loadSummary(_currentSession!.id);
       }
     } catch (e) {
       _error = userMessage(e);
+      _drawerOpen = null;
     }
     _isLoading = false;
     notifyListeners();
@@ -127,6 +154,7 @@ class CashProvider extends ChangeNotifier {
         openingBalance: openingBalance,
         notes: notes,
       );
+      _drawerOpen = true;
       await loadMovements(_currentSession!.id);
       await loadSummary(_currentSession!.id);
       _isLoading = false;
@@ -154,6 +182,7 @@ class CashProvider extends ChangeNotifier {
         closingBalance: closingBalance,
         notes: notes,
       );
+      _drawerOpen = false;
       await loadMovements(_currentSession!.id);
       await loadSummary(_currentSession!.id);
       _isLoading = false;
