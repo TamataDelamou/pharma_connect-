@@ -75,7 +75,7 @@ POSSaleItem _item(
 Future<List<String>> _pump(
   WidgetTester tester,
   POSProvider pos, {
-  Size size = phoneSize,
+  Size? size,
 }) {
   final auth = AuthProvider()
     // ignore: invalid_use_of_visible_for_testing_member

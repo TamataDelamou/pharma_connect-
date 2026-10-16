@@ -447,7 +447,7 @@ void main() {
       final report = tester.getRect(find.byType(SecondaryButton).first);
       final history = tester.getRect(find.byType(SecondaryButton).last);
       expect(history.top, greaterThan(report.bottom));
-      expect(report.width, 360 - 48);
+      expect(report.width, phoneSize.width - 48);
       for (final label in [
         '📊 Rapport',
         '📋 Historique',
