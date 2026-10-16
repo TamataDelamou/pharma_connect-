@@ -8,6 +8,8 @@ import '../../../core/widgets/inputs/glass_input.dart';
 import '../providers/catalog_provider.dart';
 import '../widgets/category_filter.dart';
 import '../widgets/product_grid_item.dart';
+import '../../../core/widgets/text/whole_words_text.dart';
+import '../../../shared/models/product.dart';
 import '../../../core/theme/palette.dart';
 
 class CatalogListScreen extends StatefulWidget {
@@ -154,38 +156,101 @@ class _CatalogListScreenState extends State<CatalogListScreen> {
       );
     }
 
-    // C266 : en largeur téléphone, deux colonnes de hauteur fixe. Trois
-    // colonnes ne laissaient à 360 px qu'une centaine de pixels par carte :
-    // le nom du produit, à la même taille que dans « Stock & Lots », était
-    // coupé lettre par lettre et le contenu dépassait la carte.
-    // C268 : avec une police agrandie, une seule colonne, plus haute : sur
-    // deux colonnes, le nom d'un produit ne tenait plus et était coupé au
-    // milieu d'un mot.
-    final textScale = MediaQuery.textScalerOf(context).scale(16) / 16;
-    return GridView.builder(
-      gridDelegate: isCompactWidth(context)
-          ? SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: textScale > 1.15 ? 1 : 2,
-              mainAxisExtent: 290 * textScale,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-            )
-          : const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              childAspectRatio: 0.9,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-            ),
-      itemCount: provider.products.length,
-      itemBuilder: (context, index) {
-        final product = provider.products[index];
-        return ProductGridItem(
-          product: product,
-          onTap: () {
-            context.push('/catalog/${product.id}');
+    // C266 : en largeur, trois colonnes (inchangé).
+    if (!isCompactWidth(context)) {
+      return GridView.builder(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          childAspectRatio: 0.9,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+        ),
+        itemCount: provider.products.length,
+        itemBuilder: (context, index) => _item(provider.products[index]),
+      );
+    }
+
+    // C276 (règle d'Achille du 16/10/2026) : en largeur téléphone, deux
+    // colonnes seulement si chaque mot des cartes tient dans la largeur réelle
+    // d'une carte, quelle que soit la raison du manque de place (écran
+    // étroit, police agrandie, zoom de l'écran) ; sinon une colonne. Plus de
+    // hauteur fixe : en deux colonnes, une rangée prend la hauteur de sa plus
+    // haute carte ; en une colonne, chaque carte la hauteur de son contenu
+    // (C275). Avant : deux colonnes jusqu'à l'échelle 1,15, hauteur fixe
+    // (C266, C268), d'où des noms coupés au milieu et des cartes rognées.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const spacing = 12.0;
+        final cardWidth = (constraints.maxWidth - spacing) / 2;
+        final columns = _wordsFit(context, provider, cardWidth) ? 2 : 1;
+        final rows = (provider.products.length / columns).ceil();
+        return ListView.builder(
+          itemCount: rows,
+          itemBuilder: (context, row) {
+            final start = row * columns;
+            final Widget content;
+            if (columns == 1) {
+              content = _item(provider.products[start]);
+            } else {
+              content = IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(child: _item(provider.products[start])),
+                    const SizedBox(width: spacing),
+                    Expanded(
+                      child: start + 1 < provider.products.length
+                          ? _item(provider.products[start + 1])
+                          : const SizedBox.shrink(),
+                    ),
+                  ],
+                ),
+              );
+            }
+            return Padding(
+              padding: EdgeInsets.only(bottom: row < rows - 1 ? spacing : 0),
+              child: content,
+            );
           },
         );
       },
     );
+  }
+
+  Widget _item(Product product) => ProductGridItem(
+    product: product,
+    onTap: () => context.push('/catalog/${product.id}'),
+  );
+
+  /// C276 : chaque mot du nom, de la DCI et de la ligne « dosage • forme »
+  /// de chaque produit tient-il dans une carte de [cardWidth] ?
+  bool _wordsFit(
+    BuildContext context,
+    CatalogProvider provider,
+    double cardWidth,
+  ) {
+    final inner = cardWidth - 2 * ProductGridItem.padding - 2;
+    if (inner <= 0) return false;
+    final textScaler = MediaQuery.textScalerOf(context);
+    final direction = Directionality.of(context);
+    final base = DefaultTextStyle.of(context).style;
+    final styles = ProductGridItem.textStyles(context);
+    for (final product in provider.products) {
+      final texts = ProductGridItem.texts(product);
+      for (var i = 0; i < texts.length; i++) {
+        final style = base.merge(styles[i]);
+        if (WholeWordsText.longestWordScale(
+              texts[i],
+              style,
+              maxWidth: inner,
+              textScaler: textScaler,
+              textDirection: direction,
+            ) <
+            1) {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 }

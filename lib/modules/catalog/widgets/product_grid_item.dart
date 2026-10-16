@@ -14,14 +14,32 @@ class ProductGridItem extends StatelessWidget {
     required this.onTap,
   });
 
+  /// C276 : marge intérieure de la carte (largeur utile des textes).
+  static const double padding = 16;
+
+  /// C276 : textes de la carte dont aucun mot ne doit être coupé (nom, DCI,
+  /// dosage et forme), et leurs styles, dans le même ordre : le catalogue
+  /// s'en sert pour choisir le nombre de colonnes.
+  static List<String> texts(Product product) => [
+    product.name,
+    product.genericName,
+    '${product.dosage} • ${product.form}',
+  ];
+
+  static List<TextStyle> textStyles(BuildContext context) => [
+    context.text.body1.copyWith(fontWeight: FontWeight.w600),
+    context.text.body2,
+    context.text.micro,
+  ];
+
   @override
   Widget build(BuildContext context) {
     return GlassCard(
       onTap: onTap,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(padding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
           // Audit Module 3 (29/08/2026) : un widget ProductImage dédié
           // existait déjà (avec placeholder/gestion d'erreur) mais n'était
@@ -34,22 +52,22 @@ class ProductGridItem extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            product.name,
-            style: context.text.body1.copyWith(fontWeight: FontWeight.w600),
+            texts(product)[0],
+            style: textStyles(context)[0],
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 4),
           Text(
-            product.genericName,
-            style: context.text.body2,
+            texts(product)[1],
+            style: textStyles(context)[1],
             maxLines: 2, // C265 : nom ou adresse, 2 lignes au plus.
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 4),
           Text(
-            '${product.dosage} • ${product.form}',
-            style: context.text.micro,
+            texts(product)[2],
+            style: textStyles(context)[2],
             // C265 : dosage et forme jamais coupés.
           ),
           const SizedBox(height: 8),
